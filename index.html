@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Starter Site — Beginner Friendly</title>
+  <!-- Link to external stylesheet (clean file separation) -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Defer loading the JS so the DOM is ready when script runs -->
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <!--
+    Header / Navigation
+    - Responsive nav bar using flexbox
+    - 'theme-toggle' button toggles light/dark theme via JS
+  -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo">SS</div>
+        <div class="brand-text">
+          <h1 class="site-title">StarterSite</h1>
+          <p class="site-tag">Simple, modern, and framework-free</p>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list">☰</button>
+        <ul id="nav-list" class="nav-list">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Theme toggle: small interactive JS feature -->
+      <button id="theme-toggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <!--
+    Hero section
+    - Uses CSS Grid to place hero content and an aside card
+    - CTA scrolls to contact area using JS smooth scrolling
+  -->
+  <main>
+    <section id="home" class="hero container">
+      <div class="hero-content">
+        <h2 class="hero-title">Build beautiful websites with plain HTML, CSS and JavaScript.</h2>
+        <p class="hero-sub">No frameworks. No build steps. Learn modern layout (Flexbox & CSS Grid) and small interactive enhancements.</p>
+        <div class="hero-ctas">
+          <button id="cta-demo" class="btn primary">Try the demo</button>
+          <a class="btn ghost" href="#features">See features</a>
+        </div>
+
+        <div class="stats">
+          <!-- Animated counters (JS triggers when visible) -->
+          <div class="stat">
+            <div class="counter" data-target="120">0</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat">
+            <div class="counter" data-target="24">0</div>
+            <div class="stat-label">Hours saved</div>
+          </div>
+          <div class="stat">
+            <div class="counter" data-target="5">0</div>
+            <div class="stat-label">Components</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="hero-card card">
+        <h3>Why this starter?</h3>
+        <p class="muted">Focused on fundamentals: responsive layout, accessibility-friendly markup, and small JS that enhances UX without complexity.</p>
+        <ul class="mini-list">
+          <li>Responsive nav</li>
+          <li>Theme toggle (light/dark)</li>
+          <li>Animated counters</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!--
+      Features section
+      - Uses CSS Grid for cards
+      - Hover effects and subtle animations
+    -->
+    <section id="features" class="container features">
+      <h3 class="section-title">Features</h3>
+      <p class="section-sub">Small, practical UI pieces you can reuse and learn from quickly.</p>
+
+      <div class="cards-grid">
+        <article class="card">
+          <h4>Responsive Navigation</h4>
+          <p class="muted">Accessible toggle for small screens, horizontal menu for larger screens — implemented with Flexbox.</p>
+        </article>
+
+        <article class="card">
+          <h4>Theme Toggle</h4>
+          <p class="muted">Switch between light and dark themes. Preference is stored in localStorage so the site remembers your choice.</p>
+        </article>
+
+        <article class="card">
+          <h4>Animated Counters</h4>
+          <p class="muted">Counters animate when scrolled into view using IntersectionObserver — a performant way to trigger JS on visibility.</p>
+        </article>
+      </div>
+    </section>
+
+    <!--
+      Contact form (demo only) — purely client-side
+      - Shows how a simple form can be handled with JavaScript
+    -->
+    <section id="contact" class="container contact card">
+      <h3>Contact (demo)</h3>
+      <p class="muted">This form is demo-only and does not submit to a server. Inspect the JS to see how it works.</p>
+      <form id="contact-form">
+        <label>
+          Name
+          <input name="name" type="text" required placeholder="Your name">
+        </label>
+        <label>
+          Message
+          <textarea name="message" rows="4" required placeholder="A short message"></textarea>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Send (demo)</button>
+          <button type="reset" class="btn ghost">Reset</button>
+        </div>
+        <div id="form-status" class="muted small"></div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer container">
+    <div>© StarterSite — Learn by editing these files.</div>
+    <div class="muted small">Built with HTML • CSS • JavaScript</div>
+  </footer>
+
+</body>
+</html>

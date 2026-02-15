@@ -1,0 +1,102 @@
+/*
+  style.css — clean, well-commented stylesheet
+  - Uses CSS variables for colors and spacing
+  - Layouts use Flexbox and CSS Grid (explained inline)
+  - Includes responsive breakpoints and subtle animations
+*/
+:root{
+  --bg:#0b1220; /* dark page background */
+  --card:#0f1724; /* card surface */
+  --muted:#9aa4b2; /* secondary text */
+  --accent:#6ee7b7; /* accent color */
+  --accent-2:#60a5fa; /* secondary accent */
+  --text:#e6eef6;
+  --radius:12px;
+  --gap:18px;
+  --glass:rgba(255,255,255,0.03);
+  --transition:300ms cubic-bezier(.2,.9,.2,1);
+}
+/* Light theme overrides — JS toggles `.light-theme` on the document element */
+.light-theme{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --muted:#455064;
+  --accent:#0ea5a9;
+  --accent-2:#2563eb;
+  --text:#0b1220;
+  --glass:rgba(2,6,23,0.03);
+}
+
+/* Basic reset */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;color:var(--text);background:radial-gradient(1200px 400px at 10% 10%, rgba(96,165,250,0.06), transparent),var(--bg);-webkit-font-smoothing:antialiased}
+.container{max-width:1100px;margin:0 auto;padding:28px}
+.small{font-size:.9rem}
+.muted{color:var(--muted)}
+.card{background:linear-gradient(180deg,var(--card),color-mix(in srgb, var(--card) 90%, black 2%));padding:18px;border-radius:var(--radius);border:1px solid var(--glass);box-shadow:0 10px 30px rgba(2,6,23,0.35);transition:transform var(--transition),box-shadow var(--transition)}
+.card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(2,6,23,0.45)}
+
+/* Header (Flexbox) */
+.site-header{position:sticky;top:0;background:linear-gradient(180deg,transparent, rgba(0,0,0,0.05));backdrop-filter: blur(4px);z-index:40}
+.header-inner{display:flex;align-items:center;gap:18px;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text)}
+.site-title{margin:0;font-size:1.05rem}
+.site-tag{margin:0;font-size:.78rem;color:var(--muted)}
+
+/* Navigation layout - responsive */
+.main-nav{display:flex;align-items:center;gap:14px}
+.nav-list{display:flex;gap:14px;list-style:none;margin:0;padding:0}
+.nav-list a{text-decoration:none;color:var(--muted);padding:6px 8px;border-radius:8px;transition:background var(--transition),color var(--transition)}
+.nav-list a:hover{background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--text)}
+.nav-toggle{display:none;background:transparent;border:1px solid var(--glass);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+.theme-toggle{background:transparent;border:0;padding:8px;border-radius:8px;cursor:pointer;font-size:1.05rem}
+
+/* Hero uses CSS Grid for two-column layout on larger screens */
+.hero{display:grid;gap:24px;align-items:start;padding:36px;border-radius:18px}
+.hero-content{max-width:740px}
+.hero-title{margin:0 0 12px 0;font-size:clamp(1.4rem,2.6vw,2rem)}
+.hero-sub{margin:0 0 18px 0;color:var(--muted)}
+.hero-ctas{display:flex;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;transition:transform var(--transition),box-shadow var(--transition)}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:var(--bg);font-weight:700}
+.btn.ghost{border-color:var(--glass);color:var(--muted)}
+.btn:hover{transform:translateY(-3px)}
+
+.stats{display:flex;gap:18px;margin-top:18px}
+.stat{display:flex;flex-direction:column;align-items:flex-start}
+.counter{font-weight:800;font-size:1.25rem}
+.stat-label{color:var(--muted);font-size:.85rem}
+
+.hero-card{min-width:260px}
+.mini-list{padding-left:18px;margin:12px 0 0 0;color:var(--muted)}
+
+/* Features grid — CSS Grid to make responsive cards */
+.features{padding-top:10px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px}
+.card h4{margin:0 0 8px 0}
+
+/* Contact form */
+.contact label{display:block;margin-bottom:12px}
+input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--glass);background:transparent;color:var(--text)}
+.form-actions{display:flex;gap:10px;align-items:center}
+
+/* Footer */
+.site-footer{display:flex;justify-content:space-between;gap:12px;padding:22px 28px;border-top:1px solid var(--glass);margin-top:28px}
+
+/* Responsive adjustments */
+@media (min-width:860px){
+  .hero{grid-template-columns:1fr 340px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:36px}
+  .nav-toggle{display:none}
+}
+@media (max-width:859px){
+  .nav-list{position:fixed;right:16px;top:72px;background:var(--card);padding:12px;border-radius:12px;flex-direction:column;display:none;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+  .nav-list.show{display:flex}
+  .nav-toggle{display:block}
+  .site-footer{flex-direction:column;align-items:start}
+  .header-inner{gap:10px}
+}
+
+/* Small animation for counters */
+.counter.animate{transition:all 900ms cubic-bezier(.2,.9,.2,1)}
