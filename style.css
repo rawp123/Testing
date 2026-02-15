@@ -113,6 +113,10 @@ input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--
 .map-status.hidden{display:none}
 .map-status .map-retry{margin-top:10px}
 
+/* Fallback iframe shown when Leaflet or tiles fail */
+.map-iframe-fallback{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:inherit;z-index:450;background:transparent;display:block}
+.map-iframe-fallback.hidden{display:none}
+
 .leaflet-container{background:transparent}
 .leaflet-control a{font-size:18px;padding:6px}
 @media (max-width:600px){#map{height:320px}}

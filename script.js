@@ -109,6 +109,42 @@ function hideMapStatus() {
   const st = mapEl.querySelector('.map-status');
   if (st) st.classList.add('hidden');
 }
+
+/* IFRAME FALLBACK --------------------------------------------------------- */
+function showIframeFallback(lat = 40.7128, lon = -74.0060, zoom = 13) {
+  const mapEl = document.getElementById('map');
+  if (!mapEl) return;
+  removeIframeFallback();
+
+  // small bbox around the marker for the embed
+  const delta = 0.03;
+  const bbox = [ (lon - delta).toFixed(6), (lat - delta).toFixed(6), (lon + delta).toFixed(6), (lat + delta).toFixed(6) ];
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join(',')}&layer=mapnik&marker=${lat.toFixed(6)},${lon.toFixed(6)}&zoom=${zoom}`;
+
+  const iframe = document.createElement('iframe');
+  iframe.className = 'map-iframe-fallback';
+  iframe.src = src;
+  iframe.title = 'OpenStreetMap fallback';
+  iframe.loading = 'lazy';
+  iframe.referrerPolicy = 'no-referrer-when-downgrade';
+  mapEl.appendChild(iframe);
+
+  // hide leaflet canvas if present (so fallback is visible)
+  const lc = mapEl.querySelector('.leaflet-container');
+  if (lc) lc.style.display = 'none';
+
+  showMapStatus(`<strong>Map unavailable — showing fallback</strong><div class="small muted">An embedded OpenStreetMap iframe is displayed as a fallback. <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=${zoom}/${lat}/${lon}" target="_blank" rel="noopener">Open full map</a></div>`);
+}
+
+function removeIframeFallback() {
+  const mapEl = document.getElementById('map');
+  if (!mapEl) return;
+  const iframe = mapEl.querySelector('.map-iframe-fallback');
+  if (iframe) iframe.remove();
+  const lc = mapEl.querySelector('.leaflet-container');
+  if (lc) lc.style.display = '';
+  hideMapStatus();
+}
 function cleanupMap() {
   if (window._map) {
     try { if (window._map.map) window._map.map.remove(); } catch (e) { /* ignore */ }
@@ -119,6 +155,8 @@ function cleanupMap() {
   }
   const mapEl = document.getElementById('map');
   if (mapEl) {
+    // remove any iframe fallback and status overlay
+    removeIframeFallback();
     const st = mapEl.querySelector('.map-status');
     if (st) st.remove();
   }
@@ -191,8 +229,9 @@ function initMap() {
     runAttempt();
   }
 
-  // If Leaflet isn't available at all, start auto-retry (which will reload page if needed)
+  // If Leaflet isn't available at all, show iframe fallback and start auto-retry
   if (typeof L === 'undefined') {
+    showIframeFallback(); // immediate, user-visible fallback
     startAutoRetry('Leaflet library not available (network blocked)');
     return console.warn('Leaflet not available');
   }
@@ -214,23 +253,26 @@ function initMap() {
   const tileErrorHandler = () => {
     tileErrors += 1;
     if (tileErrors > TILE_ERROR_THRESHOLD) {
-      // start automatic retry sequence (if not already running)
+      // show iframe fallback immediately and start automatic retry sequence
+      try { showIframeFallback(fallback[0], fallback[1], 13); } catch (e) { /* ignore */ }
       startAutoRetry('Many tile errors (network/CORS)');
     }
   };
   tileLayer.on('tileerror', tileErrorHandler);
 
-  // If tiles successfully load, hide the status overlay and clear retry state
+  // If tiles successfully load, hide the status overlay, remove iframe fallback and clear retry state
   tileLayer.once('load', () => {
     tilesLoaded = true;
+    removeIframeFallback();
     hideMapStatus();
     clearRetryState();
     setTimeout(() => map.invalidateSize(), 200);
   });
 
-  // timeout fallback: if tiles haven't loaded in 8s, start auto-retry
+  // timeout fallback: if tiles haven't loaded in 8s, show iframe fallback and start auto-retry
   const tileLoadTimeout = setTimeout(() => {
     if (!tilesLoaded && tileErrors === 0) {
+      try { showIframeFallback(fallback[0], fallback[1], 13); } catch (e) { /* ignore */ }
       startAutoRetry('Tile load timeout');
     }
   }, 8000);
