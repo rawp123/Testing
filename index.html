@@ -4,8 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Starter Site — Beginner Friendly</title>
+  <!-- Leaflet CSS (for map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <!-- Link to external stylesheet (clean file separation) -->
   <link rel="stylesheet" href="style.css">
+  <!-- Leaflet JS (deferred, must load before our script) -->
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Defer loading the JS so the DOM is ready when script runs -->
   <script defer src="script.js"></script>
 </head>
@@ -18,7 +22,9 @@
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
-        <div class="logo">SS</div>
+        <div class="logo">
+          <img src="https://media.licdn.com/dms/image/v2/C4D03AQGY1zLFgyAQpQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1516608282786?e=1772668800&v=beta&t=s8YtFO5edS3aBoVzcB9ScYxNScSKUC9NUm2M-gmADPk" alt="Profile photo" loading="lazy" decoding="async">
+        </div>
         <div class="brand-text">
           <h1 class="site-title">StarterSite</h1>
           <p class="site-tag">Simple, modern, and framework-free</p>
@@ -107,6 +113,13 @@
           <p class="muted">Counters animate when scrolled into view using IntersectionObserver — a performant way to trigger JS on visibility.</p>
         </article>
       </div>
+    </section>
+
+    <!-- Map section (interactive) -->
+    <section id="map-section" class="container map-section">
+      <h3 class="section-title">Map</h3>
+      <p class="section-sub muted">Interactive map (uses your browser location). Drag the marker or use the controls.</p>
+      <div id="map" class="card"></div>
     </section>
 
     <!--
