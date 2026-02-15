@@ -370,6 +370,9 @@ function init() {
   setupCounters();
   setupForm();
 
+  // Yelp UI
+  setupYelpUI();
+
   // Initialize map (if Leaflet is available). If Leaflet hasn't loaded yet
   // (rare), wait for the window `load` event and try again.
   if (typeof L !== 'undefined') {
@@ -380,3 +383,139 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* ---------- Yelp frontend (calls server-side proxy) --------------------- */
+function showYelpMessage(html) {
+  const el = document.getElementById('yelp-results');
+  if (!el) return;
+  el.innerHTML = `<div class="card muted small" style="padding:12px">${html}</div>`;
+}
+
+async function yelpSearch({ term = 'coffee', latitude, longitude, location = '', limit = 6 } = {}) {
+  try {
+    const params = new URLSearchParams();
+    params.set('term', term);
+    params.set('limit', String(limit));
+    if (latitude && longitude) {
+      params.set('latitude', String(latitude));
+      params.set('longitude', String(longitude));
+    } else if (location) {
+      params.set('location', location);
+    }
+    const resp = await fetch(`/api/yelp/search?${params.toString()}`);
+    if (!resp.ok) throw new Error('Search failed');
+    return resp.json();
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+function formatAddress(loc = {}) {
+  return [loc.address1, loc.address2, loc.address3, loc.city, loc.state, loc.zip_code].filter(Boolean).join(', ');
+}
+
+function ratingStars(rating) {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+function renderYelpResults(items) {
+  const out = document.getElementById('yelp-results');
+  out.innerHTML = '';
+  if (!items || items.length === 0) {
+    showYelpMessage('No results found. Try a different search.');
+    return;
+  }
+  items.forEach(b => {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    card.innerHTML = `
+      <img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}">
+      <div class="yelp-meta">
+        <div class="yelp-name">${b.name}</div>
+        <div class="yelp-rating"><strong>${b.rating}</strong> <span class="small muted">(${b.review_count} reviews)</span></div>
+        <div class="yelp-cats">${(b.categories||[]).map(c=>c.title).join(', ')} • ${b.price || ''}</div>
+        <div style="margin-top:6px;color:var(--muted);font-size:.95rem">${formatAddress(b.location)}</div>
+        <div class="yelp-actions">
+          <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open on Yelp</a>
+          <button class="btn" data-id="${b.id}">Details</button>
+        </div>
+      </div>
+    `;
+
+    // details button
+    const btn = card.querySelector('button[data-id]');
+    btn.addEventListener('click', () => showYelpDetails(b.id));
+
+    out.appendChild(card);
+  });
+}
+
+async function showYelpDetails(id) {
+  const detailsEl = document.getElementById('yelp-details');
+  detailsEl.classList.remove('hidden');
+  detailsEl.innerHTML = '<div class="small muted">Loading details…</div>';
+  try {
+    const resp = await fetch(`/api/yelp/business/${encodeURIComponent(id)}`);
+    if (!resp.ok) throw new Error('Failed to load business');
+    const data = await resp.json();
+    const d = data.details || {};
+    const reviews = data.reviews || [];
+
+    detailsEl.innerHTML = `
+      <h4 style="margin:0 0 8px 0">${d.name}</h4>
+      <div class="small muted">${d.rating} ★ — ${d.review_count} reviews — ${d.price || ''}</div>
+      <div style="margin-top:8px">${formatAddress(d.location)}</div>
+      <div style="margin-top:8px">${d.display_phone || ''} <a href="${d.url}" target="_blank" rel="noopener">(Yelp)</a></div>
+      <hr />
+      <strong>Recent reviews</strong>
+      <div style="margin-top:8px">${reviews.map(r=>`<div class="card small" style="margin:8px 0;padding:8px"><strong>${r.user.name}</strong> — <span class="small muted">${r.rating} ★</span><div style="margin-top:6px">${r.text}</div></div>`).join('')}</div>
+    `;
+  } catch (err) {
+    console.error(err);
+    detailsEl.innerHTML = '<div class="small muted">Failed to load details.</div>';
+  }
+}
+
+function setupYelpUI() {
+  const term = $('#yelp-term');
+  const locationInput = $('#yelp-location');
+  const useLoc = $('#yelp-use-location');
+  const searchBtn = $('#yelp-search');
+
+  useLoc.addEventListener('click', () => {
+    if (!navigator.geolocation) return alert('Geolocation not supported by your browser');
+    useLoc.textContent = 'Locating…';
+    navigator.geolocation.getCurrentPosition((p) => {
+      locationInput.value = `${p.coords.latitude.toFixed(5)},${p.coords.longitude.toFixed(5)}`;
+      useLoc.textContent = '📍 Use my location';
+    }, (err) => { alert('Unable to get location: '+err.message); useLoc.textContent = '📍 Use my location'; }, { timeout: 5000 });
+  });
+
+  async function doSearch() {
+    const q = term.value.trim() || 'coffee';
+    const loc = locationInput.value.trim();
+    showYelpMessage('Searching…');
+    try {
+      let res;
+      if (/^[-0-9.,\s]+$/.test(loc) && loc.includes(',')) {
+        // lat,lng input
+        const [lat, lon] = loc.split(',').map(s => parseFloat(s.trim()));
+        res = await yelpSearch({ term: q, latitude: lat, longitude: lon, limit: 8 });
+      } else {
+        res = await yelpSearch({ term: q, location: loc || undefined, limit: 8 });
+      }
+      renderYelpResults(res.businesses || []);
+    } catch (err) {
+      showYelpMessage('Search failed — check server logs and ensure `YELP_API_KEY` is set on the server.');
+    }
+  }
+
+  searchBtn.addEventListener('click', doSearch);
+  term.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+}
+

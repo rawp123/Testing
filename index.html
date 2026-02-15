@@ -122,6 +122,22 @@
       <div id="map" class="card"></div>
     </section>
 
+    <!-- Yelp search (uses server-side proxy) -->
+    <section id="yelp" class="container yelp card">
+      <h3 class="section-title">Yelp search</h3>
+      <p class="muted small">Search local businesses (server-side proxy). Requires `YELP_API_KEY` set on the server.</p>
+
+      <div class="yelp-controls">
+        <input id="yelp-term" type="search" placeholder="Search term (pizza, coffee)" aria-label="Search term">
+        <input id="yelp-location" placeholder="Location (city, leave empty to use your location)" aria-label="Location">
+        <button id="yelp-use-location" class="btn ghost" title="Use browser location">📍 Use my location</button>
+        <button id="yelp-search" class="btn primary">Search Yelp</button>
+      </div>
+
+      <div id="yelp-results" class="cards-grid" aria-live="polite"></div>
+      <div id="yelp-details" class="card hidden" style="margin-top:12px"></div>
+    </section>
+
     <!--
       Contact form (demo only) — purely client-side
       - Shows how a simple form can be handled with JavaScript
