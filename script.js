@@ -415,12 +415,8 @@ function renderYelpResults(items) {
       <td>${formatAddress(b.location)}</td>
       <td>
         <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
-        <button class="btn" data-id="${b.id}">Details</button>
       </td>
     `;
-    // details button
-    const btn = tr.querySelector('button[data-id]');
-    btn.addEventListener('click', () => showYelpDetails(b.id));
     tbody.appendChild(tr);
   });
   out.appendChild(table);
@@ -458,6 +454,7 @@ function setupYelpUI() {
   const useLoc = $('#yelp-use-location');
   const searchBtn = $('#yelp-search');
   const distanceSelect = $('#yelp-distance');
+  const priceSelect = $('#yelp-price');
   // ZIP field removed for production
 
   useLoc.addEventListener('click', () => {
@@ -472,6 +469,7 @@ function setupYelpUI() {
   async function doSearch() {
     const q = term.value.trim() || 'coffee';
     const loc = locationInput.value.trim();
+    const price = priceSelect.value;
     const distanceMiles = parseFloat(distanceSelect.value);
     let radius;
     if (!isNaN(distanceMiles) && distanceMiles > 0) {
@@ -484,13 +482,13 @@ function setupYelpUI() {
       if (/^[-0-9.,\s]+$/.test(loc) && loc.includes(',')) {
         // lat,lng input
         const [lat, lon] = loc.split(',').map(s => parseFloat(s.trim()));
-        res = await yelpSearch({ term: q, latitude: lat, longitude: lon, limit: 8, radius });
+        res = await yelpSearch({ term: q, latitude: lat, longitude: lon, limit: 8, radius, price, sort_by: 'rating' });
       } else {
-        res = await yelpSearch({ term: q, location: loc || undefined, limit: 8, radius });
+        res = await yelpSearch({ term: q, location: loc || undefined, limit: 8, radius, price, sort_by: 'rating' });
       }
       renderYelpResults(res.businesses || []);
     } catch (err) {
-      showYelpMessage('Search failed — check server logs and ensure `YELP_API_KEY` is set on the server.');
+      showYelpMessage('Search failed.');
     }
   }
 
