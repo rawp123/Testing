@@ -391,11 +391,14 @@ function showYelpMessage(html) {
   el.innerHTML = `<div class="card muted small" style="padding:12px">${html}</div>`;
 }
 
-async function yelpSearch({ term = 'coffee', latitude, longitude, location = '', limit = 6 } = {}) {
+async function yelpSearch({ term = 'coffee', latitude, longitude, location = '', price = '', sort_by = 'rating', limit = 6 } = {}) {
   try {
     const params = new URLSearchParams();
     params.set('term', term);
     params.set('limit', String(limit));
+    if (price) params.set('price', price);
+    if (sort_by) params.set('sort_by', sort_by);
+
     if (latitude && longitude) {
       params.set('latitude', String(latitude));
       params.set('longitude', String(longitude));

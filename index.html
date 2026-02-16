@@ -128,8 +128,20 @@
       <p class="muted small">Search local businesses (server-side proxy). Requires `YELP_API_KEY` set on the server.</p>
 
       <div class="yelp-controls">
-        <input id="yelp-term" type="search" placeholder="Search term (pizza, coffee)" aria-label="Search term">
+        <input id="yelp-term" type="search" placeholder="Cuisine or keyword (pizza, sushi)" aria-label="Search term">
+        <input id="yelp-zip" placeholder="ZIP code (e.g. 94103)" aria-label="ZIP code">
         <input id="yelp-location" placeholder="Location (city, leave empty to use your location)" aria-label="Location">
+
+        <label style="display:flex;align-items:center;gap:8px">
+          <select id="yelp-price" aria-label="Price range">
+            <option value="">Any price</option>
+            <option value="1">$</option>
+            <option value="2">$$</option>
+            <option value="3">$$$</option>
+            <option value="4">$$$$</option>
+          </select>
+        </label>
+
         <button id="yelp-use-location" class="btn ghost" title="Use browser location">📍 Use my location</button>
         <button id="yelp-search" class="btn primary">Search Yelp</button>
       </div>
