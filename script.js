@@ -316,10 +316,7 @@ function init() {
   const navBtn = document.querySelector('.nav-toggle');
   if (navBtn) navBtn.addEventListener('click', toggleNav);
 
-  // CTA smooth scroll
-  $('#cta-demo').addEventListener('click', () => {
-    document.querySelector('#contact').scrollIntoView({behavior:'smooth'});
-  });
+  // CTA smooth scroll removed for production
 
   // Counters and contact form removed for production
 
