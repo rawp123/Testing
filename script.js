@@ -386,30 +386,44 @@ function renderYelpResults(items) {
     showYelpMessage('No results found. Try a different search.');
     return;
   }
+  // Create table
+  const table = document.createElement('table');
+  table.className = 'yelp-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Rating</th>
+        <th>Reviews</th>
+        <th>Categories</th>
+        <th>Price</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+  const tbody = table.querySelector('tbody');
   items.forEach(b => {
-    const card = document.createElement('article');
-    card.className = 'card';
-
-    card.innerHTML = `
-      <img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}">
-      <div class="yelp-meta">
-        <div class="yelp-name">${b.name}</div>
-        <div class="yelp-rating"><strong>${b.rating}</strong> <span class="small muted">(${b.review_count} reviews)</span></div>
-        <div class="yelp-cats">${(b.categories||[]).map(c=>c.title).join(', ')} • ${b.price || ''}</div>
-        <div style="margin-top:6px;color:var(--muted);font-size:.95rem">${formatAddress(b.location)}</div>
-        <div class="yelp-actions">
-          <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open on Yelp</a>
-          <button class="btn" data-id="${b.id}">Details</button>
-        </div>
-      </div>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
+      <td>${b.rating}</td>
+      <td>${b.review_count}</td>
+      <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+      <td>${b.price || ''}</td>
+      <td>${formatAddress(b.location)}</td>
+      <td>
+        <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
+        <button class="btn" data-id="${b.id}">Details</button>
+      </td>
     `;
-
     // details button
-    const btn = card.querySelector('button[data-id]');
+    const btn = tr.querySelector('button[data-id]');
     btn.addEventListener('click', () => showYelpDetails(b.id));
-
-    out.appendChild(card);
+    tbody.appendChild(tr);
   });
+  out.appendChild(table);
 }
 
 async function showYelpDetails(id) {
@@ -444,6 +458,7 @@ function setupYelpUI() {
   const useLoc = $('#yelp-use-location');
   const searchBtn = $('#yelp-search');
   const distanceSelect = $('#yelp-distance');
+  // ZIP field removed for production
 
   useLoc.addEventListener('click', () => {
     if (!navigator.geolocation) return alert('Geolocation not supported by your browser');
