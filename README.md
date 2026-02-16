@@ -1,6 +1,6 @@
-# Testing
+# StarterSite
 
-This is a small starter site used for demonstrations and learning.
+This is a small starter site ready for production use.
 
 ## Yelp integration (server-side proxy)
 

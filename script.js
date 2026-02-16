@@ -42,52 +42,7 @@ function toggleNav() {
   list.classList.toggle('show');
 }
 
-// ANIMATED COUNTERS ---------------------------------------------------------
-// Use IntersectionObserver to trigger counter animation when visible.
-function animateCounter(el, target) {
-  // Simple incremental counter — good for small numbers.
-  let start = 0;
-  const duration = 900; // ms
-  const stepTime = Math.max(Math.floor(duration / target), 8);
-  const timer = setInterval(() => {
-    start += 1;
-    el.textContent = start;
-    if (start >= target) clearInterval(timer);
-  }, stepTime);
-}
-
-function setupCounters() {
-  const counters = $$('.counter');
-  const io = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseInt(el.getAttribute('data-target'), 10) || 0;
-        if (!el.classList.contains('started')) {
-          el.classList.add('started');
-          animateCounter(el, target);
-        }
-        obs.unobserve(el);
-      }
-    });
-  }, {threshold: 0.6});
-
-  counters.forEach(c => io.observe(c));
-}
-
-// FORM HANDLER (demo-only) -------------------------------------------------
-function setupForm() {
-  const form = $('#contact-form');
-  const status = $('#form-status');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    // Demo behaviour: show captured inputs and reset after 2s
-    status.textContent = `Captured (demo): ${data.get('name') || '—'} — "${(data.get('message')||'').slice(0,60)}"`;
-    status.style.color = 'var(--accent)';
-    setTimeout(() => { status.textContent = ''; form.reset(); }, 2000);
-  });
-}
+// Animated counters and contact form removed for production
 
 // MAP INITIALIZATION (Leaflet + Geolocation + controls) --------------------
 function showMapStatus(html) {
@@ -366,9 +321,7 @@ function init() {
     document.querySelector('#contact').scrollIntoView({behavior:'smooth'});
   });
 
-  // Counters and form
-  setupCounters();
-  setupForm();
+  // Counters and contact form removed for production
 
   // Yelp UI
   setupYelpUI();
@@ -404,6 +357,10 @@ async function yelpSearch({ term = 'coffee', latitude, longitude, location = '',
       params.set('longitude', String(longitude));
     } else if (location) {
       params.set('location', location);
+    }
+    // Add radius if present
+    if (arguments[0] && arguments[0].radius) {
+      params.set('radius', arguments[0].radius);
     }
     const resp = await fetch(`/api/yelp/search?${params.toString()}`);
     if (!resp.ok) throw new Error('Search failed');
@@ -489,6 +446,7 @@ function setupYelpUI() {
   const locationInput = $('#yelp-location');
   const useLoc = $('#yelp-use-location');
   const searchBtn = $('#yelp-search');
+  const distanceSelect = $('#yelp-distance');
 
   useLoc.addEventListener('click', () => {
     if (!navigator.geolocation) return alert('Geolocation not supported by your browser');
@@ -502,15 +460,21 @@ function setupYelpUI() {
   async function doSearch() {
     const q = term.value.trim() || 'coffee';
     const loc = locationInput.value.trim();
+    const distanceMiles = parseFloat(distanceSelect.value);
+    let radius;
+    if (!isNaN(distanceMiles) && distanceMiles > 0) {
+      // Yelp API max radius is 40000 meters (about 24.85 miles)
+      radius = Math.round(Math.min(distanceMiles * 1609.34, 40000));
+    }
     showYelpMessage('Searching…');
     try {
       let res;
       if (/^[-0-9.,\s]+$/.test(loc) && loc.includes(',')) {
         // lat,lng input
         const [lat, lon] = loc.split(',').map(s => parseFloat(s.trim()));
-        res = await yelpSearch({ term: q, latitude: lat, longitude: lon, limit: 8 });
+        res = await yelpSearch({ term: q, latitude: lat, longitude: lon, limit: 8, radius });
       } else {
-        res = await yelpSearch({ term: q, location: loc || undefined, limit: 8 });
+        res = await yelpSearch({ term: q, location: loc || undefined, limit: 8, radius });
       }
       renderYelpResults(res.businesses || []);
     } catch (err) {

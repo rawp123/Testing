@@ -35,7 +35,7 @@
         <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list">☰</button>
         <ul id="nav-list" class="nav-list">
           <li><a href="#home">Home</a></li>
-          <li><a href="#features">Features</a></li>
+          <!-- Features link removed -->
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
@@ -53,67 +53,15 @@
   <main>
     <section id="home" class="hero container">
       <div class="hero-content">
-        <h2 class="hero-title">Robert's Test Website</h2>
-        <p class="hero-sub">A Website for Testing</p>
-        <div class="hero-ctas">
-          <button id="cta-demo" class="btn primary">Try the demo</button>
-          <a class="btn ghost" href="#features">See features</a>
-        </div>
-
-        <div class="stats">
-          <!-- Animated counters (JS triggers when visible) -->
-          <div class="stat">
-            <div class="counter" data-target="120">0</div>
-            <div class="stat-label">Projects</div>
-          </div>
-          <div class="stat">
-            <div class="counter" data-target="24">0</div>
-            <div class="stat-label">Hours saved</div>
-          </div>
-          <div class="stat">
-            <div class="counter" data-target="5">0</div>
-            <div class="stat-label">Components</div>
-          </div>
-        </div>
+        <h2 class="hero-title">Robert's Website</h2>
+        <p class="hero-sub">A Modern Website</p>
+        <!-- Hero CTAs removed for production -->
       </div>
 
-      <aside class="hero-card card">
-        <h3>Why this starter?</h3>
-        <p class="muted">Focused on fundamentals: responsive layout, accessibility-friendly markup, and small JS that enhances UX without complexity.</p>
-        <ul class="mini-list">
-          <li>Responsive nav</li>
-          <li>Theme toggle (light/dark)</li>
-          <li>Animated counters</li>
-        </ul>
-      </aside>
+      <!-- Why this starter aside removed for production -->
     </section>
 
-    <!--
-      Features section
-      - Uses CSS Grid for cards
-      - Hover effects and subtle animations
-    -->
-    <section id="features" class="container features">
-      <h3 class="section-title">Features</h3>
-      <p class="section-sub">Small, practical UI pieces you can reuse and learn from quickly.</p>
-
-      <div class="cards-grid">
-        <article class="card">
-          <h4>Responsive Navigation</h4>
-          <p class="muted">Accessible toggle for small screens, horizontal menu for larger screens — implemented with Flexbox.</p>
-        </article>
-
-        <article class="card">
-          <h4>Theme Toggle</h4>
-          <p class="muted">Switch between light and dark themes. Preference is stored in localStorage so the site remembers your choice.</p>
-        </article>
-
-        <article class="card">
-          <h4>Animated Counters</h4>
-          <p class="muted">Counters animate when scrolled into view using IntersectionObserver — a performant way to trigger JS on visibility.</p>
-        </article>
-      </div>
-    </section>
+    <!-- Features section removed for production -->
 
     <!-- Map section (interactive) -->
     <section id="map-section" class="container map-section">
@@ -142,6 +90,18 @@
           </select>
         </label>
 
+        <select id="yelp-distance" aria-label="Distance (miles)" style="width:130px">
+          <option value="">Any distance</option>
+          <option value="0.1">0.1 miles</option>
+          <option value="0.25">0.25 miles</option>
+          <option value="0.5">0.5 miles</option>
+          <option value="1">1 mile</option>
+          <option value="2">2 miles</option>
+          <option value="5">5 miles</option>
+          <option value="10">10 miles</option>
+          <option value="20">20 miles</option>
+        </select>
+
         <button id="yelp-use-location" class="btn ghost" title="Use browser location">📍 Use my location</button>
         <button id="yelp-search" class="btn primary">Search Yelp</button>
       </div>
@@ -150,34 +110,12 @@
       <div id="yelp-details" class="card hidden" style="margin-top:12px"></div>
     </section>
 
-    <!--
-      Contact form (demo only) — purely client-side
-      - Shows how a simple form can be handled with JavaScript
-    -->
-    <section id="contact" class="container contact card">
-      <h3>Contact (demo)</h3>
-      <p class="muted">This form is demo-only and does not submit to a server. Inspect the JS to see how it works.</p>
-      <form id="contact-form">
-        <label>
-          Name
-          <input name="name" type="text" required placeholder="Your name">
-        </label>
-        <label>
-          Message
-          <textarea name="message" rows="4" required placeholder="A short message"></textarea>
-        </label>
-        <div class="form-actions">
-          <button type="submit" class="btn primary">Send (demo)</button>
-          <button type="reset" class="btn ghost">Reset</button>
-        </div>
-        <div id="form-status" class="muted small"></div>
-      </form>
-    </section>
+    <!-- Contact section removed for production -->
   </main>
 
   <!-- Footer -->
   <footer class="site-footer container">
-    <div>© StarterSite — Learn by editing these files.</div>
+    <div>© StarterSite — All rights reserved.</div>
     <div class="muted small">Built with HTML • CSS • JavaScript</div>
   </footer>
 

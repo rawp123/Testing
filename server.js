@@ -9,6 +9,8 @@
     YELP_API_KEY=your_key node server.js
 */
 
+require('dotenv').config(); // Load .env if present
+
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
@@ -29,7 +31,7 @@ app.use(express.static(path.join(__dirname)));
 app.get('/api/yelp/search', async (req, res) => {
   if (!YELP_KEY) return res.status(500).json({ error: 'Server missing YELP_API_KEY' });
 
-  const { term = 'coffee', latitude, longitude, location = '', limit = 6 } = req.query;
+  const { term = 'coffee', latitude, longitude, location = '', limit = 6, radius } = req.query;
   const params = { term, limit };
   if (latitude && longitude) {
     params.latitude = latitude;
@@ -39,6 +41,11 @@ app.get('/api/yelp/search', async (req, res) => {
   } else {
     // fallback to a default location
     params.location = 'New York, NY';
+  }
+  if (radius) {
+    // Yelp API: radius in meters, max 40000
+    const r = Math.min(parseInt(radius, 10) || 0, 40000);
+    if (r > 0) params.radius = r;
   }
 
   try {

@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^git add \\.env\\.example && git commit -m \"Update \\.env\\.example for Yelp API key instructions\" && git push origin main$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
