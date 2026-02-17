@@ -10,9 +10,7 @@
   <link rel="stylesheet" href="style.css">
   <!-- Leaflet JS (deferred, must load before our script) -->
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Load Yelp helpers and main script as ES modules -->
-  <script type="module" src="yelp.js"></script>
-  <script type="module" src="script.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <!--
@@ -66,32 +64,7 @@
 
     <!-- Map section removed for production -->
 
-    <!-- Yelp search (uses server-side proxy) -->
-    <section id="yelp" class="container yelp card">
-      <h3 class="section-title">Yelp search</h3>
-      <p class="muted small">Search local businesses (server-side proxy).</p>
-
-      <div class="yelp-controls">
-        <input id="yelp-term" type="search" placeholder="Cuisine or keyword (pizza, sushi)" aria-label="Search term">
-        <input id="yelp-location" placeholder="Location (city, leave empty to use your location)" aria-label="Location">
-
-        <select id="yelp-distance" aria-label="Distance (miles)" style="width:130px">
-          <option value="">Any distance</option>
-          <option value="0.1">0.1 mile</option>
-          <option value="0.25">0.25 mile</option>
-          <option value="0.5">0.5 mile</option>
-          <option value="1">1 mile</option>
-          <option value="2">2 miles</option>
-          <option value="5">5 miles</option>
-        </select>
-
-        <button id="yelp-use-location" class="btn ghost" title="Use browser location">📍 Use my location</button>
-        <button id="yelp-search" class="btn primary">Search Yelp</button>
-      </div>
-
-      <div id="yelp-results" class="cards-grid" aria-live="polite"></div>
-      <div id="yelp-details" class="card hidden" style="margin-top:12px"></div>
-    </section>
+    <!-- Yelp search section removed -->
 
     <!-- Contact section removed for production -->
   </main>
