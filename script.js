@@ -346,7 +346,10 @@ async function yelpSearch({ term = 'coffee', latitude, longitude, location = '',
     const params = new URLSearchParams();
     params.set('term', term);
     params.set('limit', String(limit));
-    if (price) params.set('price', price);
+      if (price) {
+        params.set('price', price);
+        console.log('Sending price param:', price);
+      }
     if (sort_by) params.set('sort_by', sort_by);
 
     if (latitude && longitude) {
@@ -359,7 +362,9 @@ async function yelpSearch({ term = 'coffee', latitude, longitude, location = '',
     if (arguments[0] && arguments[0].radius) {
       params.set('radius', arguments[0].radius);
     }
-    const resp = await fetch(`/api/yelp/search?${params.toString()}`);
+      const url = `/api/yelp/search?${params.toString()}`;
+      console.log('Yelp search URL:', url);
+      const resp = await fetch(url);
     if (!resp.ok) throw new Error('Search failed');
     return resp.json();
   } catch (err) {
@@ -405,6 +410,13 @@ function renderYelpResults(items) {
     <tbody></tbody>
   `;
   const tbody = table.querySelector('tbody');
+    // Get selected price from UI for frontend filtering fallback
+    const priceSelect = document.getElementById('yelp-price');
+    const selectedPrice = priceSelect ? priceSelect.value : '';
+    let filteredItems = items;
+    if (selectedPrice) {
+      filteredItems = items.filter(b => b.price === '$'.repeat(Number(selectedPrice)));
+    }
   items.forEach(b => {
     const tr = document.createElement('tr');
     // Convert distance from meters to miles, if present
