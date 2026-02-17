@@ -89,49 +89,6 @@ function toggleTheme() {
       out.appendChild(moreBtn);
     }
   }
-      let remaining = Math.ceil(delay / 1000);
-
-      showMapStatus(`<strong>Map load problem</strong><div class="small muted">${reason} — automatic retry in <span class="retry-countdown">${remaining}</span>s (attempt ${attempt} of ${state.max}).</div>`);
-
-      // update countdown every second
-      window._map._retryInterval = setInterval(() => {
-        remaining -= 1;
-        const el = document.querySelector('#map .retry-countdown');
-        if (el) el.textContent = String(remaining);
-        if (remaining <= 0) { clearInterval(window._map._retryInterval); window._map._retryInterval = null; }
-      }, 1000);
-
-      window._map._retryTimer = setTimeout(() => {
-        // attempt re-init: clear any prior map instance then try again
-        clearRetryState();
-        cleanupMap();
-        if (typeof L === 'undefined') {
-          // if Leaflet library is missing, reload the page to try fetch external script
-          location.reload();
-          return;
-        }
-
-        if (attempt >= AUTO_RETRY_MAX) {
-          // final attempt: try to init, then show final message if still failing
-          initMap();
-          // leave it to initMap / tile handlers to restart retry if needed
-          return;
-        }
-
-        // otherwise, try to initialize map again; tile errors/timeouts will trigger further retries
-        initMap();
-      }, delay);
-    };
-
-    runAttempt();
-  }
-
-  // If Leaflet isn't available at all, show iframe fallback and start auto-retry
-  if (typeof L === 'undefined') {
-    showIframeFallback(); // immediate, user-visible fallback
-    startAutoRetry('Leaflet library not available (network blocked)');
-    return console.warn('Leaflet not available');
-  }
 
   cleanupMap(); // remove any previous instance
 
