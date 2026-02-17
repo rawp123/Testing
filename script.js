@@ -415,7 +415,8 @@ function renderYelpResults(items) {
     const selectedPrice = priceSelect ? priceSelect.value : '';
     let filteredItems = items;
     if (selectedPrice) {
-      filteredItems = items.filter(b => b.price === '$'.repeat(Number(selectedPrice)));
+      const priceStr = '$'.repeat(Number(selectedPrice));
+      filteredItems = items.filter(b => b.price && b.price.trim() === priceStr);
     }
   items.forEach(b => {
     const tr = document.createElement('tr');
