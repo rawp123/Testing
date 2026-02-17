@@ -74,23 +74,14 @@
         <input id="yelp-term" type="search" placeholder="Cuisine or keyword (pizza, sushi)" aria-label="Search term">
         <input id="yelp-location" placeholder="Location (city, leave empty to use your location)" aria-label="Location">
 
-        <label style="display:flex;align-items:center;gap:8px">
-          <select id="yelp-price" aria-label="Price range">
-            <option value="">Any price</option>
-            <option value="1">$</option>
-            <option value="2">$$</option>
-            <option value="3">$$$</option>
-            <option value="4">$$$$</option>
-          </select>
-        </label>
-
         <select id="yelp-distance" aria-label="Distance (miles)" style="width:130px">
           <option value="">Any distance</option>
+          <option value="0.1">0.1 mile</option>
+          <option value="0.25">0.25 mile</option>
+          <option value="0.5">0.5 mile</option>
           <option value="1">1 mile</option>
           <option value="2">2 miles</option>
           <option value="5">5 miles</option>
-          <option value="10">10 miles</option>
-          <option value="20">20 miles</option>
         </select>
 
         <button id="yelp-use-location" class="btn ghost" title="Use browser location">📍 Use my location</button>

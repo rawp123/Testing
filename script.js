@@ -32,128 +32,63 @@ function toggleTheme() {
   const isLight = document.documentElement.classList.contains('light-theme');
   // Price-matched section
   const priceSection = document.createElement('div');
-  priceSection.className = 'card';
-  priceSection.style.marginBottom = '24px';
-  if (selectedPrice && priceMatched.length === 0) {
-    priceSection.innerHTML = '<div class="muted small" style="padding:12px">No results found for selected price tier.</div>';
-  } else if (priceMatched.length > 0) {
-    const heading = document.createElement('div');
-    heading.className = 'muted small';
-    heading.style.margin = '0 0 8px 0';
-    heading.textContent = 'Restaurants with price info:';
-    priceSection.appendChild(heading);
-    const table = document.createElement('table');
-    table.className = 'yelp-table';
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Rating</th>
-          <th>Reviews</th>
-          <th>Categories</th>
-          <th>Price</th>
-          <th>Distance</th>
-          <th>Address</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
+  // Clear output
+  out.innerHTML = '';
+  // Single grid for all businesses
+  const section = document.createElement('div');
+  section.className = 'card';
+  section.style.marginBottom = '24px';
+  const table = document.createElement('table');
+  table.className = 'yelp-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Rating</th>
+        <th>Reviews</th>
+        <th>Categories</th>
+        <th>Distance</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+  const tbody = table.querySelector('tbody');
+  items.forEach(b => {
+    const tr = document.createElement('tr');
+    let distanceMiles = '';
+    if (typeof b.distance === 'number') {
+      distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+    }
+    tr.innerHTML = `
+      <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
+      <td>${b.rating}</td>
+      <td>${b.review_count}</td>
+      <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+      <td>${distanceMiles}</td>
+      <td>${formatAddress(b.location)}</td>
+      <td>
+        <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
+      </td>
     `;
-    const tbody = table.querySelector('tbody');
-    priceMatched.forEach(b => {
-      const tr = document.createElement('tr');
-      let distanceMiles = '';
-      if (typeof b.distance === 'number') {
-        distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
-      }
-      let priceDisplay = b.price || '';
-      tr.innerHTML = `
-        <td><img class=\"yelp-thumb\" src=\"${b.image_url || ''}\" alt=\"${b.name}\" style=\"width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;\"> <strong>${b.name}</strong></td>
-        <td>${b.rating}</td>
-        <td>${b.review_count}</td>
-        <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
-        <td>${priceDisplay}</td>
-        <td>${distanceMiles}</td>
-        <td>${formatAddress(b.location)}</td>
-        <td>
-          <a class=\"btn ghost\" href=\"${b.url}\" target=\"_blank\" rel=\"noopener\">Open</a>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-    priceSection.appendChild(table);
+    tbody.appendChild(tr);
+  });
+  section.appendChild(table);
+  out.appendChild(section);
+
+  // Pagination controls
+  if (typeof total === 'number' && typeof offset === 'number' && typeof doSearch === 'function') {
+    const pageSize = items.length;
+    if (total > offset + pageSize) {
+      const moreBtn = document.createElement('button');
+      moreBtn.textContent = 'Show more results';
+      moreBtn.className = 'btn primary';
+      moreBtn.style.margin = '16px auto 0 auto';
+      moreBtn.onclick = () => doSearch(offset + pageSize);
+      out.appendChild(moreBtn);
+    }
   }
-  out.appendChild(priceSection);
-
-  // No-price section
-  if (noPrice.length > 0) {
-    const noPriceSection = document.createElement('div');
-    noPriceSection.className = 'card';
-    noPriceSection.style.marginBottom = '24px';
-    const label = document.createElement('div');
-    label.className = 'muted small';
-    label.style.margin = '0 0 8px 0';
-    label.textContent = 'Restaurants without price info:';
-    noPriceSection.appendChild(label);
-    const noPriceTable = document.createElement('table');
-    noPriceTable.className = 'yelp-table';
-    noPriceTable.innerHTML = `
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Rating</th>
-          <th>Reviews</th>
-          <th>Categories</th>
-          <th>Price</th>
-          <th>Distance</th>
-          <th>Address</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-    const tbody = noPriceTable.querySelector('tbody');
-    noPrice.forEach(b => {
-      const tr = document.createElement('tr');
-      let distanceMiles = '';
-      if (typeof b.distance === 'number') {
-        distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
-      }
-      let priceDisplay = b.price || '';
-      tr.innerHTML = `
-        <td><img class=\"yelp-thumb\" src=\"${b.image_url || ''}\" alt=\"${b.name}\" style=\"width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;\"> <strong>${b.name}</strong></td>
-        <td>${b.rating}</td>
-        <td>${b.review_count}</td>
-        <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
-        <td>${priceDisplay}</td>
-        <td>${distanceMiles}</td>
-        <td>${formatAddress(b.location)}</td>
-        <td>
-          <a class=\"btn ghost\" href=\"${b.url}\" target=\"_blank\" rel=\"noopener\">Open</a>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-    noPriceSection.appendChild(noPriceTable);
-    out.appendChild(noPriceSection);
-  }
-    if (window._map._retryTimer) { clearTimeout(window._map._retryTimer); window._map._retryTimer = null; }
-    if (window._map._retryInterval) { clearInterval(window._map._retryInterval); window._map._retryInterval = null; }
-    if (window._map._retryState) delete window._map._retryState;
-  }
-
-  function startAutoRetry(reason) {
-    // prevent multiple concurrent retry sequences
-    if (!window._map) window._map = {};
-    if (window._map._retryState && window._map._retryState.active) return;
-
-    window._map._retryState = { attempt: 0, max: AUTO_RETRY_MAX, active: true };
-
-    const runAttempt = () => {
-      const state = window._map._retryState;
-      state.attempt += 1;
-      const attempt = state.attempt;
-      const delay = Math.min(AUTO_RETRY_BASE * Math.pow(2, attempt - 1), AUTO_RETRY_MAX_DELAY);
       let remaining = Math.ceil(delay / 1000);
 
       showMapStatus(`<strong>Map load problem</strong><div class="small muted">${reason} — automatic retry in <span class="retry-countdown">${remaining}</span>s (attempt ${attempt} of ${state.max}).</div>`);
