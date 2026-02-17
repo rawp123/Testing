@@ -423,9 +423,14 @@ function renderYelpResults(items) {
       noPrice = items.filter(b => !b.price);
     }
 
-    // Render price-matched grid
+    // Clear output
+    out.innerHTML = '';
+
+    // Price-matched section
+    const priceSection = document.createElement('div');
+    priceSection.style.marginBottom = '24px';
     if (selectedPrice && priceMatched.length === 0) {
-      out.innerHTML = '<div class="card muted small" style="padding:12px">No results found for selected price tier.</div>';
+      priceSection.innerHTML = '<div class="card muted small" style="padding:12px">No results found for selected price tier.</div>';
     } else if (priceMatched.length > 0) {
       const table = document.createElement('table');
       table.className = 'yelp-table';
@@ -466,11 +471,19 @@ function renderYelpResults(items) {
         `;
         tbody.appendChild(tr);
       });
-      out.appendChild(table);
+      priceSection.appendChild(table);
     }
+    out.appendChild(priceSection);
 
-    // Render no-price grid
+    // No-price section
     if (noPrice.length > 0) {
+      const noPriceSection = document.createElement('div');
+      noPriceSection.style.marginBottom = '24px';
+      const label = document.createElement('div');
+      label.className = 'muted small';
+      label.style.margin = '12px 0 4px 0';
+      label.textContent = 'Restaurants without price info:';
+      noPriceSection.appendChild(label);
       const noPriceTable = document.createElement('table');
       noPriceTable.className = 'yelp-table';
       noPriceTable.innerHTML = `
@@ -510,12 +523,8 @@ function renderYelpResults(items) {
         `;
         tbody.appendChild(tr);
       });
-      const label = document.createElement('div');
-      label.className = 'muted small';
-      label.style.margin = '12px 0 4px 0';
-      label.textContent = 'Restaurants without price info:';
-      out.appendChild(label);
-      out.appendChild(noPriceTable);
+      noPriceSection.appendChild(noPriceTable);
+      out.appendChild(noPriceSection);
     }
 }
 
