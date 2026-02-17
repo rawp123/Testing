@@ -10,6 +10,7 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
+
 // THEME TOGGLE --------------------------------------------------------------
 // Toggle between light and dark theme. We add/remove the `light-theme` class
 // on the documentElement and persist the choice to localStorage so preference
@@ -30,9 +31,12 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const isLight = document.documentElement.classList.contains('light-theme');
-  // Price-matched section
-  const priceSection = document.createElement('div');
-  // Clear output
+  applyTheme(isLight ? 'dark' : 'light');
+}
+
+// Proper renderYelpResults function
+function renderYelpResults(items, total, offset, doSearch) {
+  const out = document.getElementById('yelp-results');
   out.innerHTML = '';
   // Single grid for all businesses
   const section = document.createElement('div');
@@ -89,117 +93,6 @@ function toggleTheme() {
       out.appendChild(moreBtn);
     }
   }
-
-  cleanupMap(); // remove any previous instance
-
-  const fallback = [40.7128, -74.0060]; // fallback to New York
-  const map = L.map('map', { scrollWheelZoom: true }).setView(fallback, 12);
-  const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  // show loading status until tiles load
-  showMapStatus('<strong>Loading map…</strong>');
-
-  let tileErrors = 0;
-  let tilesLoaded = false;
-  const TILE_ERROR_THRESHOLD = 3;
-  const tileErrorHandler = () => {
-    tileErrors += 1;
-    if (tileErrors > TILE_ERROR_THRESHOLD) {
-      // show iframe fallback immediately and start automatic retry sequence
-      try { showIframeFallback(fallback[0], fallback[1], 13); } catch (e) { /* ignore */ }
-      startAutoRetry('Many tile errors (network/CORS)');
-    }
-  };
-  tileLayer.on('tileerror', tileErrorHandler);
-
-  // If tiles successfully load, hide the status overlay, remove iframe fallback and clear retry state
-  tileLayer.once('load', () => {
-    tilesLoaded = true;
-    removeIframeFallback();
-    hideMapStatus();
-    clearRetryState();
-    setTimeout(() => map.invalidateSize(), 200);
-  });
-
-  // timeout fallback: if tiles haven't loaded in 8s, show iframe fallback and start auto-retry
-  const tileLoadTimeout = setTimeout(() => {
-    if (!tilesLoaded && tileErrors === 0) {
-      try { showIframeFallback(fallback[0], fallback[1], 13); } catch (e) { /* ignore */ }
-      startAutoRetry('Tile load timeout');
-    }
-  }, 8000);
-
-  const marker = L.marker(fallback, { draggable: true }).addTo(map);
-  marker.bindPopup(`Latitude: ${fallback[0].toFixed(5)}<br>Longitude: ${fallback[1].toFixed(5)}`).openPopup();
-
-  function updateMarker(lat, lng, zoom = 13) {
-    marker.setLatLng([lat, lng]);
-    marker.setPopupContent(`Latitude: ${lat.toFixed(5)}<br>Longitude: ${lng.toFixed(5)}`).openPopup();
-    map.setView([lat, lng], zoom);
-  }
-
-  marker.on('dragend', () => {
-    const p = marker.getLatLng();
-    marker.setPopupContent(`Latitude: ${p.lat.toFixed(5)}<br>Longitude: ${p.lng.toFixed(5)}`).openPopup();
-  });
-
-  // Try to center on the user's location. Fallback remains if denied/failed.
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      updateMarker(pos.coords.latitude, pos.coords.longitude, 13);
-    }, (err) => {
-      console.warn('Geolocation unavailable — using fallback', err);
-    }, { enableHighAccuracy: true, timeout: 5000 });
-  }
-
-  // Geolocate control (custom Leaflet control)
-  const geoCtl = L.control({ position: 'topleft' });
-  geoCtl.onAdd = function () {
-    const el = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-    const a = L.DomUtil.create('a', '', el);
-    a.href = '#'; a.title = 'Center on your location'; a.innerHTML = '📍';
-    L.DomEvent.on(a, 'click', (ev) => {
-      L.DomEvent.stopPropagation(ev); L.DomEvent.preventDefault(ev);
-      if (!navigator.geolocation) return alert('Geolocation not supported by your browser');
-      navigator.geolocation.getCurrentPosition((p) => updateMarker(p.coords.latitude, p.coords.longitude, 14),
-        (err) => alert('Unable to get location: ' + err.message), { enableHighAccuracy: true, timeout: 5000 });
-    });
-    return el;
-  };
-  geoCtl.addTo(map);
-
-  // Fullscreen toggle (uses Fullscreen API + CSS class)
-  const fsCtl = L.control({ position: 'topleft' });
-  fsCtl.onAdd = function () {
-    const el = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-    const a = L.DomUtil.create('a', '', el);
-    a.href = '#'; a.title = 'Toggle fullscreen'; a.innerHTML = '⛶';
-    L.DomEvent.on(a, 'click', (ev) => {
-      L.DomEvent.stopPropagation(ev); L.DomEvent.preventDefault(ev);
-      const mapEl = document.getElementById('map');
-      if (!document.fullscreenElement) {
-        mapEl.requestFullscreen?.();
-        mapEl.classList.add('map-fullscreen');
-      } else {
-        document.exitFullscreen?.();
-        mapEl.classList.remove('map-fullscreen');
-      }
-      setTimeout(() => map.invalidateSize(), 300);
-    });
-    return el;
-  };
-  fsCtl.addTo(map);
-
-  document.addEventListener('fullscreenchange', () => {
-    const mapEl = document.getElementById('map');
-    if (!document.fullscreenElement) mapEl.classList.remove('map-fullscreen');
-    map.invalidateSize();
-  });
-
-  // expose for debugging
-  window._map = { map, marker, updateMarker, _tileTimeout: tileLoadTimeout };
 }
 
 // INITIALIZATION -----------------------------------------------------------
