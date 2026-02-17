@@ -413,35 +413,110 @@ function renderYelpResults(items) {
     // Get selected price from UI for frontend filtering fallback
     const priceSelect = document.getElementById('yelp-price');
     const selectedPrice = priceSelect ? priceSelect.value : '';
-    let filteredItems = items;
+    let priceMatched = items;
+    let noPrice = [];
     if (selectedPrice) {
       const priceStr = '$'.repeat(Number(selectedPrice));
-      filteredItems = items.filter(b => b.price && b.price.trim() === priceStr);
+      priceMatched = items.filter(b => b.price && b.price.trim() === priceStr);
+      noPrice = items.filter(b => !b.price);
+    } else {
+      noPrice = items.filter(b => !b.price);
     }
-  items.forEach(b => {
-    const tr = document.createElement('tr');
-    // Convert distance from meters to miles, if present
-    let distanceMiles = '';
-    if (typeof b.distance === 'number') {
-      distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+
+    // Render price-matched grid
+    if (selectedPrice && priceMatched.length === 0) {
+      out.innerHTML = '<div class="card muted small" style="padding:12px">No results found for selected price tier.</div>';
+    } else if (priceMatched.length > 0) {
+      const table = document.createElement('table');
+      table.className = 'yelp-table';
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Rating</th>
+            <th>Reviews</th>
+            <th>Categories</th>
+            <th>Price</th>
+            <th>Distance</th>
+            <th>Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+      const tbody = table.querySelector('tbody');
+      priceMatched.forEach(b => {
+        const tr = document.createElement('tr');
+        let distanceMiles = '';
+        if (typeof b.distance === 'number') {
+          distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+        }
+        let priceDisplay = b.price || '';
+        tr.innerHTML = `
+          <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
+          <td>${b.rating}</td>
+          <td>${b.review_count}</td>
+          <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+          <td>${priceDisplay}</td>
+          <td>${distanceMiles}</td>
+          <td>${formatAddress(b.location)}</td>
+          <td>
+            <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      out.appendChild(table);
     }
-    // Show price as $ signs, fallback to empty
-    let priceDisplay = b.price || '';
-    tr.innerHTML = `
-      <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
-      <td>${b.rating}</td>
-      <td>${b.review_count}</td>
-      <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
-      <td>${priceDisplay}</td>
-      <td>${distanceMiles}</td>
-      <td>${formatAddress(b.location)}</td>
-      <td>
-        <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  out.appendChild(table);
+
+    // Render no-price grid
+    if (noPrice.length > 0) {
+      const noPriceTable = document.createElement('table');
+      noPriceTable.className = 'yelp-table';
+      noPriceTable.innerHTML = `
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Rating</th>
+            <th>Reviews</th>
+            <th>Categories</th>
+            <th>Price</th>
+            <th>Distance</th>
+            <th>Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+      const tbody = noPriceTable.querySelector('tbody');
+      noPrice.forEach(b => {
+        const tr = document.createElement('tr');
+        let distanceMiles = '';
+        if (typeof b.distance === 'number') {
+          distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+        }
+        let priceDisplay = b.price || '';
+        tr.innerHTML = `
+          <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
+          <td>${b.rating}</td>
+          <td>${b.review_count}</td>
+          <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+          <td>${priceDisplay}</td>
+          <td>${distanceMiles}</td>
+          <td>${formatAddress(b.location)}</td>
+          <td>
+            <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      const label = document.createElement('div');
+      label.className = 'muted small';
+      label.style.margin = '12px 0 4px 0';
+      label.textContent = 'Restaurants without price info:';
+      out.appendChild(label);
+      out.appendChild(noPriceTable);
+    }
 }
 
 async function showYelpDetails(id) {
