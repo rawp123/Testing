@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Robert P</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo">
+          <img src="https://media.licdn.com/dms/image/v2/C4D03AQGY1zLFgyAQpQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1516608282786?e=1772668800&v=beta&t=s8YtFO5edS3aBoVzcB9ScYxNScSKUC9NUm2M-gmADPk" alt="Photo of Robert P" loading="lazy" decoding="async">
+        </div>
+        <div class="brand-text">
+          <h1 class="site-title">Robert P</h1>
+        </div>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list">☰</button>
+        <ul id="nav-list" class="nav-list">
+          <li><a href="index.html#home">Home</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+  <main>
+    <section class="container card" style="margin-top:32px;max-width:500px">
+      <h3>Contact Me</h3>
+      <!-- Replace the action URL below with your Formspree endpoint after signup -->
+      <form action="https://formspree.io/f/yourFormID" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" rows="4" required></textarea>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Send</button>
+        </div>
+      </form>
+      <div class="muted small" style="margin-top:12px">This form is protected and secure via Formspree.</div>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>© StarterSite — All rights reserved.</div>
+    <div class="muted small">Built with HTML • CSS • JavaScript</div>
+  </footer>
+</body>
+</html>
