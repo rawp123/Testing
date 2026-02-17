@@ -30,106 +30,113 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const isLight = document.documentElement.classList.contains('light-theme');
-  applyTheme(isLight ? 'dark' : 'light');
-}
-
-// NAVIGATION TOGGLE (MOBILE) -----------------------------------------------
-function toggleNav() {
-  const list = $('#nav-list');
-  const btn = document.querySelector('.nav-toggle');
-  const expanded = btn.getAttribute('aria-expanded') === 'true';
-  btn.setAttribute('aria-expanded', String(!expanded));
-  list.classList.toggle('show');
-}
-
-// Animated counters and contact form removed for production
-
-// MAP INITIALIZATION (Leaflet + Geolocation + controls) --------------------
-function showMapStatus(html) {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
-  let st = mapEl.querySelector('.map-status');
-  if (!st) {
-    st = document.createElement('div');
-    st.className = 'map-status hidden';
-    st.innerHTML = `<div class="map-status-inner" role="status" aria-live="polite"></div>`;
-    mapEl.appendChild(st);
+  // Price-matched section
+  const priceSection = document.createElement('div');
+  priceSection.className = 'card';
+  priceSection.style.marginBottom = '24px';
+  if (selectedPrice && priceMatched.length === 0) {
+    priceSection.innerHTML = '<div class="muted small" style="padding:12px">No results found for selected price tier.</div>';
+  } else if (priceMatched.length > 0) {
+    const heading = document.createElement('div');
+    heading.className = 'muted small';
+    heading.style.margin = '0 0 8px 0';
+    heading.textContent = 'Restaurants with price info:';
+    priceSection.appendChild(heading);
+    const table = document.createElement('table');
+    table.className = 'yelp-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Rating</th>
+          <th>Reviews</th>
+          <th>Categories</th>
+          <th>Price</th>
+          <th>Distance</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector('tbody');
+    priceMatched.forEach(b => {
+      const tr = document.createElement('tr');
+      let distanceMiles = '';
+      if (typeof b.distance === 'number') {
+        distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+      }
+      let priceDisplay = b.price || '';
+      tr.innerHTML = `
+        <td><img class=\"yelp-thumb\" src=\"${b.image_url || ''}\" alt=\"${b.name}\" style=\"width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;\"> <strong>${b.name}</strong></td>
+        <td>${b.rating}</td>
+        <td>${b.review_count}</td>
+        <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+        <td>${priceDisplay}</td>
+        <td>${distanceMiles}</td>
+        <td>${formatAddress(b.location)}</td>
+        <td>
+          <a class=\"btn ghost\" href=\"${b.url}\" target=\"_blank\" rel=\"noopener\">Open</a>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    priceSection.appendChild(table);
   }
-  st.querySelector('.map-status-inner').innerHTML = html;
-  st.classList.remove('hidden');
-}
-function hideMapStatus() {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
-  const st = mapEl.querySelector('.map-status');
-  if (st) st.classList.add('hidden');
-}
+  out.appendChild(priceSection);
 
-/* IFRAME FALLBACK --------------------------------------------------------- */
-function showIframeFallback(lat = 40.7128, lon = -74.0060, zoom = 13) {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
-  removeIframeFallback();
-
-  // small bbox around the marker for the embed
-  const delta = 0.03;
-  const bbox = [ (lon - delta).toFixed(6), (lat - delta).toFixed(6), (lon + delta).toFixed(6), (lat + delta).toFixed(6) ];
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join(',')}&layer=mapnik&marker=${lat.toFixed(6)},${lon.toFixed(6)}&zoom=${zoom}`;
-
-  const iframe = document.createElement('iframe');
-  iframe.className = 'map-iframe-fallback';
-  iframe.src = src;
-  iframe.title = 'OpenStreetMap fallback';
-  iframe.loading = 'lazy';
-  iframe.referrerPolicy = 'no-referrer-when-downgrade';
-  mapEl.appendChild(iframe);
-
-  // hide leaflet canvas if present (so fallback is visible)
-  const lc = mapEl.querySelector('.leaflet-container');
-  if (lc) lc.style.display = 'none';
-
-  showMapStatus(`<strong>Map unavailable — showing fallback</strong><div class="small muted">An embedded OpenStreetMap iframe is displayed as a fallback. <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=${zoom}/${lat}/${lon}" target="_blank" rel="noopener">Open full map</a></div>`);
-}
-
-function removeIframeFallback() {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
-  const iframe = mapEl.querySelector('.map-iframe-fallback');
-  if (iframe) iframe.remove();
-  const lc = mapEl.querySelector('.leaflet-container');
-  if (lc) lc.style.display = '';
-  hideMapStatus();
-}
-function cleanupMap() {
-  if (window._map) {
-    try { if (window._map.map) window._map.map.remove(); } catch (e) { /* ignore */ }
-    if (window._map._tileTimeout) { clearTimeout(window._map._tileTimeout); window._map._tileTimeout = null; }
-    if (window._map._retryTimer) { clearTimeout(window._map._retryTimer); window._map._retryTimer = null; }
-    if (window._map._retryInterval) { clearInterval(window._map._retryInterval); window._map._retryInterval = null; }
-    delete window._map;
+  // No-price section
+  if (noPrice.length > 0) {
+    const noPriceSection = document.createElement('div');
+    noPriceSection.className = 'card';
+    noPriceSection.style.marginBottom = '24px';
+    const label = document.createElement('div');
+    label.className = 'muted small';
+    label.style.margin = '0 0 8px 0';
+    label.textContent = 'Restaurants without price info:';
+    noPriceSection.appendChild(label);
+    const noPriceTable = document.createElement('table');
+    noPriceTable.className = 'yelp-table';
+    noPriceTable.innerHTML = `
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Rating</th>
+          <th>Reviews</th>
+          <th>Categories</th>
+          <th>Price</th>
+          <th>Distance</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = noPriceTable.querySelector('tbody');
+    noPrice.forEach(b => {
+      const tr = document.createElement('tr');
+      let distanceMiles = '';
+      if (typeof b.distance === 'number') {
+        distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+      }
+      let priceDisplay = b.price || '';
+      tr.innerHTML = `
+        <td><img class=\"yelp-thumb\" src=\"${b.image_url || ''}\" alt=\"${b.name}\" style=\"width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;\"> <strong>${b.name}</strong></td>
+        <td>${b.rating}</td>
+        <td>${b.review_count}</td>
+        <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
+        <td>${priceDisplay}</td>
+        <td>${distanceMiles}</td>
+        <td>${formatAddress(b.location)}</td>
+        <td>
+          <a class=\"btn ghost\" href=\"${b.url}\" target=\"_blank\" rel=\"noopener\">Open</a>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    noPriceSection.appendChild(noPriceTable);
+    out.appendChild(noPriceSection);
   }
-  const mapEl = document.getElementById('map');
-  if (mapEl) {
-    // remove any iframe fallback and status overlay
-    removeIframeFallback();
-    const st = mapEl.querySelector('.map-status');
-    if (st) st.remove();
-  }
-}
-
-function initMap() {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
-  mapEl.style.position = mapEl.style.position || 'relative';
-  hideMapStatus();
-
-  // Automatic retry config (exponential backoff)
-  const AUTO_RETRY_MAX = 4;      // maximum attempts
-  const AUTO_RETRY_BASE = 1000;  // base delay in ms (doubles each attempt)
-  const AUTO_RETRY_MAX_DELAY = 30000; // cap delay
-
-  function clearRetryState() {
-    if (!window._map) return;
     if (window._map._retryTimer) { clearTimeout(window._map._retryTimer); window._map._retryTimer = null; }
     if (window._map._retryInterval) { clearInterval(window._map._retryInterval); window._map._retryInterval = null; }
     if (window._map._retryState) delete window._map._retryState;
