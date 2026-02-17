@@ -10,8 +10,9 @@
   <link rel="stylesheet" href="style.css">
   <!-- Leaflet JS (deferred, must load before our script) -->
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Defer loading the JS so the DOM is ready when script runs -->
-  <script defer src="script.js"></script>
+  <!-- Load Yelp helpers and main script as ES modules -->
+  <script type="module" src="yelp.js"></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body>
   <!--
