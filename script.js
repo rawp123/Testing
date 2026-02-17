@@ -397,6 +397,7 @@ function renderYelpResults(items) {
         <th>Reviews</th>
         <th>Categories</th>
         <th>Price</th>
+        <th>Distance</th>
         <th>Address</th>
         <th>Actions</th>
       </tr>
@@ -406,12 +407,20 @@ function renderYelpResults(items) {
   const tbody = table.querySelector('tbody');
   items.forEach(b => {
     const tr = document.createElement('tr');
+    // Convert distance from meters to miles, if present
+    let distanceMiles = '';
+    if (typeof b.distance === 'number') {
+      distanceMiles = (b.distance / 1609.34).toFixed(2) + ' mi';
+    }
+    // Show price as $ signs, fallback to empty
+    let priceDisplay = b.price || '';
     tr.innerHTML = `
       <td><img class="yelp-thumb" src="${b.image_url || ''}" alt="${b.name}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;"> <strong>${b.name}</strong></td>
       <td>${b.rating}</td>
       <td>${b.review_count}</td>
       <td>${(b.categories||[]).map(c=>c.title).join(', ')}</td>
-      <td>${b.price || ''}</td>
+      <td>${priceDisplay}</td>
+      <td>${distanceMiles}</td>
       <td>${formatAddress(b.location)}</td>
       <td>
         <a class="btn ghost" href="${b.url}" target="_blank" rel="noopener">Open</a>
@@ -494,5 +503,9 @@ function setupYelpUI() {
 
   searchBtn.addEventListener('click', doSearch);
   term.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+
+  // Trigger search when price or distance is changed
+  priceSelect.addEventListener('change', doSearch);
+  distanceSelect.addEventListener('change', doSearch);
 }
 
