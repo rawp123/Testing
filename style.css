@@ -111,6 +111,9 @@ input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--
 .yelp-controls input{padding:10px;border-radius:8px;border:1px solid var(--glass);background:transparent;color:var(--text);min-width:160px}
 #yelp-results .card{display:flex;gap:12px;align-items:flex-start}
 .yelp-thumb{width:84px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--glass)}
+.yelp-thumb-table{width:40px;height:40px;margin-right:8px;vertical-align:middle;}
+.yelp-results-section{margin-bottom:24px;}
+.yelp-more-btn{margin:16px auto 0 auto;display:block;}
 .yelp-meta{flex:1}
 .yelp-name{font-weight:700;margin:0}
 .yelp-rating{display:inline-flex;gap:8px;align-items:center;margin-top:6px}
