@@ -3,70 +3,138 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Starter Site — Beginner Friendly</title>
-  <!-- Link to external stylesheet (clean file separation) -->
+  <!-- TODO: refine page title/meta description for SEO -->
+  <title>Robert Parrish | Mass Torts &amp; Litigation Analytics</title>
+  <meta name="description" content="Robert Parrish, Director at Alvarez &amp; Marsal. Mass tort strategy, litigation analytics, and complex claims advisory." />
   <link rel="stylesheet" href="style.css">
   <script defer src="script.js"></script>
+  <script src="/src/js/header.js" defer></script>
 </head>
-<body>
-  <!--
-    Header / Navigation
-    - Responsive nav bar using flexbox
-    - 'theme-toggle' button toggles light/dark theme via JS
-  -->
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand">
-        <div class="logo">
-          <img src="https://media.licdn.com/dms/image/v2/C4D03AQGY1zLFgyAQpQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1516608282786?e=1772668800&v=beta&t=s8YtFO5edS3aBoVzcB9ScYxNScSKUC9NUm2M-gmADPk" alt="Photo of Robert P" loading="lazy" decoding="async">
-        </div>
-        <div class="brand-text">
-          <h1 class="site-title">Robert P</h1>
-        </div>
-      </div>
+<body data-page="home">
+  <div id="site-header"></div>
 
-      <nav class="main-nav" aria-label="Primary">
-        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list">☰</button>
-        <ul id="nav-list" class="nav-list">
-          <li><a href="#home">Home</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </nav>
-
-      <!-- Theme toggle: small interactive JS feature -->
-      <button id="theme-toggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">🌙</button>
-    </div>
-  </header>
-
-  <!--
-    Hero section
-    - Uses CSS Grid to place hero content and an aside card
-    - CTA scrolls to contact area using JS smooth scrolling
-  -->
   <main>
-    <section id="home" class="hero container">
-      <div class="hero-content">
-        <h2 class="hero-title">Robert's Personal Site</h2>
-        <p class="hero-sub">Contents</p>
-        <!-- Hero CTAs removed for production -->
-      </div>
 
-      <!-- Why this starter aside removed for production -->
+    <!-- ══════════════════════════════════════════
+         SECTION 1 — HERO
+         ══════════════════════════════════════════ -->
+    <section id="home" class="hp-hero-wrapper">
+      <div class="hp-hero container">
+      <div class="hp-hero-left">
+        <!-- TODO: refine headline copy if needed -->
+        <p class="hp-eyebrow">Director, Alvarez &amp; Marsal &middot; Washington, DC</p>
+        <h2 class="hp-headline">Mass Tort Strategy, Litigation Analytics, and Complex Claims Advisory</h2>
+        <p class="hp-subheadline">I advise law firms, corporations, and insurers on high-volume litigation environments, liability modeling, and structured claims analytics.</p>
+        <p class="hp-bio">Robert Parrish is a Director at Alvarez &amp; Marsal in the Disputes &amp; Investigations practice, focused on mass torts and complex litigation. His work centers on quantitative modeling, exposure analysis, insurance allocation strategy, and large-scale claims environments.</p>
+        <div class="hp-ctas">
+          <a href="https://www.linkedin.com/in/robertawparrish/" target="_blank" rel="noopener noreferrer" class="btn ghost">Connect on LinkedIn</a>
+        </div>
+      </div>
+      <div class="hp-hero-right">
+        <div class="hp-projects-card">
+          <p class="hp-projects-label">Projects I'm Currently Working On</p>
+          <a href="/jpml-mdl-map.html" class="hp-project-item">
+            <div class="hp-project-icon">&#9656;</div>
+            <div>
+              <div class="hp-project-title">JPML MDL Dashboard</div>
+              <div class="hp-project-desc">Interactive analytics tracking all active federal multidistrict litigation: case volumes, trends, and district breakdowns.</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
     </section>
 
-    <!-- Features section removed for production -->
+    <!-- ══════════════════════════════════════════
+         SECTION 2 — PROFESSIONAL FOCUS
+         ══════════════════════════════════════════ -->
+    <section class="hp-section container">
+      <h3 class="hp-section-title">Professional Focus</h3>
+      <div class="hp-cards-grid">
 
-    <!-- Map section removed for production -->
+        <div class="card hp-focus-card">
+          <div class="hp-focus-icon">&#9656;</div>
+          <!-- TODO: expand descriptions as needed -->
+          <h4 class="hp-focus-title">Mass Tort Analytics &amp; Forecasting</h4>
+          <p class="hp-focus-desc">Data-driven modeling of litigation exposure, filing trends, and portfolio risk.</p>
+        </div>
 
-    <!-- Yelp search section removed -->
+        <div class="card hp-focus-card">
+          <div class="hp-focus-icon">&#9656;</div>
+          <h4 class="hp-focus-title">Settlement &amp; Claims Strategy</h4>
+          <p class="hp-focus-desc">Quantitative review of claim submissions, valuation frameworks, and adjudication processes.</p>
+        </div>
 
-    <!-- Contact section moved to contact.html -->
+        <div class="card hp-focus-card">
+          <div class="hp-focus-icon">&#9656;</div>
+          <h4 class="hp-focus-title">Insurance Allocation &amp; Recovery Analysis</h4>
+          <p class="hp-focus-desc">Structured analysis supporting allocation strategy in complex coverage environments.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 3 — EXPERIENCE
+         ══════════════════════════════════════════ -->
+    <section class="hp-section container">
+      <h3 class="hp-section-title">Experience</h3>
+      <div class="hp-exp-stack">
+
+        <div class="card hp-exp-card">
+          <div class="hp-exp-header">
+            <span class="hp-exp-org">Alvarez &amp; Marsal</span>
+            <span class="hp-exp-meta">Director &middot; 2024–Present &middot; Washington, DC</span>
+          </div>
+          <p class="hp-exp-desc">Mass tort advisory, litigation analytics, exposure modeling, and structured claims environments.</p>
+        </div>
+
+        <div class="card hp-exp-card">
+          <div class="hp-exp-header">
+            <span class="hp-exp-org">KCIC</span>
+            <span class="hp-exp-meta">Director &middot; 2015–2024 &middot; Washington, DC</span>
+          </div>
+          <p class="hp-exp-desc">Advised clients in high-volume litigation and insurance allocation matters, emphasizing quantitative modeling and data integrity.</p>
+        </div>
+
+        <div class="card hp-exp-card">
+          <div class="hp-exp-header">
+            <span class="hp-exp-org">Navigant</span>
+            <!-- TODO: confirm exact dates/title if needed -->
+            <span class="hp-exp-meta">Senior Consultant &middot; 2012–2015</span>
+          </div>
+          <p class="hp-exp-desc">Structured data analysis, litigation support, and regulatory review engagements.</p>
+        </div>
+
+      </div>
+    </section>
+
+    
+
+    <!-- ══════════════════════════════════════════
+         SECTION 5 — EDUCATION
+         ══════════════════════════════════════════ -->
+    <section class="hp-section container">
+      <h3 class="hp-section-title">Education</h3>
+      <div class="card hp-edu-card">
+        <div class="hp-edu-row">
+          <span class="hp-edu-degree">M.S. in Commerce</span>
+          <span class="hp-edu-school">University of Virginia &mdash; McIntire School of Commerce</span>
+        </div>
+        <div class="hp-edu-row">
+          <span class="hp-edu-degree">B.A. in Foreign Affairs &amp; History</span>
+          <span class="hp-edu-school">University of Virginia</span>
+        </div>
+      </div>
+    </section>
+
+  
+
   </main>
 
-  <!-- Footer -->
   <footer class="site-footer container">
-    <div>© StarterSite — All rights reserved.</div>
-    <div class="muted small">Built with HTML • CSS • JavaScript</div>
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Views expressed are my own and do not represent Alvarez &amp; Marsal or any other employer.</div>
   </footer>
 
 </body>

@@ -42,8 +42,8 @@ function init() {
   const saved = localStorage.getItem('site-theme') || 'dark';
   applyTheme(saved);
 
-  // Theme toggle button
-  $('#theme-toggle').addEventListener('click', toggleTheme);
+  // Theme toggle is wired by header.js after it injects the header
+  // (button doesn't exist at DOMContentLoaded since header is loaded async)
 
   // Mobile nav toggle
   const navBtn = document.querySelector('.nav-toggle');

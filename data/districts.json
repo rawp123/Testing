@@ -1,0 +1,1458 @@
+{
+  "N.D. Ala.": {
+    "name": "Northern District of Alabama",
+    "city": "Birmingham",
+    "state": "AL",
+    "lat": 33.5186,
+    "lon": -86.8104,
+    "abbreviation": "ALN"
+  },
+  "ALN": {
+    "name": "N.D. Ala.",
+    "city": "Birmingham",
+    "state": "AL",
+    "lat": 33.5186,
+    "lon": -86.8104,
+    "abbreviation": "ALN"
+  },
+  "M.D. Ala.": {
+    "name": "Middle District of Alabama",
+    "city": "Montgomery",
+    "state": "AL",
+    "lat": 32.3668,
+    "lon": -86.3,
+    "abbreviation": "ALM"
+  },
+  "ALM": {
+    "name": "M.D. Ala.",
+    "city": "Montgomery",
+    "state": "AL",
+    "lat": 32.3668,
+    "lon": -86.3,
+    "abbreviation": "ALM"
+  },
+  "S.D. Ala.": {
+    "name": "Southern District of Alabama",
+    "city": "Mobile",
+    "state": "AL",
+    "lat": 30.6954,
+    "lon": -88.0399,
+    "abbreviation": "ALS"
+  },
+  "ALS": {
+    "name": "S.D. Ala.",
+    "city": "Mobile",
+    "state": "AL",
+    "lat": 30.6954,
+    "lon": -88.0399,
+    "abbreviation": "ALS"
+  },
+  "D. Alaska": {
+    "name": "District of Alaska",
+    "city": "Anchorage",
+    "state": "AK",
+    "lat": 61.2181,
+    "lon": -149.9003,
+    "abbreviation": "AK"
+  },
+  "AK": {
+    "name": "D. Alaska",
+    "city": "Anchorage",
+    "state": "AK",
+    "lat": 61.2181,
+    "lon": -149.9003,
+    "abbreviation": "AK"
+  },
+  "D. Ariz.": {
+    "name": "District of Arizona",
+    "city": "Phoenix",
+    "state": "AZ",
+    "lat": 33.4484,
+    "lon": -112.074,
+    "abbreviation": "AZ"
+  },
+  "AZ": {
+    "name": "D. Ariz.",
+    "city": "Phoenix",
+    "state": "AZ",
+    "lat": 33.4484,
+    "lon": -112.074,
+    "abbreviation": "AZ"
+  },
+  "E.D. Ark.": {
+    "name": "Eastern District of Arkansas",
+    "city": "Little Rock",
+    "state": "AR",
+    "lat": 34.7465,
+    "lon": -92.2896,
+    "abbreviation": "ARE"
+  },
+  "ARE": {
+    "name": "E.D. Ark.",
+    "city": "Little Rock",
+    "state": "AR",
+    "lat": 34.7465,
+    "lon": -92.2896,
+    "abbreviation": "ARE"
+  },
+  "W.D. Ark.": {
+    "name": "Western District of Arkansas",
+    "city": "Fort Smith",
+    "state": "AR",
+    "lat": 35.3859,
+    "lon": -94.3985,
+    "abbreviation": "ARW"
+  },
+  "ARW": {
+    "name": "W.D. Ark.",
+    "city": "Fort Smith",
+    "state": "AR",
+    "lat": 35.3859,
+    "lon": -94.3985,
+    "abbreviation": "ARW"
+  },
+  "C.D. Cal.": {
+    "name": "Central District of California",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "abbreviation": "CAC"
+  },
+  "CAC": {
+    "name": "C.D. Cal.",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "abbreviation": "CAC"
+  },
+  "E.D. Cal.": {
+    "name": "Eastern District of California",
+    "city": "Sacramento",
+    "state": "CA",
+    "lat": 38.5816,
+    "lon": -121.4944,
+    "abbreviation": "CAE"
+  },
+  "CAE": {
+    "name": "E.D. Cal.",
+    "city": "Sacramento",
+    "state": "CA",
+    "lat": 38.5816,
+    "lon": -121.4944,
+    "abbreviation": "CAE"
+  },
+  "N.D. Cal.": {
+    "name": "Northern District of California",
+    "city": "San Francisco",
+    "state": "CA",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "abbreviation": "CAN"
+  },
+  "CAN": {
+    "name": "N.D. Cal.",
+    "city": "San Francisco",
+    "state": "CA",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "abbreviation": "CAN"
+  },
+  "S.D. Cal.": {
+    "name": "Southern District of California",
+    "city": "San Diego",
+    "state": "CA",
+    "lat": 32.7157,
+    "lon": -117.1611,
+    "abbreviation": "CAS"
+  },
+  "CAS": {
+    "name": "S.D. Cal.",
+    "city": "San Diego",
+    "state": "CA",
+    "lat": 32.7157,
+    "lon": -117.1611,
+    "abbreviation": "CAS"
+  },
+  "D. Colo.": {
+    "name": "District of Colorado",
+    "city": "Denver",
+    "state": "CO",
+    "lat": 39.7392,
+    "lon": -104.9903,
+    "abbreviation": "CO"
+  },
+  "CO": {
+    "name": "D. Colo.",
+    "city": "Denver",
+    "state": "CO",
+    "lat": 39.7392,
+    "lon": -104.9903,
+    "abbreviation": "CO"
+  },
+  "D. Conn.": {
+    "name": "District of Connecticut",
+    "city": "New Haven",
+    "state": "CT",
+    "lat": 41.3083,
+    "lon": -72.9279,
+    "abbreviation": "CT"
+  },
+  "CT": {
+    "name": "D. Conn.",
+    "city": "New Haven",
+    "state": "CT",
+    "lat": 41.3083,
+    "lon": -72.9279,
+    "abbreviation": "CT"
+  },
+  "D. Del.": {
+    "name": "District of Delaware",
+    "city": "Wilmington",
+    "state": "DE",
+    "lat": 39.7391,
+    "lon": -75.5398,
+    "abbreviation": "DE"
+  },
+  "DE": {
+    "name": "D. Del.",
+    "city": "Wilmington",
+    "state": "DE",
+    "lat": 39.7391,
+    "lon": -75.5398,
+    "abbreviation": "DE"
+  },
+  "D.D.C.": {
+    "name": "District of Columbia",
+    "city": "Washington",
+    "state": "DC",
+    "lat": 38.8951,
+    "lon": -77.0364,
+    "abbreviation": "DC"
+  },
+  "DC": {
+    "name": "D.D.C.",
+    "city": "Washington",
+    "state": "DC",
+    "lat": 38.8951,
+    "lon": -77.0364,
+    "abbreviation": "DC"
+  },
+  "M.D. Fla.": {
+    "name": "Middle District of Florida",
+    "city": "Orlando",
+    "state": "FL",
+    "lat": 28.5383,
+    "lon": -81.3792,
+    "abbreviation": "FLM"
+  },
+  "FLM": {
+    "name": "M.D. Fla.",
+    "city": "Orlando",
+    "state": "FL",
+    "lat": 28.5383,
+    "lon": -81.3792,
+    "abbreviation": "FLM"
+  },
+  "N.D. Fla.": {
+    "name": "Northern District of Florida",
+    "city": "Tallahassee",
+    "state": "FL",
+    "lat": 30.4383,
+    "lon": -84.2807,
+    "abbreviation": "FLN"
+  },
+  "FLN": {
+    "name": "N.D. Fla.",
+    "city": "Tallahassee",
+    "state": "FL",
+    "lat": 30.4383,
+    "lon": -84.2807,
+    "abbreviation": "FLN"
+  },
+  "S.D. Fla.": {
+    "name": "Southern District of Florida",
+    "city": "Miami",
+    "state": "FL",
+    "lat": 25.7617,
+    "lon": -80.1918,
+    "abbreviation": "FLS"
+  },
+  "FLS": {
+    "name": "S.D. Fla.",
+    "city": "Miami",
+    "state": "FL",
+    "lat": 25.7617,
+    "lon": -80.1918,
+    "abbreviation": "FLS"
+  },
+  "M.D. Ga.": {
+    "name": "Middle District of Georgia",
+    "city": "Macon",
+    "state": "GA",
+    "lat": 32.8407,
+    "lon": -83.6324,
+    "abbreviation": "GAM"
+  },
+  "GAM": {
+    "name": "M.D. Ga.",
+    "city": "Macon",
+    "state": "GA",
+    "lat": 32.8407,
+    "lon": -83.6324,
+    "abbreviation": "GAM"
+  },
+  "N.D. Ga.": {
+    "name": "Northern District of Georgia",
+    "city": "Atlanta",
+    "state": "GA",
+    "lat": 33.749,
+    "lon": -84.388,
+    "abbreviation": "GAN"
+  },
+  "GAN": {
+    "name": "N.D. Ga.",
+    "city": "Atlanta",
+    "state": "GA",
+    "lat": 33.749,
+    "lon": -84.388,
+    "abbreviation": "GAN"
+  },
+  "S.D. Ga.": {
+    "name": "Southern District of Georgia",
+    "city": "Savannah",
+    "state": "GA",
+    "lat": 32.0809,
+    "lon": -81.0912,
+    "abbreviation": "GAS"
+  },
+  "GAS": {
+    "name": "S.D. Ga.",
+    "city": "Savannah",
+    "state": "GA",
+    "lat": 32.0809,
+    "lon": -81.0912,
+    "abbreviation": "GAS"
+  },
+  "D. Haw.": {
+    "name": "District of Hawaii",
+    "city": "Honolulu",
+    "state": "HI",
+    "lat": 21.3069,
+    "lon": -157.8583,
+    "abbreviation": "HI"
+  },
+  "HI": {
+    "name": "D. Haw.",
+    "city": "Honolulu",
+    "state": "HI",
+    "lat": 21.3069,
+    "lon": -157.8583,
+    "abbreviation": "HI"
+  },
+  "D. Idaho": {
+    "name": "District of Idaho",
+    "city": "Boise",
+    "state": "ID",
+    "lat": 43.615,
+    "lon": -116.2023,
+    "abbreviation": "ID"
+  },
+  "ID": {
+    "name": "D. Idaho",
+    "city": "Boise",
+    "state": "ID",
+    "lat": 43.615,
+    "lon": -116.2023,
+    "abbreviation": "ID"
+  },
+  "N.D. Ill.": {
+    "name": "Northern District of Illinois",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.8781,
+    "lon": -87.6298,
+    "abbreviation": "ILN"
+  },
+  "ILN": {
+    "name": "N.D. Ill.",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.8781,
+    "lon": -87.6298,
+    "abbreviation": "ILN"
+  },
+  "C.D. Ill.": {
+    "name": "Central District of Illinois",
+    "city": "Peoria",
+    "state": "IL",
+    "lat": 40.6936,
+    "lon": -89.589,
+    "abbreviation": "ILC"
+  },
+  "ILC": {
+    "name": "C.D. Ill.",
+    "city": "Peoria",
+    "state": "IL",
+    "lat": 40.6936,
+    "lon": -89.589,
+    "abbreviation": "ILC"
+  },
+  "S.D. Ill.": {
+    "name": "Southern District of Illinois",
+    "city": "East St. Louis",
+    "state": "IL",
+    "lat": 38.6245,
+    "lon": -90.1502,
+    "abbreviation": "ILS"
+  },
+  "ILS": {
+    "name": "S.D. Ill.",
+    "city": "East St. Louis",
+    "state": "IL",
+    "lat": 38.6245,
+    "lon": -90.1502,
+    "abbreviation": "ILS"
+  },
+  "N.D. Ind.": {
+    "name": "Northern District of Indiana",
+    "city": "South Bend",
+    "state": "IN",
+    "lat": 41.6764,
+    "lon": -86.252,
+    "abbreviation": "INN"
+  },
+  "INN": {
+    "name": "N.D. Ind.",
+    "city": "South Bend",
+    "state": "IN",
+    "lat": 41.6764,
+    "lon": -86.252,
+    "abbreviation": "INN"
+  },
+  "S.D. Ind.": {
+    "name": "Southern District of Indiana",
+    "city": "Indianapolis",
+    "state": "IN",
+    "lat": 39.7684,
+    "lon": -86.1581,
+    "abbreviation": "INS"
+  },
+  "INS": {
+    "name": "S.D. Ind.",
+    "city": "Indianapolis",
+    "state": "IN",
+    "lat": 39.7684,
+    "lon": -86.1581,
+    "abbreviation": "INS"
+  },
+  "N.D. Iowa": {
+    "name": "Northern District of Iowa",
+    "city": "Cedar Rapids",
+    "state": "IA",
+    "lat": 41.9779,
+    "lon": -91.6656,
+    "abbreviation": "IAN"
+  },
+  "IAN": {
+    "name": "N.D. Iowa",
+    "city": "Cedar Rapids",
+    "state": "IA",
+    "lat": 41.9779,
+    "lon": -91.6656,
+    "abbreviation": "IAN"
+  },
+  "S.D. Iowa": {
+    "name": "Southern District of Iowa",
+    "city": "Des Moines",
+    "state": "IA",
+    "lat": 41.5868,
+    "lon": -93.625,
+    "abbreviation": "IAS"
+  },
+  "IAS": {
+    "name": "S.D. Iowa",
+    "city": "Des Moines",
+    "state": "IA",
+    "lat": 41.5868,
+    "lon": -93.625,
+    "abbreviation": "IAS"
+  },
+  "D. Kan.": {
+    "name": "District of Kansas",
+    "city": "Kansas City",
+    "state": "KS",
+    "lat": 39.1141,
+    "lon": -94.6275,
+    "abbreviation": "KS"
+  },
+  "KS": {
+    "name": "D. Kan.",
+    "city": "Kansas City",
+    "state": "KS",
+    "lat": 39.1141,
+    "lon": -94.6275,
+    "abbreviation": "KS"
+  },
+  "E.D. Ky.": {
+    "name": "Eastern District of Kentucky",
+    "city": "Lexington",
+    "state": "KY",
+    "lat": 38.0406,
+    "lon": -84.5037,
+    "abbreviation": "KYE"
+  },
+  "KYE": {
+    "name": "E.D. Ky.",
+    "city": "Lexington",
+    "state": "KY",
+    "lat": 38.0406,
+    "lon": -84.5037,
+    "abbreviation": "KYE"
+  },
+  "W.D. Ky.": {
+    "name": "Western District of Kentucky",
+    "city": "Louisville",
+    "state": "KY",
+    "lat": 38.2527,
+    "lon": -85.7585,
+    "abbreviation": "KYW"
+  },
+  "KYW": {
+    "name": "W.D. Ky.",
+    "city": "Louisville",
+    "state": "KY",
+    "lat": 38.2527,
+    "lon": -85.7585,
+    "abbreviation": "KYW"
+  },
+  "E.D. La.": {
+    "name": "Eastern District of Louisiana",
+    "city": "New Orleans",
+    "state": "LA",
+    "lat": 29.9511,
+    "lon": -90.0715,
+    "abbreviation": "LAE"
+  },
+  "LAE": {
+    "name": "E.D. La.",
+    "city": "New Orleans",
+    "state": "LA",
+    "lat": 29.9511,
+    "lon": -90.0715,
+    "abbreviation": "LAE"
+  },
+  "M.D. La.": {
+    "name": "Middle District of Louisiana",
+    "city": "Baton Rouge",
+    "state": "LA",
+    "lat": 30.4515,
+    "lon": -91.1871,
+    "abbreviation": "LAM"
+  },
+  "LAM": {
+    "name": "M.D. La.",
+    "city": "Baton Rouge",
+    "state": "LA",
+    "lat": 30.4515,
+    "lon": -91.1871,
+    "abbreviation": "LAM"
+  },
+  "W.D. La.": {
+    "name": "Western District of Louisiana",
+    "city": "Shreveport",
+    "state": "LA",
+    "lat": 32.5252,
+    "lon": -93.7502,
+    "abbreviation": "LAW"
+  },
+  "LAW": {
+    "name": "W.D. La.",
+    "city": "Shreveport",
+    "state": "LA",
+    "lat": 32.5252,
+    "lon": -93.7502,
+    "abbreviation": "LAW"
+  },
+  "D. Me.": {
+    "name": "District of Maine",
+    "city": "Portland",
+    "state": "ME",
+    "lat": 43.6591,
+    "lon": -70.2568,
+    "abbreviation": "ME"
+  },
+  "ME": {
+    "name": "D. Me.",
+    "city": "Portland",
+    "state": "ME",
+    "lat": 43.6591,
+    "lon": -70.2568,
+    "abbreviation": "ME"
+  },
+  "D. Md.": {
+    "name": "District of Maryland",
+    "city": "Baltimore",
+    "state": "MD",
+    "lat": 39.2904,
+    "lon": -76.6122,
+    "abbreviation": "MD"
+  },
+  "MD": {
+    "name": "D. Md.",
+    "city": "Baltimore",
+    "state": "MD",
+    "lat": 39.2904,
+    "lon": -76.6122,
+    "abbreviation": "MD"
+  },
+  "D. Mass.": {
+    "name": "District of Massachusetts",
+    "city": "Boston",
+    "state": "MA",
+    "lat": 42.3601,
+    "lon": -71.0589,
+    "abbreviation": "MA"
+  },
+  "MA": {
+    "name": "D. Mass.",
+    "city": "Boston",
+    "state": "MA",
+    "lat": 42.3601,
+    "lon": -71.0589,
+    "abbreviation": "MA"
+  },
+  "E.D. Mich.": {
+    "name": "Eastern District of Michigan",
+    "city": "Detroit",
+    "state": "MI",
+    "lat": 42.3314,
+    "lon": -83.0458,
+    "abbreviation": "MIE"
+  },
+  "MIE": {
+    "name": "E.D. Mich.",
+    "city": "Detroit",
+    "state": "MI",
+    "lat": 42.3314,
+    "lon": -83.0458,
+    "abbreviation": "MIE"
+  },
+  "W.D. Mich.": {
+    "name": "Western District of Michigan",
+    "city": "Grand Rapids",
+    "state": "MI",
+    "lat": 42.9634,
+    "lon": -85.6681,
+    "abbreviation": "MIW"
+  },
+  "MIW": {
+    "name": "W.D. Mich.",
+    "city": "Grand Rapids",
+    "state": "MI",
+    "lat": 42.9634,
+    "lon": -85.6681,
+    "abbreviation": "MIW"
+  },
+  "D. Minn.": {
+    "name": "District of Minnesota",
+    "city": "Minneapolis",
+    "state": "MN",
+    "lat": 44.9778,
+    "lon": -93.265,
+    "abbreviation": "MN"
+  },
+  "MN": {
+    "name": "D. Minn.",
+    "city": "Minneapolis",
+    "state": "MN",
+    "lat": 44.9778,
+    "lon": -93.265,
+    "abbreviation": "MN"
+  },
+  "N.D. Miss.": {
+    "name": "Northern District of Mississippi",
+    "city": "Oxford",
+    "state": "MS",
+    "lat": 34.3665,
+    "lon": -89.5192,
+    "abbreviation": "MSN"
+  },
+  "MSN": {
+    "name": "N.D. Miss.",
+    "city": "Oxford",
+    "state": "MS",
+    "lat": 34.3665,
+    "lon": -89.5192,
+    "abbreviation": "MSN"
+  },
+  "S.D. Miss.": {
+    "name": "Southern District of Mississippi",
+    "city": "Gulfport",
+    "state": "MS",
+    "lat": 30.3674,
+    "lon": -89.0928,
+    "abbreviation": "MSS"
+  },
+  "MSS": {
+    "name": "S.D. Miss.",
+    "city": "Gulfport",
+    "state": "MS",
+    "lat": 30.3674,
+    "lon": -89.0928,
+    "abbreviation": "MSS"
+  },
+  "E.D. Mo.": {
+    "name": "Eastern District of Missouri",
+    "city": "St. Louis",
+    "state": "MO",
+    "lat": 38.627,
+    "lon": -90.1994,
+    "abbreviation": "MOE"
+  },
+  "MOE": {
+    "name": "E.D. Mo.",
+    "city": "St. Louis",
+    "state": "MO",
+    "lat": 38.627,
+    "lon": -90.1994,
+    "abbreviation": "MOE"
+  },
+  "W.D. Mo.": {
+    "name": "Western District of Missouri",
+    "city": "Kansas City",
+    "state": "MO",
+    "lat": 39.0997,
+    "lon": -94.5786,
+    "abbreviation": "MOW"
+  },
+  "MOW": {
+    "name": "W.D. Mo.",
+    "city": "Kansas City",
+    "state": "MO",
+    "lat": 39.0997,
+    "lon": -94.5786,
+    "abbreviation": "MOW"
+  },
+  "D. Mont.": {
+    "name": "District of Montana",
+    "city": "Billings",
+    "state": "MT",
+    "lat": 45.7833,
+    "lon": -108.5007,
+    "abbreviation": "MT"
+  },
+  "MT": {
+    "name": "D. Mont.",
+    "city": "Billings",
+    "state": "MT",
+    "lat": 45.7833,
+    "lon": -108.5007,
+    "abbreviation": "MT"
+  },
+  "D. Neb.": {
+    "name": "District of Nebraska",
+    "city": "Omaha",
+    "state": "NE",
+    "lat": 41.2565,
+    "lon": -95.9345,
+    "abbreviation": "NE"
+  },
+  "NE": {
+    "name": "D. Neb.",
+    "city": "Omaha",
+    "state": "NE",
+    "lat": 41.2565,
+    "lon": -95.9345,
+    "abbreviation": "NE"
+  },
+  "D. Nev.": {
+    "name": "District of Nevada",
+    "city": "Las Vegas",
+    "state": "NV",
+    "lat": 36.1699,
+    "lon": -115.1398,
+    "abbreviation": "NV"
+  },
+  "NV": {
+    "name": "D. Nev.",
+    "city": "Las Vegas",
+    "state": "NV",
+    "lat": 36.1699,
+    "lon": -115.1398,
+    "abbreviation": "NV"
+  },
+  "D.N.H.": {
+    "name": "District of New Hampshire",
+    "city": "Concord",
+    "state": "NH",
+    "lat": 43.2081,
+    "lon": -71.5376,
+    "abbreviation": "NH"
+  },
+  "NH": {
+    "name": "D.N.H.",
+    "city": "Concord",
+    "state": "NH",
+    "lat": 43.2081,
+    "lon": -71.5376,
+    "abbreviation": "NH"
+  },
+  "D.N.J.": {
+    "name": "District of New Jersey",
+    "city": "Newark",
+    "state": "NJ",
+    "lat": 40.7357,
+    "lon": -74.1724,
+    "abbreviation": "NJ"
+  },
+  "NJ": {
+    "name": "D.N.J.",
+    "city": "Newark",
+    "state": "NJ",
+    "lat": 40.7357,
+    "lon": -74.1724,
+    "abbreviation": "NJ"
+  },
+  "D.N.M.": {
+    "name": "District of New Mexico",
+    "city": "Albuquerque",
+    "state": "NM",
+    "lat": 35.0844,
+    "lon": -106.6504,
+    "abbreviation": "NM"
+  },
+  "NM": {
+    "name": "D.N.M.",
+    "city": "Albuquerque",
+    "state": "NM",
+    "lat": 35.0844,
+    "lon": -106.6504,
+    "abbreviation": "NM"
+  },
+  "E.D.N.Y.": {
+    "name": "Eastern District of New York",
+    "city": "Brooklyn",
+    "state": "NY",
+    "lat": 40.6782,
+    "lon": -73.9442,
+    "abbreviation": "NYE"
+  },
+  "NYE": {
+    "name": "E.D.N.Y.",
+    "city": "Brooklyn",
+    "state": "NY",
+    "lat": 40.6782,
+    "lon": -73.9442,
+    "abbreviation": "NYE"
+  },
+  "N.D.N.Y.": {
+    "name": "Northern District of New York",
+    "city": "Syracuse",
+    "state": "NY",
+    "lat": 43.0481,
+    "lon": -76.1474,
+    "abbreviation": "NYN"
+  },
+  "NYN": {
+    "name": "N.D.N.Y.",
+    "city": "Syracuse",
+    "state": "NY",
+    "lat": 43.0481,
+    "lon": -76.1474,
+    "abbreviation": "NYN"
+  },
+  "S.D.N.Y.": {
+    "name": "Southern District of New York",
+    "city": "New York",
+    "state": "NY",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "abbreviation": "NYS"
+  },
+  "NYS": {
+    "name": "S.D.N.Y.",
+    "city": "New York",
+    "state": "NY",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "abbreviation": "NYS"
+  },
+  "W.D.N.Y.": {
+    "name": "Western District of New York",
+    "city": "Buffalo",
+    "state": "NY",
+    "lat": 42.8864,
+    "lon": -78.8784,
+    "abbreviation": "NYW"
+  },
+  "NYW": {
+    "name": "W.D.N.Y.",
+    "city": "Buffalo",
+    "state": "NY",
+    "lat": 42.8864,
+    "lon": -78.8784,
+    "abbreviation": "NYW"
+  },
+  "E.D.N.C.": {
+    "name": "Eastern District of North Carolina",
+    "city": "Raleigh",
+    "state": "NC",
+    "lat": 35.7796,
+    "lon": -78.6382,
+    "abbreviation": "NCE"
+  },
+  "NCE": {
+    "name": "E.D.N.C.",
+    "city": "Raleigh",
+    "state": "NC",
+    "lat": 35.7796,
+    "lon": -78.6382,
+    "abbreviation": "NCE"
+  },
+  "M.D.N.C.": {
+    "name": "Middle District of North Carolina",
+    "city": "Greensboro",
+    "state": "NC",
+    "lat": 36.0726,
+    "lon": -79.792,
+    "abbreviation": "NCM"
+  },
+  "NCM": {
+    "name": "M.D.N.C.",
+    "city": "Greensboro",
+    "state": "NC",
+    "lat": 36.0726,
+    "lon": -79.792,
+    "abbreviation": "NCM"
+  },
+  "W.D.N.C.": {
+    "name": "Western District of North Carolina",
+    "city": "Charlotte",
+    "state": "NC",
+    "lat": 35.2271,
+    "lon": -80.8431,
+    "abbreviation": "NCW"
+  },
+  "NCW": {
+    "name": "W.D.N.C.",
+    "city": "Charlotte",
+    "state": "NC",
+    "lat": 35.2271,
+    "lon": -80.8431,
+    "abbreviation": "NCW"
+  },
+  "D.N.D.": {
+    "name": "District of North Dakota",
+    "city": "Fargo",
+    "state": "ND",
+    "lat": 46.8772,
+    "lon": -96.7898,
+    "abbreviation": "ND"
+  },
+  "ND": {
+    "name": "D.N.D.",
+    "city": "Fargo",
+    "state": "ND",
+    "lat": 46.8772,
+    "lon": -96.7898,
+    "abbreviation": "ND"
+  },
+  "N.D. Ohio": {
+    "name": "Northern District of Ohio",
+    "city": "Cleveland",
+    "state": "OH",
+    "lat": 41.4993,
+    "lon": -81.6944,
+    "abbreviation": "OHN"
+  },
+  "OHN": {
+    "name": "N.D. Ohio",
+    "city": "Cleveland",
+    "state": "OH",
+    "lat": 41.4993,
+    "lon": -81.6944,
+    "abbreviation": "OHN"
+  },
+  "S.D. Ohio": {
+    "name": "Southern District of Ohio",
+    "city": "Columbus",
+    "state": "OH",
+    "lat": 39.9612,
+    "lon": -82.9988,
+    "abbreviation": "OHS"
+  },
+  "OHS": {
+    "name": "S.D. Ohio",
+    "city": "Columbus",
+    "state": "OH",
+    "lat": 39.9612,
+    "lon": -82.9988,
+    "abbreviation": "OHS"
+  },
+  "E.D. Okla.": {
+    "name": "Eastern District of Oklahoma",
+    "city": "Muskogee",
+    "state": "OK",
+    "lat": 35.7479,
+    "lon": -95.3697,
+    "abbreviation": "OKE"
+  },
+  "OKE": {
+    "name": "E.D. Okla.",
+    "city": "Muskogee",
+    "state": "OK",
+    "lat": 35.7479,
+    "lon": -95.3697,
+    "abbreviation": "OKE"
+  },
+  "N.D. Okla.": {
+    "name": "Northern District of Oklahoma",
+    "city": "Tulsa",
+    "state": "OK",
+    "lat": 36.1539,
+    "lon": -95.9928,
+    "abbreviation": "OKN"
+  },
+  "OKN": {
+    "name": "N.D. Okla.",
+    "city": "Tulsa",
+    "state": "OK",
+    "lat": 36.1539,
+    "lon": -95.9928,
+    "abbreviation": "OKN"
+  },
+  "W.D. Okla.": {
+    "name": "Western District of Oklahoma",
+    "city": "Oklahoma City",
+    "state": "OK",
+    "lat": 35.4634,
+    "lon": -97.5151,
+    "abbreviation": "OKW"
+  },
+  "OKW": {
+    "name": "W.D. Okla.",
+    "city": "Oklahoma City",
+    "state": "OK",
+    "lat": 35.4634,
+    "lon": -97.5151,
+    "abbreviation": "OKW"
+  },
+  "D. Or.": {
+    "name": "District of Oregon",
+    "city": "Portland",
+    "state": "OR",
+    "lat": 45.5051,
+    "lon": -122.675,
+    "abbreviation": "OR"
+  },
+  "OR": {
+    "name": "D. Or.",
+    "city": "Portland",
+    "state": "OR",
+    "lat": 45.5051,
+    "lon": -122.675,
+    "abbreviation": "OR"
+  },
+  "E.D. Pa.": {
+    "name": "Eastern District of Pennsylvania",
+    "city": "Philadelphia",
+    "state": "PA",
+    "lat": 39.9526,
+    "lon": -75.1652,
+    "abbreviation": "PAE"
+  },
+  "PAE": {
+    "name": "E.D. Pa.",
+    "city": "Philadelphia",
+    "state": "PA",
+    "lat": 39.9526,
+    "lon": -75.1652,
+    "abbreviation": "PAE"
+  },
+  "M.D. Pa.": {
+    "name": "Middle District of Pennsylvania",
+    "city": "Scranton",
+    "state": "PA",
+    "lat": 41.4089,
+    "lon": -75.6624,
+    "abbreviation": "PAM"
+  },
+  "PAM": {
+    "name": "M.D. Pa.",
+    "city": "Scranton",
+    "state": "PA",
+    "lat": 41.4089,
+    "lon": -75.6624,
+    "abbreviation": "PAM"
+  },
+  "W.D. Pa.": {
+    "name": "Western District of Pennsylvania",
+    "city": "Pittsburgh",
+    "state": "PA",
+    "lat": 40.4406,
+    "lon": -79.9959,
+    "abbreviation": "PAW"
+  },
+  "PAW": {
+    "name": "W.D. Pa.",
+    "city": "Pittsburgh",
+    "state": "PA",
+    "lat": 40.4406,
+    "lon": -79.9959,
+    "abbreviation": "PAW"
+  },
+  "D.P.R.": {
+    "name": "District of Puerto Rico",
+    "city": "San Juan",
+    "state": "PR",
+    "lat": 18.4655,
+    "lon": -66.1057,
+    "abbreviation": "PR"
+  },
+  "PR": {
+    "name": "D.P.R.",
+    "city": "San Juan",
+    "state": "PR",
+    "lat": 18.4655,
+    "lon": -66.1057,
+    "abbreviation": "PR"
+  },
+  "D.R.I.": {
+    "name": "District of Rhode Island",
+    "city": "Providence",
+    "state": "RI",
+    "lat": 41.824,
+    "lon": -71.4128,
+    "abbreviation": "RI"
+  },
+  "RI": {
+    "name": "D.R.I.",
+    "city": "Providence",
+    "state": "RI",
+    "lat": 41.824,
+    "lon": -71.4128,
+    "abbreviation": "RI"
+  },
+  "D.S.C.": {
+    "name": "District of South Carolina",
+    "city": "Columbia",
+    "state": "SC",
+    "lat": 34.0007,
+    "lon": -81.0348,
+    "abbreviation": "SC"
+  },
+  "SC": {
+    "name": "D.S.C.",
+    "city": "Columbia",
+    "state": "SC",
+    "lat": 34.0007,
+    "lon": -81.0348,
+    "abbreviation": "SC"
+  },
+  "D.S.D.": {
+    "name": "District of South Dakota",
+    "city": "Sioux Falls",
+    "state": "SD",
+    "lat": 43.5446,
+    "lon": -96.7311,
+    "abbreviation": "SD"
+  },
+  "SD": {
+    "name": "D.S.D.",
+    "city": "Sioux Falls",
+    "state": "SD",
+    "lat": 43.5446,
+    "lon": -96.7311,
+    "abbreviation": "SD"
+  },
+  "E.D. Tenn.": {
+    "name": "Eastern District of Tennessee",
+    "city": "Knoxville",
+    "state": "TN",
+    "lat": 35.9606,
+    "lon": -83.9207,
+    "abbreviation": "TNE"
+  },
+  "TNE": {
+    "name": "E.D. Tenn.",
+    "city": "Knoxville",
+    "state": "TN",
+    "lat": 35.9606,
+    "lon": -83.9207,
+    "abbreviation": "TNE"
+  },
+  "M.D. Tenn.": {
+    "name": "Middle District of Tennessee",
+    "city": "Nashville",
+    "state": "TN",
+    "lat": 36.1627,
+    "lon": -86.7816,
+    "abbreviation": "TNM"
+  },
+  "TNM": {
+    "name": "M.D. Tenn.",
+    "city": "Nashville",
+    "state": "TN",
+    "lat": 36.1627,
+    "lon": -86.7816,
+    "abbreviation": "TNM"
+  },
+  "W.D. Tenn.": {
+    "name": "Western District of Tennessee",
+    "city": "Memphis",
+    "state": "TN",
+    "lat": 35.1495,
+    "lon": -90.049,
+    "abbreviation": "TNW"
+  },
+  "TNW": {
+    "name": "W.D. Tenn.",
+    "city": "Memphis",
+    "state": "TN",
+    "lat": 35.1495,
+    "lon": -90.049,
+    "abbreviation": "TNW"
+  },
+  "E.D. Tex.": {
+    "name": "Eastern District of Texas",
+    "city": "Tyler",
+    "state": "TX",
+    "lat": 32.3513,
+    "lon": -95.3011,
+    "abbreviation": "TXE"
+  },
+  "TXE": {
+    "name": "E.D. Tex.",
+    "city": "Tyler",
+    "state": "TX",
+    "lat": 32.3513,
+    "lon": -95.3011,
+    "abbreviation": "TXE"
+  },
+  "N.D. Tex.": {
+    "name": "Northern District of Texas",
+    "city": "Dallas",
+    "state": "TX",
+    "lat": 32.7767,
+    "lon": -96.797,
+    "abbreviation": "TXN"
+  },
+  "TXN": {
+    "name": "N.D. Tex.",
+    "city": "Dallas",
+    "state": "TX",
+    "lat": 32.7767,
+    "lon": -96.797,
+    "abbreviation": "TXN"
+  },
+  "S.D. Tex.": {
+    "name": "Southern District of Texas",
+    "city": "Houston",
+    "state": "TX",
+    "lat": 29.7604,
+    "lon": -95.3698,
+    "abbreviation": "TXS"
+  },
+  "TXS": {
+    "name": "S.D. Tex.",
+    "city": "Houston",
+    "state": "TX",
+    "lat": 29.7604,
+    "lon": -95.3698,
+    "abbreviation": "TXS"
+  },
+  "W.D. Tex.": {
+    "name": "Western District of Texas",
+    "city": "San Antonio",
+    "state": "TX",
+    "lat": 29.4241,
+    "lon": -98.4936,
+    "abbreviation": "TXW"
+  },
+  "TXW": {
+    "name": "W.D. Tex.",
+    "city": "San Antonio",
+    "state": "TX",
+    "lat": 29.4241,
+    "lon": -98.4936,
+    "abbreviation": "TXW"
+  },
+  "D. Utah": {
+    "name": "District of Utah",
+    "city": "Salt Lake City",
+    "state": "UT",
+    "lat": 40.7608,
+    "lon": -111.891,
+    "abbreviation": "UT"
+  },
+  "UT": {
+    "name": "D. Utah",
+    "city": "Salt Lake City",
+    "state": "UT",
+    "lat": 40.7608,
+    "lon": -111.891,
+    "abbreviation": "UT"
+  },
+  "D. Vt.": {
+    "name": "District of Vermont",
+    "city": "Burlington",
+    "state": "VT",
+    "lat": 44.4759,
+    "lon": -73.2121,
+    "abbreviation": "VT"
+  },
+  "VT": {
+    "name": "D. Vt.",
+    "city": "Burlington",
+    "state": "VT",
+    "lat": 44.4759,
+    "lon": -73.2121,
+    "abbreviation": "VT"
+  },
+  "E.D. Va.": {
+    "name": "Eastern District of Virginia",
+    "city": "Alexandria",
+    "state": "VA",
+    "lat": 38.8048,
+    "lon": -77.0469,
+    "abbreviation": "VAE"
+  },
+  "VAE": {
+    "name": "E.D. Va.",
+    "city": "Alexandria",
+    "state": "VA",
+    "lat": 38.8048,
+    "lon": -77.0469,
+    "abbreviation": "VAE"
+  },
+  "W.D. Va.": {
+    "name": "Western District of Virginia",
+    "city": "Roanoke",
+    "state": "VA",
+    "lat": 37.2709,
+    "lon": -79.9414,
+    "abbreviation": "VAW"
+  },
+  "VAW": {
+    "name": "W.D. Va.",
+    "city": "Roanoke",
+    "state": "VA",
+    "lat": 37.2709,
+    "lon": -79.9414,
+    "abbreviation": "VAW"
+  },
+  "E.D. Wash.": {
+    "name": "Eastern District of Washington",
+    "city": "Spokane",
+    "state": "WA",
+    "lat": 47.6588,
+    "lon": -117.426,
+    "abbreviation": "WAE"
+  },
+  "WAE": {
+    "name": "E.D. Wash.",
+    "city": "Spokane",
+    "state": "WA",
+    "lat": 47.6588,
+    "lon": -117.426,
+    "abbreviation": "WAE"
+  },
+  "W.D. Wash.": {
+    "name": "Western District of Washington",
+    "city": "Seattle",
+    "state": "WA",
+    "lat": 47.6062,
+    "lon": -122.3321,
+    "abbreviation": "WAW"
+  },
+  "WAW": {
+    "name": "W.D. Wash.",
+    "city": "Seattle",
+    "state": "WA",
+    "lat": 47.6062,
+    "lon": -122.3321,
+    "abbreviation": "WAW"
+  },
+  "N.D. W. Va.": {
+    "name": "Northern District of West Virginia",
+    "city": "Wheeling",
+    "state": "WV",
+    "lat": 40.0639,
+    "lon": -80.7209,
+    "abbreviation": "WVN"
+  },
+  "WVN": {
+    "name": "N.D. W. Va.",
+    "city": "Wheeling",
+    "state": "WV",
+    "lat": 40.0639,
+    "lon": -80.7209,
+    "abbreviation": "WVN"
+  },
+  "S.D. W. Va.": {
+    "name": "Southern District of West Virginia",
+    "city": "Charleston",
+    "state": "WV",
+    "lat": 38.3498,
+    "lon": -81.6326,
+    "abbreviation": "WVS"
+  },
+  "WVS": {
+    "name": "S.D. W. Va.",
+    "city": "Charleston",
+    "state": "WV",
+    "lat": 38.3498,
+    "lon": -81.6326,
+    "abbreviation": "WVS"
+  },
+  "E.D. Wis.": {
+    "name": "Eastern District of Wisconsin",
+    "city": "Milwaukee",
+    "state": "WI",
+    "lat": 43.0389,
+    "lon": -87.9065,
+    "abbreviation": "WIE"
+  },
+  "WIE": {
+    "name": "E.D. Wis.",
+    "city": "Milwaukee",
+    "state": "WI",
+    "lat": 43.0389,
+    "lon": -87.9065,
+    "abbreviation": "WIE"
+  },
+  "W.D. Wis.": {
+    "name": "Western District of Wisconsin",
+    "city": "Madison",
+    "state": "WI",
+    "lat": 43.0731,
+    "lon": -89.4012,
+    "abbreviation": "WIW"
+  },
+  "WIW": {
+    "name": "W.D. Wis.",
+    "city": "Madison",
+    "state": "WI",
+    "lat": 43.0731,
+    "lon": -89.4012,
+    "abbreviation": "WIW"
+  },
+  "D. Wyo.": {
+    "name": "District of Wyoming",
+    "city": "Cheyenne",
+    "state": "WY",
+    "lat": 41.14,
+    "lon": -104.8202,
+    "abbreviation": "WY"
+  },
+  "WY": {
+    "name": "D. Wyo.",
+    "city": "Cheyenne",
+    "state": "WY",
+    "lat": 41.14,
+    "lon": -104.8202,
+    "abbreviation": "WY"
+  }
+}

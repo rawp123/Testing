@@ -1,0 +1,1469 @@
+[
+  {
+    "District": "ALN",
+    "Judge": "R. David Proctor (Chief Judge, USDC)",
+    "MDL": "MDL-2406",
+    "Title": "IN RE: Blue Cross Blue Shield Antitrust Litigation",
+    "Pending": 12,
+    "Total": 89,
+    "MDL Count": 12
+  },
+  {
+    "District": "ARE",
+    "Judge": "Kristine G. Baker (U.S. District Judge)",
+    "MDL": "MDL-2949",
+    "Title": "IN RE: Profemur Hip Implant Products Liability Litigation",
+    "Pending": 1,
+    "Total": 155,
+    "MDL Count": 1
+  },
+  {
+    "District": "AZ",
+    "Judge": "David G. Campbell (Sr. District Judge)",
+    "MDL": "MDL-3081",
+    "Title": "IN RE: Bard Implanted Port Catheter Products Liability Litigation",
+    "Pending": 1205,
+    "Total": 1252,
+    "MDL Count": 1205
+  },
+  {
+    "District": "CAC",
+    "Judge": "James V. Selna (Sr. District Judge)",
+    "MDL": "MDL-2151",
+    "Title": "IN RE: Toyota Motor Corp. Unintended Acceleration Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 8,
+    "Total": 466,
+    "MDL Count": 8
+  },
+  {
+    "District": "CAC",
+    "Judge": "Andre Birotte, Jr (U.S. District Judge)",
+    "MDL": "MDL-2814",
+    "Title": "IN RE: Ford Motor Co. DPS6 PowerShift Transmission Products Liability Litigation",
+    "Pending": 169,
+    "Total": 1299,
+    "MDL Count": 169
+  },
+  {
+    "District": "CAC",
+    "Judge": "John A. Kronstadt (Sr. District Judge)",
+    "MDL": "MDL-2905",
+    "Title": "IN RE: ZF-TRW Airbag Control Units Products Liability Litigation",
+    "Pending": 27,
+    "Total": 27,
+    "MDL Count": 27
+  },
+  {
+    "District": "CAC",
+    "Judge": "James V. Selna (Sr. District Judge)",
+    "MDL": "MDL-3052",
+    "Title": "IN RE: Kia Hyundai Vehicle Theft Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 109,
+    "Total": 109,
+    "MDL Count": 109
+  },
+  {
+    "District": "CAN",
+    "Judge": "Jon S. Tigar (U.S. District Judge)",
+    "MDL": "MDL-1917",
+    "Title": "IN RE: Cathode Ray Tube (CRT) Antitrust Litigation",
+    "Pending": 54,
+    "Total": 75,
+    "MDL Count": 54
+  },
+  {
+    "District": "CAN",
+    "Judge": "Charles R. Breyer (Sr. District Judge)",
+    "MDL": "MDL-2672",
+    "Title": "IN RE: Volkswagen \"Clean Diesel\" Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 130,
+    "Total": 1888,
+    "MDL Count": 130
+  },
+  {
+    "District": "CAN",
+    "Judge": "Vince Chhabria (U.S. District Judge)",
+    "MDL": "MDL-2741",
+    "Title": "IN RE: Roundup Products Liability Litigation",
+    "Pending": 4415,
+    "Total": 5054,
+    "MDL Count": 4415
+  },
+  {
+    "District": "CAN",
+    "Judge": "Edward M. Chen (Sr. District Judge)",
+    "MDL": "MDL-2777",
+    "Title": "IN RE: Chrysler-Dodge-Jeep EcoDiesel Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 0,
+    "Total": 52,
+    "MDL Count": 0
+  },
+  {
+    "District": "CAN",
+    "Judge": "Vince Chhabria (U.S. District Judge)",
+    "MDL": "MDL-2843",
+    "Title": "IN RE: Facebook, Inc., Consumer Privacy User Profile Litigation",
+    "Pending": 41,
+    "Total": 49,
+    "MDL Count": 41
+  },
+  {
+    "District": "CAN",
+    "Judge": "William H. Orrick, III (U.S. District Judge)",
+    "MDL": "MDL-2913",
+    "Title": "IN RE: Juul Labs, Inc., Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 67,
+    "Total": 7069,
+    "MDL Count": 67
+  },
+  {
+    "District": "CAN",
+    "Judge": "Maxine M. Chesney (Sr. District Judge)",
+    "MDL": "MDL-2918",
+    "Title": "IN RE: Hard Disk Drive Suspension Assemblies Antitrust Litigation",
+    "Pending": 31,
+    "Total": 36,
+    "MDL Count": 31
+  },
+  {
+    "District": "CAN",
+    "Judge": "Haywood S. Gilliam, Jr (U.S. District Judge)",
+    "MDL": "MDL-2951",
+    "Title": "IN RE: StubHub Refund Litigation",
+    "Pending": 6,
+    "Total": 6,
+    "MDL Count": 6
+  },
+  {
+    "District": "CAN",
+    "Judge": "Richard Seeborg (Chief Judge, USDC)",
+    "MDL": "MDL-2966",
+    "Title": "IN RE: Xyrem (Sodium Oxybate) Antitrust Litigation",
+    "Pending": 13,
+    "Total": 13,
+    "MDL Count": 13
+  },
+  {
+    "District": "CAN",
+    "Judge": "James Donato (U.S. District Judge)",
+    "MDL": "MDL-2981",
+    "Title": "IN RE: Google Play Store Antitrust Litigation",
+    "Pending": 14,
+    "Total": 21,
+    "MDL Count": 14
+  },
+  {
+    "District": "CAN",
+    "Judge": "Edward J. Davila (U.S. District Judge)",
+    "MDL": "MDL-2985",
+    "Title": "IN RE: Apple Inc. App Store Simulated Casino-Style Games Litigation",
+    "Pending": 11,
+    "Total": 11,
+    "MDL Count": 11
+  },
+  {
+    "District": "CAN",
+    "Judge": "Charles R. Breyer (Sr. District Judge)",
+    "MDL": "MDL-2996",
+    "Title": "IN RE: McKinsey & Company, Inc., National Prescription Opiate Consultant Litigation",
+    "Pending": 251,
+    "Total": 259,
+    "MDL Count": 251
+  },
+  {
+    "District": "CAN",
+    "Judge": "Edward J. Davila (U.S. District Judge)",
+    "MDL": "MDL-3001",
+    "Title": "IN RE: Google Play Store Simulated Casino-Style Games Litigation",
+    "Pending": 11,
+    "Total": 12,
+    "MDL Count": 11
+  },
+  {
+    "District": "CAN",
+    "Judge": "Yvonne Gonzalez Rogers (U.S. District Judge)",
+    "MDL": "MDL-3047",
+    "Title": "IN RE: Social Media Adolescent Addiction/Personal Injury Products Liability Litigation",
+    "Pending": 1745,
+    "Total": 1894,
+    "MDL Count": 1745
+  },
+  {
+    "District": "CAN",
+    "Judge": "Charles R. Breyer (Sr. District Judge)",
+    "MDL": "MDL-3084",
+    "Title": "IN RE: Uber Technologies, Inc., Passenger Sexual Assault Litigation",
+    "Pending": 1883,
+    "Total": 1896,
+    "MDL Count": 1883
+  },
+  {
+    "District": "CAN",
+    "Judge": "Beth Labson Freeman (U.S. District Judge)",
+    "MDL": "MDL-3087",
+    "Title": "IN RE: Future Motion, Inc. Products Liability Litigation",
+    "Pending": 98,
+    "Total": 101,
+    "MDL Count": 98
+  },
+  {
+    "District": "CAN",
+    "Judge": "Edward M. Chen (Sr. District Judge)",
+    "MDL": "MDL-3098",
+    "Title": "IN RE: 23andMe, Inc., Customer Data Security Breach Litigation",
+    "Pending": 40,
+    "Total": 40,
+    "MDL Count": 40
+  },
+  {
+    "District": "CAN",
+    "Judge": "Jacqueline Scott Corley (U.S. District Judge)",
+    "MDL": "MDL-3101",
+    "Title": "IN RE: Baby Food Products Liability Litigation",
+    "Pending": 135,
+    "Total": 135,
+    "MDL Count": 135
+  },
+  {
+    "District": "CAS",
+    "Judge": "Dana M. Sabraw (U.S. District Judge)",
+    "MDL": "MDL-2670",
+    "Title": "IN RE: Packaged Seafood Products Antitrust Litigation",
+    "Pending": 11,
+    "Total": 84,
+    "MDL Count": 11
+  },
+  {
+    "District": "CAS",
+    "Judge": "Gonzalo P. Curiel (Sr. District Judge)",
+    "MDL": "MDL-2992",
+    "Title": "IN RE: Bank of America California Unemployment Benefits Litigation",
+    "Pending": 31,
+    "Total": 43,
+    "MDL Count": 31
+  },
+  {
+    "District": "CAS",
+    "Judge": "Jinsook Ohta (U.S. District Judge)",
+    "MDL": "MDL-3125",
+    "Title": "IN RE: AngioDynamics, Inc., and Navilyst Medical, Inc., Port Catheter Products Liability Litigation",
+    "Pending": 141,
+    "Total": 141,
+    "MDL Count": 141
+  },
+  {
+    "District": "DC",
+    "Judge": "Beryl A. Howell (Chief Judge, USDC)",
+    "MDL": "MDL-1869",
+    "Title": "IN RE: Rail Freight Fuel Surcharge Antitrust Litigation",
+    "Pending": 6,
+    "Total": 24,
+    "MDL Count": 6
+  },
+  {
+    "District": "DC",
+    "Judge": "Emmet G. Sullivan (Sr. District Judge)",
+    "MDL": "MDL-2165",
+    "Title": "IN RE: Endangered Species Act Section 4 Deadline Litigation",
+    "Pending": 3,
+    "Total": 40,
+    "MDL Count": 3
+  },
+  {
+    "District": "DC",
+    "Judge": "Colleen Kollar-Kotelly (U.S. District Judge)",
+    "MDL": "MDL-2656",
+    "Title": "IN RE: Domestic Airline Travel Antitrust Litigation",
+    "Pending": 105,
+    "Total": 111,
+    "MDL Count": 105
+  },
+  {
+    "District": "DC",
+    "Judge": "Beryl A. Howell (Chief Judge, USDC)",
+    "MDL": "MDL-2925",
+    "Title": "IN RE: Rail Freight Fuel Surcharge Antitrust Litigation (No. II)",
+    "Pending": 108,
+    "Total": 112,
+    "MDL Count": 108
+  },
+  {
+    "District": "DE",
+    "Judge": "Joshua D. Wolson (U.S. District Judge)",
+    "MDL": "MDL-2358",
+    "Title": "IN RE: Google Inc. Cookie Placement Consumer Privacy Litigation",
+    "Pending": 26,
+    "Total": 26,
+    "MDL Count": 26
+  },
+  {
+    "District": "DE",
+    "Judge": "Colm F. Connolly (Chief Judge, USDC)",
+    "MDL": "MDL-2895",
+    "Title": "IN RE: Sensipar (Cinacalcet Hydrochloride Tablets) Antitrust Litigation",
+    "Pending": 4,
+    "Total": 6,
+    "MDL Count": 4
+  },
+  {
+    "District": "DE",
+    "Judge": "Richard G. Andrews (U.S. District Judge)",
+    "MDL": "MDL-2930",
+    "Title": "IN RE: Entresto (Sacubitril/Valsartan) Patent Litigation",
+    "Pending": 4,
+    "Total": 28,
+    "MDL Count": 4
+  },
+  {
+    "District": "DE",
+    "Judge": "Richard G. Andrews (U.S. District Judge)",
+    "MDL": "MDL-3017",
+    "Title": "IN RE: Xarelto (Rivaroxaban) ('310) Patent Litigation",
+    "Pending": 13,
+    "Total": 25,
+    "MDL Count": 13
+  },
+  {
+    "District": "DE",
+    "Judge": "Colm F. Connolly (Chief Judge, USDC)",
+    "MDL": "MDL-3038",
+    "Title": "IN RE: Ozempic (Semaglutide) Patent Litigation",
+    "Pending": 4,
+    "Total": 10,
+    "MDL Count": 4
+  },
+  {
+    "District": "FLM",
+    "Judge": "Roy B. Dalton, Jr (Sr. District Judge)",
+    "MDL": "MDL-3006",
+    "Title": "IN RE: Tasigna (Nilotinib) Products Liability Litigation",
+    "Pending": 36,
+    "Total": 39,
+    "MDL Count": 36
+  },
+  {
+    "District": "FLN",
+    "Judge": "M. Casey Rodgers (U.S. District Judge)",
+    "MDL": "MDL-2885",
+    "Title": "IN RE: 3M Combat Arms Earplug Products Liability Litigation",
+    "Pending": 41,
+    "Total": 391222,
+    "MDL Count": 41
+  },
+  {
+    "District": "FLN",
+    "Judge": "M. Casey Rodgers (U.S. District Judge)",
+    "MDL": "MDL-3140",
+    "Title": "IN RE: Depo-Provera (Depot Medroxyprogesterone Acetate) Products Liability Litigation",
+    "Pending": 130,
+    "Total": 131,
+    "MDL Count": 130
+  },
+  {
+    "District": "FLS",
+    "Judge": "Roy K. Altman (U.S. District Judge)",
+    "MDL": "MDL-1916",
+    "Title": "IN RE: Chiquita Brands International, Inc., Alien Tort Statute and Shareholders Derivative Litigation",
+    "Pending": 5,
+    "Total": 31,
+    "MDL Count": 5
+  },
+  {
+    "District": "FLS",
+    "Judge": "Federico A. Moreno (Sr. District Judge)",
+    "MDL": "MDL-2599",
+    "Title": "IN RE: Takata Airbag Products Liability Litigation",
+    "Pending": 78,
+    "Total": 350,
+    "MDL Count": 78
+  },
+  {
+    "District": "FLS",
+    "Judge": "K. Michael Moore (U.S. District Judge)",
+    "MDL": "MDL-2832",
+    "Title": "IN RE: Liquid Toppings Dispensing System ('447) Patent Litigation",
+    "Pending": 15,
+    "Total": 15,
+    "MDL Count": 15
+  },
+  {
+    "District": "FLS",
+    "Judge": "Darrin P. Gayles (U.S. District Judge)",
+    "MDL": "MDL-2841",
+    "Title": "IN RE: MONAT Hair Care Products Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 13,
+    "Total": 13,
+    "MDL Count": 13
+  },
+  {
+    "District": "FLS",
+    "Judge": "Robin L. Rosenberg (U.S. District Judge)",
+    "MDL": "MDL-2924",
+    "Title": "IN RE: Zantac (Ranitidine) Products Liability Litigation",
+    "Pending": 2427,
+    "Total": 15018,
+    "MDL Count": 2427
+  },
+  {
+    "District": "FLS",
+    "Judge": "Cecilia M. Altonaga (Chief Judge, USDC)",
+    "MDL": "MDL-2989",
+    "Title": "IN RE: January 2021 Short Squeeze Trading Litigation",
+    "Pending": 26,
+    "Total": 68,
+    "MDL Count": 26
+  },
+  {
+    "District": "FLS",
+    "Judge": "Raag Singhal (U.S. District Judge)",
+    "MDL": "MDL-3015",
+    "Title": "IN RE: Johnson & Johnson Sunscreen Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 0,
+    "Total": 16,
+    "MDL Count": 0
+  },
+  {
+    "District": "FLS",
+    "Judge": "K. Michael Moore (U.S. District Judge)",
+    "MDL": "MDL-3076",
+    "Title": "IN RE: FTX Cryptocurrency Exchange Collapse Litigation",
+    "Pending": 35,
+    "Total": 37,
+    "MDL Count": 35
+  },
+  {
+    "District": "FLS",
+    "Judge": "Rodolfo A. Ruiz, II (U.S. District Judge)",
+    "MDL": "MDL-3090",
+    "Title": "IN RE: Fortra File Transfer Software Data Security Breach Litigation",
+    "Pending": 52,
+    "Total": 52,
+    "MDL Count": 52
+  },
+  {
+    "District": "GAN",
+    "Judge": "Richard W. Story (Sr. District Judge)",
+    "MDL": "MDL-2782",
+    "Title": "IN RE: Ethicon Physiomesh Flexible Composite Hernia Mesh Products Liability Litigation",
+    "Pending": 14,
+    "Total": 4053,
+    "MDL Count": 14
+  },
+  {
+    "District": "GAN",
+    "Judge": "Leigh Martin May (U.S. District Judge)",
+    "MDL": "MDL-2974",
+    "Title": "IN RE: Paragard IUD Products Liability Litigation",
+    "Pending": 3036,
+    "Total": 3275,
+    "MDL Count": 3036
+  },
+  {
+    "District": "GAN",
+    "Judge": "Eleanor L. Ross (U.S. District Judge)",
+    "MDL": "MDL-3051",
+    "Title": "IN RE: ARC Airbag Inflators Products Liability Litigation",
+    "Pending": 24,
+    "Total": 24,
+    "MDL Count": 24
+  },
+  {
+    "District": "GAN",
+    "Judge": "Thomas W. Thrash, Jr (Sr. District Judge)",
+    "MDL": "MDL-3115",
+    "Title": "IN RE: Consumer Vehicle Driving Data Tracking Litigation",
+    "Pending": 20,
+    "Total": 34,
+    "MDL Count": 20
+  },
+  {
+    "District": "IAS",
+    "Judge": "Stephen H. Locher (U.S. District Judge)",
+    "MDL": "MDL-3132",
+    "Title": "IN RE: Midwest Energy Emissions Corp. Patent Litigation",
+    "Pending": 5,
+    "Total": 6,
+    "MDL Count": 5
+  },
+  {
+    "District": "ILN",
+    "Judge": "Manish S. Shah (U.S. District Judge)",
+    "MDL": "MDL-2492",
+    "Title": "IN RE: National Collegiate Athletic Association Student-Athlete Concussion Injury Litigation",
+    "Pending": 586,
+    "Total": 600,
+    "MDL Count": 586
+  },
+  {
+    "District": "ILN",
+    "Judge": "Virginia M. Kendall (Chief Judge, USDC)",
+    "MDL": "MDL-2867",
+    "Title": "IN RE: Local TV Advertising Antitrust Litigation",
+    "Pending": 15,
+    "Total": 23,
+    "MDL Count": 15
+  },
+  {
+    "District": "ILN",
+    "Judge": "Elaine E. Bucklo (Sr. District Judge)",
+    "MDL": "MDL-2931",
+    "Title": "IN RE: Delta Dental Antitrust Litigation",
+    "Pending": 27,
+    "Total": 28,
+    "MDL Count": 27
+  },
+  {
+    "District": "ILN",
+    "Judge": "Rebecca R. Pallmeyer (U.S. District Judge)",
+    "MDL": "MDL-2948",
+    "Title": "IN RE: TikTok, Inc., Consumer Privacy Litigation",
+    "Pending": 6,
+    "Total": 39,
+    "MDL Count": 6
+  },
+  {
+    "District": "ILN",
+    "Judge": "Edmond E. Chang (U.S. District Judge)",
+    "MDL": "MDL-2964",
+    "Title": "IN RE: Society Insurance Company COVID-19 Business Interruption Protection Insurance Litigation",
+    "Pending": 56,
+    "Total": 57,
+    "MDL Count": 56
+  },
+  {
+    "District": "ILN",
+    "Judge": "Sharon Johnson Coleman (U.S. District Judge)",
+    "MDL": "MDL-2967",
+    "Title": "IN RE: Clearview AI, Inc., Consumer Privacy Litigation",
+    "Pending": 9,
+    "Total": 14,
+    "MDL Count": 9
+  },
+  {
+    "District": "ILN",
+    "Judge": "Rebecca R. Pallmeyer (U.S. District Judge)",
+    "MDL": "MDL-3026",
+    "Title": "IN RE: Abbott Laboratories, et al., Preterm Infant Nutrition Products Liability Litigation",
+    "Pending": 683,
+    "Total": 790,
+    "MDL Count": 683
+  },
+  {
+    "District": "ILN",
+    "Judge": "Iain D. Johnston (U.S. District Judge)",
+    "MDL": "MDL-3030",
+    "Title": "IN RE: Deere & Company Repair Services Antitrust Litigation",
+    "Pending": 14,
+    "Total": 16,
+    "MDL Count": 14
+  },
+  {
+    "District": "ILN",
+    "Judge": "Matthew F. Kennelly (Sr. District Judge)",
+    "MDL": "MDL-3037",
+    "Title": "IN RE: Recalled Abbott Infant Formula Products Liability Litigation",
+    "Pending": 113,
+    "Total": 141,
+    "MDL Count": 113
+  },
+  {
+    "District": "ILN",
+    "Judge": "Sara L. Ellis (U.S. District Judge)",
+    "MDL": "MDL-3059",
+    "Title": "IN RE: Beyond Meat, Inc., Protein Content Marketing and Sales Practices Litigation",
+    "Pending": 6,
+    "Total": 6,
+    "MDL Count": 6
+  },
+  {
+    "District": "ILN",
+    "Judge": "Mary M. Rowland (U.S. District Judge)",
+    "MDL": "MDL-3060",
+    "Title": "IN RE: Hair Relaxer Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 9936,
+    "Total": 12288,
+    "MDL Count": 9936
+  },
+  {
+    "District": "ILN",
+    "Judge": "Thomas M. Durkin (U.S. District Judge)",
+    "MDL": "MDL-3079",
+    "Title": "IN RE: Tepezza Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 213,
+    "Total": 221,
+    "MDL Count": 213
+  },
+  {
+    "District": "ILN",
+    "Judge": "Matthew F. Kennelly (Sr. District Judge)",
+    "MDL": "MDL-3121",
+    "Title": "IN RE: MultiPlan Health Insurance Provider Litigation",
+    "Pending": 48,
+    "Total": 53,
+    "MDL Count": 48
+  },
+  {
+    "District": "ILS",
+    "Judge": "Nancy J. Rosenstengel (Chief Judge, USDC)",
+    "MDL": "MDL-3004",
+    "Title": "IN RE: Paraquat Products Liability Litigation",
+    "Pending": 5911,
+    "Total": 7402,
+    "MDL Count": 5911
+  },
+  {
+    "District": "INS",
+    "Judge": "Richard L. Young (U.S. District Judge)",
+    "MDL": "MDL-2570",
+    "Title": "IN RE: Cook Medical, Inc., IVC Filters Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 7202,
+    "Total": 11437,
+    "MDL Count": 7202
+  },
+  {
+    "District": "KS",
+    "Judge": "John W. Lungstrum (Sr. District Judge)",
+    "MDL": "MDL-2591",
+    "Title": "IN RE: Syngenta AG MIR162 Corn Litigation",
+    "Pending": 0,
+    "Total": 2437,
+    "MDL Count": 0
+  },
+  {
+    "District": "LAE",
+    "Judge": "Eldon E. Fallon (Sr. District Judge)",
+    "MDL": "MDL-2047",
+    "Title": "IN RE: Chinese-Manufactured Drywall Products Liability Litigation",
+    "Pending": 28,
+    "Total": 422,
+    "MDL Count": 28
+  },
+  {
+    "District": "LAE",
+    "Judge": "Carl J. Barbier (U.S. District Judge)",
+    "MDL": "MDL-2179",
+    "Title": "IN RE: Oil Spill by the Oil Rig \"Deepwater Horizon\" in the Gulf of Mexico, on April 20, 2010",
+    "Pending": 6,
+    "Total": 6155,
+    "MDL Count": 6
+  },
+  {
+    "District": "LAE",
+    "Judge": "Eldon E. Fallon (Sr. District Judge)",
+    "MDL": "MDL-2592",
+    "Title": "IN RE: Xarelto (Rivaroxaban) Products Liability Litigation",
+    "Pending": 450,
+    "Total": 31965,
+    "MDL Count": 450
+  },
+  {
+    "District": "LAE",
+    "Judge": "Jane Triche Milazzo (U.S. District Judge)",
+    "MDL": "MDL-2740",
+    "Title": "IN RE: Taxotere (Docetaxel) Products Liability Litigation",
+    "Pending": 6885,
+    "Total": 15576,
+    "MDL Count": 6885
+  },
+  {
+    "District": "LAE",
+    "Judge": "Jane Triche Milazzo (U.S. District Judge)",
+    "MDL": "MDL-3023",
+    "Title": "IN RE: Taxotere (Docetaxel) Eye Injury Products Liability Litigation",
+    "Pending": 342,
+    "Total": 385,
+    "MDL Count": 342
+  },
+  {
+    "District": "MA",
+    "Judge": "Nathaniel M. Gorton (U.S. District Judge)",
+    "MDL": "MDL-2566",
+    "Title": "IN RE: TelexFree Securities Litigation",
+    "Pending": 3,
+    "Total": 15,
+    "MDL Count": 3
+  },
+  {
+    "District": "MA",
+    "Judge": "Indira Talwani (U.S. District Judge)",
+    "MDL": "MDL-2768",
+    "Title": "IN RE: Stryker LFIT V40 Femoral Head Products Liability Litigation",
+    "Pending": 144,
+    "Total": 1233,
+    "MDL Count": 144
+  },
+  {
+    "District": "MA",
+    "Judge": "Denise J. Casper (U.S. District Judge)",
+    "MDL": "MDL-2938",
+    "Title": "IN RE: Evenflo Company, Inc., Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 28,
+    "Total": 28,
+    "MDL Count": 28
+  },
+  {
+    "District": "MA",
+    "Judge": "Patti B. Saris (U.S. District Judge)",
+    "MDL": "MDL-3029",
+    "Title": "IN RE: Covidien Hernia Mesh Products Liability Litigation (No. II)",
+    "Pending": 1704,
+    "Total": 1710,
+    "MDL Count": 1704
+  },
+  {
+    "District": "MA",
+    "Judge": "Allison D. Burroughs (U.S. District Judge)",
+    "MDL": "MDL-3083",
+    "Title": "IN RE: MOVEit Customer Data Security Breach Litigation",
+    "Pending": 299,
+    "Total": 347,
+    "MDL Count": 299
+  },
+  {
+    "District": "MD",
+    "Judge": "James K. Bredar (Chief Judge, USDC)",
+    "MDL": "MDL-2775",
+    "Title": "IN RE: Smith & Nephew Birmingham Hip Resurfacing (BHR) Hip Implant Products Liability Litigation",
+    "Pending": 1,
+    "Total": 1089,
+    "MDL Count": 1
+  },
+  {
+    "District": "MD",
+    "Judge": "John P. Bailey (U.S. District Judge)",
+    "MDL": "MDL-2879",
+    "Title": "IN RE: Marriott International, Inc., Customer Data Security Breach Litigation",
+    "Pending": 73,
+    "Total": 91,
+    "MDL Count": 73
+  },
+  {
+    "District": "MIE",
+    "Judge": "Sean F. Cox (Chief Judge, USDC)",
+    "MDL": "MDL-2311",
+    "Title": "IN RE: Automotive Parts Antitrust Litigation",
+    "Pending": 17,
+    "Total": 382,
+    "MDL Count": 17
+  },
+  {
+    "District": "MIE",
+    "Judge": "Matthew F. Leitman (U.S. District Judge)",
+    "MDL": "MDL-2818",
+    "Title": "IN RE: General Motors Air Conditioning Marketing and Sales Practices Litigation",
+    "Pending": 15,
+    "Total": 15,
+    "MDL Count": 15
+  },
+  {
+    "District": "MIE",
+    "Judge": "Terrence G. Berg (U.S. District Judge)",
+    "MDL": "MDL-3034",
+    "Title": "IN RE: Neo Wireless, LLC, Patent Litigation",
+    "Pending": 7,
+    "Total": 9,
+    "MDL Count": 7
+  },
+  {
+    "District": "MIE",
+    "Judge": "David M. Lawson (Sr. District Judge)",
+    "MDL": "MDL-3040",
+    "Title": "IN RE: Chrysler Pacifica Fire Recall Products Liability Litigation",
+    "Pending": 11,
+    "Total": 13,
+    "MDL Count": 11
+  },
+  {
+    "District": "MN",
+    "Judge": "Donovan W. Frank (Sr. District Judge)",
+    "MDL": "MDL-2441",
+    "Title": "IN RE: Stryker Rejuvenate and ABG II Hip Implant Products Liability Litigation",
+    "Pending": 55,
+    "Total": 3637,
+    "MDL Count": 55
+  },
+  {
+    "District": "MN",
+    "Judge": "John R. Tunheim (Sr. District Judge)",
+    "MDL": "MDL-2642",
+    "Title": "IN RE: Fluoroquinolone Products Liability Litigation",
+    "Pending": 0,
+    "Total": 1270,
+    "MDL Count": 0
+  },
+  {
+    "District": "MN",
+    "Judge": "Joan N. Ericksen (Sr. District Judge)",
+    "MDL": "MDL-2666",
+    "Title": "IN RE: Bair Hugger Forced Air Warming Devices Products Liability Litigation",
+    "Pending": 8084,
+    "Total": 9319,
+    "MDL Count": 8084
+  },
+  {
+    "District": "MN",
+    "Judge": "John R. Tunheim (Sr. District Judge)",
+    "MDL": "MDL-2998",
+    "Title": "IN RE: Pork Antitrust Litigation",
+    "Pending": 52,
+    "Total": 54,
+    "MDL Count": 52
+  },
+  {
+    "District": "MN",
+    "Judge": "John R. Tunheim (Sr. District Judge)",
+    "MDL": "MDL-3031",
+    "Title": "IN RE: Cattle and Beef Antitrust Litigation",
+    "Pending": 35,
+    "Total": 36,
+    "MDL Count": 35
+  },
+  {
+    "District": "MN",
+    "Judge": "Donovan W. Frank (Sr. District Judge)",
+    "MDL": "MDL-3108",
+    "Title": "IN RE: Change Healthcare, Inc., Customer Data Security Breach Litigation",
+    "Pending": 69,
+    "Total": 79,
+    "MDL Count": 69
+  },
+  {
+    "District": "MN",
+    "Judge": "Jerry W. Blackwell (U.S. District Judge)",
+    "MDL": "MDL-3110",
+    "Title": "IN RE: Granulated Sugar Antitrust Litigation",
+    "Pending": 52,
+    "Total": 56,
+    "MDL Count": 52
+  },
+  {
+    "District": "MN",
+    "Judge": "Katherine Marie Menendez (U.S. District Judge)",
+    "MDL": "MDL-3128",
+    "Title": "IN RE: Dividend Solar Finance, LLC, and Fifth Third Bank Sales and Lending Practices Litigation",
+    "Pending": 32,
+    "Total": 34,
+    "MDL Count": 32
+  },
+  {
+    "District": "MOE",
+    "Judge": "Stephen N. Limbaugh, Jr (Sr. District Judge)",
+    "MDL": "MDL-2820",
+    "Title": "IN RE: Dicamba Herbicides Litigation",
+    "Pending": 31,
+    "Total": 55,
+    "MDL Count": 31
+  },
+  {
+    "District": "MOW",
+    "Judge": "Stephen R. Bough (U.S. District Judge)",
+    "MDL": "MDL-2936",
+    "Title": "IN RE: Smitty's/CAM2 303 Tractor Hydraulic Fluid Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 0,
+    "Total": 11,
+    "MDL Count": 0
+  },
+  {
+    "District": "MOW",
+    "Judge": "Beth Phillips (Chief Judge, USDC)",
+    "MDL": "MDL-2945",
+    "Title": "IN RE: Ahern Rentals, Inc., Trade Secret Litigation",
+    "Pending": 2,
+    "Total": 19,
+    "MDL Count": 2
+  },
+  {
+    "District": "MOW",
+    "Judge": "Beth Phillips (Chief Judge, USDC)",
+    "MDL": "MDL-2984",
+    "Title": "IN RE: Folgers Coffee Marketing and Sales Practices Litigation",
+    "Pending": 7,
+    "Total": 13,
+    "MDL Count": 7
+  },
+  {
+    "District": "MOW",
+    "Judge": "Brian C. Wimes (U.S. District Judge)",
+    "MDL": "MDL-3073",
+    "Title": "IN RE: T-Mobile 2022 Customer Data Security Breach Litigation",
+    "Pending": 18,
+    "Total": 18,
+    "MDL Count": 18
+  },
+  {
+    "District": "MT",
+    "Judge": "Brian Morris (Chief Judge, USDC)",
+    "MDL": "MDL-3126",
+    "Title": "IN RE: Snowflake, Inc., Data Security Breach Litigation",
+    "Pending": 85,
+    "Total": 96,
+    "MDL Count": 85
+  },
+  {
+    "District": "NCM",
+    "Judge": "Thomas D. Schroeder (Chief Judge, USDC)",
+    "MDL": "MDL-3062",
+    "Title": "IN RE: Crop Protection Products Loyalty Program Antitrust Litigation",
+    "Pending": 29,
+    "Total": 44,
+    "MDL Count": 29
+  },
+  {
+    "District": "NCW",
+    "Judge": "Kenneth D. Bell (U.S. District Judge)",
+    "MDL": "MDL-3036",
+    "Title": "IN RE: Gardasil Products Liability Litigation",
+    "Pending": 233,
+    "Total": 241,
+    "MDL Count": 233
+  },
+  {
+    "District": "NH",
+    "Judge": "Landya B. McCafferty (Chief Judge, USDC)",
+    "MDL": "MDL-2753",
+    "Title": "IN RE: Atrium Medical Corp. C-Qur Mesh Products Liability Litigation",
+    "Pending": 436,
+    "Total": 3583,
+    "MDL Count": 436
+  },
+  {
+    "District": "NJ",
+    "Judge": "Claire C. Cecchi (U.S. District Judge)",
+    "MDL": "MDL-1663",
+    "Title": "IN RE: Insurance Brokerage Antitrust Litigation",
+    "Pending": 2,
+    "Total": 52,
+    "MDL Count": 2
+  },
+  {
+    "District": "NJ",
+    "Judge": "Karen M. Williams (U.S. District Judge)",
+    "MDL": "MDL-2243",
+    "Title": "IN RE: Fosamax (Alendronate Sodium) Products Liability Litigation (No. II)",
+    "Pending": 5,
+    "Total": 1288,
+    "MDL Count": 5
+  },
+  {
+    "District": "NJ",
+    "Judge": "Michael A. Shipp (U.S. District Judge)",
+    "MDL": "MDL-2738",
+    "Title": "IN RE: Johnson & Johnson Talcum Powder Products Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 58208,
+    "Total": 59378,
+    "MDL Count": 58208
+  },
+  {
+    "District": "NJ",
+    "Judge": "Claire C. Cecchi (U.S. District Judge)",
+    "MDL": "MDL-2789",
+    "Title": "IN RE: Proton-Pump Inhibitor Products Liability Litigation (No. II)",
+    "Pending": 11808,
+    "Total": 18706,
+    "MDL Count": 11808
+  },
+  {
+    "District": "NJ",
+    "Judge": "Renee M. Bumb (Chief Judge, USDC)",
+    "MDL": "MDL-2875",
+    "Title": "IN RE: Valsartan, Losartan, and Irbesartan Products Liability Litigation",
+    "Pending": 1310,
+    "Total": 1481,
+    "MDL Count": 1310
+  },
+  {
+    "District": "NJ",
+    "Judge": "Madeline C. Arleo (U.S. District Judge)",
+    "MDL": "MDL-2904",
+    "Title": "IN RE: American Medical Collection Agency, Inc., Customer Data Security Breach Litigation",
+    "Pending": 43,
+    "Total": 56,
+    "MDL Count": 43
+  },
+  {
+    "District": "NJ",
+    "Judge": "Brian R. Martinotti (U.S. District Judge)",
+    "MDL": "MDL-2921",
+    "Title": "IN RE: Allergan Biocell Textured Breast Implant Products Liability Litigation",
+    "Pending": 1409,
+    "Total": 1477,
+    "MDL Count": 1409
+  },
+  {
+    "District": "NJ",
+    "Judge": "Brian R. Martinotti (U.S. District Judge)",
+    "MDL": "MDL-2973",
+    "Title": "IN RE: Elmiron (Pentosan Polysulfate Sodium) Products Liability Litigation",
+    "Pending": 1091,
+    "Total": 1986,
+    "MDL Count": 1091
+  },
+  {
+    "District": "NJ",
+    "Judge": "Brian R. Martinotti (U.S. District Judge)",
+    "MDL": "MDL-3080",
+    "Title": "IN RE: Insulin Pricing Litigation",
+    "Pending": 449,
+    "Total": 466,
+    "MDL Count": 449
+  },
+  {
+    "District": "NJ",
+    "Judge": "Julien Xavier Neals (U.S. District Judge)",
+    "MDL": "MDL-3113",
+    "Title": "IN RE: Apple Inc. Smartphone Antitrust Litigation",
+    "Pending": 32,
+    "Total": 44,
+    "MDL Count": 32
+  },
+  {
+    "District": "NJ",
+    "Judge": "Zahid N. Quraishi (U.S. District Judge)",
+    "MDL": "MDL-3134",
+    "Title": "IN RE: AVYCAZ (Ceftazidime and Avibactam) Patent Litigation",
+    "Pending": 2,
+    "Total": 2,
+    "MDL Count": 2
+  },
+  {
+    "District": "NJ",
+    "Judge": "Christine P. O'Hearn (U.S. District Judge)",
+    "MDL": "MDL-3138",
+    "Title": "IN RE: Denosumab Patent Litigation",
+    "Pending": 4,
+    "Total": 4,
+    "MDL Count": 4
+  },
+  {
+    "District": "NM",
+    "Judge": "James O. Browning (U.S. District Judge)",
+    "MDL": "MDL-2695",
+    "Title": "IN RE: Santa Fe Natural Tobacco Company Marketing and Sales Practices Litigation",
+    "Pending": 17,
+    "Total": 17,
+    "MDL Count": 17
+  },
+  {
+    "District": "NM",
+    "Judge": "Matthew L. Garcia (U.S. District Judge)",
+    "MDL": "MDL-3119",
+    "Title": "IN RE: Shale Oil Antitrust Litigation",
+    "Pending": 23,
+    "Total": 23,
+    "MDL Count": 23
+  },
+  {
+    "District": "NYE",
+    "Judge": "Margo K. Brodie (Chief Judge, USDC)",
+    "MDL": "MDL-1720",
+    "Title": "IN RE: Payment Card Interchange Fee and Merchant Discount Antitrust Litigation",
+    "Pending": 64,
+    "Total": 134,
+    "MDL Count": 64
+  },
+  {
+    "District": "NYE",
+    "Judge": "Nicholas G. Garaufis (Sr. District Judge)",
+    "MDL": "MDL-3044",
+    "Title": "IN RE: Exactech Polyethylene Orthopedic Products Liability Litigation",
+    "Pending": 1842,
+    "Total": 1851,
+    "MDL Count": 1842
+  },
+  {
+    "District": "NYE",
+    "Judge": "Rachel P. Kovner (U.S. District Judge)",
+    "MDL": "MDL-3096",
+    "Title": "IN RE: Perry Johnson & Associates Medical Transcription Data Security Breach Litigation",
+    "Pending": 57,
+    "Total": 57,
+    "MDL Count": 57
+  },
+  {
+    "District": "NYS",
+    "Judge": "Denise L. Cote (Sr. District Judge)",
+    "MDL": "MDL-1358",
+    "Title": "IN RE: Methyl Tertiary Butyl Ether (\"MTBE\") Products Liability Litigation",
+    "Pending": 4,
+    "Total": 190,
+    "MDL Count": 4
+  },
+  {
+    "District": "NYS",
+    "Judge": "George B. Daniels (Sr. District Judge)",
+    "MDL": "MDL-1570",
+    "Title": "IN RE: Terrorist Attacks on September 11, 2001",
+    "Pending": 366,
+    "Total": 376,
+    "MDL Count": 366
+  },
+  {
+    "District": "NYS",
+    "Judge": "Naomi Reice Buchwald (Sr. District Judge)",
+    "MDL": "MDL-2262",
+    "Title": "IN RE: Libor-Based Financial Instruments Antitrust Litigation",
+    "Pending": 44,
+    "Total": 81,
+    "MDL Count": 44
+  },
+  {
+    "District": "NYS",
+    "Judge": "Vernon S. Broderick (U.S. District Judge)",
+    "MDL": "MDL-2542",
+    "Title": "IN RE: Keurig Green Mountain Single-Serve Coffee Antitrust Litigation",
+    "Pending": 21,
+    "Total": 30,
+    "MDL Count": 21
+  },
+  {
+    "District": "NYS",
+    "Judge": "J. Paul Oetken (U.S. District Judge)",
+    "MDL": "MDL-2704",
+    "Title": "IN RE: Interest Rate Swaps Antitrust Litigation",
+    "Pending": 10,
+    "Total": 11,
+    "MDL Count": 10
+  },
+  {
+    "District": "NYS",
+    "Judge": "Jesse M. Furman (U.S. District Judge)",
+    "MDL": "MDL-2859",
+    "Title": "IN RE: Zimmer M/L Taper Hip Prosthesis or M/L Taper Hip Prosthesis with Kinectiv Technology and Versys Femoral Head Products Liability Litigation",
+    "Pending": 2,
+    "Total": 332,
+    "MDL Count": 2
+  },
+  {
+    "District": "NYS",
+    "Judge": "Lewis A. Kaplan (Sr. District Judge)",
+    "MDL": "MDL-2865",
+    "Title": "IN RE: Customs and Tax Administration of the Kingdom of Denmark (Skatteforvaltningen) Tax Refund Scheme Litigation",
+    "Pending": 145,
+    "Total": 187,
+    "MDL Count": 145
+  },
+  {
+    "District": "NYS",
+    "Judge": "P. Kevin Castel (Sr. District Judge)",
+    "MDL": "MDL-3010",
+    "Title": "IN RE: Google Digital Advertising Antitrust Litigation",
+    "Pending": 8,
+    "Total": 38,
+    "MDL Count": 8
+  },
+  {
+    "District": "NYS",
+    "Judge": "Paul A. Engelmayer (U.S. District Judge)",
+    "MDL": "MDL-3028",
+    "Title": "IN RE: ONE Apus Container Ship Incident on November 30, 2020",
+    "Pending": 77,
+    "Total": 80,
+    "MDL Count": 77
+  },
+  {
+    "District": "NYS",
+    "Judge": "Denise L. Cote (Sr. District Judge)",
+    "MDL": "MDL-3043",
+    "Title": "IN RE: Acetaminophen - ASD/ADHD Products Liability Litigation",
+    "Pending": 15,
+    "Total": 664,
+    "MDL Count": 15
+  },
+  {
+    "District": "NYS",
+    "Judge": "Katherine Polk Failla (U.S. District Judge)",
+    "MDL": "MDL-3050",
+    "Title": "IN RE: Chantix (Varenicline) Marketing, Sales Practices and Products Liability Litigation (No. II)",
+    "Pending": 17,
+    "Total": 17,
+    "MDL Count": 17
+  },
+  {
+    "District": "NYS",
+    "Judge": "Lewis J. Liman (U.S. District Judge)",
+    "MDL": "MDL-3097",
+    "Title": "IN RE: Concrete and Cement Additives Antitrust Litigation",
+    "Pending": 17,
+    "Total": 17,
+    "MDL Count": 17
+  },
+  {
+    "District": "NYW",
+    "Judge": "Geoffrey W. Crawford (Chief Judge, USDC)",
+    "MDL": "MDL-2903",
+    "Title": "IN RE: Fisher-Price Rock 'n Play Sleeper Marketing, Sales Practices, and Products Liability Litigation",
+    "Pending": 16,
+    "Total": 16,
+    "MDL Count": 16
+  },
+  {
+    "District": "OHN",
+    "Judge": "Jeffrey J. Helmick (U.S. District Judge)",
+    "MDL": "MDL-2197",
+    "Title": "IN RE: DePuy Orthopaedics, Inc., ASR Hip Implant Products Liability Litigation",
+    "Pending": 143,
+    "Total": 10453,
+    "MDL Count": 143
+  },
+  {
+    "District": "OHN",
+    "Judge": "Dan A. Polster (Sr. District Judge)",
+    "MDL": "MDL-2804",
+    "Title": "IN RE: National Prescription Opiate Litigation",
+    "Pending": 2985,
+    "Total": 3182,
+    "MDL Count": 2985
+  },
+  {
+    "District": "OHN",
+    "Judge": "J. Philip Calabrese (U.S. District Judge)",
+    "MDL": "MDL-3092",
+    "Title": "IN RE: Suboxone (Buprenorphine/Naloxone) Film Products Liability Litigation",
+    "Pending": 896,
+    "Total": 904,
+    "MDL Count": 896
+  },
+  {
+    "District": "OHN",
+    "Judge": "Donald C. Nugent (Sr. District Judge)",
+    "MDL": "MDL-3093",
+    "Title": "IN RE: Pipe Flashing Patent Litigation",
+    "Pending": 4,
+    "Total": 4,
+    "MDL Count": 4
+  },
+  {
+    "District": "OHN",
+    "Judge": "Sara Lioi (Chief Judge, USDC)",
+    "MDL": "MDL-3107",
+    "Title": "IN RE: Passenger Vehicle Replacement Tires Antitrust Litigation",
+    "Pending": 24,
+    "Total": 37,
+    "MDL Count": 24
+  },
+  {
+    "District": "OHS",
+    "Judge": "Edmund A. Sargus, Jr (U.S. District Judge)",
+    "MDL": "MDL-2846",
+    "Title": "IN RE: Davol, Inc./C.R. Bard, Inc., Polypropylene Hernia Mesh Products Liability Litigation",
+    "Pending": 24080,
+    "Total": 25001,
+    "MDL Count": 24080
+  },
+  {
+    "District": "OKN",
+    "Judge": "Gregory K Frizzell (Chief Judge, USDC)",
+    "MDL": "MDL-2700",
+    "Title": "IN RE: Genentech, Inc., Herceptin (Trastuzumab) Marketing and Sales Practices Litigation",
+    "Pending": 14,
+    "Total": 15,
+    "MDL Count": 14
+  },
+  {
+    "District": "PAE",
+    "Judge": "Cynthia M. Rufe (Sr. District Judge)",
+    "MDL": "MDL-1871",
+    "Title": "IN RE: Avandia Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 0,
+    "Total": 5299,
+    "MDL Count": 0
+  },
+  {
+    "District": "PAE",
+    "Judge": "Anita B. Brody (Sr. District Judge)",
+    "MDL": "MDL-2323",
+    "Title": "IN RE: National Football League Players' Concussion Injury Litigation",
+    "Pending": 329,
+    "Total": 352,
+    "MDL Count": 329
+  },
+  {
+    "District": "PAE",
+    "Judge": "Timothy J. Savage (Sr. District Judge)",
+    "MDL": "MDL-2460",
+    "Title": "IN RE: Niaspan Antitrust Litigation",
+    "Pending": 20,
+    "Total": 23,
+    "MDL Count": 20
+  },
+  {
+    "District": "PAE",
+    "Judge": "Cynthia M. Rufe (Sr. District Judge)",
+    "MDL": "MDL-2724",
+    "Title": "IN RE: Generic Pharmaceuticals Pricing Antitrust Litigation",
+    "Pending": 137,
+    "Total": 210,
+    "MDL Count": 137
+  },
+  {
+    "District": "PAE",
+    "Judge": "Nitza I. Quinones Alejandro (U.S. District Judge)",
+    "MDL": "MDL-2833",
+    "Title": "IN RE: FedLoan Student Loan Servicing Litigation",
+    "Pending": 9,
+    "Total": 10,
+    "MDL Count": 9
+  },
+  {
+    "District": "PAE",
+    "Judge": "Harvey Bartle, III (Sr. District Judge)",
+    "MDL": "MDL-2848",
+    "Title": "IN RE: Zostavax (Zoster Vaccine Live) Products Liability Litigation",
+    "Pending": 834,
+    "Total": 2664,
+    "MDL Count": 834
+  },
+  {
+    "District": "PAE",
+    "Judge": "Karen S. Marston (U.S. District Judge)",
+    "MDL": "MDL-3094",
+    "Title": "IN RE: Glucagon-like Peptide-1 Receptor Agonists (GLP-1 RAs) Products Liability Litigation",
+    "Pending": 1685,
+    "Total": 1688,
+    "MDL Count": 1685
+  },
+  {
+    "District": "PAM",
+    "Judge": "Karoline Mehalchick (Magistrate Judge)",
+    "MDL": "MDL-2816",
+    "Title": "IN RE: Sorin 3T Heater-Cooler System Products Liability Litigation (No. II)",
+    "Pending": 3,
+    "Total": 105,
+    "MDL Count": 3
+  },
+  {
+    "District": "PAW",
+    "Judge": "W. Scott Hardy (U.S. District Judge)",
+    "MDL": "MDL-2862",
+    "Title": "IN RE: Diisocyanates Antitrust Litigation",
+    "Pending": 12,
+    "Total": 12,
+    "MDL Count": 12
+  },
+  {
+    "District": "PAW",
+    "Judge": "Joy Flowers Conti (Sr. District Judge)",
+    "MDL": "MDL-3014",
+    "Title": "IN RE: Philips Recalled CPAP, Bi-Level PAP, and Mechanical Ventilator Products Liability Litigation",
+    "Pending": 826,
+    "Total": 1000,
+    "MDL Count": 826
+  },
+  {
+    "District": "PAW",
+    "Judge": "Joy Flowers Conti (Sr. District Judge)",
+    "MDL": "MDL-3021",
+    "Title": "IN RE: SoClean, Inc., Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 41,
+    "Total": 62,
+    "MDL Count": 41
+  },
+  {
+    "District": "SC",
+    "Judge": "Richard M. Gergel (U.S. District Judge)",
+    "MDL": "MDL-2873",
+    "Title": "IN RE: Aqueous Film-Forming Foams Products Liability Litigation",
+    "Pending": 8928,
+    "Total": 12778,
+    "MDL Count": 8928
+  },
+  {
+    "District": "SC",
+    "Judge": "Joseph F. Anderson, Jr (Sr. District Judge)",
+    "MDL": "MDL-2972",
+    "Title": "IN RE: Blackbaud, Inc., Customer Data Security Breach Litigation",
+    "Pending": 26,
+    "Total": 31,
+    "MDL Count": 26
+  },
+  {
+    "District": "TNM",
+    "Judge": "Waverly D. Crenshaw, Jr (U.S. District Judge)",
+    "MDL": "MDL-3071",
+    "Title": "IN RE: RealPage, Inc., Rental Software Antitrust Litigation (No. II)",
+    "Pending": 13,
+    "Total": 47,
+    "MDL Count": 13
+  },
+  {
+    "District": "TNW",
+    "Judge": "S. Thomas Anderson (U.S. District Judge)",
+    "MDL": "MDL-3035",
+    "Title": "IN RE: AME Church Employee Retirement Fund Litigation",
+    "Pending": 6,
+    "Total": 6,
+    "MDL Count": 6
+  },
+  {
+    "District": "TNW",
+    "Judge": "Sheryl H. Lipman (Chief Judge, USDC)",
+    "MDL": "MDL-3127",
+    "Title": "IN RE: Evolve Bank & Trust Customer Data Security Breach Litigation",
+    "Pending": 39,
+    "Total": 39,
+    "MDL Count": 39
+  },
+  {
+    "District": "TXN",
+    "Judge": "David C. Godbey (Chief Judge, USDC)",
+    "MDL": "MDL-2099",
+    "Title": "IN RE: Stanford Entities Securities Litigation",
+    "Pending": 15,
+    "Total": 156,
+    "MDL Count": 15
+  },
+  {
+    "District": "TXN",
+    "Judge": "Ada E. Brown (U.S. District Judge)",
+    "MDL": "MDL-3114",
+    "Title": "IN RE: AT&T Inc. Customer Data Security Breach Litigation",
+    "Pending": 94,
+    "Total": 94,
+    "MDL Count": 94
+  },
+  {
+    "District": "UT",
+    "Judge": "Robert J. Shelby (Chief Judge, USDC)",
+    "MDL": "MDL-3102",
+    "Title": "IN RE: The Church of Jesus Christ of Latter-Day Saints Tithing Litigation",
+    "Pending": 5,
+    "Total": 5,
+    "MDL Count": 5
+  },
+  {
+    "District": "VAE",
+    "Judge": "Claude M. Hilton (Sr. District Judge)",
+    "MDL": "MDL-3072",
+    "Title": "IN RE: Air Crash Into the Java Sea on January 9, 2021",
+    "Pending": 21,
+    "Total": 22,
+    "MDL Count": 21
+  },
+  {
+    "District": "VAE",
+    "Judge": "David J. Novak (U.S. District Judge)",
+    "MDL": "MDL-3111",
+    "Title": "IN RE: Capital One 360 Savings Account Interest Rate Litigation",
+    "Pending": 7,
+    "Total": 7,
+    "MDL Count": 7
+  },
+  {
+    "District": "WIE",
+    "Judge": "Lynn S. Adelman (U.S. District Judge)",
+    "MDL": "MDL-3078",
+    "Title": "IN RE: Generac Solar Power Systems Marketing, Sales Practices and Products Liability Litigation",
+    "Pending": 9,
+    "Total": 9,
+    "MDL Count": 9
+  },
+  {
+    "District": "WVN",
+    "Judge": "Thomas S. Kleeh (Chief Judge, USDC)",
+    "MDL": "MDL-3103",
+    "Title": "IN RE: Aflibercept Patent Litigation",
+    "Pending": 8,
+    "Total": 8,
+    "MDL Count": 8
+  }
+]

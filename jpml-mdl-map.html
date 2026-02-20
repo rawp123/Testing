@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MDL Concentration & Emerging Trends Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/dashboard_fixed.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="/src/js/header.js" defer></script>
+</head>
+<body class="dashboard-page" data-page="dashboard">
+  <div id="site-header"></div>
+  <main>
+    <div class="page-container">
+      <div class="container">
+        <h1>National MDL Analytics Dashboard</h1>
+        
+        <div class="dashboard-tabs">
+          <button class="tab-button active" data-tab="executive-summary">Executive Summary</button>
+          <button class="tab-button" id="tab-current-month" data-tab="current-month">Current Month Statistics</button>
+          <button class="tab-button" data-tab="month-over-month">Month over Month Statistics</button>
+          <button class="tab-button" data-tab="trends-overview">Trends</button>
+          <button class="tab-button" data-tab="source-reports">Source Reports</button>
+        </div>
+
+        <div class="tab-content active" id="executive-summary-tab">
+          <!-- Populated by renderExecutiveSummary() in dashboard.js -->
+        </div>
+
+        <div class="tab-content" id="current-month-tab">
+          <div class="dashboard-grid">
+            <div class="dashboard-card mdls-card">
+              <h2>Top 10 Active MDLs (Current Month)</h2>
+              <div class="dashboard-mdl-list-wrap">
+                <table class="dashboard-mdl-table" id="dashboard-mdl-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-column="MDL">MDL</th>
+                      <th class="sortable" data-column="Title">Title</th>
+                      <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Count">Count</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top-mdls-list"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="dashboard-card mdls-card">
+              <h2>Top 10 Districts by Pending Cases (Current Month)</h2>
+              <p id="top-districts-subtitle" style="margin: -8px 0 12px; font-size: 0.82rem; color: var(--color-text-secondary);">Ranked by Pending Cases · Click any row to see its individual MDLs below</p>
+              <div class="dashboard-mdl-list-wrap">
+                <table class="dashboard-mdl-table" id="top-districts-table">
+                  <thead>
+                    <tr>
+                      <th style="width:40px;">#</th>
+                      <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Pending">Pending</th>
+                      <th class="sortable" data-column="Terminated">Terminated</th>
+                      <th class="sortable" data-column="Total">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top-districts-list"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-grid" style="margin-top: 20px;" id="district-detail-section" hidden>
+            <div class="dashboard-card" style="grid-column: 1 / -1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                <h2 id="district-detail-title">District MDL Details</h2>
+                <button id="district-detail-close" class="close-detail-btn" title="Close details" onclick="document.getElementById('district-detail-section').hidden = true; document.querySelectorAll('#top-districts-list .row-selected').forEach(r => r.classList.remove('row-selected'));">✕</button>
+              </div>
+              <div class="table-wrap">
+                <table class="dashboard-table" id="district-detail-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-column="MDL">MDL</th>
+                      <th class="sortable" data-column="Title">Title</th>
+                      <th class="sortable" data-column="Terminated">Terminated Count</th>
+                      <th class="sortable" data-column="Pending">Pending Count</th>
+                      <th class="sortable" data-column="Total">Total Count</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-grid" style="margin-top: 20px;">
+            <div class="dashboard-card">
+              <h2>New MDLs (Current Month)</h2>
+              <div class="table-wrap">
+                <table class="dashboard-table" id="current-new-mdls-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-column="MDL">MDL</th>
+                      <th class="sortable" data-column="Title">Title</th>
+                      <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Count">Count</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="dashboard-card">
+              <h2>Removed MDLs (Current Month)</h2>
+              <div class="table-wrap">
+                <table class="dashboard-table" id="current-removed-mdls-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-column="MDL">MDL</th>
+                      <th class="sortable" data-column="Title">Title</th>
+                      <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Count">Prior Count</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="month-over-month-tab">
+          <div class="controls-bar">
+            <label for="start-month-select">Start Month:</label>
+            <select id="start-month-select"></select>
+            <label for="end-month-select">End Month:</label>
+            <select id="end-month-select"></select>
+          </div>
+          
+          <div class="dashboard-subtabs">
+            <button class="subtab-button active" data-subtab="by-district">By District</button>
+            <button class="subtab-button" data-subtab="by-mdl">By MDL</button>
+          </div>
+          
+          <div class="subtab-content active" id="by-district-subtab">
+            <div class="metric-filter-section">
+              <label class="metric-filter-label">Rank by:</label>
+              <div class="metric-toggle-group">
+                <label class="metric-toggle-option">
+                  <input type="radio" name="district-metric" value="absolute" checked>
+                  <span class="toggle-text">Absolute Change</span>
+                </label>
+                <label class="metric-toggle-option">
+                  <input type="radio" name="district-metric" value="percentage">
+                  <span class="toggle-text">Percentage Change</span>
+                </label>
+              </div>
+            </div>
+            <div class="dashboard-grid">
+              <div class="dashboard-card">
+                <h2>Top 10 Pending Count Increase</h2>
+                <div class="table-wrap">
+                  <table class="dashboard-table" id="pending-increase-table">
+                    <thead>
+                      <tr>
+                        <th style="width:40px;">#</th>
+                        <th class="sortable" data-column="District">District</th>
+                        <th class="sortable" data-column="Current">Current</th>
+                        <th class="sortable" data-column="Prior">Prior</th>
+                        <th class="sortable" data-column="Delta">Δ</th>
+                        <th class="sortable" data-column="PctDelta">% Δ</th>
+                        <th style="width: 40px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="dashboard-card">
+                <h2>Top 10 Total Count Increase</h2>
+                <div class="table-wrap">
+                  <table class="dashboard-table" id="total-increase-table">
+                    <thead>
+                      <tr>
+                        <th style="width:40px;">#</th>
+                        <th class="sortable" data-column="District">District</th>
+                        <th class="sortable" data-column="Current">Current</th>
+                        <th class="sortable" data-column="Prior">Prior</th>
+                        <th class="sortable" data-column="Delta">Δ</th>
+                        <th class="sortable" data-column="PctDelta">% Δ</th>
+                        <th style="width: 40px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="subtab-content" id="by-mdl-subtab">
+            <div class="metric-filter-section">
+              <label class="metric-filter-label">Rank by:</label>
+              <div class="metric-toggle-group">
+                <label class="metric-toggle-option">
+                  <input type="radio" name="mdl-metric" value="absolute" checked>
+                  <span class="toggle-text">Absolute Change</span>
+                </label>
+                <label class="metric-toggle-option">
+                  <input type="radio" name="mdl-metric" value="percentage">
+                  <span class="toggle-text">Percentage Change</span>
+                </label>
+              </div>
+            </div>
+            <div class="dashboard-grid">
+              <div class="dashboard-card">
+                <h2>Top 10 MDL Pending Count Increase</h2>
+                <div class="table-wrap">
+                  <table class="dashboard-table" id="mdl-pending-increase-table">
+                    <colgroup>
+                      <col style="width:62px">
+                      <col>
+                      <col style="width:68px">
+                      <col style="width:68px">
+                      <col style="width:52px">
+                      <col style="width:52px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th class="sortable" data-column="MDL">MDL</th>
+                        <th class="sortable" data-column="Title">Title</th>
+                        <th class="sortable" data-column="Current">Current</th>
+                        <th class="sortable" data-column="Prior">Prior</th>
+                        <th class="sortable" data-column="Delta">Δ</th>
+                        <th class="sortable" data-column="PctDelta">% Δ</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="dashboard-card">
+                <h2>Top 10 MDL Total Count Increase</h2>
+                <div class="table-wrap">
+                  <table class="dashboard-table" id="mdl-total-increase-table">
+                    <colgroup>
+                      <col style="width:62px">
+                      <col>
+                      <col style="width:68px">
+                      <col style="width:68px">
+                      <col style="width:52px">
+                      <col style="width:52px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th class="sortable" data-column="MDL">MDL</th>
+                        <th class="sortable" data-column="Title">Title</th>
+                        <th class="sortable" data-column="Current">Current</th>
+                        <th class="sortable" data-column="Prior">Prior</th>
+                        <th class="sortable" data-column="Delta">Δ</th>
+                        <th class="sortable" data-column="PctDelta">% Δ</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <div class="tab-content" id="trends-overview-tab">
+
+          <div class="dashboard-card" style="max-width: 100%; margin-bottom: var(--spacing-lg);">
+            <h2>Case Volume Over Time</h2>
+            <p style="margin-bottom: var(--spacing-md); color: var(--color-text-secondary);">
+              Monthly case counts with 3-month moving average trend line. Dominant MDLs (>20% of month's total) shown in tooltip.
+            </p>
+            <div class="metric-filter-section" style="margin-bottom: var(--spacing-md);">
+              <label class="metric-filter-label">Show:</label>
+              <div class="metric-toggle-group">
+                <label class="metric-toggle-option">
+                  <input type="radio" name="trends-metric" value="pending" checked>
+                  <span class="toggle-text">Pending Cases</span>
+                </label>
+                <label class="metric-toggle-option">
+                  <input type="radio" name="trends-metric" value="all">
+                  <span class="toggle-text">All Cases</span>
+                </label>
+              </div>
+            </div>
+            <div class="chart-container" style="position: relative; height: 500px; margin: var(--spacing-lg) 0;">
+              <canvas id="trends-overview-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Key Summaries section — rendered by renderKeySummaries() in dashboard.js -->
+          <div id="trend-key-summaries" style="margin-bottom: var(--spacing-lg);">
+            <h3 class="ks-section-title">Key Summaries</h3>
+            <div class="ks-grid-top">
+              <div class="dashboard-card" id="top-judges-card">
+                <h2>Top Judges by Active MDLs</h2>
+                <p class="ks-subtitle" id="top-judges-month-label"></p>
+                <div class="table-wrap">
+                  <table class="dashboard-table ks-table" id="top-judges-table" style="table-layout:fixed;width:100%">
+                    <colgroup>
+                      <col><!-- Judge: takes remaining space -->
+                      <col style="width:90px">
+                      <col style="width:62px">
+                      <col style="width:78px">
+                      <col style="width:58px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>Judge</th>
+                        <th>District</th>
+                        <th class="ks-num">Active</th>
+                        <th class="ks-num">Not Active</th>
+                        <th class="ks-num">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody id="top-judges-tbody"></tbody>
+                  </table>
+                </div>
+                <p class="ks-footnote">Active = Pending &gt; 0 in selected end month. Total = all MDLs since data begins.</p>
+              </div>
+              <div class="dashboard-card" id="active-mdls-card">
+                <h2>Most Active MDLs (Pending / Total)</h2>
+                <p class="ks-subtitle" id="active-mdls-month-label"></p>
+                <div class="table-wrap">
+                  <table class="dashboard-table ks-table" id="active-mdls-table" style="table-layout:fixed;width:100%">
+                    <colgroup>
+                      <col style="width:68px">
+                      <col><!-- Title: takes remaining space -->
+                      <col style="width:68px">
+                      <col style="width:68px">
+                      <col style="width:60px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>MDL</th>
+                        <th>Title</th>
+                        <th class="ks-num">Pending</th>
+                        <th class="ks-num">Total</th>
+                        <th class="ks-num">Pend %</th>
+                      </tr>
+                    </thead>
+                    <tbody id="active-mdls-tbody"></tbody>
+                  </table>
+                </div>
+                <p class="ks-footnote">MDLs with ≥50 total actions; ranked by pending share.</p>
+              </div>
+            </div>
+            <!-- MoM Drivers — full width below top row -->
+            <div class="dashboard-card" id="mom-drivers-card" style="margin-top: var(--spacing-md);">
+              <h2>What Drove the MoM Change?</h2>
+              <p class="ks-subtitle" id="mom-drivers-label"></p>
+              <div class="ks-drivers-grid" id="mom-drivers-content">
+                <div>
+                  <h4 class="ks-drivers-subhead">Top District Contributors</h4>
+                  <table class="dashboard-table ks-table" id="mom-district-drivers-table" style="table-layout:fixed;width:100%">
+                    <colgroup>
+                      <col><!-- District: remaining space -->
+                      <col style="width:80px">
+                      <col style="width:68px">
+                    </colgroup>
+                    <thead><tr><th>District</th><th class="ks-num">Δ Pending</th><th class="ks-num">% Share</th></tr></thead>
+                    <tbody id="mom-district-drivers-tbody"></tbody>
+                  </table>
+                  <p class="ks-footnote" id="mom-drivers-footnote-dist"></p>
+                </div>
+                <div>
+                  <h4 class="ks-drivers-subhead">Top MDL Contributors</h4>
+                  <table class="dashboard-table ks-table" id="mom-mdl-drivers-table" style="table-layout:fixed;width:100%">
+                    <colgroup>
+                      <col style="width:55px">
+                      <col><!-- Title: remaining space -->
+                      <col style="width:80px">
+                      <col style="width:68px">
+                    </colgroup>
+                    <thead><tr><th>MDL</th><th>Title</th><th class="ks-num">Δ Pending</th><th class="ks-num">% Share</th></tr></thead>
+                    <tbody id="mom-mdl-drivers-tbody"></tbody>
+                  </table>
+                  <p class="ks-footnote" id="mom-drivers-footnote-mdl"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end #trend-key-summaries -->
+        </div>
+
+        <div class="tab-content" id="source-reports-tab">
+          <div class="dashboard-card">
+            <h2>Source Reports</h2>
+            <p class="ks-subtitle">Original JPML monthly pending docket reports used to build this dashboard.
+              Source: <a href="https://www.jpml.uscourts.gov" target="_blank" rel="noopener" style="color:var(--color-accent)">JPML.uscourts.gov</a>
+            </p>
+            <div id="source-reports-grid" style="margin-top:var(--spacing-md)">
+              <p style="color:var(--color-text-secondary)">Loading reports...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <script src="/src/js/dashboard.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>
