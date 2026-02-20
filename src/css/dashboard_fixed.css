@@ -85,12 +85,12 @@ body {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 48px);
+  padding: 0 clamp(12px, 1.5vw, 28px);
 }
 
 body.dashboard-page .container {
   max-width: 1600px;
-  padding: 0 clamp(16px, 3vw, 48px);
+  padding: 0 clamp(12px, 1.5vw, 28px);
 }
 
 .container h1 {
@@ -327,7 +327,52 @@ body.dashboard-page .container {
   outline-offset: -2px;
 }
 
-/* Ensure [hidden] always wins over any display overrides */
+/* Exclude-dominant checkbox toggle */
+.trends-exclude-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 14px 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.trends-exclude-label:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.trends-exclude-label input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.trends-exclude-text {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.trends-exclude-label:has(input:checked) {
+  border-color: var(--color-primary);
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.trends-exclude-label:has(input:checked) .trends-exclude-text {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+
 [hidden] { display: none !important; }
 
 /* ===== Dashboard Grid ===== */
@@ -487,7 +532,7 @@ body.dashboard-page .container {
 
 #mdl-pending-increase-table,
 #mdl-total-increase-table {
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 #mdl-pending-increase-table th,
@@ -1054,11 +1099,11 @@ body.dashboard-page .container {
 
 /* REMOVED: Duplicate .dashboard-mdl-table rules that conflicted with consolidated version above */
 /* =========================================
-   Movers tables: remove horizontal scrollbars
+   Movers tables (layout notes)
    ========================================= */
 
 .table-wrap {
-  overflow-x: hidden;            /* prevent horizontal scroll in these cards */
+  overflow-x: auto;              /* allow horizontal scroll on narrow viewports */
 }
 
 .dashboard-table {
@@ -1729,6 +1774,14 @@ html.debug .inline-mdl-table {
   text-overflow: unset !important;
 }
 
+/* Switch ks-table to auto layout so the Title column gets flex space.
+   This overrides both the global .dashboard-table { table-layout: fixed }
+   rule and the inline style="table-layout:fixed" on the table elements,
+   preventing the 90px nth-child width from capping the Title column. */
+.ks-table {
+  table-layout: auto !important;
+}
+
 /* Ensure no horizontal scroll on KS tables */
 #top-judges-card .table-wrap,
 #active-mdls-card .table-wrap {
@@ -1790,7 +1843,107 @@ html.debug .inline-mdl-table {
 .fc-r2-mid { background: rgba(241,196,15,0.18);  color: #d4ac0d; }
 .fc-r2-lo  { background: rgba(231,76,60,0.18);   color: #e74c3c; }
 
-/* ─── Source Reports tab ──────────────────────────────────────────────────── */
+/* ─── Trend legend card ───────────────────────────────────────────────────── */
+.fc-legend-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.fc-legend-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 5px 14px;
+  align-items: center;
+}
+
+.fc-legend-def {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* ─── Acceleration badges ─────────────────────────────────────────────────── */
+.fc-accel {
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.fc-accel-up   { background: rgba(255,165,0,0.18); color: #e6960a; }
+.fc-accel-flat { background: rgba(150,150,150,0.13); color: var(--color-text-secondary); }
+.fc-accel-dn   { background: rgba(100,140,255,0.18); color: #6699ff; }
+
+/* ─── Anomaly type badges ─────────────────────────────────────────────────── */
+.fc-anom-spike { font-size: 0.73rem; font-weight: 700; color: #e74c3c; }
+.fc-anom-drop  { font-size: 0.73rem; font-weight: 700; color: #3498db; }
+
+/* ─── CourtListener module ────────────────────────────────────────────────── */
+.fc-cl-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary, rgba(255,255,255,0.06));
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.fc-cl-meta {
+  font-size: 0.74rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.15rem;
+  font-style: italic;
+}
+
+.fc-cl-filter-input {
+  width: 100%;
+  max-width: 420px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary, rgba(255,255,255,0.05));
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+.fc-cl-filter-input:focus {
+  outline: 2px solid var(--color-primary, #42a5f5);
+  outline-offset: 1px;
+}
+
+.fc-cl-link {
+  color: var(--color-primary, #42a5f5);
+  text-decoration: none;
+  font-weight: 700;
+}
+.fc-cl-link:hover { text-decoration: underline; }
+
+.fc-cl-firms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.fc-cl-firm {
+  font-size: 0.70rem;
+  background: rgba(100,160,255,0.12);
+  border: 1px solid rgba(100,160,255,0.25);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-cl-active { color: #2ecc71; font-weight: 700; font-size: 0.73rem; }
+.fc-cl-term   { color: #e74c3c; font-weight: 700; font-size: 0.73rem; }
+.fc-cl-unk    { color: var(--color-text-secondary); font-size: 0.73rem; }
+
+/* ─── Sources tab ────────────────────────────────────────────────────────── */
 .sr-year-group {
   display: flex;
   align-items: baseline;
@@ -1837,3 +1990,183 @@ html.debug .inline-mdl-table {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
+/* External source cards */
+.sr-sources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.sr-source-card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sr-source-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sr-source-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sr-source-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+  display: block;
+}
+.sr-source-title:hover { text-decoration: underline; }
+
+.sr-source-org {
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: 1px;
+}
+
+.sr-source-desc {
+  font-size: 0.79rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.sr-source-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.sr-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(100,160,255,0.1);
+  border: 1px solid rgba(100,160,255,0.2);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Readable table override (disables global overflow:hidden clip) ────────── */
+.dashboard-table.table-readable th,
+.dashboard-table.table-readable td {
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+.dashboard-table.table-readable th {
+  white-space: nowrap;
+}
+
+/* ── MDL Category Badges ──────────────────────────────────────────────────── */
+.mdl-cat-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.cat-pharma    { background: rgba(248,113,113,.15); color: #f87171; border: 1px solid rgba(248,113,113,.3); }
+.cat-device    { background: rgba(251,191, 36,.15); color: #fbbf24; border: 1px solid rgba(251,191, 36,.3); }
+.cat-pfas      { background: rgba( 52,211,153,.15); color: #34d399; border: 1px solid rgba( 52,211,153,.3); }
+.cat-consumer  { background: rgba(167,139,250,.15); color: #a78bfa; border: 1px solid rgba(167,139,250,.3); }
+.cat-auto      { background: rgba( 96,165,250,.15); color: #60a5fa; border: 1px solid rgba( 96,165,250,.3); }
+.cat-financial { background: rgba(245,158, 11,.15); color: #f59e0b; border: 1px solid rgba(245,158, 11,.3); }
+.cat-employ    { background: rgba(236,72,153,.15);  color: #ec4899; border: 1px solid rgba(236, 72,153,.3); }
+.cat-env       { background: rgba( 16,185,129,.15); color: #10b981; border: 1px solid rgba( 16,185,129,.3); }
+.cat-data      { background: rgba(139,92,246,.15);  color: #8b5cf6; border: 1px solid rgba(139, 92,246,.3); }
+.cat-other     { background: rgba(100,116,139,.15); color: #94a3b8; border: 1px solid rgba(100,116,139,.3); }
+
+/* ── Defendant Exposure Tracker ───────────────────────────────────────────── */
+.exposure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.exposure-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem;
+}
+.exposure-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.exposure-stats {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.exposure-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  gap: 1px;
+}
+.exposure-stat-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+.exposure-stat-label {
+  font-size: 0.64rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.exposure-footer {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--color-border);
+}
+.exposure-risk {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.risk-high { background: rgba(239,68,68,.15);  color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
+.risk-mid  { background: rgba(245,158,11,.15);  color: #f59e0b; border: 1px solid rgba(245,158,11,.3); }
+.risk-low  { background: rgba(72,199,142,.15);  color: #48c78e; border: 1px solid rgba(72,199,142,.3); }
+
+/* ── Settlement Proximity Badge ───────────────────────────────────────────── */
+.prox-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.prox-high { background: rgba(72,199,142,.15);  color: #48c78e; border: 1px solid rgba(72,199,142,.3); }
+.prox-mid  { background: rgba(245,158,11,.15);  color: #f59e0b; border: 1px solid rgba(245,158,11,.3); }
+.prox-low  { background: rgba(100,116,139,.12); color: #94a3b8; border: 1px solid rgba(100,116,139,.25); }

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
-// List available PDF source reports
+// List available PDF source files
 app.get('/api/pdfs', (_req, res) => {
   const pdfsDir = path.join(__dirname, 'data', 'pdfs');
   fs.readdir(pdfsDir, (err, files) => {

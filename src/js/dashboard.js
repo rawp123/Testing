@@ -1031,18 +1031,60 @@ function shiftMonth(dateStr, n) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 }
 
-function momentumLabel(slope) {
-  if (slope > 150)  return { text: '⬆ Rapidly Rising',    cls: 'fc-up2' };
-  if (slope > 30)   return { text: '↑ Rising',           cls: 'fc-up1' };
-  if (slope > -30)  return { text: '→ Stable',           cls: 'fc-flat' };
-  if (slope > -150) return { text: '↓ Declining',        cls: 'fc-dn1' };
-  return               { text: '⬇ Rapidly Declining', cls: 'fc-dn2' };
+// LOESS smoother: locally-weighted linear regression at each point.
+// bandwidth = fraction of total n used as the local window (0.0–1.0).
+function loess(xs, ys, bandwidth = 0.35) {
+  const n    = xs.length;
+  const span = Math.max(3, Math.round(bandwidth * n));
+  return xs.map(x0 => {
+    // Sort neighbours by absolute distance to x0
+    const dists = xs.map((x, j) => ({ j, d: Math.abs(x - x0) }))
+                    .sort((a, b) => a.d - b.d)
+                    .slice(0, span);
+    const maxD  = dists[dists.length - 1].d || 1;
+    // Tricubic weight: (1 – (d/maxD)³)³
+    const W     = dists.map(({ j, d }) => {
+      const u = d / maxD;
+      return { j, w: Math.pow(1 - Math.pow(u, 3), 3) };
+    });
+    // Weighted least-squares linear fit at x0
+    const sw    = W.reduce((s, { w }) => s + w, 0);
+    const swx   = W.reduce((s, { j, w }) => s + w * xs[j], 0);
+    const swy   = W.reduce((s, { j, w }) => s + w * ys[j], 0);
+    const swxx  = W.reduce((s, { j, w }) => s + w * xs[j] ** 2, 0);
+    const swxy  = W.reduce((s, { j, w }) => s + w * xs[j] * ys[j], 0);
+    const det   = sw * swxx - swx * swx;
+    if (Math.abs(det) < 1e-9) return swy / sw;   // fallback: weighted mean
+    const slope = (sw * swxy - swx * swy) / det;
+    const intc  = (swy - slope * swx) / sw;
+    return slope * x0 + intc;
+  });
+}
+
+function momentumLabel(slope, baseline) {
+  // Use relative slope (fraction of baseline per month) so the label is
+  // self-relative: a large MDL needs a proportionally large slope to be
+  // flagged as rapidly rising/declining.
+  const rel = (baseline && baseline > 0) ? slope / baseline : 0;
+  if (rel >  0.10) return { text: '⬆ Rapidly Rising',    cls: 'fc-up2' };
+  if (rel >  0.03) return { text: '↑ Rising',            cls: 'fc-up1' };
+  if (rel > -0.03) return { text: '→ Stable',            cls: 'fc-flat' };
+  if (rel > -0.10) return { text: '↓ Declining',         cls: 'fc-dn1' };
+  return              { text: '⬇ Rapidly Declining',     cls: 'fc-dn2' };
 }
 
 function r2Badge(r2) {
   const pct = (r2 * 100).toFixed(0);
   const cls = r2 >= 0.7 ? 'fc-r2-hi' : r2 >= 0.4 ? 'fc-r2-mid' : 'fc-r2-lo';
   return `<span class="fc-r2 ${cls}">${pct}%</span>`;
+}
+
+// Acceleration: is the rate of change itself increasing or decreasing?
+// relAccel = (second-half slope − first-half slope) / meanPending
+function accelLabel(relAccel) {
+  if (relAccel >  0.03) return { text: '↗ Accel.',  cls: 'fc-accel-up',   tip: 'Rate of change is speeding up — trend is accelerating' };
+  if (relAccel < -0.03) return { text: '↘ Decel.',  cls: 'fc-accel-dn',   tip: 'Rate of change is slowing down — trend is decelerating' };
+  return                       { text: '~ Steady',  cls: 'fc-accel-flat', tip: 'Rate of change is consistent over the window' };
 }
 
 function fcChartColors() {
@@ -1080,10 +1122,26 @@ async function renderForecastingTab() {
     ...months.map(formatMonthYear),
     ...futureMonths.map(m => formatMonthYear(m) + ' ▸')
   ];
-  const totalLen  = histLen + FORECAST_N;
 
   // Regression line across full span
-  const regLine = Array.from({ length: totalLen }, (_, i) => predCI(aggReg, i).yHat);
+  // Historical portion: LOESS smooth curve (captures real curvature)
+  // Forecast portion: linear extrapolation anchored to the LOESS tail
+  const loessHist = loess(xs, aggPending, 0.4);
+
+  // Fit a short local regression on the last 8 LOESS values to extrapolate forward
+  const tailN    = Math.min(8, histLen);
+  const tailXs   = xs.slice(-tailN);
+  const tailYs   = loessHist.slice(-tailN);
+  const tailReg  = linReg(tailXs, tailYs);
+  const extendFrom = loessHist[histLen - 1];           // ensure continuity
+  const tailSlope  = tailReg ? tailReg.slope : aggReg.slope;
+  const tailIntc   = extendFrom - tailSlope * xs[histLen - 1];
+
+  const regLine = [
+    ...loessHist,
+    ...Array.from({ length: FORECAST_N }, (_, i) =>
+      Math.max(0, tailSlope * (histLen + i) + tailIntc))
+  ];
 
   // Forecast bars and CI
   const fcVals  = Array.from({ length: FORECAST_N }, (_, i) =>
@@ -1092,10 +1150,11 @@ async function renderForecastingTab() {
   const ciLower = Array.from({ length: FORECAST_N }, (_, i) => predCI(aggReg, histLen + i).lower);
 
   // Padded arrays
-  const histBars = [...aggPending,             ...Array(FORECAST_N).fill(null)];
-  const fcBars   = [...Array(histLen).fill(null), ...fcVals];
-  const ciUArr   = [...Array(histLen).fill(null), ...ciUpper];
-  const ciLArr   = [...Array(histLen).fill(null), ...ciLower];
+  const histBars      = [...aggPending,                        ...Array(FORECAST_N).fill(null)];
+  const predictedBars = [...regLine.slice(0, histLen),         ...Array(FORECAST_N).fill(null)];
+  const fcBars        = [...Array(histLen).fill(null),         ...fcVals];
+  const ciUArr        = [...Array(histLen).fill(null),         ...ciUpper];
+  const ciLArr        = [...Array(histLen).fill(null),         ...ciLower];
 
   // ─ Aggregate forecast chart ───────────────────────────────────────────────────
   if (fcAggChart) { fcAggChart.destroy(); fcAggChart = null; }
@@ -1110,8 +1169,14 @@ async function renderForecastingTab() {
         {
           type: 'bar', label: 'Actual (Pending)',
           data: histBars,
-          backgroundColor: 'rgba(54,162,235,0.6)',
+          backgroundColor: 'rgba(54,162,235,0.65)',
           borderColor: 'rgba(54,162,235,1)', borderWidth: 1, order: 3
+        },
+        {
+          type: 'bar', label: 'Trend (LOESS)',
+          data: predictedBars,
+          backgroundColor: 'rgba(255,99,132,0.4)',
+          borderColor: 'rgba(255,99,132,0.85)', borderWidth: 1, order: 3
         },
         {
           type: 'bar', label: 'Forecast',
@@ -1122,8 +1187,8 @@ async function renderForecastingTab() {
         {
           type: 'line', label: 'Regression line',
           data: regLine,
-          borderColor: 'rgba(255,99,132,0.85)', borderWidth: 2,
-          borderDash: [6, 3], pointRadius: 0, tension: 0, order: 1, fill: false
+          borderColor: 'rgba(255,99,132,0.55)', borderWidth: 1.5,
+          borderDash: [5, 4], pointRadius: 0, tension: 0, order: 1, fill: false
         },
         {
           type: 'line', label: '95% CI upper',
@@ -1158,6 +1223,16 @@ async function renderForecastingTab() {
             label: ctx => {
               if (ctx.parsed.y === null || ctx.dataset.label.startsWith('95%')) return null;
               return `${ctx.dataset.label}: ${Math.round(ctx.parsed.y).toLocaleString()}`;
+            },
+            afterBody: (items) => {
+              const actual  = items.find(i => i.dataset.label === 'Actual (Pending)');
+              const loessFit = items.find(i => i.dataset.label === 'Trend (LOESS)');
+              if (actual && loessFit && actual.parsed.y !== null && loessFit.parsed.y !== null) {
+                const diff = actual.parsed.y - loessFit.parsed.y;
+                const sign = diff >= 0 ? '+' : '';
+                return [`─────────────────`, `Deviation from trend: ${sign}${Math.round(diff).toLocaleString()}`];
+              }
+              return [];
             }
           }
         }
@@ -1207,24 +1282,61 @@ async function renderForecastingTab() {
     if (valid.length < 6) continue;
     const r = linReg(valid.map(v => v.x), valid.map(v => v.y));
     if (!r) continue;
-    const lastPending = info.pending.filter(v => v !== null).pop();
-    if ((lastPending || 0) < 10) continue;
+    const nonNullVals = info.pending.filter(v => v !== null);
+    const lastPending = nonNullVals.slice(-1)[0] || 0;
+    if (lastPending < 10) continue;
+    const meanPending = nonNullVals.reduce((a, b) => a + b, 0) / nonNullVals.length;
     const proj6 = Math.max(0, r.slope * (WINDOW + 6) + r.intercept);
-    const projDelta = proj6 - (lastPending || 0);
-    mdlStats.push({ mdl, title: info.title, slope: r.slope, r2: r.r2, lastPending, proj6, projDelta });
+    const projDelta = proj6 - lastPending;
+
+    // ── Acceleration: compare slope of first vs second half of valid window ──
+    let relAccel = 0;
+    const mid = Math.floor(valid.length / 2);
+    const firstHalf  = valid.slice(0, mid);
+    const secondHalf = valid.slice(mid);
+    if (firstHalf.length >= 3 && secondHalf.length >= 3) {
+      const r1 = linReg(firstHalf.map(v => v.x),  firstHalf.map(v => v.y));
+      const r2h = linReg(secondHalf.map(v => v.x), secondHalf.map(v => v.y));
+      if (r1 && r2h && meanPending > 0) relAccel = (r2h.slope - r1.slope) / meanPending;
+    }
+
+    // ── Anomaly detection: months where |residual| > 2 × SE ─────────────────
+    let worstAnomaly = null;
+    if (r.se > 0) {
+      let best = null;
+      for (const pt of valid) {
+        const expected  = r.slope * pt.x + r.intercept;
+        const residual  = pt.y - expected;
+        if (Math.abs(residual) > 2 * r.se) {
+          if (!best || Math.abs(residual) > Math.abs(best.residual)) {
+            best = {
+              monthLabel: formatMonthYear(recentMonths[pt.x] || ''),
+              actual:     pt.y,
+              expected:   Math.max(0, expected),
+              residual
+            };
+          }
+        }
+      }
+      worstAnomaly = best;
+    }
+
+    mdlStats.push({ mdl, title: info.title, slope: r.slope, r2: r.r2, lastPending, meanPending, proj6, projDelta, relAccel, worstAnomaly });
   }
   mdlStats.sort((a, b) => b.slope - a.slope);
 
   function mdlRows(list) {
     return list.map(s => {
-      const mom  = momentumLabel(s.slope);
-      const sStr = (s.slope >= 0 ? '+' : '') + Math.round(s.slope).toLocaleString();
-      const dStr = (s.projDelta >= 0 ? '+' : '') + Math.round(s.projDelta).toLocaleString();
+      const mom   = momentumLabel(s.slope, s.meanPending);
+      const accel = accelLabel(s.relAccel);
+      const sStr  = (s.slope >= 0 ? '+' : '') + Math.round(s.slope).toLocaleString();
+      const dStr  = (s.projDelta >= 0 ? '+' : '') + Math.round(s.projDelta).toLocaleString();
       return `<tr>
         <td style="font-size:.74rem;font-weight:600">${s.mdl}</td>
         <td class="ks-clamp">${s.title}</td>
         <td class="ks-num">${Math.round(s.lastPending).toLocaleString()}</td>
         <td class="ks-num"><span class="fc-mom ${mom.cls}">${mom.text}</span></td>
+        <td class="ks-num"><span class="fc-accel ${accel.cls}" title="${accel.tip}">${accel.text}</span></td>
         <td class="ks-num">${sStr}</td>
         <td class="ks-num">${dStr}</td>
         <td class="ks-num">${r2Badge(s.r2)}</td>
@@ -1232,8 +1344,43 @@ async function renderForecastingTab() {
     }).join('');
   }
 
-  document.getElementById('fc-rising-tbody').innerHTML   = mdlRows(mdlStats.slice(0, 10));
-  document.getElementById('fc-declining-tbody').innerHTML = mdlRows([...mdlStats].reverse().slice(0, 10));
+  // Filter to genuinely rising/declining MDLs (rel slope outside ±3% stable band)
+  const risingMdls    = mdlStats.filter(s => s.meanPending > 0 && s.slope / s.meanPending >  0.03);
+  const decliningMdls = [...mdlStats].reverse().filter(s => s.meanPending > 0 && s.slope / s.meanPending < -0.03);
+
+  document.getElementById('fc-rising-tbody').innerHTML   = risingMdls.length
+    ? mdlRows(risingMdls.slice(0, 10))
+    : '<tr><td colspan="8" style="text-align:center;opacity:.55;padding:.75rem">No MDLs with a rising trend in the current window.</td></tr>';
+  document.getElementById('fc-declining-tbody').innerHTML = decliningMdls.length
+    ? mdlRows(decliningMdls.slice(0, 10))
+    : '<tr><td colspan="8" style="text-align:center;opacity:.55;padding:.75rem">No MDLs with a declining trend in the current window.</td></tr>';
+
+  // ─ Anomalous months table ────────────────────────────────────────────────────
+  const anomalyRows = mdlStats
+    .filter(s => s.worstAnomaly)
+    .sort((a, b) => Math.abs(b.worstAnomaly.residual) - Math.abs(a.worstAnomaly.residual))
+    .slice(0, 15)
+    .map(s => {
+      const a     = s.worstAnomaly;
+      const devPct = a.expected > 0 ? ((a.residual / a.expected) * 100).toFixed(0) : '—';
+      const spike  = a.residual > 0;
+      const typeHtml = spike
+        ? `<span class="fc-anom-spike">▲ Spike</span>`
+        : `<span class="fc-anom-drop">▼ Drop</span>`;
+      const devSign = a.residual >= 0 ? '+' : '';
+      return `<tr>
+        <td style="font-size:.74rem;font-weight:600">${s.mdl}</td>
+        <td class="ks-clamp">${s.title}</td>
+        <td class="ks-num">${a.monthLabel}</td>
+        <td class="ks-num">${Math.round(a.actual).toLocaleString()}</td>
+        <td class="ks-num">${Math.round(a.expected).toLocaleString()}</td>
+        <td class="ks-num">${devSign}${devPct}%</td>
+        <td class="ks-num">${typeHtml}</td>
+      </tr>`;
+    }).join('');
+
+  document.getElementById('fc-anomaly-tbody').innerHTML = anomalyRows ||
+    '<tr><td colspan="7" style="text-align:center;opacity:.55;padding:.75rem">No statistically anomalous months detected in the current window.</td></tr>';
 
   // ─ District momentum horizontal bar chart ───────────────────────────────────────
   const distHistory = {};
@@ -1308,10 +1455,370 @@ async function renderForecastingTab() {
   });
 
   container.dataset.loaded = '1';
+
+  // Load CourtListener enrichment separately (non-blocking)
+  renderCourtListenerSection();
+
+  // Defense intelligence features (non-blocking)
+  renderDefendantExposureTracker();
+  renderSettlementProximity();
+  renderJudicialAnalysis();
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Source Reports ──────────────────────────────────────────────────────────
+// ─── CourtListener Enrichment Module ─────────────────────────────────────────
+async function renderCourtListenerSection() {
+  const wrap = document.getElementById('fc-cl-wrap');
+  if (!wrap || wrap.dataset.loaded) return;
+
+  const tbody    = document.getElementById('fc-cl-tbody');
+  const metaEl   = document.getElementById('fc-cl-meta');
+  const filterEl = document.getElementById('fc-cl-filter');
+
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;opacity:.5;padding:1rem">Loading CourtListener data…</td></tr>';
+
+  let clData;
+  try {
+    const res = await fetch('/data/courtlistener.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    clData = await res.json();
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--color-warning);padding:1rem">
+      Could not load CourtListener data. Run <code>python scripts/fetch_courtlistener.py</code> to generate it.
+    </td></tr>`;
+    return;
+  }
+
+  const records = clData.records || [];
+  wrap.dataset.loaded = '1';
+
+  // Format generated timestamp
+  if (metaEl && clData.generated) {
+    const d = new Date(clData.generated);
+    const fmt = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    metaEl.textContent = `Data fetched ${fmt} from CourtListener · ${clData.total} MDLs · re-run scripts/fetch_courtlistener.py to refresh`;
+  }
+
+  function buildRows(list) {
+    if (!list.length) {
+      return '<tr><td colspan="5" style="text-align:center;opacity:.55;padding:.75rem">No results.</td></tr>';
+    }
+    return list.map(r => {
+      const statusCls = r.status === 'Active' ? 'fc-cl-active' : r.status === 'Terminated' ? 'fc-cl-term' : 'fc-cl-unk';
+      const statusDot = `<span class="${statusCls}" title="${r.status}" style="margin-left:3px;font-size:.6rem">●</span>`;
+      const mdlLink = r.cl_url
+        ? `<a href="${r.cl_url}" target="_blank" rel="noopener" class="fc-cl-link">${r.mdl}</a>${statusDot}`
+        : `<span>${r.mdl}</span>${statusDot}`;
+      const firmsHtml = r.firms && r.firms.length
+        ? r.firms.map(f => `<span class="fc-cl-firm">${f}</span>`).join('')
+        : '<span style="opacity:.4">—</span>';
+      return `<tr>
+        <td style="font-size:.74rem;font-weight:600;white-space:nowrap">${mdlLink}</td>
+        <td class="ks-clamp">${r.cl_case_name || r.mdl}</td>
+        <td class="ks-num">${(r.pending || 0).toLocaleString()}</td>
+        <td style="font-size:.75rem">${r.judge || '<span style="opacity:.4">—</span>'}</td>
+        <td style="font-size:.73rem"><div class="fc-cl-firms">${firmsHtml}</div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function applyFilter() {
+    const q = (filterEl ? filterEl.value : '').toLowerCase().trim();
+    const filtered = q
+      ? records.filter(r =>
+          r.mdl.toLowerCase().includes(q) ||
+          (r.cl_case_name || '').toLowerCase().includes(q) ||
+          (r.judge || '').toLowerCase().includes(q) ||
+          (r.firms || []).some(f => f.toLowerCase().includes(q))
+        )
+      : records;
+    tbody.innerHTML = buildRows(filtered);
+  }
+
+  if (filterEl) filterEl.addEventListener('input', applyFilter);
+  applyFilter();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Litigation Category Tags ─────────────────────────────────────────────────
+const CATEGORY_RULES = [
+  { cat: 'Pharmaceutical',     cls: 'cat-pharma',    re: /\b(drug|pharma|medication|medicine|pill|tablet|opioid|fentanyl|acetaminophen|tylenol|risperdal|zoloft|paxil|vioxx|celebrex|abilify|invokana|xarelto|eliquis|pradaxa|belviq|zantac|ranitidine|taxotere|docetaxel|suboxone|buprenorphine|talc|baby powder)\b/i },
+  { cat: 'Medical Device',     cls: 'cat-device',    re: /\b(device|implant|mesh|stent|pacemaker|hip|knee|shoulder|spine|hernia|IUD|essure|morcellator|transvaginal|catheter|port|filter|atrium|bard)\b/i },
+  { cat: 'PFAS / Chemical',    cls: 'cat-pfas',      re: /\b(PFAS|PFOA|PFOS|AFFF|foam|forever chemical|chemical|paraquat|roundup|glyphosate|benzene|asbestos|mesothelioma|3M|aqueous)\b/i },
+  { cat: 'Consumer Product',   cls: 'cat-consumer',  re: /\b(product|consumer|retail|food|beverage|cosmetic|supplement|vitamin|shampoo|hair|baby|infant|toy|appliance)\b/i },
+  { cat: 'Vehicle / Auto',     cls: 'cat-auto',      re: /\b(vehicle|auto|automotive|car|truck|airbag|takata|defect|recall|transmission|engine|fuel)\b/i },
+  { cat: 'Financial',          cls: 'cat-financial', re: /\b(securit|fraud|stock|invest|bank|financial|mortgage|loan|credit|insurance|ponzi|ERISA|antitrust|price.?fixing|market)\b/i },
+  { cat: 'Employment / Civil', cls: 'cat-employ',    re: /\b(employ|wage|labor|civil.?right|discriminat|harassment|ADA|FLSA|class.?action|worker|passenger|sexual.?assault|uber|lyft)\b/i },
+  { cat: 'Environmental',      cls: 'cat-env',       re: /\b(environment|water|contamina|pollution|lead|PCB|oil|spill|pipeline|natural.?gas|coal)\b/i },
+  { cat: 'Data / Privacy',     cls: 'cat-data',      re: /\b(data|privacy|breach|cyber|hack|biometric|BIPA|CCPA|telephone|TCPA)\b/i },
+];
+
+function classifyMDL(title) {
+  if (!title) return { cat: 'Other', cls: 'cat-other' };
+  for (const rule of CATEGORY_RULES) {
+    if (rule.re.test(title)) return { cat: rule.cat, cls: rule.cls };
+  }
+  return { cat: 'Other', cls: 'cat-other' };
+}
+
+// ─── Defendant Exposure Tracker ───────────────────────────────────────────────
+async function renderDefendantExposureTracker() {
+  const container = document.getElementById('exposure-tracker-content');
+  if (!container) return;
+
+  const WINDOW = 12;
+  const recentMonths = months.slice(-WINDOW);
+  const catMap = {};
+
+  for (let i = 0; i < recentMonths.length; i++) {
+    const data = await loadDataForMonth(recentMonths[i]);
+    const catTotals = {};
+    for (const row of data) {
+      const { cat, cls } = classifyMDL(row['Title'] || '');
+      const mdl = row['MDL'] || '';
+      if (!catTotals[cat]) catTotals[cat] = { pending: 0, cls, mdls: new Set() };
+      catTotals[cat].pending += row['Pending'] || 0;
+      if (mdl) catTotals[cat].mdls.add(mdl);
+    }
+    for (const [cat, info] of Object.entries(catTotals)) {
+      if (!catMap[cat]) catMap[cat] = { cls: info.cls, mdls: new Set(), pendingByMonth: Array(WINDOW).fill(0) };
+      catMap[cat].pendingByMonth[i] = info.pending;
+      info.mdls.forEach(m => catMap[cat].mdls.add(m));
+    }
+  }
+
+  const catStats = Object.entries(catMap).map(([cat, info]) => {
+    const xs = info.pendingByMonth.map((_, i) => i);
+    const ys = info.pendingByMonth;
+    const r  = linReg(xs, ys);
+    const lastPending = ys[ys.length - 1] || 0;
+    const meanPending = ys.reduce((a, b) => a + b, 0) / ys.length || 1;
+    const mom = momentumLabel(r ? r.slope : 0, meanPending);
+    const mid = Math.floor(ys.length / 2);
+    const r1  = linReg(xs.slice(0, mid), ys.slice(0, mid));
+    const r2h = linReg(xs.slice(mid), ys.slice(mid));
+    const relAccel = (r1 && r2h && meanPending > 0) ? (r2h.slope - r1.slope) / meanPending : 0;
+    const accel = accelLabel(relAccel);
+    const relSlope = r ? r.slope / meanPending : 0;
+    const riskScore = Math.min(100, Math.round(Math.max(0,
+      (lastPending / 5000) * 40 +
+      Math.max(0, relSlope * 300) +
+      (info.mdls.size / 20) * 20
+    )));
+    const riskCls = riskScore >= 70 ? 'risk-high' : riskScore >= 40 ? 'risk-mid' : 'risk-low';
+    return { cat, cls: info.cls, mdlCount: info.mdls.size, lastPending, meanPending,
+             slope: r ? r.slope : 0, mom, accel, riskScore, riskCls,
+             pendingByMonth: info.pendingByMonth };
+  }).sort((a, b) => b.lastPending - a.lastPending);
+
+  function sparkline(vals) {
+    if (vals.length < 2) return '';
+    const max = Math.max(...vals, 1), min = Math.min(...vals);
+    const range = max - min || 1;
+    const W = 60, H = 24;
+    const pts = vals.map((v, i) => {
+      const x = (i / (vals.length - 1)) * W;
+      const y = H - ((v - min) / range) * H;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const color = vals[vals.length - 1] >= vals[0] ? '#48c78e' : '#ff6b6b';
+    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="vertical-align:middle">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8"/></svg>`;
+  }
+
+  const cardsHtml = catStats.map(s => `
+    <div class="exposure-card dashboard-card">
+      <div class="exposure-card-header">
+        <span class="mdl-cat-badge ${s.cls}">${s.cat}</span>
+        <span class="exposure-risk ${s.riskCls}" title="Risk: size (40pts) + growth (40pts) + breadth (20pts). Max 100.">Risk ${s.riskScore}</span>
+      </div>
+      <div class="exposure-stats">
+        <div class="exposure-stat">
+          <span class="exposure-stat-val">${s.lastPending.toLocaleString()}</span>
+          <span class="exposure-stat-label">Pending</span>
+        </div>
+        <div class="exposure-stat">
+          <span class="exposure-stat-val">${s.mdlCount}</span>
+          <span class="exposure-stat-label">MDLs</span>
+        </div>
+        <div class="exposure-stat">
+          ${sparkline(s.pendingByMonth)}
+          <span class="exposure-stat-label">12-mo trend</span>
+        </div>
+      </div>
+      <div class="exposure-footer">
+        <span class="fc-mom ${s.mom.cls}">${s.mom.text}</span>
+        <span class="fc-accel ${s.accel.cls}" title="${s.accel.tip}">${s.accel.text}</span>
+        <span style="font-size:.72rem;color:var(--color-text-secondary)">${s.slope >= 0 ? '+' : ''}${Math.round(s.slope).toLocaleString()} cases/mo</span>
+      </div>
+    </div>`).join('');
+
+  const endData = await loadDataForMonth(endMonth || months[months.length - 1]);
+  const mdlRows = endData
+    .filter(r => (r['Pending'] || 0) > 0)
+    .map(r => { const { cat, cls } = classifyMDL(r['Title'] || ''); return { mdl: r['MDL'] || '', title: r['Title'] || '', pending: r['Pending'] || 0, cat, cls }; })
+    .sort((a, b) => b.pending - a.pending)
+    .slice(0, 50)
+    .map(r => `<tr>
+      <td style="font-size:.74rem;font-weight:600;white-space:nowrap">${r.mdl}</td>
+      <td style="white-space:normal;overflow:visible;text-overflow:unset;word-break:break-word;min-width:160px">${r.title}</td>
+      <td><span class="mdl-cat-badge ${r.cls}">${r.cat}</span></td>
+      <td class="ks-num">${r.pending.toLocaleString()}</td>
+    </tr>`).join('');
+
+  container.innerHTML = `
+    <div class="exposure-grid">${cardsHtml}</div>
+    <h4 style="font-size:.85rem;font-weight:600;margin:.75rem 0 .4rem;color:var(--color-text-secondary)">Top 50 MDLs by Pending — Current Month</h4>
+    <table class="dashboard-table" style="width:100%">
+      <thead><tr><th>MDL</th><th>Title</th><th>Category</th><th class="ks-num">Pending</th></tr></thead>
+      <tbody>${mdlRows}</tbody>
+    </table>`;
+}
+
+// ─── Settlement Proximity Signals ─────────────────────────────────────────────
+async function renderSettlementProximity() {
+  const tbody = document.getElementById('settlement-proximity-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:.5;padding:1rem">Computing…</td></tr>';
+
+  const WINDOW = 12;
+  const recentMonths = months.slice(-WINDOW);
+  const mdlFirstSeen = {};
+  const mdlMeta = {};
+
+  for (let i = 0; i < months.length; i++) {
+    const data = await loadDataForMonth(months[i]);
+    for (const row of data) {
+      const mdl = row['MDL'] || ''; if (!mdl) continue;
+      if (mdlFirstSeen[mdl] === undefined) mdlFirstSeen[mdl] = i;
+      if (!mdlMeta[mdl]) mdlMeta[mdl] = { title: row['Title'] || '' };
+    }
+  }
+
+  const mdlRecent = {};
+  for (let i = 0; i < recentMonths.length; i++) {
+    const data = await loadDataForMonth(recentMonths[i]);
+    for (const row of data) {
+      const mdl = row['MDL'] || ''; if (!mdl) continue;
+      if (!mdlRecent[mdl]) mdlRecent[mdl] = Array(WINDOW).fill(null);
+      mdlRecent[mdl][i] = row['Pending'] || 0;
+    }
+  }
+
+  const signals = [];
+  for (const [mdl, info] of Object.entries(mdlMeta)) {
+    const pending = mdlRecent[mdl] || [];
+    const valid   = pending.reduce((a, v, i) => { if (v !== null) a.push({ x: i, y: v }); return a; }, []);
+    if (valid.length < 4) continue;
+    const r = linReg(valid.map(v => v.x), valid.map(v => v.y));
+    if (!r) continue;
+    const lastPending = valid[valid.length - 1].y;
+    const meanPending = valid.reduce((s, v) => s + v.y, 0) / valid.length;
+    if (lastPending < 20 && meanPending < 20) continue;
+    const ageMonths = months.length - (mdlFirstSeen[mdl] || 0);
+    const relSlope  = meanPending > 0 ? r.slope / meanPending : 0;
+    const mid = Math.floor(valid.length / 2);
+    const r1  = valid.length >= 6 ? linReg(valid.slice(0, mid).map(v => v.x), valid.slice(0, mid).map(v => v.y)) : null;
+    const r2h = valid.length >= 6 ? linReg(valid.slice(mid).map(v => v.x), valid.slice(mid).map(v => v.y)) : null;
+    const relAccel = (r1 && r2h && meanPending > 0) ? (r2h.slope - r1.slope) / meanPending : 0;
+
+    let score = 0;
+    if (ageMonths >= 60)   score += 25; else if (ageMonths >= 36) score += 12;
+    if (relSlope  < -0.10) score += 30; else if (relSlope  < -0.03) score += 18;
+    if (relAccel  < -0.03) score += 15;
+    if (lastPending < 100 && ageMonths >= 24) score += 20;
+    if (lastPending < 500 && relSlope  < 0)   score += 10;
+    score = Math.min(100, score);
+
+    const likelihood = score >= 70 ? { text: '🟢 High',     cls: 'prox-high' }
+                     : score >= 40 ? { text: '🟡 Moderate', cls: 'prox-mid'  }
+                     :               { text: '⚪ Low',       cls: 'prox-low'  };
+    signals.push({ mdl, title: info.title, ageMonths, lastPending, score, likelihood,
+                   mom:   momentumLabel(r.slope, meanPending),
+                   accel: accelLabel(relAccel) });
+  }
+
+  signals.sort((a, b) => b.score - a.score);
+  tbody.innerHTML = signals.slice(0, 20).map(s => {
+    const ageStr = s.ageMonths >= 12
+      ? `${Math.floor(s.ageMonths / 12)}y ${s.ageMonths % 12}m`
+      : `${s.ageMonths}m`;
+    return `<tr>
+      <td style="font-size:.74rem;font-weight:600;white-space:nowrap">${s.mdl}</td>
+      <td style="white-space:normal;overflow:visible;text-overflow:unset;word-break:break-word;min-width:160px">${s.title}</td>
+      <td class="ks-num">${s.lastPending.toLocaleString()}</td>
+      <td class="ks-num">${ageStr}</td>
+      <td class="ks-num"><span class="fc-mom ${s.mom.cls}">${s.mom.text}</span></td>
+      <td class="ks-num"><span class="fc-accel ${s.accel.cls}" title="${s.accel.tip}">${s.accel.text}</span></td>
+      <td class="ks-num"><span class="prox-badge ${s.likelihood.cls}" title="Score: ${s.score}/100">${s.likelihood.text} (${s.score})</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;opacity:.55;padding:.75rem">Insufficient data.</td></tr>';
+}
+
+// ─── Judicial Assignment Analysis ─────────────────────────────────────────────
+async function renderJudicialAnalysis() {
+  const tbody = document.getElementById('judicial-analysis-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:.5;padding:1rem">Computing…</td></tr>';
+
+  const judgeData = {};
+  for (let i = 0; i < months.length; i++) {
+    const data = await loadDataForMonth(months[i]);
+    for (const row of data) {
+      const judge = row['Judge'] || ''; if (!judge || judge === 'Unknown') continue;
+      const mdl   = row['MDL']   || ''; if (!mdl) continue;
+      if (!judgeData[judge]) judgeData[judge] = { district: row['District'] || '', mdls: {} };
+      if (!judgeData[judge].mdls[mdl]) judgeData[judge].mdls[mdl] = { firstSeen: i, lastSeen: i, peakPending: 0, finalPending: 0 };
+      const jm = judgeData[judge].mdls[mdl];
+      jm.lastSeen     = i;
+      jm.peakPending  = Math.max(jm.peakPending, row['Pending'] || 0);
+      jm.finalPending = row['Pending'] || 0;
+    }
+  }
+
+  const endData = await loadDataForMonth(endMonth || months[months.length - 1]);
+  const activePendingByJudge = {};
+  for (const row of endData) {
+    const judge = row['Judge'] || ''; if (!judge) continue;
+    if ((row['Pending'] || 0) > 0) {
+      if (!activePendingByJudge[judge]) activePendingByJudge[judge] = { count: 0, pending: 0 };
+      activePendingByJudge[judge].count++;
+      activePendingByJudge[judge].pending += row['Pending'] || 0;
+    }
+  }
+
+  const judgeStats = Object.entries(judgeData).map(([judge, info]) => {
+    const mdlArr   = Object.values(info.mdls);
+    const resolved = mdlArr.filter(m => m.finalPending === 0 && m.lastSeen < months.length - 1);
+    const active   = activePendingByJudge[judge] || { count: 0, pending: 0 };
+    const avgDuration = resolved.length
+      ? Math.round(resolved.reduce((s, m) => s + (m.lastSeen - m.firstSeen + 1), 0) / resolved.length)
+      : null;
+    const velocity = active.count > 0 ? Math.round(active.pending / active.count) : 0;
+    return { judge, district: info.district, totalMDLs: mdlArr.length,
+             activeMDLs: active.count, resolvedMDLs: resolved.length,
+             avgDuration, velocity };
+  })
+  .filter(j => j.totalMDLs >= 2)
+  .sort((a, b) => b.activeMDLs - a.activeMDLs)
+  .slice(0, 25);
+
+  tbody.innerHTML = judgeStats.map(j => {
+    const durStr = j.avgDuration !== null ? `${j.avgDuration}mo` : '—';
+    const velCls = j.velocity >= 5000 ? 'delta-negative' : j.velocity < 2000 ? 'delta-positive' : '';
+    return `<tr>
+      <td style="font-weight:500;word-break:break-word" title="${j.judge}">${j.judge}</td>
+      <td style="font-size:.75rem;word-break:break-word">${getFullDistrictName(j.district) || j.district}</td>
+      <td class="ks-num delta-positive">${j.activeMDLs}</td>
+      <td class="ks-num" style="color:var(--color-text-secondary)">${j.resolvedMDLs}</td>
+      <td class="ks-num">${j.totalMDLs}</td>
+      <td class="ks-num">${durStr}</td>
+      <td class="ks-num ${velCls}">${j.velocity.toLocaleString()}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;opacity:.55;padding:.75rem">No judge data available.</td></tr>';
+}
+
+// ─── Sources tab ─────────────────────────────────────────────────────────────
 async function renderSourceReports() {
   const grid = document.getElementById('source-reports-grid');
   if (!grid || grid.dataset.loaded) return;
@@ -1368,7 +1875,7 @@ async function renderSourceReports() {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function renderTrendsOverview(mode = 'pending') {
+async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
   const canvas = document.getElementById('trends-overview-chart');
   if (!canvas) {
     console.error('Trends overview canvas not found');
@@ -1380,63 +1887,93 @@ async function renderTrendsOverview(mode = 'pending') {
     return;
   }
   
-  // Load data for all months and calculate totals + dominant MDLs
-  const chartData = [];
-  
+  // ── Phase 1: load all months into memory (cached by loadDataForMonth) ───────
+  const allMonthCounts = [];   // parallel array to months[]
   for (const month of months) {
     const data = await loadDataForMonth(month);
-    
-    // Calculate totals
-    let totalPending = 0;
-    let totalAll = 0;
     const mdlCounts = {};
-    
     for (const row of data) {
       const pending = row['Pending'] || 0;
-      const total = row['Total'] || 0;
-      const mdl = row['MDL'] || row['MDL Name'] || '';
-      const title = row['Title'] || '';
-      
-      totalPending += pending;
-      totalAll += total;
-      
+      const total   = row['Total']   || 0;
+      const mdl     = row['MDL'] || row['MDL Name'] || '';
+      const title   = row['Title'] || '';
       if (mdl) {
-        if (!mdlCounts[mdl]) {
-          mdlCounts[mdl] = { pending: 0, total: 0, title: title };
-        }
+        if (!mdlCounts[mdl]) mdlCounts[mdl] = { pending: 0, total: 0, title };
         mdlCounts[mdl].pending += pending;
-        mdlCounts[mdl].total += total;
+        mdlCounts[mdl].total   += total;
       }
     }
-    
+    allMonthCounts.push(mdlCounts);
+  }
+
+  // ── Phase 2: build a permanent exclusion set (iterative cascade) ────────
+  // Each round recomputes shares on the ALREADY-FILTERED total, so a large
+  // MDL that was hiding behind an even-larger one gets caught in the next
+  // round.  E.g.: 3M is ~60% raw → excluded round 1; J&J Talc then becomes
+  // ~32% of the remaining total → excluded round 2; repeat until stable.
+  const EXCLUDE_THRESHOLD = 0.25; // 25% of the filtered-month total
+  const permanentlyExcluded = new Set();
+  if (excludeDominant) {
+    let prevSize = -1;
+    while (permanentlyExcluded.size !== prevSize) {
+      prevSize = permanentlyExcluded.size;
+      for (const mdlCounts of allMonthCounts) {
+        // Denominator: sum only over MDLs NOT yet excluded
+        let refRaw = 0;
+        for (const [mdl, info] of Object.entries(mdlCounts)) {
+          if (permanentlyExcluded.has(mdl)) continue;
+          refRaw += mode === 'total' ? info.total : info.pending;
+        }
+        if (refRaw <= 0) continue;
+        for (const [mdl, info] of Object.entries(mdlCounts)) {
+          if (permanentlyExcluded.has(mdl)) continue;
+          const share = (mode === 'total' ? info.total : info.pending) / refRaw;
+          if (share > EXCLUDE_THRESHOLD) permanentlyExcluded.add(mdl);
+        }
+      }
+    }
+  }
+
+  // ── Phase 3: build chartData using permanently excluded set ──────────────
+  const chartData = [];
+  for (let mi = 0; mi < months.length; mi++) {
+    const month     = months[mi];
+    const mdlCounts = allMonthCounts[mi];
+
+    let totalPending = 0;
+    let totalAll     = 0;
+    for (const [mdl, info] of Object.entries(mdlCounts)) {
+      if (permanentlyExcluded.has(mdl)) continue;
+      totalPending += info.pending;
+      totalAll     += info.total;
+    }
+
     const totalTerminated = totalAll - totalPending;
-    
-    // Find MDLs that are >20% of total based on selected mode
+
+    // Dominant MDLs for tooltip (>20% of the filtered total)
     const dominantMDLs = [];
     const referenceTotal = mode === 'total' ? totalAll : totalPending;
-    
     for (const [mdl, info] of Object.entries(mdlCounts)) {
-      const count = mode === 'total' ? info.total : info.pending;
-      const percentage = (count / referenceTotal) * 100;
+      if (permanentlyExcluded.has(mdl)) continue;
+      const count      = mode === 'total' ? info.total : info.pending;
+      const percentage = referenceTotal > 0 ? (count / referenceTotal) * 100 : 0;
       if (percentage > 20) {
-        dominantMDLs.push({
-          mdl: mdl,
-          title: info.title,
-          count: count,
-          percentage: percentage
-        });
+        dominantMDLs.push({ mdl, title: info.title, count, percentage });
       }
     }
-    
-    // Sort dominant MDLs by percentage descending
     dominantMDLs.sort((a, b) => b.percentage - a.percentage);
-    
+
     chartData.push({
-      month: month,
+      month,
       pending: totalPending,
       total: totalAll,
       terminated: totalTerminated,
-      dominantMDLs: dominantMDLs
+      dominantMDLs,
+      excludedCount: permanentlyExcluded.size,
+      excludedMDLs: [...permanentlyExcluded].map(mdl => {
+        const info = mdlCounts[mdl];
+        return info ? `${mdl} — ${info.title}` : mdl;
+      })
     });
   }
   
@@ -1623,27 +2160,25 @@ async function renderTrendsOverview(mode = 'pending') {
           callbacks: {
             label: function(context) {
               let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.parsed.y !== null) {
-                label += Math.round(context.parsed.y).toLocaleString();
-              }
+              if (label) label += ': ';
+              if (context.parsed.y !== null) label += Math.round(context.parsed.y).toLocaleString();
               return label;
             },
             afterBody: function(context) {
               const index = context[0].dataIndex;
-              const dominantMDLs = chartData[index].dominantMDLs;
-              
-              if (dominantMDLs.length > 0) {
-                const lines = ['\nDominant MDLs (>20%):'];
-                dominantMDLs.forEach(mdl => {
-                  lines.push(`${mdl.mdl} - ${mdl.title}`);
+              const point = chartData[index];
+              const lines = [];
+              if (point.excludedCount > 0) {
+                lines.push(`\n(${point.excludedCount} dominant MDL${point.excludedCount > 1 ? 's' : ''} excluded from chart)`);
+              }
+              if (point.dominantMDLs.length > 0) {
+                lines.push('\nLargest MDLs in this bar:');
+                point.dominantMDLs.forEach(mdl => {
+                  lines.push(`${mdl.mdl} — ${mdl.title}`);
                   lines.push(`  ${Math.round(mdl.count).toLocaleString()} cases (${mdl.percentage.toFixed(1)}%)`);
                 });
-                return lines;
               }
-              return [];
+              return lines;
             }
           }
         },
@@ -2721,12 +3256,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Render trends chart when trends-overview tab is selected
         if (tabName === 'trends-overview') {
-          await renderTrendsOverview(metricState['trends']);
+          const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
+          await renderTrendsOverview(metricState['trends'], excl);
         }
         if (tabName === 'forecasting') {
           await renderForecastingTab();
         }
-        // Render source reports list on first visit
+        // Render sources list on first visit
         if (tabName === 'source-reports') {
           await renderSourceReports();
         }
@@ -2772,8 +3308,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDashboard();
       } else if (e.target.name === 'trends-metric') {
         metricState['trends'] = e.target.value;
-        await renderTrendsOverview(e.target.value);
+        const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
+        await renderTrendsOverview(e.target.value, excl);
       }
+    }
+    // Exclude-dominant checkbox
+    if (e.target.id === 'trends-exclude-dominant') {
+      const excl = e.target.checked;
+      await renderTrendsOverview(metricState['trends'] || 'pending', excl);
     }
   });
   
@@ -2806,7 +3348,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateDashboard();
       const trendsTab = document.getElementById('trends-overview-tab');
       if (trendsTab && trendsTab.classList.contains('active')) {
-        await renderTrendsOverview(metricState['trends']);
+        const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
+        await renderTrendsOverview(metricState['trends'], excl);
       }
     }, 50);
   };

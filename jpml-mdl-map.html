@@ -22,7 +22,7 @@
           <button class="tab-button" data-tab="month-over-month">Month over Month Statistics</button>
           <button class="tab-button" data-tab="trends-overview">Trends</button>
           <button class="tab-button" data-tab="forecasting">Forecasting</button>
-          <button class="tab-button" data-tab="source-reports">Source Reports</button>
+          <button class="tab-button" data-tab="source-reports">Sources</button>
         </div>
 
         <div class="tab-content active" id="executive-summary-tab">
@@ -284,6 +284,10 @@
                   <span class="toggle-text">All Cases</span>
                 </label>
               </div>
+              <label class="trends-exclude-label" title="Remove any MDL whose share of that month&#39;s total exceeds 40%, so outlier MDLs don&#39;t dominate the chart.">
+                <input type="checkbox" id="trends-exclude-dominant">
+                <span class="trends-exclude-text">Exclude MDLs &gt;40% of month</span>
+              </label>
             </div>
             <div class="chart-container" style="position: relative; height: 500px; margin: var(--spacing-lg) 0;">
               <canvas id="trends-overview-chart"></canvas>
@@ -399,25 +403,57 @@
             </div>
           </div>
 
+          <div class="dashboard-card fc-legend-card" style="margin-bottom:var(--spacing-lg)">
+            <h3 style="margin:0 0 .5rem;font-size:.82rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.75">Trend Label Definitions</h3>
+            <p style="margin:0 0 .65rem;font-size:.78rem;opacity:.65">
+              Labels are <strong>self-relative</strong> — each MDL is measured against its own average caseload,
+              so a large MDL must change proportionally more to be flagged as rapidly moving.
+            </p>
+            <p style="margin:.4rem 0 .3rem;font-size:.78rem;font-weight:700;opacity:.6;letter-spacing:.03em">TREND DIRECTION</p>
+            <div class="fc-legend-grid">
+              <span class="fc-mom fc-up2">⬆ Rapidly Rising</span>
+              <span class="fc-legend-def">Monthly slope &gt; <strong>+10%</strong> of the MDL's own average — an unusually fast acceleration.</span>
+              <span class="fc-mom fc-up1">↑ Rising</span>
+              <span class="fc-legend-def">Monthly slope between <strong>+3%</strong> and +10% — steady, notable growth.</span>
+              <span class="fc-mom fc-flat">→ Stable</span>
+              <span class="fc-legend-def">Monthly slope within <strong>±3%</strong> — no meaningful directional change.</span>
+              <span class="fc-mom fc-dn1">↓ Declining</span>
+              <span class="fc-legend-def">Monthly slope between <strong>−3%</strong> and −10% — steady, notable decrease.</span>
+              <span class="fc-mom fc-dn2">⬇ Rapidly Declining</span>
+              <span class="fc-legend-def">Monthly slope &lt; <strong>−10%</strong> of the MDL's own average — an unusually fast contraction.</span>
+            </div>
+            <p style="margin:.85rem 0 .3rem;font-size:.78rem;font-weight:700;opacity:.6;letter-spacing:.03em">ACCELERATION (ACCEL COLUMN)</p>
+            <div class="fc-legend-grid">
+              <span class="fc-accel fc-accel-up">↗ Accel.</span>
+              <span class="fc-legend-def">The rate of change is <strong>speeding up</strong> — second half of the window moved faster than the first. A rising MDL getting faster, or a declining MDL accelerating downward.</span>
+              <span class="fc-accel fc-accel-flat">~ Steady</span>
+              <span class="fc-legend-def">The rate of change is <strong>consistent</strong> throughout the window — no meaningful difference between early and recent months.</span>
+              <span class="fc-accel fc-accel-dn">↘ Decel.</span>
+              <span class="fc-legend-def">The rate of change is <strong>slowing down</strong> — second half of the window moved slower than the first. A declining MDL may be stabilizing; a rising one may be peaking.</span>
+            </div>
+          </div>
+
           <div class="dashboard-grid" style="margin-bottom:var(--spacing-lg)">
             <div class="dashboard-card">
               <h2>Top 10 Rising MDLs</h2>
-              <p class="ks-subtitle">Strongest upward trend over last 12 months. R&#178; = model reliability.</p>
+              <p class="ks-subtitle">Strongest upward trend over last 12 months. <em>Accel</em> shows whether the rate of change is itself speeding up or slowing. R&#178; = model reliability.</p>
               <div class="table-wrap">
                 <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
                   <colgroup>
                     <col style="width:72px">
                     <col>
                     <col style="width:66px">
-                    <col style="width:108px">
-                    <col style="width:60px">
-                    <col style="width:68px">
+                    <col style="width:100px">
+                    <col style="width:62px">
+                    <col style="width:56px">
+                    <col style="width:64px">
                     <col style="width:44px">
                   </colgroup>
                   <thead><tr>
                     <th>MDL</th><th>Title</th>
                     <th class="ks-num">Current</th>
                     <th class="ks-num">Trend</th>
+                    <th class="ks-num">Accel</th>
                     <th class="ks-num">&#177;/mo</th>
                     <th class="ks-num">6-mo &#916;</th>
                     <th class="ks-num">R&#178;</th>
@@ -428,22 +464,24 @@
             </div>
             <div class="dashboard-card">
               <h2>Top 10 Declining MDLs</h2>
-              <p class="ks-subtitle">Strongest downward trend over last 12 months.</p>
+              <p class="ks-subtitle">Strongest downward trend over last 12 months. <em>Accel</em> shows whether the rate of decline is speeding up or easing.</p>
               <div class="table-wrap">
                 <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
                   <colgroup>
                     <col style="width:72px">
                     <col>
                     <col style="width:66px">
-                    <col style="width:108px">
-                    <col style="width:60px">
-                    <col style="width:68px">
+                    <col style="width:100px">
+                    <col style="width:62px">
+                    <col style="width:56px">
+                    <col style="width:64px">
                     <col style="width:44px">
                   </colgroup>
                   <thead><tr>
                     <th>MDL</th><th>Title</th>
                     <th class="ks-num">Current</th>
                     <th class="ks-num">Trend</th>
+                    <th class="ks-num">Accel</th>
                     <th class="ks-num">&#177;/mo</th>
                     <th class="ks-num">6-mo &#916;</th>
                     <th class="ks-num">R&#178;</th>
@@ -451,6 +489,37 @@
                   <tbody id="fc-declining-tbody"></tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+          <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
+            <h2>Anomalous Months</h2>
+            <p class="ks-subtitle">
+              Months where a single MDL's pending count deviated more than <strong>2 standard errors</strong> from its own regression line —
+              statistically out-of-character spikes or drops that may signal a mass filing event, bellwether trial, settlement wave, or data artifact.
+              Sorted by magnitude of deviation. Only 1 worst month shown per MDL.
+            </p>
+            <div class="table-wrap">
+              <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
+                <colgroup>
+                  <col style="width:72px">
+                  <col>
+                  <col style="width:76px">
+                  <col style="width:72px">
+                  <col style="width:72px">
+                  <col style="width:60px">
+                  <col style="width:60px">
+                </colgroup>
+                <thead><tr>
+                  <th>MDL</th><th>Title</th>
+                  <th class="ks-num">Month</th>
+                  <th class="ks-num">Actual</th>
+                  <th class="ks-num">Expected</th>
+                  <th class="ks-num">Dev %</th>
+                  <th class="ks-num">Type</th>
+                </tr></thead>
+                <tbody id="fc-anomaly-tbody"></tbody>
+              </table>
             </div>
           </div>
 
@@ -464,19 +533,171 @@
             </div>
           </div>
 
+          <div class="dashboard-card">
+            <h2>Court Docket Intelligence <span class="fc-cl-badge">via CourtListener</span></h2>
+            <p class="ks-subtitle">
+              Judge assignments and lead plaintiff law firms sourced from the free
+              <a href="https://www.courtlistener.com" target="_blank" rel="noopener">CourtListener</a>
+              public API (Free Law Project) — matched by MDL docket number to JPML records.
+              Firm data is available for MDLs indexed in the RECAP archive.
+              Click any MDL number to open its full docket on CourtListener.
+            </p>
+            <div id="fc-cl-meta" class="fc-cl-meta"></div>
+            <div style="margin:.6rem 0">
+              <input id="fc-cl-filter" type="search" placeholder="Filter by MDL, title, judge, or firm…" class="fc-cl-filter-input">
+            </div>
+            <div id="fc-cl-wrap" class="table-wrap">
+              <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
+                <colgroup>
+                  <col style="width:76px">
+                  <col>
+                  <col style="width:72px">
+                  <col style="width:140px">
+                  <col style="width:220px">
+                </colgroup>
+                <thead><tr>
+                  <th>MDL</th>
+                  <th>Title</th>
+                  <th class="ks-num">Pending</th>
+                  <th>Judge</th>
+                  <th>Lead Plaintiff Firms</th>
+                </tr></thead>
+                <tbody id="fc-cl-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Defendant Exposure Tracker -->
+          <div class="dashboard-card" style="margin-top:1rem">
+            <div class="card-header">
+              <h3 class="card-title">Defendant Exposure Tracker</h3>
+              <span class="card-subtitle">Litigation category risk scores — last 12 months</span>
+            </div>
+            <div id="exposure-tracker-content">
+              <div class="fc-loading">Loading exposure data…</div>
+            </div>
+          </div>
+
+          <!-- Settlement Proximity Signals -->
+          <div class="dashboard-card" style="margin-top:1rem">
+            <div class="card-header">
+              <h3 class="card-title">Settlement Proximity Signals</h3>
+              <span class="card-subtitle">MDLs with declining caseloads and mature age — highest scores first</span>
+            </div>
+            <div class="table-wrap">
+              <table class="dashboard-table table-readable" id="settlement-table" style="width:100%;table-layout:fixed">
+                <colgroup>
+                  <col style="width:80px">
+                  <col style="width:auto">
+                  <col style="width:80px">
+                  <col style="width:65px">
+                  <col style="width:110px">
+                  <col style="width:90px">
+                  <col style="width:130px">
+                </colgroup>
+                <thead><tr>
+                  <th style="white-space:nowrap">MDL</th>
+                  <th>Title</th>
+                  <th class="ks-num" style="white-space:nowrap">Pending</th>
+                  <th class="ks-num" style="white-space:nowrap">Age</th>
+                  <th class="ks-num" style="white-space:nowrap">Momentum</th>
+                  <th class="ks-num" style="white-space:nowrap">Accel.</th>
+                  <th class="ks-num" style="white-space:nowrap">Proximity Score</th>
+                </tr></thead>
+                <tbody id="settlement-proximity-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Judicial Assignment Analysis -->
+          <div class="dashboard-card" style="margin-top:1rem">
+            <div class="card-header">
+              <h3 class="card-title">Judicial Assignment Analysis</h3>
+              <span class="card-subtitle">Judges ranked by active MDL case load — top 25</span>
+            </div>
+            <div class="table-wrap">
+              <table class="dashboard-table table-readable" id="judicial-table" style="width:100%;table-layout:fixed">
+                <colgroup>
+                  <col style="width:200px">
+                  <col style="width:auto">
+                  <col style="width:90px">
+                  <col style="width:80px">
+                  <col style="width:80px">
+                  <col style="width:90px">
+                  <col style="width:120px">
+                </colgroup>
+                <thead><tr>
+                  <th>Judge</th>
+                  <th>District</th>
+                  <th class="ks-num" style="white-space:nowrap">Active MDLs</th>
+                  <th class="ks-num" style="white-space:nowrap">Resolved</th>
+                  <th class="ks-num" style="white-space:nowrap">Total MDLs</th>
+                  <th class="ks-num" style="white-space:nowrap">Avg Duration</th>
+                  <th class="ks-num" style="white-space:nowrap">Avg Pending/MDL</th>
+                </tr></thead>
+                <tbody id="judicial-analysis-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
         <!-- end #forecasting-tab -->
 
         <div class="tab-content" id="source-reports-tab">
-          <div class="dashboard-card">
-            <h2>Source Reports</h2>
-            <p class="ks-subtitle">Original JPML monthly pending docket reports used to build this dashboard.
-              Source: <a href="https://www.jpml.uscourts.gov" target="_blank" rel="noopener" style="color:var(--color-accent)">JPML.uscourts.gov</a>
+
+          <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
+            <h2>JPML Monthly Reports</h2>
+            <p class="ks-subtitle">Original pending docket statistics published monthly by the
+              <a href="https://www.jpml.uscourts.gov/pending-mdl-statistics-0" target="_blank" rel="noopener" style="color:var(--color-accent)">U.S. Judicial Panel on Multidistrict Litigation</a>.
+              These PDFs are the primary input — parsed and stored as structured JSON to power every chart and table on this dashboard.
+              Download <code>scripts/download_pdfs.py</code> and <code>scripts/parse_mdls.py</code> to refresh them.
             </p>
             <div id="source-reports-grid" style="margin-top:var(--spacing-md)">
               <p style="color:var(--color-text-secondary)">Loading reports...</p>
             </div>
           </div>
+
+          <div class="dashboard-card">
+            <h2>External Data Sources</h2>
+            <p class="ks-subtitle">Third-party sources used to enrich the dashboard. All free and publicly accessible.</p>
+            <div class="sr-sources-grid">
+
+              <div class="sr-source-card">
+                <div class="sr-source-header">
+                  <span class="sr-source-icon">⚖️</span>
+                  <div>
+                    <a href="https://www.courtlistener.com" target="_blank" rel="noopener" class="sr-source-title">CourtListener</a>
+                    <span class="sr-source-org">Free Law Project</span>
+                  </div>
+                </div>
+                <p class="sr-source-desc">Free public API providing MDL docket metadata matched by docket number: judge assignments, lead plaintiff law firms, case filing dates, and docket URLs. Powers the <em>Court Docket Intelligence</em> card on the Forecasting tab. Refresh with <code>python scripts/fetch_courtlistener.py --force</code>.</p>
+              </div>
+
+              <div class="sr-source-card">
+                <div class="sr-source-header">
+                  <span class="sr-source-icon">📂</span>
+                  <div>
+                    <a href="https://www.courtlistener.com/recap/" target="_blank" rel="noopener" class="sr-source-title">RECAP Archive</a>
+                    <span class="sr-source-org">Free Law Project</span>
+                  </div>
+                </div>
+                <p class="sr-source-desc">Crowd-sourced mirror of PACER federal court documents. CourtListener's firm and attorney data is populated from RECAP — MDLs that appear in RECAP have richer enrichment data (law firms, parties) than those that don't.</p>
+              </div>
+
+              <div class="sr-source-card">
+                <div class="sr-source-header">
+                  <span class="sr-source-icon">🏛️</span>
+                  <div>
+                    <a href="https://www.jpml.uscourts.gov" target="_blank" rel="noopener" class="sr-source-title">JPML Official Site</a>
+                    <span class="sr-source-org">U.S. Judicial Panel on Multidistrict Litigation</span>
+                  </div>
+                </div>
+                <p class="sr-source-desc">The authoritative source for all MDL statistics. Publishes monthly pending docket PDFs, transfer orders, and docket listings. The PDFs above are downloaded directly from this site.</p>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
       </div>
