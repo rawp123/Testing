@@ -49,7 +49,7 @@
     const placeholder = document.getElementById('site-header');
     if (!placeholder) return;
 
-    fetch('/partials/header.html')
+    fetch('/src/partials/header.html')
       .then(function (res) { return res.text(); })
       .then(function (html) {
         placeholder.outerHTML = html;
