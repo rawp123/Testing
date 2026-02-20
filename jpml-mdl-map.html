@@ -21,6 +21,7 @@
           <button class="tab-button" id="tab-current-month" data-tab="current-month">Current Month Statistics</button>
           <button class="tab-button" data-tab="month-over-month">Month over Month Statistics</button>
           <button class="tab-button" data-tab="trends-overview">Trends</button>
+          <button class="tab-button" data-tab="forecasting">Forecasting</button>
           <button class="tab-button" data-tab="source-reports">Source Reports</button>
         </div>
 
@@ -383,6 +384,88 @@
           </div>
           <!-- end #trend-key-summaries -->
         </div>
+
+        <!-- ══ Forecasting tab ══════════════════════════════════════════════════ -->
+        <div class="tab-content" id="forecasting-tab">
+
+          <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
+            <h2>National Pending Case Forecast</h2>
+            <p class="ks-subtitle">Linear regression over all available JPML monthly data, projected 6 months ahead.
+              Orange bars are model projections; shaded band = 95% prediction interval.
+            </p>
+            <div id="fc-agg-stats" class="fc-stats-bar"></div>
+            <div class="chart-container" style="position:relative;height:440px;margin-top:var(--spacing-md)">
+              <canvas id="fc-agg-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="dashboard-grid" style="margin-bottom:var(--spacing-lg)">
+            <div class="dashboard-card">
+              <h2>Top 10 Rising MDLs</h2>
+              <p class="ks-subtitle">Strongest upward trend over last 12 months. R&#178; = model reliability.</p>
+              <div class="table-wrap">
+                <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
+                  <colgroup>
+                    <col style="width:72px">
+                    <col>
+                    <col style="width:66px">
+                    <col style="width:108px">
+                    <col style="width:60px">
+                    <col style="width:68px">
+                    <col style="width:44px">
+                  </colgroup>
+                  <thead><tr>
+                    <th>MDL</th><th>Title</th>
+                    <th class="ks-num">Current</th>
+                    <th class="ks-num">Trend</th>
+                    <th class="ks-num">&#177;/mo</th>
+                    <th class="ks-num">6-mo &#916;</th>
+                    <th class="ks-num">R&#178;</th>
+                  </tr></thead>
+                  <tbody id="fc-rising-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="dashboard-card">
+              <h2>Top 10 Declining MDLs</h2>
+              <p class="ks-subtitle">Strongest downward trend over last 12 months.</p>
+              <div class="table-wrap">
+                <table class="dashboard-table ks-table" style="table-layout:fixed;width:100%">
+                  <colgroup>
+                    <col style="width:72px">
+                    <col>
+                    <col style="width:66px">
+                    <col style="width:108px">
+                    <col style="width:60px">
+                    <col style="width:68px">
+                    <col style="width:44px">
+                  </colgroup>
+                  <thead><tr>
+                    <th>MDL</th><th>Title</th>
+                    <th class="ks-num">Current</th>
+                    <th class="ks-num">Trend</th>
+                    <th class="ks-num">&#177;/mo</th>
+                    <th class="ks-num">6-mo &#916;</th>
+                    <th class="ks-num">R&#178;</th>
+                  </tr></thead>
+                  <tbody id="fc-declining-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-card">
+            <h2>District Momentum</h2>
+            <p class="ks-subtitle">Monthly trend slope for the most-moving districts over the last 12 months.
+              Green = growing, red = declining.
+            </p>
+            <div style="position:relative;height:380px;margin-top:var(--spacing-md)">
+              <canvas id="fc-district-chart"></canvas>
+            </div>
+          </div>
+
+        </div>
+        <!-- end #forecasting-tab -->
 
         <div class="tab-content" id="source-reports-tab">
           <div class="dashboard-card">

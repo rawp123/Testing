@@ -1736,6 +1736,60 @@ html.debug .inline-mdl-table {
   max-width: 100%;
 }
 
+/* ─── Forecasting tab ─────────────────────────────────────────────────────── */
+.fc-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: var(--spacing-sm);
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.light-theme .fc-stats-bar {
+  background: rgba(0,0,0,0.04);
+}
+
+.fc-stat {
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
+}
+
+.fc-stat strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.fc-ci {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.fc-mom {
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fc-up2 { color: #2ecc71; }
+.fc-up1 { color: #52d68a; }
+.fc-flat { color: var(--color-text-secondary); }
+.fc-dn1 { color: #e67e22; }
+.fc-dn2 { color: #e74c3c; }
+
+.fc-r2 {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.fc-r2-hi  { background: rgba(46,204,113,0.18); color: #2ecc71; }
+.fc-r2-mid { background: rgba(241,196,15,0.18);  color: #d4ac0d; }
+.fc-r2-lo  { background: rgba(231,76,60,0.18);   color: #e74c3c; }
+
 /* ─── Source Reports tab ──────────────────────────────────────────────────── */
 .sr-year-group {
   display: flex;

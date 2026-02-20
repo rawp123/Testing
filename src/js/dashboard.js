@@ -997,6 +997,320 @@ function renderTrendChart() {}
 // Global variable to store the trends overview chart instance
 let trendsOverviewChart = null;
 
+// ─── Forecasting helpers & state ─────────────────────────────────────────────────────────
+let fcAggChart = null;
+let fcDistrictChart = null;
+
+function linReg(xs, ys) {
+  const n = xs.length;
+  if (n < 3) return null;
+  const xMean = xs.reduce((a, b) => a + b, 0) / n;
+  const yMean = ys.reduce((a, b) => a + b, 0) / n;
+  const Sxx = xs.reduce((s, x) => s + (x - xMean) ** 2, 0);
+  const Sxy = xs.reduce((s, x, i) => s + (x - xMean) * (ys[i] - yMean), 0);
+  const slope = Sxx < 1e-9 ? 0 : Sxy / Sxx;
+  const intercept = yMean - slope * xMean;
+  const yHat = xs.map(x => slope * x + intercept);
+  const ss_res = ys.reduce((s, y, i) => s + (y - yHat[i]) ** 2, 0);
+  const ss_tot = ys.reduce((s, y) => s + (y - yMean) ** 2, 0);
+  const r2 = ss_tot < 1 ? 1 : Math.max(0, 1 - ss_res / ss_tot);
+  const se = n > 2 ? Math.sqrt(ss_res / (n - 2)) : 0;
+  return { slope, intercept, r2, se, xMean, Sxx, n };
+}
+
+function predCI(reg, x, z = 1.96) {
+  const { slope, intercept, se, xMean, Sxx, n } = reg;
+  const yHat = slope * x + intercept;
+  const margin = z * se * Math.sqrt(1 + 1 / n + (x - xMean) ** 2 / (Sxx || 1));
+  return { yHat: Math.max(0, yHat), lower: Math.max(0, yHat - margin), upper: yHat + margin };
+}
+
+function shiftMonth(dateStr, n) {
+  const [y, m] = dateStr.split('-').map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
+function momentumLabel(slope) {
+  if (slope > 150)  return { text: '⬆ Rapidly Rising',    cls: 'fc-up2' };
+  if (slope > 30)   return { text: '↑ Rising',           cls: 'fc-up1' };
+  if (slope > -30)  return { text: '→ Stable',           cls: 'fc-flat' };
+  if (slope > -150) return { text: '↓ Declining',        cls: 'fc-dn1' };
+  return               { text: '⬇ Rapidly Declining', cls: 'fc-dn2' };
+}
+
+function r2Badge(r2) {
+  const pct = (r2 * 100).toFixed(0);
+  const cls = r2 >= 0.7 ? 'fc-r2-hi' : r2 >= 0.4 ? 'fc-r2-mid' : 'fc-r2-lo';
+  return `<span class="fc-r2 ${cls}">${pct}%</span>`;
+}
+
+function fcChartColors() {
+  const light = document.documentElement.classList.contains('light-theme');
+  return {
+    text:       light ? '#333' : '#ddd',
+    grid:       light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)',
+    tooltipBg:  light ? 'rgba(255,255,255,0.95)' : 'rgba(18,18,18,0.93)'
+  };
+}
+
+async function renderForecastingTab() {
+  const container = document.getElementById('forecasting-tab');
+  if (!container || container.dataset.loaded) return;
+
+  // ─ Load all months ───────────────────────────────────────────────────────────
+  const allData = {};
+  for (const m of months) allData[m] = await loadDataForMonth(m);
+
+  const FORECAST_N    = 6;
+  const WINDOW        = 12;
+  const lastMonth     = months[months.length - 1];
+  const futureMonths  = Array.from({ length: FORECAST_N }, (_, i) => shiftMonth(lastMonth, i + 1));
+
+  // ─ Aggregate totals per month ────────────────────────────────────────────────
+  const aggPending = months.map(m =>
+    allData[m].reduce((s, r) => s + (r.Pending || 0), 0)
+  );
+  const xs     = months.map((_, i) => i);
+  const aggReg = linReg(xs, aggPending);
+  const histLen = months.length;
+
+  // Build full label array (historical + forecast markers)
+  const allLabels = [
+    ...months.map(formatMonthYear),
+    ...futureMonths.map(m => formatMonthYear(m) + ' ▸')
+  ];
+  const totalLen  = histLen + FORECAST_N;
+
+  // Regression line across full span
+  const regLine = Array.from({ length: totalLen }, (_, i) => predCI(aggReg, i).yHat);
+
+  // Forecast bars and CI
+  const fcVals  = Array.from({ length: FORECAST_N }, (_, i) =>
+    Math.max(0, aggReg.slope * (histLen + i) + aggReg.intercept));
+  const ciUpper = Array.from({ length: FORECAST_N }, (_, i) => predCI(aggReg, histLen + i).upper);
+  const ciLower = Array.from({ length: FORECAST_N }, (_, i) => predCI(aggReg, histLen + i).lower);
+
+  // Padded arrays
+  const histBars = [...aggPending,             ...Array(FORECAST_N).fill(null)];
+  const fcBars   = [...Array(histLen).fill(null), ...fcVals];
+  const ciUArr   = [...Array(histLen).fill(null), ...ciUpper];
+  const ciLArr   = [...Array(histLen).fill(null), ...ciLower];
+
+  // ─ Aggregate forecast chart ───────────────────────────────────────────────────
+  if (fcAggChart) { fcAggChart.destroy(); fcAggChart = null; }
+  const c = fcChartColors();
+  const aggCanvas = document.getElementById('fc-agg-chart');
+
+  fcAggChart = new Chart(aggCanvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          type: 'bar', label: 'Actual (Pending)',
+          data: histBars,
+          backgroundColor: 'rgba(54,162,235,0.6)',
+          borderColor: 'rgba(54,162,235,1)', borderWidth: 1, order: 3
+        },
+        {
+          type: 'bar', label: 'Forecast',
+          data: fcBars,
+          backgroundColor: 'rgba(255,165,0,0.45)',
+          borderColor: 'rgba(255,165,0,0.85)', borderWidth: 1, order: 3
+        },
+        {
+          type: 'line', label: 'Regression line',
+          data: regLine,
+          borderColor: 'rgba(255,99,132,0.85)', borderWidth: 2,
+          borderDash: [6, 3], pointRadius: 0, tension: 0, order: 1, fill: false
+        },
+        {
+          type: 'line', label: '95% CI upper',
+          data: ciUArr,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(255,165,0,0.15)',
+          pointRadius: 0, tension: 0, fill: '+1', order: 2
+        },
+        {
+          type: 'line', label: '95% CI lower',
+          data: ciLArr,
+          borderColor: 'transparent', backgroundColor: 'transparent',
+          pointRadius: 0, tension: 0, fill: false, order: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        datalabels: { display: false },
+        legend: {
+          position: 'top',
+          labels: {
+            filter: item => !item.text.startsWith('95%'),
+            color: c.text, usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: c.tooltipBg, titleColor: c.text, bodyColor: c.text,
+          callbacks: {
+            label: ctx => {
+              if (ctx.parsed.y === null || ctx.dataset.label.startsWith('95%')) return null;
+              return `${ctx.dataset.label}: ${Math.round(ctx.parsed.y).toLocaleString()}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxRotation: 45, minRotation: 45,
+            color: ctx => ctx.index >= histLen ? 'rgba(255,165,0,0.9)' : c.text
+          },
+          grid: { color: c.grid }
+        },
+        y: {
+          beginAtZero: false,
+          title: { display: true, text: 'Pending Cases', color: c.text },
+          ticks: { color: c.text, callback: v => v.toLocaleString() },
+          grid: { color: c.grid }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  // Stats bar
+  const nxt = predCI(aggReg, histLen);
+  const sDir = aggReg.slope >= 0 ? '+' : '';
+  document.getElementById('fc-agg-stats').innerHTML =
+    `<span class="fc-stat">Trend slope <strong>${sDir}${Math.round(aggReg.slope).toLocaleString()} cases/mo</strong></span>` +
+    `<span class="fc-stat">Model fit (R²) <strong>${(aggReg.r2 * 100).toFixed(1)}%</strong></span>` +
+    `<span class="fc-stat">Next month projection <strong>${Math.round(nxt.yHat).toLocaleString()}</strong>` +
+    ` <span class="fc-ci">(95% CI: ${Math.round(nxt.lower).toLocaleString()} – ${Math.round(nxt.upper).toLocaleString()})</span></span>`;
+
+  // ─ Per-MDL momentum (last WINDOW months) ───────────────────────────────────────
+  const recentMonths = months.slice(-WINDOW);
+  const mdlHistory = {};
+  for (let i = 0; i < recentMonths.length; i++) {
+    for (const row of allData[recentMonths[i]] || []) {
+      const mdl = row.MDL || ''; if (!mdl) continue;
+      if (!mdlHistory[mdl]) mdlHistory[mdl] = { title: row.Title || '', pending: Array(recentMonths.length).fill(null) };
+      mdlHistory[mdl].pending[i] = row.Pending || 0;
+    }
+  }
+
+  const mdlStats = [];
+  for (const [mdl, info] of Object.entries(mdlHistory)) {
+    const valid = info.pending.reduce((a, v, i) => { if (v !== null) a.push({ x: i, y: v }); return a; }, []);
+    if (valid.length < 6) continue;
+    const r = linReg(valid.map(v => v.x), valid.map(v => v.y));
+    if (!r) continue;
+    const lastPending = info.pending.filter(v => v !== null).pop();
+    if ((lastPending || 0) < 10) continue;
+    const proj6 = Math.max(0, r.slope * (WINDOW + 6) + r.intercept);
+    const projDelta = proj6 - (lastPending || 0);
+    mdlStats.push({ mdl, title: info.title, slope: r.slope, r2: r.r2, lastPending, proj6, projDelta });
+  }
+  mdlStats.sort((a, b) => b.slope - a.slope);
+
+  function mdlRows(list) {
+    return list.map(s => {
+      const mom  = momentumLabel(s.slope);
+      const sStr = (s.slope >= 0 ? '+' : '') + Math.round(s.slope).toLocaleString();
+      const dStr = (s.projDelta >= 0 ? '+' : '') + Math.round(s.projDelta).toLocaleString();
+      return `<tr>
+        <td style="font-size:.74rem;font-weight:600">${s.mdl}</td>
+        <td class="ks-clamp">${s.title}</td>
+        <td class="ks-num">${Math.round(s.lastPending).toLocaleString()}</td>
+        <td class="ks-num"><span class="fc-mom ${mom.cls}">${mom.text}</span></td>
+        <td class="ks-num">${sStr}</td>
+        <td class="ks-num">${dStr}</td>
+        <td class="ks-num">${r2Badge(s.r2)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('fc-rising-tbody').innerHTML   = mdlRows(mdlStats.slice(0, 10));
+  document.getElementById('fc-declining-tbody').innerHTML = mdlRows([...mdlStats].reverse().slice(0, 10));
+
+  // ─ District momentum horizontal bar chart ───────────────────────────────────────
+  const distHistory = {};
+  for (let i = 0; i < recentMonths.length; i++) {
+    for (const row of allData[recentMonths[i]] || []) {
+      const d = row.District || ''; if (!d) continue;
+      if (!distHistory[d]) distHistory[d] = Array(recentMonths.length).fill(0);
+      distHistory[d][i] += row.Pending || 0;
+    }
+  }
+
+  const distStats = [];
+  for (const [dist, pending] of Object.entries(distHistory)) {
+    const nzIdx = pending.reduce((a, v, i) => { if (v > 0) a.push(i); return a; }, []);
+    if (nzIdx.length < 6) continue;
+    const r = linReg(nzIdx, nzIdx.map(i => pending[i]));
+    if (!r) continue;
+    distStats.push({ dist, slope: r.slope, r2: r.r2 });
+  }
+  distStats.sort((a, b) => b.slope - a.slope);
+
+  const topRising   = distStats.slice(0, 8);
+  const topDecline  = [...distStats].reverse().slice(0, 8);
+  const seen        = new Set(topRising.map(d => d.dist));
+  const distDisplay = [
+    ...topDecline.filter(d => !seen.has(d.dist)),
+    ...topRising
+  ].sort((a, b) => a.slope - b.slope);
+
+  if (fcDistrictChart) { fcDistrictChart.destroy(); fcDistrictChart = null; }
+  const distCanvas = document.getElementById('fc-district-chart');
+
+  fcDistrictChart = new Chart(distCanvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: distDisplay.map(d => d.dist),
+      datasets: [{
+        label: 'Monthly trend (pending cases/mo)',
+        data: distDisplay.map(d => d.slope),
+        backgroundColor: distDisplay.map(d =>
+          d.slope >= 0 ? 'rgba(72,199,142,0.72)' : 'rgba(255,99,132,0.72)'),
+        borderColor: distDisplay.map(d =>
+          d.slope >= 0 ? 'rgba(72,199,142,1)' : 'rgba(255,99,132,1)'),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        datalabels: { display: false },
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.tooltipBg, titleColor: c.text, bodyColor: c.text,
+          callbacks: {
+            label: ctx => {
+              const s = ctx.parsed.x;
+              return `Trend: ${s >= 0 ? '+' : ''}${Math.round(s)} cases/mo`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Monthly trend (pending cases / mo)', color: c.text },
+          grid: { color: c.grid }, ticks: { color: c.text }
+        },
+        y: { ticks: { color: c.text } }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  container.dataset.loaded = '1';
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ─── Source Reports ──────────────────────────────────────────────────────────
 async function renderSourceReports() {
   const grid = document.getElementById('source-reports-grid');
@@ -2408,6 +2722,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Render trends chart when trends-overview tab is selected
         if (tabName === 'trends-overview') {
           await renderTrendsOverview(metricState['trends']);
+        }
+        if (tabName === 'forecasting') {
+          await renderForecastingTab();
         }
         // Render source reports list on first visit
         if (tabName === 'source-reports') {
