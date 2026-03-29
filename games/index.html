@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Game Lab | Robert Parrish</title>
+  <meta name="description" content="Game Lab features playful browser games, including Happy Math, Find The Ball, and Math Meteor Shower." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/games/game-lab.css">
+  <script src="/src/js/header.js" defer></script>
+</head>
+<body data-page="game-lab">
+  <div id="site-header"></div>
+  <main>
+    <section class="container lab-shell">
+      <section class="lab-intro" aria-label="Game Lab library intro">
+        <div class="lab-intro-copy">
+          <p class="lab-kicker">Game Library</p>
+          <h1 class="lab-title">Browse by category</h1>
+          <p class="lab-copy">Pick a shelf and jump into a math game, a reading game, or a quick challenge.</p>
+        </div>
+        <div class="lab-intro-stats" aria-hidden="true">
+          <div class="lab-stat-tile">
+            <span class="lab-panel-label">Games</span>
+            <strong>4</strong>
+          </div>
+          <div class="lab-stat-tile">
+            <span class="lab-panel-label">Categories</span>
+            <strong>3</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-groups" aria-label="Game Lab categories">
+        <section class="lab-group">
+          <div class="lab-group-head">
+            <p class="lab-panel-label">Math Missions</p>
+            <h2>Numbers with arcade energy</h2>
+            <p class="lab-group-copy">Math games with quick feedback, streaks, and bright arcade-style moments.</p>
+          </div>
+          <div class="lab-grid">
+            <article class="lab-card lab-card-happy">
+              <p class="lab-card-kicker">Math Mission</p>
+              <h2>Happy Math</h2>
+              <p>Answer bright, friendly math questions, collect rewards, and keep your streak going.</p>
+              <div class="lab-card-tags">
+                <span>Math</span>
+                <span>Rewards</span>
+                <span>Kid-friendly</span>
+              </div>
+              <a href="/games/happy-math/" class="btn primary">Play Happy Math</a>
+            </article>
+
+            <article class="lab-card lab-card-meteor">
+              <p class="lab-card-kicker">Arcade Cabinet</p>
+              <h2>Math Meteor Shower</h2>
+              <p>Tap the falling meteor with the right answer, build a streak, and survive the space storm.</p>
+              <div class="lab-card-tags">
+                <span>Arcade</span>
+                <span>Math</span>
+                <span>Power-ups</span>
+              </div>
+              <a href="/games/math-meteor-shower/" class="btn primary">Play Math Meteor Shower</a>
+            </article>
+          </div>
+        </section>
+
+        <section class="lab-group">
+          <div class="lab-group-head">
+            <p class="lab-panel-label">Word Play</p>
+            <h2>Early reading and phonics</h2>
+            <p class="lab-group-copy">Simple sound work, decodable words, and a calmer reading-focused pace.</p>
+          </div>
+          <div class="lab-grid lab-grid-single">
+            <article class="lab-card lab-card-word">
+              <p class="lab-card-kicker">Early Literacy</p>
+              <h2>Silly Word Builder</h2>
+              <p>Fill in the missing sound, build simple decodable words, and collect cheerful reading rewards.</p>
+              <div class="lab-card-tags">
+                <span>Phonics</span>
+                <span>Reading</span>
+                <span>Word play</span>
+              </div>
+              <a href="/games/silly-word-builder/" class="btn primary">Play Silly Word Builder</a>
+            </article>
+          </div>
+        </section>
+
+        <section class="lab-group">
+          <div class="lab-group-head">
+            <p class="lab-panel-label">Quick Challenges</p>
+            <h2>Short rounds and focus games</h2>
+            <p class="lab-group-copy">Fast, replayable games built around attention, tracking, and quick wins.</p>
+          </div>
+          <div class="lab-grid lab-grid-single">
+            <article class="lab-card lab-card-find">
+              <p class="lab-card-kicker">Street Magic</p>
+              <h2>Find The Ball</h2>
+              <p>Watch the cups, track the shuffle, and pick the one hiding the ball.</p>
+              <div class="lab-card-tags">
+                <span>Reaction</span>
+                <span>Focus</span>
+                <span>Quick rounds</span>
+              </div>
+              <a href="/games/find-the-ball/" class="btn primary">Play Find The Ball</a>
+            </article>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with HTML, CSS, and JavaScript.</div>
+  </footer>
+</body>
+</html>

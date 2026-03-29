@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Find The Ball | Robert Parrish</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/games/find-the-ball.css">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/games/find-the-ball.js" defer></script>
+</head>
+<body data-page="find-the-ball">
+  <div id="site-header"></div>
+  <main>
+    <section class="container" style="margin-top:32px;margin-bottom:32px">
+      <section class="card shell-card" style="max-width:980px;margin:0 auto">
+        <p class="shell-kicker">Game Lab</p>
+        <h1 class="shell-title" style="text-align:center">Find The Ball</h1>
+        <p class="shell-copy">Press start, watch the three cups shuffle for 10 moves, then guess which cup is hiding the ball.</p>
+
+        <div class="shell-toolbar" aria-label="Game controls">
+          <button id="shell-start" class="btn primary" type="button">Start Shuffle</button>
+          <div class="shell-chip">Moves Left: <strong id="shell-moves-left">10</strong></div>
+          <div class="shell-chip">Wins: <strong id="shell-wins">0</strong></div>
+        </div>
+
+        <p id="shell-status" class="shell-status" aria-live="polite">Press start to begin.</p>
+
+        <div class="shell-stage" aria-label="Cup and ball game board">
+          <div id="shell-ball" class="shell-ball" aria-hidden="true"></div>
+          <div class="shell-cups">
+            <button class="shell-cup" type="button" data-cup-id="0" aria-label="Choose cup 1">
+              <span class="shell-cup-rim"></span>
+              <span class="shell-cup-body"></span>
+              <span class="shell-cup-handle"></span>
+              <span class="shell-cup-saucer"></span>
+              <span class="shell-cup-shadow"></span>
+            </button>
+            <button class="shell-cup" type="button" data-cup-id="1" aria-label="Choose cup 2">
+              <span class="shell-cup-rim"></span>
+              <span class="shell-cup-body"></span>
+              <span class="shell-cup-handle"></span>
+              <span class="shell-cup-saucer"></span>
+              <span class="shell-cup-shadow"></span>
+            </button>
+            <button class="shell-cup" type="button" data-cup-id="2" aria-label="Choose cup 3">
+              <span class="shell-cup-rim"></span>
+              <span class="shell-cup-body"></span>
+              <span class="shell-cup-handle"></span>
+              <span class="shell-cup-saucer"></span>
+              <span class="shell-cup-shadow"></span>
+            </button>
+          </div>
+        </div>
+
+        <p class="shell-help">The ball shows at the beginning so you know where it starts. Once the cups finish moving, click the cup you think has it.</p>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>© JPML Dashboard. All rights reserved.</div>
+    <div class="muted small">Built with HTML • CSS • JavaScript</div>
+  </footer>
+</body>
+</html>

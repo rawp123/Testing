@@ -1,99 +1,119 @@
 /**
- * header.js — loads the shared header partial into #site-header on every page,
- * then wires up theme toggle, mobile nav toggle, and active nav link.
+ * Loads the shared site header, applies the saved theme, and wires the header UI.
  */
-(function () {
-  // ── Theme helpers (must run before injection so theme applies immediately) ──
+(function initializeSharedHeader() {
+  const HEADER_PARTIAL_PATH = '/src/partials/header.html';
+  const THEME_STORAGE_KEY = 'site-theme';
+
+  function getStoredTheme() {
+    return localStorage.getItem(THEME_STORAGE_KEY) || 'dark';
+  }
+
   function applyTheme(theme) {
-    const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light-theme');
-    } else {
-      root.classList.remove('light-theme');
+    const isLightTheme = theme === 'light';
+    document.documentElement.classList.toggle('light-theme', isLightTheme);
+
+    const themeToggleButton = document.getElementById('theme-toggle');
+    if (themeToggleButton) {
+      themeToggleButton.textContent = isLightTheme ? '☀️' : '🌙';
+      themeToggleButton.setAttribute('aria-pressed', isLightTheme ? 'true' : 'false');
     }
-    // Update toggle icon if it exists yet
-    const btn = document.getElementById('theme-toggle');
-    if (btn) {
-      btn.textContent = theme === 'light' ? '☀️' : '🌙';
-      btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-    }
-    localStorage.setItem('site-theme', theme);
+
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   }
 
-  // Apply saved theme immediately (before header even loads) to avoid flash
-  const savedTheme = localStorage.getItem('site-theme') || 'dark';
-  applyTheme(savedTheme);
+  function toggleMobileNavigation() {
+    const navList = document.getElementById('nav-list');
+    const navToggleButton = document.querySelector('.nav-toggle');
 
-  // ── Mobile nav toggle ──
-  function toggleNav() {
-    const list = document.getElementById('nav-list');
-    const btn  = document.querySelector('.nav-toggle');
-    if (!list || !btn) return;
-    const open = list.classList.toggle('show');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!navList || !navToggleButton) {
+      return;
+    }
+
+    const isOpen = navList.classList.toggle('show');
+    navToggleButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
-  // ── Set active link ──
-  function setActiveLink(page) {
-    if (!page) return;
-    document.querySelectorAll('[data-nav-link]').forEach(function (a) {
-      if (a.dataset.navLink === page) {
-        a.classList.add('nav-active');
-        a.setAttribute('aria-current', 'page');
+  function markActiveLink(page) {
+    if (!page) {
+      return;
+    }
+
+    document.querySelectorAll('[data-nav-link]').forEach((link) => {
+      if (link.dataset.navLink === page) {
+        link.classList.add('nav-active');
+        link.setAttribute('aria-current', 'page');
       }
     });
   }
 
-  // ── Load and inject header ──
-  document.addEventListener('DOMContentLoaded', function () {
-    const placeholder = document.getElementById('site-header');
-    if (!placeholder) return;
+  function closeOpenDropdowns() {
+    document.querySelectorAll('.nav-dropdown.open').forEach((dropdown) => {
+      dropdown.classList.remove('open');
 
-    fetch('/src/partials/header.html')
-      .then(function (res) { return res.text(); })
-      .then(function (html) {
-        placeholder.outerHTML = html;
+      const dropdownButton = dropdown.querySelector('.nav-dropdown-btn');
+      if (dropdownButton) {
+        dropdownButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 
-        // Re-apply theme so icon text is updated now that the button exists
-        applyTheme(localStorage.getItem('site-theme') || 'dark');
+  function bindHeaderControls() {
+    const themeToggleButton = document.getElementById('theme-toggle');
+    if (themeToggleButton) {
+      themeToggleButton.addEventListener('click', () => {
+        const nextTheme = document.documentElement.classList.contains('light-theme') ? 'dark' : 'light';
+        applyTheme(nextTheme);
 
-        // Wire theme toggle
-        var themeBtn = document.getElementById('theme-toggle');
-        if (themeBtn) {
-          themeBtn.addEventListener('click', function () {
-            var isLight = document.documentElement.classList.contains('light-theme');
-            applyTheme(isLight ? 'dark' : 'light');
-            // If the dashboard's own updateDashboard exists, let it re-render too
-            if (typeof window.onThemeToggle === 'function') window.onThemeToggle();
-          });
+        if (typeof window.onThemeToggle === 'function') {
+          window.onThemeToggle();
+        }
+      });
+    }
+
+    const navToggleButton = document.querySelector('.nav-toggle');
+    if (navToggleButton) {
+      navToggleButton.addEventListener('click', toggleMobileNavigation);
+    }
+
+    document.querySelectorAll('.nav-dropdown-btn').forEach((dropdownButton) => {
+      dropdownButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+
+        const dropdown = dropdownButton.closest('.nav-dropdown');
+        if (!dropdown) {
+          return;
         }
 
-        // Wire mobile nav toggle
-        var navBtn = document.querySelector('.nav-toggle');
-        if (navBtn) navBtn.addEventListener('click', toggleNav);
-
-        // Wire dropdown toggles
-        document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var li = btn.closest('.nav-dropdown');
-            var isOpen = li.classList.toggle('open');
-            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-          });
-        });
-        document.addEventListener('click', function () {
-          document.querySelectorAll('.nav-dropdown.open').forEach(function (li) {
-            li.classList.remove('open');
-            var btn = li.querySelector('.nav-dropdown-btn');
-            if (btn) btn.setAttribute('aria-expanded', 'false');
-          });
-        });
-
-        // Set active link
-        setActiveLink(document.body.dataset.page);
-      })
-      .catch(function (err) {
-        console.warn('header.js: could not load header partial', err);
+        const isOpen = dropdown.classList.toggle('open');
+        dropdownButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
-  });
+    });
+
+    document.addEventListener('click', closeOpenDropdowns);
+  }
+
+  async function injectHeader() {
+    const headerPlaceholder = document.getElementById('site-header');
+    if (!headerPlaceholder) {
+      return;
+    }
+
+    try {
+      const response = await fetch(HEADER_PARTIAL_PATH);
+      if (!response.ok) {
+        throw new Error(`Header request failed with ${response.status}`);
+      }
+
+      headerPlaceholder.outerHTML = await response.text();
+      applyTheme(getStoredTheme());
+      bindHeaderControls();
+      markActiveLink(document.body.dataset.page);
+    } catch (error) {
+      console.warn('header.js: could not load header partial', error);
+    }
+  }
+
+  applyTheme(getStoredTheme());
+  document.addEventListener('DOMContentLoaded', injectHeader);
 })();

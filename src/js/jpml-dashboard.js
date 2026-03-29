@@ -1,32 +1,13 @@
-/*
- * MANUAL TEST PROCEDURE:
- * 1. Load jpml-mdl-map.html with query params: start=2025-12-02&end=2026-02-02
- * 2. Click expand on Pending Increase row 1, confirm SINGLE section with current month (2026-02-02) only
- * 3. Click expand on another row, confirm previous closes
- * 4. Verify inline details show: section title, table headers (MDL | Title | Count), data rows, total footer
- * 5. Confirm NO horizontal scrollbar in inline details
- * 6. Confirm long titles wrap normally (no vertical letter stacking)
- * 7. Test narrow viewport (DevTools responsive ~900px and ~600px) - still no horizontal scroll
- * 8. Verify Total row appears at bottom with correct sum
- * 9. To enable debug outlines, add class="debug" to <html> tag in DevTools
- */
-
-// Debug flag (set to true to enable console logging)
-const DEBUG_INLINE_DETAILS = false;
-
-// Test harness flag (set to true to inject synthetic test rows with extreme titles)
-const ENABLE_INLINE_TABLE_TEST_HARNESS = false;
-
+// ---------------------------------------------------------------------------
 // Global state
+// ---------------------------------------------------------------------------
 let districts = {};
 let months = [];
 let dataByMonth = {};
 let startMonth = null;
 let endMonth = null;
-let metric = 'count';
 let shortToLongDistrictMap = {};
-let currentEndData = []; // raw row data for the currently displayed end month
-let currentStartData = []; // raw row data for the currently displayed start month
+let currentEndMonthData = [];
 
 // Sort state for tables
 const sortState = {
@@ -38,7 +19,8 @@ const sortState = {
   'top-districts-table': { column: null, direction: 'desc' },
   'district-detail-table': { column: null, direction: 'desc' },
   'current-new-mdls-table': { column: null, direction: 'desc' },
-  'current-removed-mdls-table': { column: null, direction: 'desc' }
+  'current-removed-mdls-table': { column: null, direction: 'desc' },
+  'current-reappeared-mdls-table': { column: null, direction: 'desc' }
 };
 
 // Metric state for movers tables
@@ -47,6 +29,10 @@ const metricState = {
   'mdl': 'absolute',       // mdl-metric radio buttons
   'trends': 'pending'      // trends-metric radio buttons
 };
+
+// ---------------------------------------------------------------------------
+// General helpers
+// ---------------------------------------------------------------------------
 
 // Helper to close any open inline details row in a table
 function closeOpenDetails(tableId) {
@@ -60,6 +46,17 @@ function closeOpenDetails(tableId) {
   buttons.forEach(btn => btn.classList.remove('expanded'));
 }
 
+function hideDistrictDetailSection() {
+  const detailSection = document.getElementById('district-detail-section');
+  if (detailSection) {
+    detailSection.hidden = true;
+  }
+
+  document.querySelectorAll('#top-districts-list .row-selected').forEach((row) => {
+    row.classList.remove('row-selected');
+  });
+}
+
 // Helper to render compact MDL breakdown table for inline details (current month only)
 function renderInlineMdlsSection(mdls, total, mdlsAvailable, label) {
   if (!mdlsAvailable) {
@@ -68,23 +65,6 @@ function renderInlineMdlsSection(mdls, total, mdlsAvailable, label) {
   
   if (!mdls || mdls.length === 0) {
     return `<div class="inline-no-data">No ${label} MDLs found for this district.</div>`;
-  }
-  
-  // DEV TEST HARNESS: Inject synthetic test rows if enabled
-  if (ENABLE_INLINE_TABLE_TEST_HARNESS) {
-    mdls = [...mdls];
-    // Test 1: Very long title with spaces (300+ chars)
-    mdls.push({
-      mdlNum: 'TEST-8888',
-      title: 'In Re: Aqueous Film Forming Foams Products Liability Litigation Involving Multiple Districts And Extensive Case Management Coordination Requirements With Numerous Plaintiffs Complex Discovery Proceedings Bellwether Trials Settlement Negotiations Expert Witness Depositions Motion Practice Summary Judgment Briefing Class Certification Issues Multi-District Transfer Coordination',
-      count: 888888
-    });
-    // Test 2: Very long unbroken token (200+ chars, no spaces)
-    mdls.push({
-      mdlNum: 'TEST-9999',
-      title: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-      count: 999999
-    });
   }
   
   // Build table with colgroup for fixed column widths, headers, ALL rows, and total footer
@@ -98,7 +78,7 @@ function renderInlineMdlsSection(mdls, total, mdlsAvailable, label) {
       <tr>
         <th>MDL</th>
         <th class="title">Title</th>
-        <th class="count">Count</th>
+        <th class="count">${label}</th>
       </tr>
     </thead>
     <tbody>`;
@@ -303,6 +283,15 @@ async function loadDataForMonth(month) {
   return dataByMonth[month];
 }
 
+function getCurrentMonthComparisonMonths() {
+  if (!months || months.length < 2) return null;
+
+  return {
+    latestMonth: months[months.length - 1],
+    previousMonth: months[months.length - 2]
+  };
+}
+
 function computeSummary(currentData, priorData) {
   const byDistrict = {};
   const priorByDistrict = {};
@@ -445,29 +434,6 @@ function computeSummary(currentData, priorData) {
   };
 }
 
-function renderPanels(summary) {
-  const el = document.getElementById('dashboard-panels');
-  const deltaClass = summary.nationalDelta >= 0 ? 'delta-positive' : 'delta-negative';
-  el.innerHTML = `
-    <div class="panel">
-      <div class="panel-label">National Total Pending MDL Cases</div>
-      <div class="panel-value">${summary.total.toLocaleString()}</div>
-    </div>
-    <div class="panel">
-      <div class="panel-label">National Pending MoM Δ</div>
-      <div class="panel-value"><span class="${deltaClass}">${summary.nationalDelta >= 0 ? '+' : ''}${summary.nationalDelta.toLocaleString()}</span> (${summary.nationalPctDelta >= 0 ? '+' : ''}${summary.nationalPctDelta.toFixed(1)}%)</div>
-    </div>
-    <div class="panel">
-      <div class="panel-label">HHI Concentration</div>
-      <div class="panel-value">${summary.hhi} <span class="score-label ${summary.concentration.toLowerCase()}">${summary.concentration}</span></div>
-    </div>
-    <div class="panel">
-      <div class="panel-label">Top 5 Districts Combined %</div>
-      <div class="panel-value">${(summary.top5Share * 100).toFixed(1)}%</div>
-    </div>
-  `;
-}
-
 function sortTable(tableId, column) {
   const state = sortState[tableId];
   
@@ -479,6 +445,18 @@ function sortTable(tableId, column) {
     state.direction = 'desc';
   }
   
+  const currentMonthTables = new Set([
+    'current-new-mdls-table',
+    'current-removed-mdls-table',
+    'current-reappeared-mdls-table'
+  ]);
+
+  // Keep current-month tables tied to latest-vs-previous snapshot logic.
+  if (currentMonthTables.has(tableId)) {
+    renderCurrentMonthNewMDLs();
+    return;
+  }
+
   // Update dashboard to re-render with new sort
   updateDashboard();
 }
@@ -512,6 +490,43 @@ function sortData(data, column, direction, columnMapping = {}) {
     }
     
     return direction === 'asc' ? comparison : -comparison;
+  });
+}
+
+async function classifyNewMDLs(newMDLs, previousMonth, currentMonth) {
+  if (!newMDLs || newMDLs.length === 0) return [];
+
+  const priorMonthIndex = months.indexOf(previousMonth);
+  const historicalMonths = priorMonthIndex > 0 ? months.slice(0, priorMonthIndex) : [];
+  const seenMonthsByMDL = {};
+
+  for (const month of historicalMonths) {
+    const rows = await loadDataForMonth(month);
+    for (const row of rows) {
+      const mdl = row['MDL'] || row['MDL Name'];
+      if (mdl) {
+        if (!seenMonthsByMDL[mdl]) seenMonthsByMDL[mdl] = [];
+        seenMonthsByMDL[mdl].push(month);
+      }
+    }
+  }
+
+  return newMDLs.map(mdl => {
+    const seenMonths = seenMonthsByMDL[mdl.MDL] || [];
+    const firstSeenMonth = seenMonths[0] || null;
+    const lastSeenMonth = seenMonths.length ? seenMonths[seenMonths.length - 1] : null;
+    const fellOffMonth = lastSeenMonth
+      ? months[months.indexOf(lastSeenMonth) + 1] || null
+      : null;
+
+    return {
+      ...mdl,
+      newSincePreviousSnapshot: true,
+      firstSeenMonth,
+      fellOffMonth,
+      reappearedMonth: currentMonth || null,
+      status: firstSeenMonth ? 'reappeared' : 'first_seen'
+    };
   });
 }
 
@@ -552,8 +567,9 @@ function renderMoversTable(summary, tableType, metric = 'absolute') {
     });
   }
   
-  // Get all districts and filter/sort based on metric
-  const allDistricts = Object.values(summary.byDistrict || {});
+  // Exclude reappeared MDLs from district mover rankings so revived proceedings
+  // do not overstate month-over-month district growth.
+  const allDistricts = getDistrictMoverDistricts(summary);
   
   // Determine which field to use for sorting
   const deltaField = tableType === 'pending' 
@@ -691,6 +707,38 @@ function renderMoversTable(summary, tableType, metric = 'absolute') {
   // Setup expand button listeners using event delegation (handled in DOMContentLoaded)
 }
 
+function getDistrictMoverDistricts(summary) {
+  const byDistrict = {};
+
+  Object.entries(summary.byDistrict || {}).forEach(([district, values]) => {
+    byDistrict[district] = { ...values };
+  });
+
+  const reappearedMDLs = (summary.newMDLs || []).filter(mdl => mdl.status === 'reappeared');
+  reappearedMDLs.forEach(mdl => {
+    const district = mdl.District;
+    if (!district || !byDistrict[district]) return;
+
+    byDistrict[district].pending = Math.max(0, (byDistrict[district].pending || 0) - (mdl.pending || 0));
+    byDistrict[district].total = Math.max(0, (byDistrict[district].total || 0) - (mdl.total || 0));
+  });
+
+  return Object.values(byDistrict).map(district => {
+    const priorPending = district.priorPending || 0;
+    const priorTotal = district.priorTotal || 0;
+    const pending = district.pending || 0;
+    const total = district.total || 0;
+
+    return {
+      ...district,
+      pendingDelta: pending - priorPending,
+      pendingPctDelta: priorPending ? ((pending - priorPending) / priorPending) * 100 : (pending ? 100 : 0),
+      totalDelta: total - priorTotal,
+      totalPctDelta: priorTotal ? ((total - priorTotal) / priorTotal) * 100 : (total ? 100 : 0)
+    };
+  });
+}
+
 function renderMDLMoversTable(summary, tableType, metric = 'absolute') {
   const tableId = tableType === 'pending' ? 'mdl-pending-increase-table' : 'mdl-total-increase-table';
   const tbody = document.querySelector(`#${tableId} tbody`);
@@ -766,14 +814,14 @@ function renderNewMDLsTable(summary, tableId = 'current-new-mdls-table') {
   
   tbody.innerHTML = '';
   
-  let newMDLs = summary.newMDLs || [];
+  let newMDLs = (summary.newMDLs || []).filter(mdl => mdl.status !== 'reappeared');
   
   // Apply sorting if sort state exists
   const sortCol = sortState[tableId]?.column;
   const sortDir = sortState[tableId]?.direction || 'desc';
   
   if (sortCol && newMDLs.length > 0) {
-    const columnMapping = { 'Count': 'abs' };
+    const columnMapping = { 'Count': 'abs', 'Status': 'status' };
     newMDLs = sortData(newMDLs, sortCol, sortDir, columnMapping);
   }
   
@@ -785,8 +833,8 @@ function renderNewMDLsTable(summary, tableId = 'current-new-mdls-table') {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${mdl.MDL || ''}</td>
-        <td>${mdl.Title || ''}</td>
         <td>${getFullDistrictName(mdl.District) || ''}</td>
+        <td>${mdl.Title || ''}</td>
         <td>${mdl.abs != null ? mdl.abs.toLocaleString() : ''}</td>
       `;
       tbody.appendChild(row);
@@ -824,8 +872,8 @@ function renderRemovedMDLsTable(summary, tableId = 'current-removed-mdls-table')
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${mdl.MDL || ''}</td>
-        <td>${mdl.Title || ''}</td>
         <td>${getFullDistrictName(mdl.District) || ''}</td>
+        <td>${mdl.Title || ''}</td>
         <td>${mdl.abs != null ? mdl.abs.toLocaleString() : ''}</td>
       `;
       tbody.appendChild(row);
@@ -837,23 +885,76 @@ function renderRemovedMDLsTable(summary, tableId = 'current-removed-mdls-table')
   }
 }
 
+function renderReappearedMDLsTable(summary, tableId = 'current-reappeared-mdls-table') {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  let reappearedMDLs = (summary.newMDLs || []).filter(mdl => mdl.status === 'reappeared');
+
+  const sortCol = sortState[tableId]?.column;
+  const sortDir = sortState[tableId]?.direction || 'desc';
+
+  if (sortCol && reappearedMDLs.length > 0) {
+    const columnMapping = {
+      'Fell Off': 'fellOffMonth',
+      'Reappeared': 'reappearedMonth',
+      'Current Count': 'abs'
+    };
+    reappearedMDLs = sortData(reappearedMDLs, sortCol, sortDir, columnMapping);
+  }
+
+  updateSortHeaders(tableId);
+
+  if (reappearedMDLs.length > 0) {
+    reappearedMDLs.forEach(mdl => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${mdl.MDL || ''}</td>
+        <td>${getFullDistrictName(mdl.District) || ''}</td>
+        <td>${mdl.Title || ''}</td>
+        <td>${mdl.fellOffMonth ? formatMonthYear(mdl.fellOffMonth) : ''}</td>
+        <td>${mdl.reappearedMonth ? formatMonthYear(mdl.reappearedMonth) : ''}</td>
+        <td>${mdl.abs != null ? mdl.abs.toLocaleString() : ''}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  } else {
+    const row = document.createElement('tr');
+    row.innerHTML = '<td colspan="6" style="text-align:center;">No reappeared MDLs</td>';
+    tbody.appendChild(row);
+  }
+}
+
+function renderCurrentMonthTables(summary) {
+  renderNewMDLsTable(summary, 'current-new-mdls-table');
+  renderRemovedMDLsTable(summary, 'current-removed-mdls-table');
+  renderReappearedMDLsTable(summary, 'current-reappeared-mdls-table');
+}
+
 async function renderCurrentMonthNewMDLs() {
-  // Get the latest month and the previous month
-  if (!months || months.length < 2) {
+  const monthPair = getCurrentMonthComparisonMonths();
+
+  if (!monthPair) {
     console.warn('renderCurrentMonthNewMDLs: Insufficient months data', { months, length: months?.length });
     const newTbody = document.querySelector('#current-new-mdls-table tbody');
     const removedTbody = document.querySelector('#current-removed-mdls-table tbody');
+    const reappearedTbody = document.querySelector('#current-reappeared-mdls-table tbody');
     if (newTbody) {
       newTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Insufficient data</td></tr>';
     }
     if (removedTbody) {
       removedTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Insufficient data</td></tr>';
     }
+    if (reappearedTbody) {
+      reappearedTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Insufficient data</td></tr>';
+    }
     return;
   }
   
-  const latestMonth = months[months.length - 1];
-  const previousMonth = months[months.length - 2];
+  const { latestMonth, previousMonth } = monthPair;
   
   console.log('renderCurrentMonthNewMDLs: Comparing', { latestMonth, previousMonth });
   
@@ -867,6 +968,7 @@ async function renderCurrentMonthNewMDLs() {
   
   // Compute summary to get new and removed MDLs
   const summary = computeSummary(latestData, previousData);
+  summary.newMDLs = await classifyNewMDLs(summary.newMDLs || [], previousMonth, latestMonth);
   
   console.log('renderCurrentMonthNewMDLs: Summary computed', { 
     newMDLs: summary.newMDLs?.length, 
@@ -874,8 +976,7 @@ async function renderCurrentMonthNewMDLs() {
   });
   
   // Render both new and removed MDLs tables
-  renderNewMDLsTable(summary, 'current-new-mdls-table');
-  renderRemovedMDLsTable(summary, 'current-removed-mdls-table');
+  renderCurrentMonthTables(summary);
 }
 
 function getDistrictBreakdownForMonth(monthData, districtName) {
@@ -958,18 +1059,6 @@ async function handleExpandClick(btn) {
   const currentTotal = isPendingTable ? currentBreakdown.totals.pending : currentBreakdown.totals.total;
   const label = isPendingTable ? 'Pending Count' : 'Total Count';
   
-  // Debug logging
-  if (DEBUG_INLINE_DETAILS) {
-    console.log('=== Inline Details Debug (Current Only) ===');
-    console.log('tableId:', tableId);
-    console.log('district:', district);
-    console.log('isPendingTable:', isPendingTable);
-    console.log('endMonth:', endMonth);
-    console.log('currentMdls count:', currentMdls.length);
-    console.log('currentTotal:', currentTotal);
-    console.log('mdlsAvailable:', currentBreakdown.mdlsAvailable);
-  }
-  
   // Insert inline details row with SINGLE current month section
   const colCount = table.querySelectorAll('thead th').length;
   const detailsRow = document.createElement('tr');
@@ -985,14 +1074,7 @@ async function handleExpandClick(btn) {
   
   tr.parentNode.insertBefore(detailsRow, tr.nextSibling);
   
-  // Debug: confirm insertion
-  if (DEBUG_INLINE_DETAILS) {
-    console.log('detailsRow inserted (current only), colspan:', colCount);
-    console.log('thead th count:', table.querySelectorAll('thead th').length);
-  }
 }
-
-function renderTrendChart() {}
 
 // Global variable to store the trends overview chart instance
 let trendsOverviewChart = null;
@@ -1000,6 +1082,10 @@ let trendsOverviewChart = null;
 // ─── Forecasting helpers & state ─────────────────────────────────────────────────────────
 let fcAggChart = null;
 let fcDistrictChart = null;
+
+function getOptionalChartPlugins() {
+  return typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : [];
+}
 
 function linReg(xs, ys) {
   const n = xs.length;
@@ -1123,25 +1209,13 @@ async function renderForecastingTab() {
     ...futureMonths.map(m => formatMonthYear(m) + ' ▸')
   ];
 
-  // Regression line across full span
-  // Historical portion: LOESS smooth curve (captures real curvature)
-  // Forecast portion: linear extrapolation anchored to the LOESS tail
+  // Historical smooth trend for shape/context
   const loessHist = loess(xs, aggPending, 0.4);
 
-  // Fit a short local regression on the last 8 LOESS values to extrapolate forward
-  const tailN    = Math.min(8, histLen);
-  const tailXs   = xs.slice(-tailN);
-  const tailYs   = loessHist.slice(-tailN);
-  const tailReg  = linReg(tailXs, tailYs);
-  const extendFrom = loessHist[histLen - 1];           // ensure continuity
-  const tailSlope  = tailReg ? tailReg.slope : aggReg.slope;
-  const tailIntc   = extendFrom - tailSlope * xs[histLen - 1];
-
-  const regLine = [
-    ...loessHist,
-    ...Array.from({ length: FORECAST_N }, (_, i) =>
-      Math.max(0, tailSlope * (histLen + i) + tailIntc))
-  ];
+  // True linear regression across the full historical span and forecast horizon.
+  const regLine = Array.from({ length: histLen + FORECAST_N }, (_, i) =>
+    Math.max(0, aggReg.slope * i + aggReg.intercept)
+  );
 
   // Forecast bars and CI
   const fcVals  = Array.from({ length: FORECAST_N }, (_, i) =>
@@ -1151,7 +1225,7 @@ async function renderForecastingTab() {
 
   // Padded arrays
   const histBars      = [...aggPending,                        ...Array(FORECAST_N).fill(null)];
-  const predictedBars = [...regLine.slice(0, histLen),         ...Array(FORECAST_N).fill(null)];
+  const predictedBars = [...loessHist,                         ...Array(FORECAST_N).fill(null)];
   const fcBars        = [...Array(histLen).fill(null),         ...fcVals];
   const ciUArr        = [...Array(histLen).fill(null),         ...ciUpper];
   const ciLArr        = [...Array(histLen).fill(null),         ...ciLower];
@@ -1253,7 +1327,7 @@ async function renderForecastingTab() {
         }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: getOptionalChartPlugins()
   });
 
   // Stats bar
@@ -1451,7 +1525,7 @@ async function renderForecastingTab() {
         y: { ticks: { color: c.text } }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: getOptionalChartPlugins()
   });
 
   container.dataset.loaded = '1';
@@ -2235,7 +2309,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: getOptionalChartPlugins()
   });
   
   console.log('Trends overview chart rendered with', chartData.length, 'months in', mode, 'mode');
@@ -2333,212 +2407,13 @@ function renderTopDistrictsTable(summary) {
   tbody.querySelectorAll('tr.clickable-row').forEach(row => {
     row.addEventListener('click', () => {
       const districtAbbr = row.getAttribute('data-district');
-      if (districtAbbr && currentEndData.length > 0) {
+      if (districtAbbr && currentEndMonthData.length > 0) {
         // Highlight selected row
         tbody.querySelectorAll('tr').forEach(r => r.classList.remove('row-selected'));
         row.classList.add('row-selected');
-        renderDistrictDetails(districtAbbr, currentEndData, summary);
+        renderDistrictDetails(districtAbbr, currentEndMonthData, summary);
       }
     });
-  });
-}
-
-// Global variable to store the chart instance
-let districtPieChart = null;
-
-function renderDistrictPieChart(summary, currentMonthData = []) {
-  const canvas = document.getElementById('district-pie-chart');
-  const legendEl = document.getElementById('pie-chart-legend');
-  
-  console.log('renderDistrictPieChart called', { 
-    canvas: !!canvas, 
-    legendEl: !!legendEl,
-    summaryByDistrict: Object.keys(summary?.byDistrict || {}).length,
-    currentMonthData: currentMonthData?.length
-  });
-  
-  if (!canvas) {
-    console.error('Pie chart canvas not found');
-    return;
-  }
-  
-  // Get top 5 districts by case count
-  const allDistricts = Object.values(summary.byDistrict)
-    .sort((a, b) => b.abs - a.abs);
-  
-  console.log('renderDistrictPieChart: All districts', allDistricts.length);
-  
-  const top5 = allDistricts.slice(0, 5);
-  const others = allDistricts.slice(5);
-  const othersTotal = others.reduce((sum, d) => sum + d.abs, 0);
-  
-  // Prepare data
-  const labels = top5.map(d => d.District);
-  const data = top5.map(d => d.abs);
-  
-  if (othersTotal > 0) {
-    labels.push('All Others');
-    data.push(othersTotal);
-  }
-  
-  // Color palette
-  const colors = [
-    '#3b82f6', // blue
-    '#8b5cf6', // purple
-    '#ec4899', // pink
-    '#f59e0b', // amber
-    '#10b981', // green
-    '#6b7280'  // gray for "All Others"
-  ];
-  
-  // Calculate total for percentages
-  const total = data.reduce((a, b) => a + b, 0);
-  
-  // Destroy existing chart if it exists
-  if (districtPieChart) {
-    districtPieChart.destroy();
-  }
-  
-  // Get current theme colors from CSS variables
-  const textColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--color-text-primary').trim() || '#e6edf3';
-  const tooltipBg = getComputedStyle(document.documentElement)
-    .getPropertyValue('--color-bg-tertiary').trim() || '#21262d';
-  const borderColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--color-bg-secondary').trim() || '#161b22';
-  
-  // Create new chart with datalabels
-  districtPieChart = new Chart(canvas, {
-    type: 'pie',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: colors.slice(0, labels.length),
-        borderWidth: 2,
-        borderColor: borderColor
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      onClick: (event, elements) => {
-        if (elements && elements.length > 0) {
-          const index = elements[0].index;
-          const districtName = labels[index];
-          
-          // Skip if "All Others" is clicked
-          if (districtName === 'All Others') {
-            return;
-          }
-          
-          // Show district details
-          renderDistrictDetails(districtName, currentMonthData, summary);
-        }
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'right',
-          labels: {
-            padding: 15,
-            font: {
-              size: 12
-            },
-            color: textColor,
-            generateLabels: function(chart) {
-              const data = chart.data;
-              if (data.labels.length && data.datasets.length) {
-                return data.labels.map((label, i) => {
-                  const value = data.datasets[0].data[i];
-                  const percentage = ((value / total) * 100).toFixed(1);
-                  return {
-                    text: `${label} (${percentage}%)`,
-                    fillStyle: data.datasets[0].backgroundColor[i],
-                    fontColor: textColor,
-                    hidden: false,
-                    index: i
-                  };
-                });
-              }
-              return [];
-            }
-          }
-        },
-        tooltip: {
-          callbacks: {
-            title: function(context) {
-              const label = context[0].label || '';
-              const value = context[0].parsed || 0;
-              const percentage = ((value / total) * 100).toFixed(1);
-              return `${label}: ${value.toLocaleString()} (${percentage}%)`;
-            },
-            label: function(context) {
-              const districtName = context.label || '';
-              
-              // Skip MDL list for "All Others"
-              if (districtName === 'All Others') {
-                return '';
-              }
-              
-              // Get MDLs for this district from current month data
-              const districtMDLs = currentMonthData
-                .filter(row => row.District === districtName)
-                .map(row => ({
-                  mdl: row['MDL'] || row['MDL Name'] || '',
-                  count: row['Pending'] || 0
-                }))
-                .filter(m => m.mdl) // Only include rows with MDL numbers
-                .sort((a, b) => b.count - a.count) // Sort by count descending
-                .slice(0, 10); // Top 10 MDLs
-              
-              // Return empty if no MDLs
-              if (districtMDLs.length === 0) {
-                return '';
-              }
-              
-              // Format as array of strings for multi-line tooltip
-              return districtMDLs.map(m => `  ${m.mdl}: ${m.count.toLocaleString()}`);
-            },
-            footer: function(context) {
-              const districtName = context[0].label || '';
-              if (districtName === 'All Others') {
-                return ['', 'Click on a district slice to see full MDL details'];
-              }
-              
-              const districtMDLs = currentMonthData
-                .filter(row => row.District === districtName)
-                .filter(row => row['MDL'] || row['MDL Name']);
-              
-              const lines = [];
-              if (districtMDLs.length > 10) {
-                lines.push(`  ... and ${districtMDLs.length - 10} more`);
-              }
-              lines.push('', 'Click to see full details');
-              return lines;
-            }
-          },
-          backgroundColor: tooltipBg,
-          titleColor: textColor,
-          bodyColor: textColor,
-          footerColor: getComputedStyle(document.documentElement)
-            .getPropertyValue('--color-text-secondary').trim() || '#7d8590',
-          padding: 12,
-          displayColors: false,
-          bodyFont: {
-            family: 'monospace',
-            size: 11
-          },
-          titleFont: {
-            size: 13,
-            weight: 'bold'
-          }
-        },
-        datalabels: {
-          display: false
-        }
-      }
-    }
   });
 }
 
@@ -2645,7 +2520,7 @@ function renderExecutiveSummary(summary, endData) {
 
   // Top MDL by pending
   const topMDL = allMDLArr.slice().sort((a, b) => b.pending - a.pending)[0] || {};
-  // Fastest growing MDL MoM
+  // Fastest growing MDL month-over-month
   const fastMDL = (summary.mdlPendingIncrease || [])[0] || null;
   // Top districts sorted
   const topDist = allDistArr.slice().sort((a, b) => b.pending - a.pending);
@@ -2680,7 +2555,7 @@ function renderExecutiveSummary(summary, endData) {
           <div class="es-metric-value">${nationalTotal.toLocaleString()}</div>
         </div>
         <div class="es-metric-tile">
-          <div class="es-metric-label">MoM Pending Δ</div>
+          <div class="es-metric-label">Month-over-month Pending Δ</div>
           <div class="es-metric-value"><span class="${deltaClass}">${deltaSign}${summary.nationalDelta.toLocaleString()}</span></div>
           <div class="es-metric-sub">${pctSign}${summary.nationalPctDelta.toFixed(2)}%</div>
         </div>
@@ -2720,7 +2595,7 @@ function renderExecutiveSummary(summary, endData) {
 
         ${fastMDL ? `
         <div class="dashboard-card es-spotlight-card">
-          <div class="es-spotlight-label">Fastest Growing MDL (MoM)</div>
+          <div class="es-spotlight-label">Fastest Growing MDL (Month-over-month)</div>
           <div class="es-spotlight-mdl-num">${fastMDL.MDL}</div>
           <div class="es-spotlight-mdl-title">${fastMDL.Title}</div>
           <div class="es-spotlight-stats">
@@ -2830,28 +2705,6 @@ function renderExecutiveSummary(summary, endData) {
       </div>
     </div>
 
-    <!-- ── Row 4: Concentration Analysis ── -->
-    <div class="es-section">
-      <div class="es-section-header">
-        <h3 class="es-section-title">Concentration Analysis</h3>
-      </div>
-      <div class="es-conc-grid">
-        <div class="dashboard-card es-conc-card">
-          <div class="es-conc-label">Herfindahl–Hirschman Index (HHI)</div>
-          <div class="es-conc-value">${summary.hhi.toLocaleString()}</div>
-          <div class="es-conc-badge es-conc-${(summary.concentration || '').toLowerCase()}">${summary.concentration}</div>
-          <p class="es-conc-desc">HHI measures case concentration across jurisdictions. Values above 2,500 indicate high concentration; below 1,500 reflects broader geographic distribution.</p>
-        </div>
-        <div class="dashboard-card es-conc-card">
-          <div class="es-conc-label">Top 5 Jurisdictions Share</div>
-          <div class="es-conc-value">${(summary.top5Share * 100).toFixed(1)}%</div>
-          <div class="es-conc-sub">${(100 - summary.top5Share * 100).toFixed(1)}% distributed across remaining jurisdictions</div>
-          <div class="es-top5-bar-wrap">
-            <div class="es-top5-bar-fill" style="width:${(summary.top5Share * 100).toFixed(1)}%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   `;
 }
 
@@ -3161,8 +3014,8 @@ async function updateDashboard() {
   });
   
   const summary = computeSummary(endData, startData);
-  currentEndData = endData;   // store for district detail click handlers
-  currentStartData = startData; // store for Key Summaries MoM drivers
+  summary.newMDLs = await classifyNewMDLs(summary.newMDLs || [], startMonth, endMonth);
+  currentEndMonthData = endData;
   
   // renderPanels removed — metrics now in Executive Summary tab
   
@@ -3201,18 +3054,18 @@ async function updateDashboard() {
     
     mdlListEl.innerHTML =
       topMDLs.map(d =>
-        `<tr><td class="col-mdl">${d.MDL}</td><td class="col-title">${d.Title}</td><td class="col-district">${getFullDistrictName(d.District)}</td><td class="col-count num">${d.Count.toLocaleString()}</td></tr>`
+        `<tr><td class="col-mdl">${d.MDL}</td><td class="col-district">${getFullDistrictName(d.District)}</td><td class="col-title">${d.Title}</td><td class="col-count num">${d.Count.toLocaleString()}</td></tr>`
       ).join('') +
       (otherMDLs.length ? `<tr style="color:var(--color-text-secondary);font-style:italic">
         <td class="col-mdl"></td>
-        <td class="col-title">All Others (${otherMDLs.length})</td>
         <td class="col-district"></td>
+        <td class="col-title">All Others (${otherMDLs.length})</td>
         <td class="col-count num" style="font-style:normal">${othersCount.toLocaleString()}</td>
       </tr>` : '') +
       `<tr style="border-top:2px solid var(--color-border);font-weight:600">
         <td class="col-mdl"></td>
-        <td class="col-title">Total</td>
         <td class="col-district"></td>
+        <td class="col-title">Total</td>
         <td class="col-count num">${grandTotal.toLocaleString()}</td>
       </tr>`;
   }
@@ -3223,7 +3076,6 @@ async function updateDashboard() {
   renderMDLMoversTable(summary, 'total', metricState['mdl']);
   renderNewMDLsTable(summary);
   renderTopDistrictsTable(summary);
-  renderTrendChart();
   renderExecutiveSummary(summary, endData);
   await renderKeySummaries(endData, startData); // Key Summaries on Trends Overview tab
 }
@@ -3326,19 +3178,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       await handleExpandClick(btn);
     }
     
-    // Handle close district detail button - check element and parents
-    const isCloseBtn = e.target.id === 'district-detail-close' || 
-                       e.target.classList.contains('close-detail-btn') ||
-                       e.target.parentElement?.id === 'district-detail-close' ||
-                       e.target.parentElement?.classList.contains('close-detail-btn');
-    
-    if (isCloseBtn) {
+    const closeButton = e.target.closest('#district-detail-close');
+    if (closeButton) {
       e.preventDefault();
       e.stopPropagation();
-      const detailSection = document.getElementById('district-detail-section');
-      if (detailSection) {
-        detailSection.hidden = true;
-      }
+      hideDistrictDetailSection();
     }
   });
   

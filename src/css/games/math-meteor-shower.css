@@ -1,0 +1,49 @@
+.meteor-shell{padding-top:18px;padding-bottom:30px}
+.meteor-panel{padding:24px;background:radial-gradient(circle at top left, color-mix(in srgb,var(--accent) 18%, transparent), transparent 30%),radial-gradient(circle at bottom right, color-mix(in srgb,var(--accent-2) 16%, transparent), transparent 28%),linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 92%, white 2%))}
+.meteor-hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.meteor-kicker{margin:0 0 10px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.meteor-title{margin:0 0 10px;font-size:clamp(2rem,4.6vw,3rem)}
+.meteor-copy{margin:0;max-width:58ch;color:var(--muted);line-height:1.7}
+.meteor-hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.meteor-hud{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:18px 0}
+.meteor-chip{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--glass);font-size:.92rem}
+.meteor-chip strong{display:block;margin-top:6px;font-size:1.35rem}
+.meteor-toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.meteor-toggle{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1px solid var(--glass);background:rgba(255,255,255,.04);cursor:pointer}
+.meteor-toggle input{width:auto;margin:0}
+.meteor-wave-copy{color:var(--muted);font-size:.94rem}
+.meteor-instructions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.meteor-instructions span{padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--glass);font-size:.88rem;color:var(--muted)}
+.meteor-stage-wrap{position:relative}
+.meteor-question-bar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.meteor-question-label{margin:0 0 6px;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.meteor-question{margin:0;font-size:clamp(1.8rem,5vw,2.5rem);font-weight:900}
+.meteor-boss-badge{padding:10px 14px;border-radius:999px;background:linear-gradient(90deg,#fb7185,#f59e0b);color:#0b1220;font-weight:800;box-shadow:0 8px 24px rgba(245,158,11,.28)}
+.meteor-stage{position:relative;min-height:560px;border-radius:24px;overflow:hidden;border:1px solid var(--glass);background:radial-gradient(circle at top, rgba(255,255,255,.08), transparent 40%),linear-gradient(180deg,#101b2d 0%,#08111e 72%,#111927 100%)}
+.meteor-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:88px;background:linear-gradient(180deg,#1d2938,#0f1724);border-top:1px solid rgba(255,255,255,.06)}
+.meteor-stars,.meteor-effects,.meteor-field{position:absolute;inset:0}
+.meteor-stars{background-image:radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1px),radial-gradient(circle, rgba(255,255,255,.6) 0 1px, transparent 1px);background-position:8% 14%,66% 26%;background-size:180px 180px,220px 220px;opacity:.7}
+.meteor-status-overlay{position:absolute;left:50%;top:16px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(11,18,32,.78);border:1px solid color-mix(in srgb,var(--accent-2) 26%, transparent);color:var(--text);font-weight:700;z-index:4;backdrop-filter:blur(8px)}
+.meteor-field{pointer-events:none}
+.meteor-rocket{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:3;display:grid;justify-items:center}
+.meteor-rocket-body{font-size:3rem;filter:drop-shadow(0 10px 24px rgba(2,6,23,.4))}
+.meteor-rocket-flame{width:18px;height:32px;background:linear-gradient(180deg,#fde68a,#f97316 60%, transparent);clip-path:polygon(50% 100%,0 0,100% 0);filter:blur(1px);animation:meteor-flame 700ms ease-in-out infinite}
+.meteor-powerup{position:absolute;top:90px;right:20px;width:58px;height:58px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:linear-gradient(180deg,rgba(96,165,250,.92),rgba(34,197,94,.82));box-shadow:0 10px 30px rgba(96,165,250,.24);font-size:1.6rem;cursor:pointer;z-index:4}
+.meteor-item{position:absolute;top:-120px;left:0;width:110px;height:110px;border-radius:50%;display:grid;place-items:center;padding:12px;background:radial-gradient(circle at 28% 28%, rgba(255,255,255,.35), transparent 18%),radial-gradient(circle at 50% 50%, #8b5e34, #533319 72%, #2b1a0d 100%);border:2px solid rgba(245,158,11,.22);box-shadow:0 18px 32px rgba(2,6,23,.34);pointer-events:auto;cursor:pointer;user-select:none;transition:transform .16s ease,filter .16s ease,opacity .16s ease}
+.meteor-item::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1px dashed rgba(255,255,255,.1)}
+.meteor-item:hover{filter:brightness(1.08)}
+.meteor-item.is-correct-hint{box-shadow:0 0 0 3px rgba(110,231,183,.55),0 20px 38px rgba(2,6,23,.34)}
+.meteor-item.is-boss{width:148px;height:148px;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.3), transparent 18%),radial-gradient(circle at 50% 50%, #f97316, #b91c1c 68%, #3b0a0a 100%);border-color:rgba(251,146,60,.6)}
+.meteor-item.is-hit{transform:scale(.9);filter:brightness(1.18)}
+.meteor-item.is-destroyed{opacity:0;transform:scale(1.28)}
+.meteor-label{position:relative;z-index:2;text-align:center;font-size:1.28rem;font-weight:900;color:#fff7ed;text-shadow:0 3px 10px rgba(0,0,0,.35)}
+.meteor-trail{position:absolute;left:50%;top:-70px;width:12px;height:80px;transform:translateX(-50%);background:linear-gradient(180deg, rgba(251,191,36,.95), rgba(245,158,11,.16), transparent);filter:blur(4px);opacity:.85}
+.meteor-hit-burst{position:absolute;width:120px;height:120px;border-radius:50%;pointer-events:none;background:radial-gradient(circle, rgba(255,255,255,.95), rgba(250,204,21,.42), transparent 72%);animation:meteor-burst 520ms ease-out forwards}
+.meteor-status{min-height:32px;margin:16px 0 0;text-align:center;font-weight:700;color:var(--accent)}
+.meteor-status.right{color:#86efac}
+.meteor-status.wrong{color:#fca5a5}
+.meteor-status.special{color:#93c5fd}
+@keyframes meteor-flame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.75)}}
+@keyframes meteor-burst{0%{transform:scale(.45);opacity:1}100%{transform:scale(1.2);opacity:0}}
+@media (max-width:860px){.meteor-hud{grid-template-columns:repeat(2,minmax(0,1fr))}.meteor-stage{min-height:500px}}
+@media (max-width:560px){.meteor-panel{padding:18px}.meteor-hero-actions,.meteor-toolbar{display:grid;grid-template-columns:1fr 1fr}.meteor-wave-copy{grid-column:1 / -1}.meteor-stage{min-height:460px}.meteor-item{width:92px;height:92px}.meteor-item.is-boss{width:126px;height:126px}.meteor-label{font-size:1.1rem}}

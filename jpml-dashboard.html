@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MDL Concentration & Emerging Trends Dashboard</title>
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/src/css/dashboard_fixed.css">
+  <link rel="stylesheet" href="/src/css/jpml-dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/jpml-updater-widget.js" defer></script>
 </head>
 <body class="dashboard-page" data-page="dashboard">
   <div id="site-header"></div>
@@ -26,7 +27,7 @@
         </div>
 
         <div class="tab-content active" id="executive-summary-tab">
-          <!-- Populated by renderExecutiveSummary() in dashboard.js -->
+          <!-- Populated by renderExecutiveSummary() in jpml-dashboard.js -->
         </div>
 
         <div class="tab-content" id="current-month-tab">
@@ -38,8 +39,8 @@
                   <thead>
                     <tr>
                       <th class="sortable" data-column="MDL">MDL</th>
-                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="Count">Count</th>
                     </tr>
                   </thead>
@@ -70,7 +71,7 @@
             <div class="dashboard-card" style="grid-column: 1 / -1;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
                 <h2 id="district-detail-title">District MDL Details</h2>
-                <button id="district-detail-close" class="close-detail-btn" title="Close details" onclick="document.getElementById('district-detail-section').hidden = true; document.querySelectorAll('#top-districts-list .row-selected').forEach(r => r.classList.remove('row-selected'));">✕</button>
+                <button id="district-detail-close" class="close-detail-btn" title="Close details" type="button" aria-label="Close district details">&times;</button>
               </div>
               <div class="table-wrap">
                 <table class="dashboard-table" id="district-detail-table">
@@ -96,8 +97,8 @@
                   <thead>
                     <tr>
                       <th class="sortable" data-column="MDL">MDL</th>
-                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="Count">Count</th>
                     </tr>
                   </thead>
@@ -112,9 +113,25 @@
                   <thead>
                     <tr>
                       <th class="sortable" data-column="MDL">MDL</th>
-                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Title">Title</th>
                       <th class="sortable" data-column="Count">Prior Count</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <h2 style="margin-top: 24px;">Reappeared MDLs (Current Month)</h2>
+              <div class="table-wrap">
+                <table class="dashboard-table" id="current-reappeared-mdls-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-column="MDL">MDL</th>
+                      <th class="sortable" data-column="District">District</th>
+                      <th class="sortable" data-column="Title">Title</th>
+                      <th class="sortable" data-column="Fell Off">Fell Off</th>
+                      <th class="sortable" data-column="Reappeared">Reappeared</th>
+                      <th class="sortable" data-column="Current Count">Current Count</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -151,6 +168,7 @@
                 </label>
               </div>
             </div>
+            <p style="margin: -8px 0 16px; font-size: 0.82rem; color: var(--color-text-secondary);">Footnote: Reappeared MDLs are excluded from the district increase rankings below.</p>
             <div class="dashboard-grid">
               <div class="dashboard-card">
                 <h2>Top 10 Pending Count Increase</h2>
@@ -294,7 +312,7 @@
             </div>
           </div>
 
-          <!-- Key Summaries section — rendered by renderKeySummaries() in dashboard.js -->
+          <!-- Key Summaries section — rendered by renderKeySummaries() in jpml-dashboard.js -->
           <div id="trend-key-summaries" style="margin-bottom: var(--spacing-lg);">
             <h3 class="ks-section-title">Key Summaries</h3>
             <div class="ks-grid-top">
@@ -351,9 +369,9 @@
                 <p class="ks-footnote">MDLs with ≥50 total actions; ranked by pending share.</p>
               </div>
             </div>
-            <!-- MoM Drivers — full width below top row -->
+            <!-- Month-over-month drivers — full width below top row -->
             <div class="dashboard-card" id="mom-drivers-card" style="margin-top: var(--spacing-md);">
-              <h2>What Drove the MoM Change?</h2>
+              <h2>What Drove the Month-over-month Change?</h2>
               <p class="ks-subtitle" id="mom-drivers-label"></p>
               <div class="ks-drivers-grid" id="mom-drivers-content">
                 <div>
@@ -394,8 +412,8 @@
 
           <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
             <h2>National Pending Case Forecast</h2>
-            <p class="ks-subtitle">Linear regression over all available JPML monthly data, projected 6 months ahead.
-              Orange bars are model projections; shaded band = 95% prediction interval.
+            <p class="ks-subtitle">Dashed line = linear regression over all available JPML monthly data, projected 6 months ahead.
+              Pink bars show the historical LOESS trend; orange bars are regression projections; shaded band = 95% prediction interval.
             </p>
             <div id="fc-agg-stats" class="fc-stats-bar"></div>
             <div class="chart-container" style="position:relative;height:440px;margin-top:var(--spacing-md)">
@@ -645,12 +663,66 @@
 
         <div class="tab-content" id="source-reports-tab">
 
+          <div class="dashboard-card jpml-updater-card" style="margin-bottom:var(--spacing-lg)">
+            <div class="jpml-updater-header">
+              <div>
+                <h2>JPML Monthly Listing</h2>
+                <p class="ks-subtitle">Check whether the JPML has posted a newer “Pending MDL Dockets By District” PDF, then import it through the same parsing pipeline already powering this dashboard.</p>
+              </div>
+              <span class="jpml-updater-pill" id="jpml-updater-pill" data-state="idle">Ready</span>
+            </div>
+
+            <div class="jpml-updater-grid">
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Current imported report</span>
+                <strong id="jpml-current-report-date">Checking...</strong>
+              </div>
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Current source file</span>
+                <strong id="jpml-current-file-name">Checking...</strong>
+              </div>
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Last checked</span>
+                <strong id="jpml-last-checked">Not checked yet</strong>
+              </div>
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Last import</span>
+                <strong id="jpml-last-import">No imports yet</strong>
+              </div>
+            </div>
+
+            <p class="jpml-updater-status-text" id="jpml-updater-status-text">Checking the JPML listing status...</p>
+
+            <div class="jpml-updater-candidate" id="jpml-updater-candidate" hidden>
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Remote candidate report</span>
+                <strong id="jpml-remote-report-date">Not found</strong>
+              </div>
+              <div class="jpml-updater-field">
+                <span class="jpml-updater-label">Remote source file</span>
+                <strong id="jpml-remote-file-name">Not found</strong>
+              </div>
+              <div class="jpml-updater-field jpml-updater-field--wide">
+                <span class="jpml-updater-label">Source URL</span>
+                <a id="jpml-remote-source-url" href="#" target="_blank" rel="noopener">Open remote PDF</a>
+              </div>
+            </div>
+
+            <div class="jpml-updater-actions">
+              <button class="tab-button jpml-updater-action" id="jpml-updater-check" type="button">Check for New JPML Listing</button>
+              <button class="tab-button jpml-updater-action jpml-updater-action--primary" id="jpml-updater-import" type="button" hidden>Pull New JPML Listing</button>
+              <button class="tab-button jpml-updater-action" id="jpml-updater-retry" type="button" hidden>Try Check Again</button>
+            </div>
+
+            <p class="jpml-updater-feedback" id="jpml-updater-feedback" hidden></p>
+          </div>
+
           <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
             <h2>JPML Monthly Reports</h2>
             <p class="ks-subtitle">Original pending docket statistics published monthly by the
               <a href="https://www.jpml.uscourts.gov/pending-mdl-statistics-0" target="_blank" rel="noopener" style="color:var(--color-accent)">U.S. Judicial Panel on Multidistrict Litigation</a>.
               These PDFs are the primary input — parsed and stored as structured JSON to power every chart and table on this dashboard.
-              Download <code>scripts/download_pdfs.py</code> and <code>scripts/parse_mdls.py</code> to refresh them.
+              You can also use the updater above to check for and import the latest monthly listing.
             </p>
             <div id="source-reports-grid" style="margin-top:var(--spacing-md)">
               <p style="color:var(--color-text-secondary)">Loading reports...</p>
@@ -703,7 +775,6 @@
       </div>
     </div>
   </main>
-  <script src="/src/js/dashboard.js"></script>
-  <script src="/script.js"></script>
+  <script src="/src/js/jpml-dashboard.js"></script>
 </body>
 </html>

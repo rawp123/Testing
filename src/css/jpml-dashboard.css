@@ -1,4 +1,37 @@
 /* ===== Global Base Styles ===== */
+/* ─── Dropdown nav styling ───────────────────────────────────────────── */
+.nav-dropdown {
+  position: relative;
+}
+.nav-dropdown .nav-link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.nav-dropdown .nav-chevron {
+  font-size: 0.8em;
+  margin-left: 4px;
+}
+.nav-dropdown .nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+  min-width: 160px;
+  z-index: 10;
+}
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+  display: block;
+}
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -96,6 +129,47 @@ body.dashboard-page .container {
 .container h1 {
   margin-top: 0;
   padding-top: var(--spacing-md);
+}
+
+.external-dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.external-theme-toggle {
+  align-items: center;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1rem;
+  height: 42px;
+  justify-content: center;
+  min-width: 42px;
+  padding: 0 14px;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.external-theme-toggle:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.external-theme-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .external-dashboard-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 /* ===== KPI Panels ===== */
@@ -430,17 +504,6 @@ body.dashboard-page .container {
   min-height: 700px;
 }
 
-.pie-chart-container {
-  position: relative;
-  height: 600px;
-  margin-bottom: var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  cursor: pointer;
-}
-
 .chart-container {
   position: relative;
   width: 100%;
@@ -449,10 +512,6 @@ body.dashboard-page .container {
 
 .chart-container canvas {
   max-width: 100%;
-}
-
-.pie-chart-legend {
-  display: none; /* Hidden - using on-chart labels instead */
 }
 
 .close-detail-btn {
@@ -480,39 +539,6 @@ body.dashboard-page .container {
   background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
   transform: scale(1.1);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: 4px;
-  background: var(--color-bg-tertiary);
-}
-
-.legend-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.legend-label {
-  flex: 1;
-  color: var(--color-text-primary);
-  font-weight: 500;
-}
-
-.legend-value {
-  color: var(--color-text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.legend-percentage {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-  margin-left: 6px;
 }
 
 /* ===== Table Styling ===== */
@@ -830,7 +856,7 @@ body.dashboard-page .container {
   min-width: 0; /* allow table to shrink to container width */
   border-collapse: collapse;
   font-size: var(--font-size-sm);
-  table-layout: fixed; /* CRITICAL: enforce column widths */
+  table-layout: auto;
 }
 
 .dashboard-mdl-table th,
@@ -845,17 +871,27 @@ body.dashboard-page .container {
 .dashboard-mdl-table th:nth-child(1),
 .dashboard-mdl-table td:nth-child(1),
 .dashboard-mdl-table .col-mdl {
-  width: 20%; /* wider to show full MDL numbers like MDL-2738 */
+  width: 1%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* District column - narrow, nowrap */
+.dashboard-mdl-table th:nth-child(2),
+.dashboard-mdl-table td:nth-child(2),
+.dashboard-mdl-table .col-district {
+  width: 1%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* Title column - wraps, takes most space */
-.dashboard-mdl-table th:nth-child(2),
-.dashboard-mdl-table td:nth-child(2),
+.dashboard-mdl-table th:nth-child(3),
+.dashboard-mdl-table td:nth-child(3),
 .dashboard-mdl-table .col-title {
-  width: 54%; /* more space for longer MDL titles */
+  width: auto;
   white-space: normal; /* allow wrapping */
   overflow-wrap: break-word; /* wrap long unbroken words */
   word-break: normal; /* prefer breaking at word boundaries */
@@ -864,21 +900,11 @@ body.dashboard-page .container {
   text-overflow: clip; /* no ellipsis */
 }
 
-/* District column - narrow, nowrap */
-.dashboard-mdl-table th:nth-child(3),
-.dashboard-mdl-table td:nth-child(3),
-.dashboard-mdl-table .col-district {
-  width: 12%; /* compressed for more title space */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* Count column - right aligned, nowrap, FIXED WIDTH */
 .dashboard-mdl-table th:nth-child(4),
 .dashboard-mdl-table td:nth-child(4),
 .dashboard-mdl-table .col-count {
-  width: 14%; /* compressed for more title space */
+  width: 1%;
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums; /* monospace numbers for alignment */
@@ -1223,9 +1249,36 @@ html.debug .inline-mdl-table {
 }
 
 /* ===== Force Title column wrapping across all tables ===== */
-/* New MDLs table - force Title (column 2) to wrap */
+/* New MDLs table - use custom column spacing */
+#current-new-mdls-table {
+  table-layout: auto;
+  width: 100%;
+}
+
+#current-new-mdls-table th,
+#current-new-mdls-table td {
+  padding-left: 12px;
+  padding-right: 12px;
+  vertical-align: middle;
+}
+
+#current-new-mdls-table th:nth-child(1),
+#current-new-mdls-table td:nth-child(1) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left !important;
+}
+
 #current-new-mdls-table th:nth-child(2),
 #current-new-mdls-table td:nth-child(2) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left !important;
+}
+
+#current-new-mdls-table th:nth-child(3),
+#current-new-mdls-table td:nth-child(3) {
+  width: auto;
   white-space: normal !important;
   overflow-wrap: break-word;
   word-break: normal;
@@ -1233,14 +1286,101 @@ html.debug .inline-mdl-table {
   text-align: left !important;
 }
 
+#current-new-mdls-table th:nth-child(4),
+#current-new-mdls-table td:nth-child(4) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right !important;
+}
+
 /* Removed MDLs table - force Title (column 2) to wrap */
-#current-removed-mdls-table th:nth-child(2),
-#current-removed-mdls-table td:nth-child(2) {
+#current-removed-mdls-table {
+  table-layout: auto;
+  width: 100%;
+}
+
+#current-removed-mdls-table th,
+#current-removed-mdls-table td {
+  padding-left: 12px;
+  padding-right: 12px;
+  vertical-align: middle;
+}
+
+#current-removed-mdls-table th:nth-child(1),
+#current-removed-mdls-table td:nth-child(1) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left !important;
+}
+
+#current-removed-mdls-table th:nth-child(3),
+#current-removed-mdls-table td:nth-child(3) {
+  width: auto;
   white-space: normal !important;
   overflow-wrap: break-word;
   word-break: normal;
   line-height: 1.4;
   text-align: left !important;
+}
+
+#current-removed-mdls-table th:nth-child(4),
+#current-removed-mdls-table td:nth-child(4) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right !important;
+}
+
+/* Reappeared MDLs table - force Title (column 3) to wrap */
+#current-reappeared-mdls-table {
+  table-layout: auto;
+  width: 100%;
+}
+
+#current-reappeared-mdls-table th,
+#current-reappeared-mdls-table td {
+  padding-left: 12px;
+  padding-right: 12px;
+  vertical-align: middle;
+}
+
+#current-reappeared-mdls-table th:nth-child(1),
+#current-reappeared-mdls-table td:nth-child(1),
+#current-reappeared-mdls-table th:nth-child(2),
+#current-reappeared-mdls-table td:nth-child(2),
+#current-reappeared-mdls-table th:nth-child(4),
+#current-reappeared-mdls-table td:nth-child(4),
+#current-reappeared-mdls-table th:nth-child(5),
+#current-reappeared-mdls-table td:nth-child(5),
+#current-reappeared-mdls-table th:nth-child(6),
+#current-reappeared-mdls-table td:nth-child(6) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+#current-reappeared-mdls-table th:nth-child(1),
+#current-reappeared-mdls-table td:nth-child(1),
+#current-reappeared-mdls-table th:nth-child(2),
+#current-reappeared-mdls-table td:nth-child(2),
+#current-reappeared-mdls-table th:nth-child(4),
+#current-reappeared-mdls-table td:nth-child(4),
+#current-reappeared-mdls-table th:nth-child(5),
+#current-reappeared-mdls-table td:nth-child(5) {
+  text-align: left !important;
+}
+
+#current-reappeared-mdls-table th:nth-child(3),
+#current-reappeared-mdls-table td:nth-child(3) {
+  width: auto;
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.4;
+  text-align: left !important;
+}
+
+#current-reappeared-mdls-table th:nth-child(6),
+#current-reappeared-mdls-table td:nth-child(6) {
+  text-align: right !important;
 }
 
 /* MDL Pending/Total Increase tables - force Title (column 2) to wrap */
@@ -1268,6 +1408,61 @@ html.debug .inline-mdl-table {
 /* District Detail table - use auto layout instead of fixed to handle colspan properly */
 #district-detail-table {
   table-layout: auto !important;
+}
+
+/* ===== Global dynamic column sizing for dashboard tables ===== */
+.dashboard-table {
+  table-layout: auto !important;
+  width: 100%;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  width: 1%;
+}
+
+/* Let MDL title columns absorb the leftover width across dashboard tables */
+#district-detail-table th:nth-child(2),
+#district-detail-table td:nth-child(2),
+#current-new-mdls-table th:nth-child(4),
+#current-new-mdls-table td:nth-child(4),
+#current-removed-mdls-table th:nth-child(3),
+#current-removed-mdls-table td:nth-child(3),
+#pending-increase-table th:nth-child(2),
+#pending-increase-table td:nth-child(2),
+#total-increase-table th:nth-child(2),
+#total-increase-table td:nth-child(2),
+#pending-decrease-table th:nth-child(2),
+#pending-decrease-table td:nth-child(2),
+#total-decrease-table th:nth-child(2),
+#total-decrease-table td:nth-child(2),
+#mdl-pending-increase-table th:nth-child(2),
+#mdl-pending-increase-table td:nth-child(2),
+#mdl-total-increase-table th:nth-child(2),
+#mdl-total-increase-table td:nth-child(2),
+#mdl-pending-decrease-table th:nth-child(2),
+#mdl-pending-decrease-table td:nth-child(2),
+#mdl-total-decrease-table th:nth-child(2),
+#mdl-total-decrease-table td:nth-child(2),
+#active-mdls-table th:nth-child(2),
+#active-mdls-table td:nth-child(2),
+#mom-mdl-drivers-table th:nth-child(2),
+#mom-mdl-drivers-table td:nth-child(2),
+#fc-rising-table th:nth-child(2),
+#fc-rising-table td:nth-child(2),
+#fc-declining-table th:nth-child(2),
+#fc-declining-table td:nth-child(2),
+#fc-anomaly-table th:nth-child(2),
+#fc-anomaly-table td:nth-child(2),
+#fc-cl-table th:nth-child(2),
+#fc-cl-table td:nth-child(2),
+#settlement-table th:nth-child(2),
+#settlement-table td:nth-child(2) {
+  width: auto !important;
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  text-align: left !important;
 }
 
 /* Override column widths for district detail table */
@@ -1944,6 +2139,171 @@ html.debug .inline-mdl-table {
 .fc-cl-unk    { color: var(--color-text-secondary); font-size: 0.73rem; }
 
 /* ─── Sources tab ────────────────────────────────────────────────────────── */
+.jpml-updater-card {
+  background:
+    linear-gradient(135deg, rgba(88, 166, 255, 0.08), transparent 42%),
+    var(--color-bg-secondary);
+}
+
+.jpml-updater-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.jpml-updater-pill {
+  align-items: center;
+  background: rgba(125, 133, 144, 0.14);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-primary);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  min-height: 34px;
+  padding: 0 12px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.jpml-updater-pill[data-state="success"] {
+  background: rgba(63, 185, 80, 0.14);
+  border-color: rgba(63, 185, 80, 0.4);
+  color: var(--color-success);
+}
+
+.jpml-updater-pill[data-state="warning"] {
+  background: rgba(210, 153, 34, 0.14);
+  border-color: rgba(210, 153, 34, 0.4);
+  color: var(--color-warning);
+}
+
+.jpml-updater-pill[data-state="error"] {
+  background: rgba(248, 81, 73, 0.14);
+  border-color: rgba(248, 81, 73, 0.4);
+  color: var(--color-danger);
+}
+
+.jpml-updater-pill[data-state="loading"] {
+  background: rgba(88, 166, 255, 0.14);
+  border-color: rgba(88, 166, 255, 0.4);
+  color: var(--color-accent);
+}
+
+.jpml-updater-grid,
+.jpml-updater-candidate {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.jpml-updater-candidate {
+  background: rgba(88, 166, 255, 0.06);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.jpml-updater-field {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.jpml-updater-field--wide {
+  grid-column: 1 / -1;
+}
+
+.jpml-updater-label {
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.jpml-updater-field strong,
+.jpml-updater-field a {
+  color: var(--color-text-primary);
+  font-size: 0.98rem;
+  overflow-wrap: anywhere;
+}
+
+.jpml-updater-status-text {
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 16px 0 0;
+}
+
+.jpml-updater-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.jpml-updater-action {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.jpml-updater-action--primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.jpml-updater-action--primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: #fff;
+}
+
+.jpml-updater-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.jpml-updater-feedback {
+  border-radius: var(--radius-md);
+  margin: 16px 0 0;
+  padding: 12px 14px;
+}
+
+.jpml-updater-feedback[data-state="success"] {
+  background: rgba(63, 185, 80, 0.12);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  color: var(--color-success);
+}
+
+.jpml-updater-feedback[data-state="error"] {
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid rgba(248, 81, 73, 0.35);
+  color: var(--color-danger);
+}
+
+@media (max-width: 900px) {
+  .jpml-updater-grid,
+  .jpml-updater-candidate {
+    grid-template-columns: 1fr;
+  }
+
+  .jpml-updater-header {
+    flex-direction: column;
+  }
+}
+
 .sr-year-group {
   display: flex;
   align-items: baseline;

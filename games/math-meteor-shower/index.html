@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Math Meteor Shower | Robert Parrish</title>
+  <meta name="description" content="Tap the falling meteor with the right answer in this arcade-style math game." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/games/math-meteor-shower.css">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/games/math-meteor-shower.js" defer></script>
+</head>
+<body data-page="math-meteor-shower">
+  <div id="site-header"></div>
+  <main>
+    <section class="container meteor-shell">
+      <section class="card meteor-panel">
+        <div class="meteor-hero">
+          <div>
+            <p class="meteor-kicker">Game Lab</p>
+            <h1 class="meteor-title">Math Meteor Shower</h1>
+            <p class="meteor-copy">Watch the prompt, tap the right meteor, and keep your streak alive.</p>
+          </div>
+          <div class="meteor-hero-actions">
+            <button id="meteor-start" class="btn primary" type="button">Start Game</button>
+            <button id="meteor-replay" class="btn ghost" type="button" hidden>Play Again</button>
+            <button id="meteor-mute" class="btn ghost" type="button" aria-pressed="false">Mute</button>
+          </div>
+        </div>
+
+        <div class="meteor-hud" aria-label="Math Meteor stats">
+          <div class="meteor-chip">Score <strong id="meteor-score">0</strong></div>
+          <div class="meteor-chip">Streak <strong id="meteor-streak">0</strong></div>
+          <div class="meteor-chip">Best <strong id="meteor-best-streak">0</strong></div>
+          <div class="meteor-chip">Wave <strong id="meteor-wave">1</strong></div>
+          <div class="meteor-chip">Shield <strong id="meteor-shields">0</strong></div>
+        </div>
+
+        <div class="meteor-toolbar">
+          <label class="meteor-toggle">
+            <input id="meteor-easy-mode" type="checkbox">
+            <span>Kid Mode</span>
+          </label>
+          <button id="meteor-slowmo" class="btn ghost" type="button">Slow Time (<span id="meteor-slowmo-count">2</span>)</button>
+          <div class="meteor-wave-copy" id="meteor-wave-copy">Wave 1 starts easy.</div>
+        </div>
+
+        <div class="meteor-instructions">
+          <span>Read the math problem.</span>
+          <span>Tap the right answer.</span>
+          <span>Do not let the answer meteor hit the ground.</span>
+        </div>
+
+        <div class="meteor-stage-wrap">
+          <div class="meteor-question-bar">
+            <div>
+              <p class="meteor-question-label">Tap the meteor showing:</p>
+              <p id="meteor-question" class="meteor-question">8 + 3 = ?</p>
+            </div>
+            <div id="meteor-boss-badge" class="meteor-boss-badge" hidden>Boss Wave</div>
+          </div>
+
+          <div id="meteor-stage" class="meteor-stage" aria-label="Math Meteor Shower game stage">
+            <div class="meteor-stars" aria-hidden="true"></div>
+            <div id="meteor-effects" class="meteor-effects" aria-hidden="true"></div>
+            <div id="meteor-status-overlay" class="meteor-status-overlay">Tap start to launch.</div>
+            <div id="meteor-field" class="meteor-field"></div>
+            <button id="meteor-shield-powerup" class="meteor-powerup meteor-powerup-shield" type="button" hidden aria-label="Collect shield">🛡️</button>
+            <div class="meteor-rocket" aria-hidden="true">
+              <div class="meteor-rocket-body">🚀</div>
+              <div class="meteor-rocket-flame"></div>
+            </div>
+          </div>
+        </div>
+
+        <p id="meteor-status" class="meteor-status" aria-live="polite">Tap start, then hit the right meteor.</p>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with HTML, CSS, and JavaScript.</div>
+  </footer>
+</body>
+</html>

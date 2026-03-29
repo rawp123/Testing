@@ -1,14 +1,13 @@
 {
-  "name": "testing-startersite",
+  "name": "jpml-dashboard-site",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
-    "start:dev": "nodemon server.js"
+    "start": "node jpml-server.js",
+    "start:dev": "nodemon jpml-server.js"
   },
   "dependencies": {
-    "axios": "^1.4.0",
-    "dotenv": "^17.3.1",
+    "chart.js": "^4.5.1",
     "express": "^4.18.2"
   },
   "engines": {
