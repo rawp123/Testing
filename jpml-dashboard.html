@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="/src/css/jpml-dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="/src/js/header.js" defer></script>
-  <script src="/src/js/jpml-updater-widget.js" defer></script>
 </head>
 <body class="dashboard-page" data-page="dashboard">
   <div id="site-header"></div>
@@ -662,67 +661,11 @@
         <!-- end #forecasting-tab -->
 
         <div class="tab-content" id="source-reports-tab">
-
-          <div class="dashboard-card jpml-updater-card" style="margin-bottom:var(--spacing-lg)">
-            <div class="jpml-updater-header">
-              <div>
-                <h2>JPML Monthly Listing</h2>
-                <p class="ks-subtitle">Check whether the JPML has posted a newer “Pending MDL Dockets By District” PDF, then import it through the same parsing pipeline already powering this dashboard.</p>
-              </div>
-              <span class="jpml-updater-pill" id="jpml-updater-pill" data-state="idle">Ready</span>
-            </div>
-
-            <div class="jpml-updater-grid">
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Current imported report</span>
-                <strong id="jpml-current-report-date">Checking...</strong>
-              </div>
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Current source file</span>
-                <strong id="jpml-current-file-name">Checking...</strong>
-              </div>
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Last checked</span>
-                <strong id="jpml-last-checked">Not checked yet</strong>
-              </div>
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Last import</span>
-                <strong id="jpml-last-import">No imports yet</strong>
-              </div>
-            </div>
-
-            <p class="jpml-updater-status-text" id="jpml-updater-status-text">Checking the JPML listing status...</p>
-
-            <div class="jpml-updater-candidate" id="jpml-updater-candidate" hidden>
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Remote candidate report</span>
-                <strong id="jpml-remote-report-date">Not found</strong>
-              </div>
-              <div class="jpml-updater-field">
-                <span class="jpml-updater-label">Remote source file</span>
-                <strong id="jpml-remote-file-name">Not found</strong>
-              </div>
-              <div class="jpml-updater-field jpml-updater-field--wide">
-                <span class="jpml-updater-label">Source URL</span>
-                <a id="jpml-remote-source-url" href="#" target="_blank" rel="noopener">Open remote PDF</a>
-              </div>
-            </div>
-
-            <div class="jpml-updater-actions">
-              <button class="tab-button jpml-updater-action" id="jpml-updater-check" type="button">Check for New JPML Listing</button>
-              <button class="tab-button jpml-updater-action jpml-updater-action--primary" id="jpml-updater-import" type="button" hidden>Pull New JPML Listing</button>
-              <button class="tab-button jpml-updater-action" id="jpml-updater-retry" type="button" hidden>Try Check Again</button>
-            </div>
-
-            <p class="jpml-updater-feedback" id="jpml-updater-feedback" hidden></p>
-          </div>
-
           <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
             <h2>JPML Monthly Reports</h2>
             <p class="ks-subtitle">Original pending docket statistics published monthly by the
               <a href="https://www.jpml.uscourts.gov/pending-mdl-statistics-0" target="_blank" rel="noopener" style="color:var(--color-accent)">U.S. Judicial Panel on Multidistrict Litigation</a>.
               These PDFs are the primary input — parsed and stored as structured JSON to power every chart and table on this dashboard.
-              You can also use the updater above to check for and import the latest monthly listing.
             </p>
             <div id="source-reports-grid" style="margin-top:var(--spacing-md)">
               <p style="color:var(--color-text-secondary)">Loading reports...</p>
