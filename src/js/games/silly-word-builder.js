@@ -268,8 +268,8 @@
     instructionElement.textContent = getModeInstruction(round.mode);
     bandCopyElement.textContent = getCurrentBand().description;
     heroCopyElement.textContent = round.mode === 'picture'
-      ? 'Use the picture clue and build the word.'
-      : 'Pick the missing sound and build the word.';
+      ? 'Use the picture clue to finish the word.'
+      : 'Pick the missing sound and finish the word.';
 
     puzzleElement.innerHTML = '';
     completeElement.hidden = true;
@@ -332,14 +332,14 @@
     if (threshold && state.correctCount >= threshold) {
       state.unlockedBand = nextBandId;
       state.selectedBand = nextBandId;
-      showUnlockToast(getBandById(nextBandId).label + ' unlocked!');
+      showUnlockToast(getBandById(nextBandId).label + ' is now available.');
       playSound('unlock');
     }
 
     data.badges.forEach(function checkBadge(badge) {
       if (state.streak >= badge.unlockStreak && !state.unlockedBadges.includes(badge.id)) {
         state.unlockedBadges.push(badge.id);
-        showUnlockToast(badge.label + ' badge unlocked!');
+        showUnlockToast(badge.label + ' earned.');
         playSound('unlock');
       }
     });
@@ -355,7 +355,7 @@
       }
       badgeElement.innerHTML = '<div class="word-badge-icon">' + badge.icon + '</div>'
         + '<div class="word-badge-copy"><strong>' + badge.label + '</strong><span>'
-        + (state.unlockedBadges.includes(badge.id) ? 'Unlocked' : badge.description)
+        + (state.unlockedBadges.includes(badge.id) ? 'Earned' : badge.description)
         + '</span></div>';
       badgesElement.appendChild(badgeElement);
     });
@@ -415,8 +415,8 @@
     currentBandElement.textContent = currentBand.shortLabel;
     grownupNoteElement.textContent = currentBand.grownupNote;
     nextUnlockElement.textContent = nextThreshold
-      ? getBandById(nextBandId).label + ' unlocks after ' + nextThreshold + ' correct words.'
-      : 'All word sets are unlocked. Keep building words!';
+      ? getBandById(nextBandId).label + ' becomes available after ' + nextThreshold + ' correct words.'
+      : 'All word sets are unlocked.';
     soundToggleButton.textContent = state.soundOn ? 'Sound On' : 'Sound Off';
     soundToggleButton.setAttribute('aria-pressed', state.soundOn ? 'true' : 'false');
 
@@ -448,8 +448,8 @@
       state.streak += 1;
       state.correctCount += 1;
       state.bestStreak = Math.max(state.bestStreak, state.streak);
-      setStatus(state.streak >= 5 ? 'Great reading streak!' : 'You built it!', 'right');
-      showRewardFlash('+1 Star!');
+      setStatus(state.streak >= 5 ? 'Nice streak.' : 'That\u2019s it.', 'right');
+      showRewardFlash('+1 Star');
       playSound(state.streak >= 3 ? 'streak' : 'correct');
       unlockProgressIfNeeded();
       updateUi();
@@ -464,7 +464,7 @@
     state.roundMistakes += 1;
 
     if (state.roundMistakes === 1) {
-      setStatus('So close! Try another sound.', 'wrong');
+      setStatus('Not quite. Try another sound.', 'wrong');
       playSound('wrong');
       return;
     }
@@ -473,7 +473,7 @@
       item.disabled = true;
     });
     state.streak = 0;
-    setStatus('Nice try! Here is the word.', 'special');
+    setStatus('Here is the word.', 'special');
     playSound('wrong');
     await showCompletedWord();
     updateUi();
@@ -488,7 +488,7 @@
     state.roundMistakes = 0;
     state.currentRound = createRound(chooseEntry(), state.selectedMode);
     renderPuzzle();
-    setStatus('Tap the sound that completes the word.', 'special');
+    setStatus('Tap the sound that finishes the word.', 'special');
   }
 
   soundToggleButton.addEventListener('click', function toggleSound() {

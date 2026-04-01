@@ -13,11 +13,11 @@
     const isLightTheme = theme === 'light';
     document.documentElement.classList.toggle('light-theme', isLightTheme);
 
-    const themeToggleButton = document.getElementById('theme-toggle');
-    if (themeToggleButton) {
-      themeToggleButton.textContent = isLightTheme ? '☀️' : '🌙';
-      themeToggleButton.setAttribute('aria-pressed', isLightTheme ? 'true' : 'false');
-    }
+    document.querySelectorAll('[data-theme-option]').forEach((button) => {
+      const isActive = button.dataset.themeOption === theme;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
 
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }
@@ -34,6 +34,18 @@
     navToggleButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
+  function closeMobileNavigation() {
+    const navList = document.getElementById('nav-list');
+    const navToggleButton = document.querySelector('.nav-toggle');
+
+    if (!navList || !navToggleButton) {
+      return;
+    }
+
+    navList.classList.remove('show');
+    navToggleButton.setAttribute('aria-expanded', 'false');
+  }
+
   function markActiveLink(page) {
     if (!page) {
       return;
@@ -48,6 +60,8 @@
   }
 
   function closeOpenDropdowns() {
+    closeMobileNavigation();
+
     document.querySelectorAll('.nav-dropdown.open').forEach((dropdown) => {
       dropdown.classList.remove('open');
 
@@ -59,22 +73,28 @@
   }
 
   function bindHeaderControls() {
-    const themeToggleButton = document.getElementById('theme-toggle');
-    if (themeToggleButton) {
-      themeToggleButton.addEventListener('click', () => {
-        const nextTheme = document.documentElement.classList.contains('light-theme') ? 'dark' : 'light';
+    document.querySelectorAll('[data-theme-option]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextTheme = button.dataset.themeOption === 'light' ? 'light' : 'dark';
         applyTheme(nextTheme);
 
         if (typeof window.onThemeToggle === 'function') {
           window.onThemeToggle();
         }
       });
-    }
+    });
 
     const navToggleButton = document.querySelector('.nav-toggle');
     if (navToggleButton) {
-      navToggleButton.addEventListener('click', toggleMobileNavigation);
+      navToggleButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleMobileNavigation();
+      });
     }
+
+    document.querySelectorAll('#nav-list a').forEach((link) => {
+      link.addEventListener('click', closeMobileNavigation);
+    });
 
     document.querySelectorAll('.nav-dropdown-btn').forEach((dropdownButton) => {
       dropdownButton.addEventListener('click', (event) => {
@@ -91,6 +111,11 @@
     });
 
     document.addEventListener('click', closeOpenDropdowns);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeOpenDropdowns();
+      }
+    });
   }
 
   async function injectHeader() {

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDL Concentration & Emerging Trends Dashboard</title>
+  <title>MDL Dashboard | Robert Parrish</title>
+  <meta name="description" content="Dashboard for reviewing MDL activity, trends, and related docket data." />
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/src/css/jpml-dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -14,12 +15,25 @@
   <main>
     <div class="page-container">
       <div class="container">
-        <h1>National MDL Analytics Dashboard</h1>
+        <section class="page-shell is-compact">
+          <div class="page-shell-head">
+            <div class="page-shell-copy">
+              <p class="page-kicker">Project</p>
+              <h1 class="page-title">MDL Dashboard</h1>
+              <p class="page-subtitle">Shows MDL activity, month-over-month changes, long-term trends, and related docket data.</p>
+            </div>
+            <div class="page-meta" aria-hidden="true">
+              <span class="page-meta-chip">Monthly data</span>
+              <span class="page-meta-chip">Trend analysis</span>
+              <span class="page-meta-chip">Source reports</span>
+            </div>
+          </div>
+        </section>
         
         <div class="dashboard-tabs">
-          <button class="tab-button active" data-tab="executive-summary">Executive Summary</button>
-          <button class="tab-button" id="tab-current-month" data-tab="current-month">Current Month Statistics</button>
-          <button class="tab-button" data-tab="month-over-month">Month over Month Statistics</button>
+          <button class="tab-button active" data-tab="executive-summary">Summary</button>
+          <button class="tab-button" id="tab-current-month" data-tab="current-month">Current Month</button>
+          <button class="tab-button" data-tab="month-over-month">Month over Month</button>
           <button class="tab-button" data-tab="trends-overview">Trends</button>
           <button class="tab-button" data-tab="forecasting">Forecasting</button>
           <button class="tab-button" data-tab="source-reports">Sources</button>
@@ -32,7 +46,7 @@
         <div class="tab-content" id="current-month-tab">
           <div class="dashboard-grid">
             <div class="dashboard-card mdls-card">
-              <h2>Top 10 Active MDLs (Current Month)</h2>
+              <h2>Top 10 Active MDLs</h2>
               <div class="dashboard-mdl-list-wrap">
                 <table class="dashboard-mdl-table" id="dashboard-mdl-table">
                   <thead>
@@ -48,8 +62,8 @@
               </div>
             </div>
             <div class="dashboard-card mdls-card">
-              <h2>Top 10 Districts by Pending Cases (Current Month)</h2>
-              <p id="top-districts-subtitle" style="margin: -8px 0 12px; font-size: 0.82rem; color: var(--color-text-secondary);">Ranked by Pending Cases · Click any row to see its individual MDLs below</p>
+              <h2>Top 10 Districts by Pending Cases</h2>
+              <p id="top-districts-subtitle" style="margin: -8px 0 12px; font-size: 0.82rem; color: var(--color-text-secondary);">Ranked by pending cases. Click a row to see the MDLs below.</p>
               <div class="dashboard-mdl-list-wrap">
                 <table class="dashboard-mdl-table" id="top-districts-table">
                   <thead>
@@ -69,7 +83,7 @@
           <div class="dashboard-grid" style="margin-top: 20px;" id="district-detail-section" hidden>
             <div class="dashboard-card" style="grid-column: 1 / -1;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
-                <h2 id="district-detail-title">District MDL Details</h2>
+                <h2 id="district-detail-title">District MDLs</h2>
                 <button id="district-detail-close" class="close-detail-btn" title="Close details" type="button" aria-label="Close district details">&times;</button>
               </div>
               <div class="table-wrap">
@@ -90,7 +104,7 @@
           </div>
           <div class="dashboard-grid" style="margin-top: 20px;">
             <div class="dashboard-card">
-              <h2>New MDLs (Current Month)</h2>
+              <h2>New MDLs</h2>
               <div class="table-wrap">
                 <table class="dashboard-table" id="current-new-mdls-table">
                   <thead>
@@ -106,7 +120,7 @@
               </div>
             </div>
             <div class="dashboard-card">
-              <h2>Removed MDLs (Current Month)</h2>
+              <h2>Removed MDLs</h2>
               <div class="table-wrap">
                 <table class="dashboard-table" id="current-removed-mdls-table">
                   <thead>
@@ -120,7 +134,7 @@
                   <tbody></tbody>
                 </table>
               </div>
-              <h2 style="margin-top: 24px;">Reappeared MDLs (Current Month)</h2>
+              <h2 style="margin-top: 24px;">Reappeared MDLs</h2>
               <div class="table-wrap">
                 <table class="dashboard-table" id="current-reappeared-mdls-table">
                   <thead>
@@ -167,7 +181,7 @@
                 </label>
               </div>
             </div>
-            <p style="margin: -8px 0 16px; font-size: 0.82rem; color: var(--color-text-secondary);">Footnote: Reappeared MDLs are excluded from the district increase rankings below.</p>
+            <p style="margin: -8px 0 16px; font-size: 0.82rem; color: var(--color-text-secondary);">Reappeared MDLs are excluded from the district rankings below.</p>
             <div class="dashboard-grid">
               <div class="dashboard-card">
                 <h2>Top 10 Pending Count Increase</h2>
@@ -370,7 +384,7 @@
             </div>
             <!-- Month-over-month drivers — full width below top row -->
             <div class="dashboard-card" id="mom-drivers-card" style="margin-top: var(--spacing-md);">
-              <h2>What Drove the Month-over-month Change?</h2>
+              <h2>What changed month over month?</h2>
               <p class="ks-subtitle" id="mom-drivers-label"></p>
               <div class="ks-drivers-grid" id="mom-drivers-content">
                 <div>
@@ -410,7 +424,7 @@
         <div class="tab-content" id="forecasting-tab">
 
           <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
-            <h2>National Pending Case Forecast</h2>
+            <h2>Pending Case Forecast</h2>
             <p class="ks-subtitle">Dashed line = linear regression over all available JPML monthly data, projected 6 months ahead.
               Pink bars show the historical LOESS trend; orange bars are regression projections; shaded band = 95% prediction interval.
             </p>
@@ -551,7 +565,7 @@
           </div>
 
           <div class="dashboard-card">
-            <h2>Court Docket Intelligence <span class="fc-cl-badge">via CourtListener</span></h2>
+            <h2>Court Docket Data <span class="fc-cl-badge">via CourtListener</span></h2>
             <p class="ks-subtitle">
               Judge assignments and lead plaintiff law firms sourced from the free
               <a href="https://www.courtlistener.com" target="_blank" rel="noopener">CourtListener</a>
@@ -663,7 +677,7 @@
         <div class="tab-content" id="source-reports-tab">
           <div class="dashboard-card" style="margin-bottom:var(--spacing-lg)">
             <h2>JPML Monthly Reports</h2>
-            <p class="ks-subtitle">Original pending docket statistics published monthly by the
+            <p class="ks-subtitle">Monthly pending docket statistics published by the
               <a href="https://www.jpml.uscourts.gov/pending-mdl-statistics-0" target="_blank" rel="noopener" style="color:var(--color-accent)">U.S. Judicial Panel on Multidistrict Litigation</a>.
               These PDFs are the primary input — parsed and stored as structured JSON to power every chart and table on this dashboard.
             </p>
@@ -674,7 +688,7 @@
 
           <div class="dashboard-card">
             <h2>External Data Sources</h2>
-            <p class="ks-subtitle">Third-party sources used to enrich the dashboard. All free and publicly accessible.</p>
+            <p class="ks-subtitle">Public sources used to add context to the dashboard.</p>
             <div class="sr-sources-grid">
 
               <div class="sr-source-card">
@@ -685,7 +699,7 @@
                     <span class="sr-source-org">Free Law Project</span>
                   </div>
                 </div>
-                <p class="sr-source-desc">Free public API providing MDL docket metadata matched by docket number: judge assignments, lead plaintiff law firms, case filing dates, and docket URLs. Powers the <em>Court Docket Intelligence</em> card on the Forecasting tab. Refresh with <code>python scripts/fetch_courtlistener.py --force</code>.</p>
+                <p class="sr-source-desc">Public API with MDL docket metadata by docket number, including judge assignments, lead plaintiff firms, filing dates, and docket URLs. Powers the <em>Court Docket Data</em> card on the Forecasting tab. Refresh with <code>python scripts/fetch_courtlistener.py --force</code>.</p>
               </div>
 
               <div class="sr-source-card">
@@ -696,7 +710,7 @@
                     <span class="sr-source-org">Free Law Project</span>
                   </div>
                 </div>
-                <p class="sr-source-desc">Crowd-sourced mirror of PACER federal court documents. CourtListener's firm and attorney data is populated from RECAP — MDLs that appear in RECAP have richer enrichment data (law firms, parties) than those that don't.</p>
+                <p class="sr-source-desc">Crowd-sourced mirror of PACER federal court documents. CourtListener's firm and attorney data comes from RECAP, so MDLs that appear there usually have richer firm and party detail.</p>
               </div>
 
               <div class="sr-source-card">
@@ -707,7 +721,7 @@
                     <span class="sr-source-org">U.S. Judicial Panel on Multidistrict Litigation</span>
                   </div>
                 </div>
-                <p class="sr-source-desc">The authoritative source for all MDL statistics. Publishes monthly pending docket PDFs, transfer orders, and docket listings. The PDFs above are downloaded directly from this site.</p>
+                <p class="sr-source-desc">Primary source for MDL statistics. Publishes monthly pending docket PDFs, transfer orders, and docket listings. The PDFs above are downloaded directly from this site.</p>
               </div>
 
             </div>

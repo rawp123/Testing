@@ -260,8 +260,8 @@
     bossBadgeElement.hidden = !state.bossWave;
     waveCopyElement.textContent = state.bossWave
       ? 'Boss wave. The answer meteor takes two hits.'
-      : 'Wave ' + state.wave + (state.easyMode ? ' stays slower in Kid Mode.' : ' picks up the pace.');
-    setOverlay(state.bossWave ? 'Boss asteroid incoming.' : 'Meteor wave incoming.');
+      : 'Wave ' + state.wave + (state.easyMode ? ' stays slower in Easy Mode.' : ' picks up the pace.');
+    setOverlay(state.bossWave ? 'Big wave incoming.' : 'Next wave incoming.');
     clearField();
     maybeShowShieldPowerup();
     updateHud();
@@ -272,7 +272,7 @@
     await pause(240);
     setOverlay('1');
     await pause(240);
-    setOverlay('Tap the right answer');
+    setOverlay('Tap the right answer.');
     playSound('start');
 
     state.meteors = state.activeQuestion.choices.map(function createChoiceMeteor(choice, index) {
@@ -341,8 +341,8 @@
         state.slowmoCharges += 1;
       }
 
-      setStatus(state.bossWave ? 'Boss asteroid cleared!' : 'Nice hit!', 'right');
-      setOverlay(state.streak >= 5 ? 'Hot streak!' : 'Wave cleared');
+      setStatus(state.bossWave ? 'Big wave cleared.' : 'Correct.', 'right');
+      setOverlay(state.streak >= 5 ? 'Hot streak.' : 'Wave cleared.');
       updateHud();
       saveProfile();
       await pause(420);
@@ -354,7 +354,7 @@
     playSound('wrong');
     meteor.element.classList.add('is-destroyed');
     state.canAnswer = false;
-    setStatus('So close. That was not the answer.', 'wrong');
+    setStatus('Not quite. That was not the answer.', 'wrong');
     setOverlay('Wrong meteor');
     await resolveFailure();
   }
@@ -461,8 +461,8 @@
     shieldPowerupButton.hidden = true;
     clearField();
     questionElement.textContent = '8 + 3 = ?';
-    setOverlay('Tap start to launch.');
-    setStatus('Tap start, then hit the right meteor.');
+    setOverlay('Press start to begin.');
+    setStatus('Press start, then tap the right meteor.');
     updateHud();
   }
 
@@ -475,7 +475,7 @@
     startButton.hidden = true;
     saveProfile();
     updateHud();
-    setStatus('Meteor wave incoming.', 'special');
+    setStatus('Next wave incoming.', 'special');
     startWave();
   }
 

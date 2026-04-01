@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Silly Word Builder | Robert Parrish</title>
-  <meta name="description" content="A playful early-literacy word-building game for young readers." />
+  <meta name="description" content="An early-reading game built around phonics and word building." />
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/src/css/games/silly-word-builder.css">
   <script src="/src/js/header.js" defer></script>
@@ -22,7 +22,7 @@
             <div>
               <p class="word-kicker">Game Lab</p>
               <h1 class="word-title">Silly Word Builder</h1>
-              <p id="word-hero-copy" class="word-copy">Pick the missing sound and build the word.</p>
+              <p id="word-hero-copy" class="word-copy">Pick the missing sound and finish the word.</p>
             </div>
           </div>
           <div class="word-hero-actions">
@@ -63,7 +63,7 @@
           <div class="word-puzzle-head">
             <div>
               <p id="word-instruction" class="word-instruction">Pick the missing sound.</p>
-              <p id="word-band-copy" class="word-band-copy">Simple sound practice starts here.</p>
+              <p id="word-band-copy" class="word-band-copy">Sound practice starts here.</p>
             </div>
             <div id="word-picture-card" class="word-picture-card" hidden>
               <div id="word-picture-emoji" class="word-picture-emoji" aria-hidden="true">🐱</div>
@@ -71,32 +71,32 @@
             </div>
           </div>
 
-          <div id="word-reward-flash" class="word-reward-flash" hidden>+1 Star!</div>
-          <div id="word-unlock-toast" class="word-unlock-toast" hidden>New set unlocked!</div>
+          <div id="word-reward-flash" class="word-reward-flash" hidden>+1 Star</div>
+          <div id="word-unlock-toast" class="word-unlock-toast" hidden>New set unlocked</div>
 
           <div id="word-puzzle" class="word-puzzle" aria-live="polite"></div>
           <div id="word-complete" class="word-complete" hidden>cat</div>
           <div id="word-answer-grid" class="word-answer-grid" aria-label="Answer choices"></div>
-          <p id="word-status" class="word-status" aria-live="polite">Tap the sound that completes the word.</p>
+          <p id="word-status" class="word-status" aria-live="polite">Tap the sound that finishes the word.</p>
         </div>
       </section>
 
       <aside class="word-side-list">
         <section class="card word-side-card">
-          <p class="word-side-kicker">Reading Goal</p>
-          <h2>Build simple words</h2>
+          <p class="word-side-kicker">Progress</p>
+          <h2>Build words</h2>
           <p id="word-next-unlock" class="word-side-copy">Band 2 unlocks after 6 correct words.</p>
         </section>
 
         <section class="card word-side-card">
-          <p class="word-side-kicker">Sticker Shelf</p>
-          <h2>Earn silly badges</h2>
+          <p class="word-side-kicker">Badges</p>
+          <h2>What you've earned</h2>
           <div id="word-badges" class="word-badges"></div>
         </section>
 
         <section class="card word-side-card">
-          <p class="word-side-kicker">Grown-Up Note</p>
-          <h2>Skill focus</h2>
+          <p class="word-side-kicker">For adults</p>
+          <h2>Focus</h2>
           <p id="word-grownup-note" class="word-side-copy">This set starts with VC, CV, and very simple CVC decoding.</p>
         </section>
       </aside>

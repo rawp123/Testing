@@ -129,9 +129,9 @@
     setGuessEnabled(false);
     clearCupHighlights();
     resetRound();
-    setStatus('Watch closely. The ball is showing first.');
+    setStatus('Watch closely. The ball shows first.');
     await revealBallAtStart();
-    setStatus('Shuffling the cups now.');
+    setStatus('Shuffling.');
     ballElement.style.opacity = '0';
 
     for (let move = 1; move <= totalMoves; move += 1) {
@@ -143,7 +143,7 @@
 
     setGuessEnabled(true);
     shuffling = false;
-    setStatus('Pick a cup. Which one has the ball?');
+    setStatus('Pick a cup.');
   }
 
   function handleGuess(event) {
@@ -168,10 +168,10 @@
       wins += 1;
       winsElement.textContent = String(wins);
       window.localStorage.setItem(winsStorageKey, String(wins));
-      setStatus('You found it. Nice job!', 'right');
+      setStatus('You found it.', 'right');
     } else {
       event.currentTarget.classList.add('is-wrong');
-      setStatus('Not that one. The ball was under cup ' + (ballCupId + 1) + '.', 'wrong');
+      setStatus('Not this one. The ball was under cup ' + (ballCupId + 1) + '.', 'wrong');
     }
 
     ballElement.style.opacity = '1';

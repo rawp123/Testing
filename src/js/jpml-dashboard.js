@@ -2593,29 +2593,29 @@ function renderExecutiveSummary(summary, endData) {
     <!-- ── Row 1: Key Metrics ── -->
     <div class="es-section">
       <div class="es-section-header">
-        <h3 class="es-section-title">National Overview</h3>
+        <h3 class="es-section-title">Overview</h3>
       </div>
       <div class="es-metrics-grid">
         <div class="es-metric-tile es-tile-primary">
-          <div class="es-metric-label">National Pending Cases</div>
+          <div class="es-metric-label">Pending Cases</div>
           <div class="es-metric-value">${summary.total.toLocaleString()}</div>
         </div>
         <div class="es-metric-tile">
-          <div class="es-metric-label">National Total Cases</div>
+          <div class="es-metric-label">Total Cases</div>
           <div class="es-metric-value">${nationalTotal.toLocaleString()}</div>
         </div>
         <div class="es-metric-tile">
-          <div class="es-metric-label">Month-over-month Pending Δ</div>
+          <div class="es-metric-label">Month-over-month Change</div>
           <div class="es-metric-value"><span class="${deltaClass}">${deltaSign}${summary.nationalDelta.toLocaleString()}</span></div>
           <div class="es-metric-sub">${pctSign}${summary.nationalPctDelta.toFixed(2)}%</div>
         </div>
         <div class="es-metric-tile">
-          <div class="es-metric-label">Active MDL Proceedings</div>
+          <div class="es-metric-label">Active MDLs</div>
           <div class="es-metric-value">${activeMDLCount.toLocaleString()}</div>
-          <div class="es-metric-sub">with &ge;1 pending case</div>
+          <div class="es-metric-sub">with at least 1 pending case</div>
         </div>
         <div class="es-metric-tile">
-          <div class="es-metric-label">Active Jurisdictions</div>
+          <div class="es-metric-label">Active Districts</div>
           <div class="es-metric-value">${activeDistCount}</div>
         </div>
         <div class="es-metric-tile">
@@ -2645,7 +2645,7 @@ function renderExecutiveSummary(summary, endData) {
 
         ${fastMDL ? `
         <div class="dashboard-card es-spotlight-card">
-          <div class="es-spotlight-label">Fastest Growing MDL (Month-over-month)</div>
+          <div class="es-spotlight-label">Fastest Growing MDL</div>
           <div class="es-spotlight-mdl-num">${fastMDL.MDL}</div>
           <div class="es-spotlight-mdl-title">${fastMDL.Title}</div>
           <div class="es-spotlight-stats">
@@ -2656,7 +2656,7 @@ function renderExecutiveSummary(summary, endData) {
         </div>` : ''}
 
         <div class="dashboard-card es-spotlight-card">
-          <div class="es-spotlight-label">Leading Jurisdiction</div>
+          <div class="es-spotlight-label">Leading District</div>
           <div class="es-spotlight-dist-name">${getFullDistrictName(topDistrict.District) || 'N/A'}</div>
           <div class="es-spotlight-stats">
             <span class="es-stat-chip">${(topDistrict.pending || 0).toLocaleString()} pending</span>
@@ -2667,7 +2667,7 @@ function renderExecutiveSummary(summary, endData) {
         </div>
 
         <div class="dashboard-card es-spotlight-card">
-          <div class="es-spotlight-label">Proceedings Activity (This Period)</div>
+          <div class="es-spotlight-label">Activity This Month</div>
           <div class="es-activity-row">
             <div class="es-activity-item">
               <span class="es-activity-val delta-positive">+${newCount}</span>
@@ -2681,7 +2681,7 @@ function renderExecutiveSummary(summary, endData) {
             <div class="es-activity-divider"></div>
             <div class="es-activity-item">
               <span class="es-activity-val">${activeMDLCount}</span>
-              <span class="es-activity-label">Active Total</span>
+              <span class="es-activity-label">Active</span>
             </div>
           </div>
         </div>
@@ -2692,7 +2692,7 @@ function renderExecutiveSummary(summary, endData) {
     <!-- ── Row 3: Jurisdiction Distribution ── -->
     <div class="es-section">
       <div class="es-section-header">
-        <h3 class="es-section-title">Jurisdiction Distribution: Top 10 by Pending</h3>
+        <h3 class="es-section-title">Top 10 Districts by Pending</h3>
       </div>
       <div class="dashboard-card es-dist-card">
         <div class="es-dist-list">

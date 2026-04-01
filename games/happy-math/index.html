@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Happy Math | Robert Parrish</title>
-  <meta name="description" content="A playful math game for young kids built into the Robert Parrish site." />
+  <meta name="description" content="A simple math game for kids with quick questions and short rounds." />
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/src/css/games/happy-math.css">
   <script src="/src/js/header.js" defer></script>
@@ -20,9 +20,9 @@
           <div class="game-hero-main">
             <div id="game-avatar-display" class="game-avatar-display" aria-hidden="true">🦖</div>
             <div>
-              <p class="game-kicker">Math Mission</p>
+              <p class="game-kicker">Game Lab</p>
               <h1 class="game-title">Happy Math</h1>
-              <p id="game-hero-copy" class="game-copy">Pick the right answer, earn stars, and move to the next stop.</p>
+              <p id="game-hero-copy" class="game-copy">Pick the right answer and keep moving.</p>
             </div>
           </div>
           <div class="game-hero-actions" aria-label="Game tools">
@@ -35,18 +35,18 @@
         <div id="game-confetti" class="game-confetti" aria-hidden="true"></div>
         <div id="game-celebration-badge" class="game-celebration-badge" aria-hidden="true">
           <div id="game-celebration-avatar" class="game-celebration-avatar">🦖</div>
-          <p id="game-celebration-text" class="game-celebration-text">Great job!</p>
+          <p id="game-celebration-text" class="game-celebration-text">Nice work!</p>
         </div>
-        <div id="game-reward-flash" class="game-reward-flash" aria-live="polite" hidden>+1 Star!</div>
-        <div id="game-unlock-toast" class="game-unlock-toast" aria-live="polite" hidden>New reward unlocked!</div>
+          <div id="game-reward-flash" class="game-reward-flash" aria-live="polite" hidden>+1 Star</div>
+          <div id="game-unlock-toast" class="game-unlock-toast" aria-live="polite" hidden>Unlocked</div>
 
         <div id="game-rewards-panel" class="game-drawer" hidden>
           <div class="game-drawer-head">
             <div>
-              <p class="game-drawer-kicker">Treasure Chest</p>
-              <h2>Unlockables</h2>
+              <p class="game-drawer-kicker">Rewards</p>
+              <h2>Unlocked items</h2>
             </div>
-            <p id="unlock-summary" class="game-drawer-copy">Earn stars to unlock more fun.</p>
+            <p id="unlock-summary" class="game-drawer-copy">Earn stars to unlock more items.</p>
           </div>
           <div id="unlock-grid" class="game-unlock-grid"></div>
         </div>
@@ -102,8 +102,8 @@
         <div class="game-grade-card" aria-label="Grade level choices">
           <div class="game-grade-head">
             <div>
-              <p class="game-grade-title">Choose a math path</p>
-              <p id="grade-band-description" class="game-grade-copy">Friendly number play with tiny equations.</p>
+              <p class="game-grade-title">Choose a level</p>
+              <p id="grade-band-description" class="game-grade-copy">Simple number practice.</p>
             </div>
             <div id="grade-band-points" class="game-grade-points">10 points each</div>
           </div>
@@ -117,7 +117,7 @@
 
         <div id="game-special-banner" class="game-special-banner" hidden>
           <span class="game-special-badge">Bonus</span>
-          <span id="game-special-copy">Ready for a boss question?</span>
+          <span id="game-special-copy">Ready for a harder question?</span>
         </div>
 
         <div class="game-problem" aria-live="polite">
@@ -135,14 +135,14 @@
 
         <div class="game-toolbar">
           <button id="next-problem" class="btn primary" type="button">New Question</button>
-          <button id="start-challenge" class="btn ghost" type="button">Lightning Round</button>
-          <span id="mode-description" class="game-copy game-inline-copy">A playful mix of number questions.</span>
+          <button id="start-challenge" class="btn ghost" type="button">Speed Round</button>
+          <span id="mode-description" class="game-copy game-inline-copy">A mix of number questions.</span>
         </div>
 
         <div id="challenge-banner" class="game-challenge-banner" hidden>
           <div>
-            <p class="game-challenge-title">Lightning Round</p>
-            <p id="challenge-status" class="game-challenge-copy">10 quick questions. Ready, set, go!</p>
+            <p class="game-challenge-title">Speed Round</p>
+            <p id="challenge-status" class="game-challenge-copy">10 quick questions.</p>
           </div>
           <div class="game-challenge-metrics">
             <span id="challenge-progress">10 left</span>
@@ -151,17 +151,17 @@
         </div>
 
         <div id="answer-grid" class="game-answer-grid" aria-label="Answer choices"></div>
-        <p id="game-status" class="game-status" aria-live="polite">Tap the answer and collect a star.</p>
+        <p id="game-status" class="game-status" aria-live="polite">Tap the right answer.</p>
       </div>
 
       <aside class="game-side-list">
         <section class="card game-side-card">
           <div class="game-side-head">
             <div>
-              <p class="game-side-kicker">Friend Crew</p>
-              <h2>Pick a helper</h2>
+              <p class="game-side-kicker">Helpers</p>
+              <h2>Pick a character</h2>
             </div>
-            <p id="avatar-helper-copy" class="game-side-copy">Choose a buddy for your math mission.</p>
+            <p id="avatar-helper-copy" class="game-side-copy">Pick the character you want to use.</p>
           </div>
           <div id="avatar-picker" class="game-avatar-grid"></div>
         </section>
@@ -170,9 +170,9 @@
           <div class="game-side-head">
             <div>
               <p class="game-side-kicker">Star Jar</p>
-              <h2>Fill for a bonus</h2>
+              <h2>Fill it up</h2>
             </div>
-            <p id="star-jar-copy" class="game-side-copy">Fill all 5 stars for a bonus reward.</p>
+            <p id="star-jar-copy" class="game-side-copy">Fill all 5 stars to unlock the next item.</p>
           </div>
           <div id="star-jar" class="game-stars" aria-label="Earned stars">
             <span class="game-star"></span>
@@ -181,16 +181,16 @@
             <span class="game-star"></span>
             <span class="game-star"></span>
           </div>
-          <p id="next-unlock-copy" class="game-side-copy">Next reward unlocks at 5 stars.</p>
+          <p id="next-unlock-copy" class="game-side-copy">Next item unlocks at 5 stars.</p>
         </section>
 
         <section class="card game-side-card">
           <div class="game-side-head">
             <div>
               <p class="game-side-kicker">Quick Play</p>
-              <h2>Lightning Round</h2>
+              <h2>Speed Round</h2>
             </div>
-            <p class="game-side-copy">Beat 10 quick questions and chase your best run.</p>
+            <p class="game-side-copy">Answer 10 quick questions and try to beat your best run.</p>
           </div>
           <div class="game-mini-stats">
             <div class="game-mini-stat">
@@ -202,16 +202,16 @@
               <strong id="challenge-best-time">--</strong>
             </div>
           </div>
-          <button id="start-challenge-side" class="btn primary" type="button">Start Lightning Round</button>
+          <button id="start-challenge-side" class="btn primary" type="button">Start Speed Round</button>
         </section>
 
         <section id="parent-panel" class="card game-side-card game-parent-panel" hidden>
           <div class="game-side-head">
             <div>
               <p class="game-side-kicker">Parent View</p>
-              <h2>Progress Snapshot</h2>
+              <h2>Progress</h2>
             </div>
-            <p class="game-side-copy">A quiet look at performance and pacing.</p>
+            <p class="game-side-copy">A quick look at accuracy, pace, and streaks.</p>
           </div>
           <div class="game-parent-stats">
             <div class="game-parent-stat">

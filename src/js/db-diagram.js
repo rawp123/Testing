@@ -1,88 +1,73 @@
 (function initializeDatabaseDiagramBuilder() {
-  const SAMPLE_SCHEMA = String.raw`Table tblCase {
-  MDLC_ID smallint [pk, not null]
-  LawFirmName nvarchar(1000)
-  Jurisdiction nvarchar(300)
-  PFSDate date
-  CaseCaption nvarchar(1000)
-  FilingCourtName nvarchar(200)
-  OriginalCaseNumber nvarchar(1000)
-  Under13PlatformUse varchar(50)
+  const SAMPLE_SCHEMA = String.raw`Table customers {
+  customer_id uuid [pk, not null]
+  first_name varchar(80) [not null]
+  last_name varchar(80) [not null]
+  email varchar(160) [not null]
+  loyalty_tier varchar(24)
+  created_at timestamptz [not null]
 }
 
-Table tblEmploymentMilitaryHistory {
-  EmploymentMilitaryHistoryID smallint [pk, not null]
-  MDLC_ID smallint [not null, ref: > tblCase.MDLC_ID]
-  EmployerName varchar
-  EmployerCityState varchar
-  EmploymentDateRange varchar
-  OccupationTitle varchar
-  MedicalPhysicalPsychiatricPsychologicalEmotionalSeparationFlag varchar
-  MilitaryServiceFlag varchar
-  MilitaryBranch varchar
-  MilitaryRankAtDischarge varchar
-  MilitaryDischargeType varchar
+Table addresses {
+  address_id uuid [pk, not null]
+  customer_id uuid [not null, ref: > customers.customer_id]
+  label varchar(40) [not null]
+  street_line_1 varchar(120) [not null]
+  city varchar(80) [not null]
+  state_code char(2) [not null]
+  postal_code varchar(16) [not null]
+  is_default bool [not null]
 }
 
-Table tblPersonalInformation {
-  PersonalInformationID smallint [pk, not null]
-  MDLC_ID smallint [not null, ref: > tblCase.MDLC_ID]
-  Gender varchar
-  DateOfBirth date
-  Address varchar
-  ResidenceDateRange varchar
-  SchoolName varchar
-  SchoolCityState varchar
-  SchoolAttendanceDateRange varchar
-  SchoolGradesCompleted varchar
-  CollegeName varchar
-  CollegeCityState varchar
-  CollegeAttendanceDateRange varchar
-  CollegeDegreeAwarded varchar
-  CollegeMajor varchar
-  DisciplinaryActionFlag bit
-  DisciplinarySchoolName varchar
-  DisciplinaryActionDate varchar [not null]
-  DisciplinaryActionType varchar
-  DisciplinaryActionGrounds varchar
-  AdultConvictionFraudDishonestyFlag bit
-  AdultConvictionCharges varchar
-  AdultConvictionCourt varchar
-  AdultConvictionDate varchar
-  AdultConvictionSentence varchar
-  JuvenileDelinquencyProceedingFlag bit
-  CaregiverConvictionRelatedToCareFlag bit
+Table orders {
+  order_id uuid [pk, not null]
+  customer_id uuid [not null, ref: > customers.customer_id]
+  shipping_address_id uuid [ref: > addresses.address_id]
+  order_number varchar(24) [not null]
+  order_status varchar(24) [not null]
+  placed_at timestamptz [not null]
+  subtotal decimal(10,2) [not null]
+  tax_total decimal(10,2) [not null]
+  shipping_total decimal(10,2) [not null]
+  grand_total decimal(10,2) [not null]
 }
 
-Table tblRepresentative {
-  RepresentativeCapcityID smallint [pk, not null]
-  MDLC_ID smallint [not null, ref: > tblCase.MDLC_ID]
-  RespondentAddress nvarchar(1000)
-  RespondentRelationshipToClaimant nvarchar(1000)
-  ClaimantParticipatedInPFSFlag bit
-  ClaimantDeclinedParticipationFlag bit
-  WrongfulDeathClaimFlag bit
-  ReportedHarmViaPlatformFlag bit
-  ReportPlatform nvarchar(1000)
-  ReportCount varchar
-  ReportDatesApprox nvarchar(1000)
+Table products {
+  product_id uuid [pk, not null]
+  sku varchar(32) [not null]
+  product_name varchar(140) [not null]
+  category_name varchar(80)
+  unit_price decimal(10,2) [not null]
+  active_flag bool [not null]
 }
 
-Table tblViolenceDiscrimination {
-  ViolenceDiscriminationID smallint [pk, not null]
-  MDLC_ID smallint [not null, ref: > tblCase.MDLC_ID]
-  DiscriminationHarassmentFlag nvarchar(20)
-  DiscriminationHarassmentTiming varchar
-  BullyingAbuseFlag nvarchar(20)
-  BullyingAbuseTiming varchar
-  PhysicalAbuseFlag nvarchar(20)
-  PhysicalAbuseTiming varchar
-  SexualAbuseFlag nvarchar(20)
-  SexualAbuseTiming varchar
-  ViolenceThreatsFlag nvarchar(20)
-  ViolenceThreatsTiming varchar
-  OtherPersonalCrimeFlag nvarchar(20)
-  OtherPersonalCrimeTiming varchar
+Table order_items {
+  order_item_id uuid [pk, not null]
+  order_id uuid [not null, ref: > orders.order_id]
+  product_id uuid [not null, ref: > products.product_id]
+  quantity int [not null]
+  unit_price decimal(10,2) [not null]
+  line_total decimal(10,2) [not null]
+}
+
+Table payments {
+  payment_id uuid [pk, not null]
+  order_id uuid [not null, ref: > orders.order_id]
+  payment_method varchar(30) [not null]
+  payment_status varchar(24) [not null]
+  amount decimal(10,2) [not null]
+  processed_at timestamptz
+}
+
+Table support_tickets {
+  ticket_id uuid [pk, not null]
+  customer_id uuid [not null, ref: > customers.customer_id]
+  order_id uuid [ref: > orders.order_id]
+  subject varchar(120) [not null]
+  priority varchar(20) [not null]
+  ticket_status varchar(24) [not null]
+  opened_at timestamptz [not null]
+  assigned_team varchar(60)
 }`;
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -94,7 +79,9 @@ Table tblViolenceDiscrimination {
   const TABLE_PADDING_Y = 18;
   const TABLE_HEADER_HEIGHT = 52;
   const TABLE_ROW_HEIGHT = 38;
+  const TABLE_FOOTER_HEIGHT = 40;
   const BADGE_GAP = 8;
+  const DEFAULT_VISIBLE_FIELD_COUNT = 4;
 
   function getDiagramMetrics(fontScale) {
     const scale = Math.max(0.8, Math.min(1.5, Number(fontScale) || 1));
@@ -105,10 +92,12 @@ Table tblViolenceDiscrimination {
       tablePaddingY: Math.round(TABLE_PADDING_Y * scale),
       tableHeaderHeight: Math.round(TABLE_HEADER_HEIGHT * scale),
       tableRowHeight: Math.round(TABLE_ROW_HEIGHT * scale),
+      tableFooterHeight: Math.round(TABLE_FOOTER_HEIGHT * scale),
       badgeGap: Math.max(6, Math.round(BADGE_GAP * scale)),
       titleFontSize: Math.max(14, +(17 * scale).toFixed(1)),
       fieldFontSize: Math.max(12, +(14 * scale).toFixed(1)),
       typeFontSize: Math.max(10, +(12 * scale).toFixed(1)),
+      toggleFontSize: Math.max(11, +(12 * scale).toFixed(1)),
       badgeFontSize: Math.max(10, +(11 * scale).toFixed(1)),
       badgeHeight: Math.max(18, Math.round(20 * scale)),
       badgeRadius: Math.max(7, Math.round(8 * scale)),
@@ -118,10 +107,11 @@ Table tblViolenceDiscrimination {
       fieldNameOffsetY: Math.round(13 * scale),
       fieldTypeOffsetY: Math.round(29 * scale),
       fieldCenterOffsetY: Math.round(18 * scale),
-      minTableWidth: Math.round(460 * scale),
-      maxTableWidth: Math.round(900 * scale),
-      rowMinWidth: Math.round(360 * scale),
-      rowWidthPadding: Math.round(96 * scale)
+      footerLabelY: Math.round(26 * scale),
+      minTableWidth: Math.round(520 * scale),
+      maxTableWidth: Math.round(980 * scale),
+      rowMinWidth: Math.round(410 * scale),
+      rowWidthPadding: Math.round(112 * scale)
     };
   }
 
@@ -318,20 +308,85 @@ Table tblViolenceDiscrimination {
     return 4;
   }
 
-  function estimateTableWidth(table, metrics) {
+  function isKeyField(field) {
+    return Boolean(field.isPrimaryKey || field.reference);
+  }
+
+  function getTableToggleLabel(renderState) {
+    if (renderState.isExpanded) {
+      return 'Show 4-field preview';
+    }
+
+    return `Show all ${renderState.totalFields} fields`;
+  }
+
+  function getTableRenderState(table, expandedTables) {
+    const isExpanded = Boolean(expandedTables && expandedTables[table.name]);
+    const canExpand = table.fields.length > DEFAULT_VISIBLE_FIELD_COUNT;
+
+    if (!canExpand || isExpanded) {
+      const visibleFieldIndexes = table.fields.map((_, index) => index);
+      return {
+        isExpanded,
+        canExpand,
+        totalFields: table.fields.length,
+        hiddenFieldCount: 0,
+        visibleFieldIndexes,
+        visibleFieldIndexMap: new Map(visibleFieldIndexes.map((fieldIndex, displayIndex) => [fieldIndex, displayIndex]))
+      };
+    }
+
+    const requiredFieldIndexes = new Set();
+    table.fields.forEach((field, index) => {
+      if (isKeyField(field)) {
+        requiredFieldIndexes.add(index);
+      }
+    });
+
+    const targetCount = Math.max(DEFAULT_VISIBLE_FIELD_COUNT, requiredFieldIndexes.size);
+    const visibleFieldIndexes = [];
+
+    table.fields.forEach((field, index) => {
+      if (requiredFieldIndexes.has(index) || visibleFieldIndexes.length < targetCount) {
+        visibleFieldIndexes.push(index);
+      }
+    });
+
+    return {
+      isExpanded,
+      canExpand,
+      totalFields: table.fields.length,
+      hiddenFieldCount: Math.max(0, table.fields.length - visibleFieldIndexes.length),
+      visibleFieldIndexes,
+      visibleFieldIndexMap: new Map(visibleFieldIndexes.map((fieldIndex, displayIndex) => [fieldIndex, displayIndex]))
+    };
+  }
+
+  function estimateTableWidth(table, metrics, renderState) {
     const nameWidth = table.name.length * 10 + 104;
-    const rowWidth = table.fields.reduce((widest, field) => {
+    const rowWidth = renderState.visibleFieldIndexes.reduce((widest, fieldIndex) => {
+      const field = table.fields[fieldIndex];
       const badgeCount = Number(field.isPrimaryKey) + Number(field.isNotNull) + Number(Boolean(field.reference));
       const badgeWidth = badgeCount * (18 + 2 * metrics.badgeFontSize) + Math.max(0, badgeCount - 1) * metrics.badgeGap;
       const textWidth = (`${field.name} ${field.type}`).length * ((TEXT_MEASURE_FACTOR + 0.6) * metrics.fontScale);
       return Math.max(widest, textWidth + badgeWidth + metrics.rowWidthPadding);
     }, metrics.rowMinWidth);
 
-    return Math.max(metrics.minTableWidth, Math.min(metrics.maxTableWidth, Math.ceil(Math.max(nameWidth * metrics.fontScale, rowWidth))));
+    const toggleWidth = renderState.canExpand
+      ? getTableToggleLabel(renderState).length * ((TEXT_MEASURE_FACTOR + 0.8) * metrics.fontScale) + metrics.rowWidthPadding
+      : 0;
+
+    return Math.max(
+      metrics.minTableWidth,
+      Math.min(metrics.maxTableWidth, Math.ceil(Math.max(nameWidth * metrics.fontScale, rowWidth, toggleWidth)))
+    );
   }
 
-  function estimateTableHeight(table, metrics) {
-    return metrics.tableHeaderHeight + metrics.tablePaddingY * 2 + table.fields.length * metrics.tableRowHeight;
+  function estimateTableHeight(renderState, metrics) {
+    return metrics.tableHeaderHeight
+      + metrics.tablePaddingY * 2
+      + renderState.visibleFieldIndexes.length * metrics.tableRowHeight
+      + (renderState.canExpand ? metrics.tableFooterHeight : 0);
   }
 
   function buildConnectivity(tables, relationships) {
@@ -440,18 +495,18 @@ Table tblViolenceDiscrimination {
     };
   }
 
-  function layoutTables(tables, relationships, positionOverrides, metrics) {
+  function layoutTables(tables, relationships, positionOverrides, metrics, renderStateByName) {
     const columnCount = computeColumnCount(tables.length);
     const positions = {};
-    const gapX = 112;
-    const gapY = 64;
+    const gapX = 132;
+    const gapY = 72;
     const topPadding = 48;
     const columnWidths = new Array(columnCount).fill(0);
 
     const specs = tables.map((table) => ({
       name: table.name,
-      width: estimateTableWidth(table, metrics),
-      height: estimateTableHeight(table, metrics)
+      width: estimateTableWidth(table, metrics, renderStateByName.get(table.name)),
+      height: estimateTableHeight(renderStateByName.get(table.name), metrics)
     }));
     const specByName = new Map(specs.map((spec) => [spec.name, spec]));
 
@@ -613,13 +668,14 @@ Table tblViolenceDiscrimination {
     return badgeWidth;
   }
 
-  function buildTableShapes(svg, table, frame, palette, metrics) {
+  function buildTableShapes(svg, table, frame, palette, metrics, renderState) {
     const group = createSvgElement('g', {
       transform: `translate(${frame.x}, ${frame.y})`,
       class: 'db-table-node',
       'data-table-name': table.name
     });
     const shadow = createSvgElement('rect', {
+      class: 'db-table-shadow',
       x: 0,
       y: 6,
       width: frame.width,
@@ -629,6 +685,7 @@ Table tblViolenceDiscrimination {
       fill: palette.tableShadow
     });
     const card = createSvgElement('rect', {
+      class: 'db-table-card',
       x: 0,
       y: 0,
       width: frame.width,
@@ -640,6 +697,7 @@ Table tblViolenceDiscrimination {
       'stroke-width': 1.2
     });
     const header = createSvgElement('rect', {
+      class: 'db-table-header',
       x: 0,
       y: 0,
       width: frame.width,
@@ -670,8 +728,9 @@ Table tblViolenceDiscrimination {
       fill: '#f8fbff'
     });
 
-    table.fields.forEach((field, index) => {
-      const rowY = metrics.tableHeaderHeight + metrics.tablePaddingY + index * metrics.tableRowHeight;
+    renderState.visibleFieldIndexes.forEach((fieldIndex, displayIndex) => {
+      const field = table.fields[fieldIndex];
+      const rowY = metrics.tableHeaderHeight + metrics.tablePaddingY + displayIndex * metrics.tableRowHeight;
       const line = createSvgElement('line', {
         x1: 0,
         y1: rowY - metrics.dividerOffsetY,
@@ -720,35 +779,131 @@ Table tblViolenceDiscrimination {
       });
     });
 
+    if (renderState.canExpand) {
+      const footerY = frame.height - metrics.tableFooterHeight;
+      const footerDivider = createSvgElement('line', {
+        x1: 0,
+        y1: footerY,
+        x2: frame.width,
+        y2: footerY,
+        stroke: palette.divider,
+        'stroke-width': 1
+      });
+      const toggleGroup = createSvgElement('g', {
+        'data-table-toggle': 'true',
+        'data-table-name': table.name,
+        cursor: 'pointer'
+      });
+      const toggleRect = createSvgElement('rect', {
+        class: 'db-table-toggle-rect',
+        x: 10,
+        y: footerY + 8,
+        width: frame.width - 20,
+        height: metrics.tableFooterHeight - 16,
+        rx: 12,
+        ry: 12,
+        fill: isLightThemeActive() ? 'rgba(37, 99, 235, 0.08)' : 'rgba(96, 165, 250, 0.12)',
+        stroke: isLightThemeActive() ? 'rgba(37, 99, 235, 0.12)' : 'rgba(148, 163, 184, 0.16)',
+        'stroke-width': 1
+      });
+
+      toggleGroup.appendChild(toggleRect);
+      addText(toggleGroup, {
+        x: frame.width / 2,
+        y: footerY + metrics.footerLabelY,
+        value: getTableToggleLabel(renderState),
+        fontSize: metrics.toggleFontSize,
+        fontWeight: 700,
+        fill: palette.relationship,
+        fontFamily: 'Inter, system-ui, sans-serif'
+      }).setAttribute('class', 'db-table-toggle-text');
+      toggleGroup.lastChild.setAttribute('text-anchor', 'middle');
+
+      if (!renderState.isExpanded && renderState.hiddenFieldCount > 0) {
+        addText(toggleGroup, {
+          x: frame.width - metrics.tablePaddingX,
+          y: footerY + metrics.footerLabelY,
+          value: `+${renderState.hiddenFieldCount}`,
+          fontSize: metrics.toggleFontSize,
+          fontWeight: 700,
+          fill: palette.mutedText
+        }).setAttribute('class', 'db-table-toggle-count');
+        toggleGroup.lastChild.setAttribute('text-anchor', 'end');
+      }
+
+      group.appendChild(footerDivider);
+      group.appendChild(toggleGroup);
+    }
+
     svg.appendChild(group);
     return group;
   }
 
-  function getFieldCenter(frame, rowIndex, side, metrics) {
-    const y = frame.y + metrics.tableHeaderHeight + metrics.tablePaddingY + rowIndex * metrics.tableRowHeight + metrics.fieldCenterOffsetY;
+  function getFieldCenter(frame, renderState, rowIndex, side, metrics) {
+    const displayIndex = renderState.visibleFieldIndexMap.get(rowIndex);
+    const y = displayIndex === undefined
+      ? frame.y + frame.height - (renderState.canExpand ? metrics.tableFooterHeight / 2 : metrics.tablePaddingY)
+      : frame.y + metrics.tableHeaderHeight + metrics.tablePaddingY + displayIndex * metrics.tableRowHeight + metrics.fieldCenterOffsetY;
     const x = side === 'left' ? frame.x : frame.x + frame.width;
     return { x, y };
   }
 
-  function updateRelationshipPath(connection, layout, metrics) {
+  function buildOrthogonalPath(start, end, fromSide, toSide) {
+    const outwardOffset = 28;
+    const startBendX = start.x + (fromSide === 'right' ? outwardOffset : -outwardOffset);
+    const endBendX = end.x + (toSide === 'left' ? -outwardOffset : outwardOffset);
+    const horizontalClearance = fromSide === 'right'
+      ? endBendX - startBendX
+      : startBendX - endBendX;
+    const points = [
+      start,
+      { x: startBendX, y: start.y }
+    ];
+
+    if (horizontalClearance >= 24) {
+      const midX = (startBendX + endBendX) / 2;
+      points.push(
+        { x: midX, y: start.y },
+        { x: midX, y: end.y }
+      );
+    } else {
+      const deltaY = end.y - start.y;
+      const midY = Math.abs(deltaY) >= 16
+        ? start.y + deltaY / 2
+        : start.y + (start.y <= end.y ? 40 : -40);
+      points.push(
+        { x: startBendX, y: midY },
+        { x: endBendX, y: midY }
+      );
+    }
+
+    points.push(
+      { x: endBendX, y: end.y },
+      end
+    );
+
+    const deduped = points.filter((point, index) => index === 0 || point.x !== points[index - 1].x || point.y !== points[index - 1].y);
+    return deduped.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+  }
+
+  function updateRelationshipPath(connection, layout, metrics, renderStateByName) {
     const fromFrame = layout.positions[connection.fromTable];
     const toFrame = layout.positions[connection.toTable];
+    const fromRenderState = renderStateByName.get(connection.fromTable);
+    const toRenderState = renderStateByName.get(connection.toTable);
     const fromSide = fromFrame.x <= toFrame.x ? 'right' : 'left';
     const toSide = fromSide === 'right' ? 'left' : 'right';
-    const start = getFieldCenter(fromFrame, connection.fromRowIndex, fromSide, metrics);
-    const end = getFieldCenter(toFrame, connection.toRowIndex, toSide, metrics);
-    const curveOffset = Math.max(48, Math.abs(end.x - start.x) * 0.34);
-    const controlOneX = start.x + (fromSide === 'right' ? curveOffset : -curveOffset);
-    const controlTwoX = end.x + (toSide === 'left' ? -curveOffset : curveOffset);
+    const start = getFieldCenter(fromFrame, fromRenderState, connection.fromRowIndex, fromSide, metrics);
+    const end = getFieldCenter(toFrame, toRenderState, connection.toRowIndex, toSide, metrics);
 
-    connection.path.setAttribute('d', `M ${start.x} ${start.y} C ${controlOneX} ${start.y}, ${controlTwoX} ${end.y}, ${end.x} ${end.y}`);
+    connection.path.setAttribute('d', buildOrthogonalPath(start, end, fromSide, toSide));
     connection.startDot.setAttribute('cx', String(start.x));
     connection.startDot.setAttribute('cy', String(start.y));
     connection.endDot.setAttribute('cx', String(end.x));
     connection.endDot.setAttribute('cy', String(end.y));
   }
 
-  function buildRelationshipPaths(svg, diagram, layout, palette, metrics) {
+  function buildRelationshipPaths(svg, diagram, layout, palette, metrics, renderStateByName) {
     const connections = [];
 
     diagram.relationships.forEach((relationship) => {
@@ -760,41 +915,50 @@ Table tblViolenceDiscrimination {
 
       const fromRowIndex = fromTable.fields.findIndex((field) => field.name === relationship.fromField);
       const toRowIndex = toTable.fields.findIndex((field) => field.name === relationship.toField);
+      const group = createSvgElement('g', {
+        class: 'db-relationship'
+      });
       const path = createSvgElement('path', {
+        class: 'db-relationship-path',
         fill: 'none',
         stroke: palette.relationship,
         'stroke-width': 2.2,
         'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
         'stroke-opacity': 0.92,
         'marker-end': 'url(#arrowhead)'
       });
       const startDot = createSvgElement('circle', {
+        class: 'db-relationship-dot',
         cx: 0,
         cy: 0,
         r: 4,
         fill: palette.relationshipDot
       });
       const endDot = createSvgElement('circle', {
+        class: 'db-relationship-dot',
         cx: 0,
         cy: 0,
         r: 4,
         fill: palette.relationshipDot
       });
 
-      svg.appendChild(path);
-      svg.appendChild(startDot);
-      svg.appendChild(endDot);
+      group.appendChild(path);
+      group.appendChild(startDot);
+      group.appendChild(endDot);
+      svg.appendChild(group);
       const connection = {
         relationship,
         fromTable: relationship.fromTable,
         toTable: relationship.toTable,
         fromRowIndex,
         toRowIndex,
+        group,
         path,
         startDot,
         endDot
       };
-      updateRelationshipPath(connection, layout, metrics);
+      updateRelationshipPath(connection, layout, metrics, renderStateByName);
       connections.push(connection);
     });
 
@@ -844,14 +1008,15 @@ Table tblViolenceDiscrimination {
     return Math.max(980, stageWidth + 140);
   }
 
-  function renderDiagram(diagram, stageWidth, positionOverrides, fontScale) {
+  function renderDiagram(diagram, stageWidth, positionOverrides, fontScale, expandedTables) {
     if (!diagram.tables.length) {
       throw new Error('No tables were found in the schema.');
     }
 
     const palette = getThemePalette();
     const metrics = getDiagramMetrics(fontScale);
-    const layout = layoutTables(diagram.tables, diagram.relationships, positionOverrides, metrics);
+    const renderStateByName = new Map(diagram.tables.map((table) => [table.name, getTableRenderState(table, expandedTables)]));
+    const layout = layoutTables(diagram.tables, diagram.relationships, positionOverrides, metrics, renderStateByName);
     const canvasWidth = Math.max(layout.width, getMinimumCanvasWidth(stageWidth || 0));
     const canvasHeight = layout.height;
     const svg = createSvgElement('svg', {
@@ -866,6 +1031,7 @@ Table tblViolenceDiscrimination {
 
     buildDefinitions(svg, palette);
     const backgroundRect = createSvgElement('rect', {
+      class: 'db-canvas-background',
       x: 0,
       y: 0,
       width: canvasWidth,
@@ -874,16 +1040,17 @@ Table tblViolenceDiscrimination {
     });
     svg.appendChild(backgroundRect);
 
-    const connections = buildRelationshipPaths(svg, diagram, layout, palette, metrics);
+    const connections = buildRelationshipPaths(svg, diagram, layout, palette, metrics, renderStateByName);
     const tableGroups = new Map();
     diagram.tables.forEach((table) => {
-      tableGroups.set(table.name, buildTableShapes(svg, table, layout.positions[table.name], palette, metrics));
+      tableGroups.set(table.name, buildTableShapes(svg, table, layout.positions[table.name], palette, metrics, renderStateByName.get(table.name)));
     });
     return {
       svg,
       layout,
       connections,
       tableGroups,
+      renderStateByName,
       metrics,
       backgroundRect,
       minimumCanvasWidth: getMinimumCanvasWidth(stageWidth || 0)
@@ -986,6 +1153,38 @@ Table tblViolenceDiscrimination {
     elements.errorPanel.hidden = false;
   }
 
+  function extractErrorLineDetails(messages, lineCount) {
+    const errorLines = new Set();
+    const contextLines = new Set();
+
+    messages.forEach((message) => {
+      const match = message.match(/Line\s+(\d+)/i);
+      if (!match) {
+        return;
+      }
+
+      const lineNumber = Number(match[1]);
+      if (!Number.isFinite(lineNumber) || lineNumber < 1) {
+        return;
+      }
+
+      errorLines.add(lineNumber);
+      if (lineNumber > 1) {
+        contextLines.add(lineNumber - 1);
+      }
+      if (lineNumber < lineCount) {
+        contextLines.add(lineNumber + 1);
+      }
+    });
+
+    errorLines.forEach((lineNumber) => contextLines.delete(lineNumber));
+
+    return {
+      errorLines,
+      contextLines
+    };
+  }
+
   function mountDiagram(stage, svg, emptyState) {
     stage.innerHTML = '';
     if (svg) {
@@ -1007,6 +1206,9 @@ Table tblViolenceDiscrimination {
 
     const elements = {
       schemaInput,
+      schemaEditor: document.getElementById('schema-editor'),
+      lineNumbers: document.getElementById('line-numbers'),
+      schemaHighlights: document.getElementById('schema-highlights'),
       schemaBody: document.getElementById('schema-body'),
       collapsedBar: document.getElementById('schema-collapsed-bar'),
       tableCount: document.getElementById('table-count'),
@@ -1016,6 +1218,10 @@ Table tblViolenceDiscrimination {
       errorList: document.getElementById('error-list'),
       stage: document.getElementById('diagram-stage'),
       emptyState: document.getElementById('diagram-empty-state'),
+      selectionState: document.getElementById('table-selection-state'),
+      tableSearchInput: document.getElementById('table-search'),
+      tableSearchOptions: document.getElementById('table-search-options'),
+      jumpTableButton: document.getElementById('jump-table'),
       zoomOutButton: document.getElementById('zoom-out'),
       zoomInButton: document.getElementById('zoom-in'),
       zoomFitButton: document.getElementById('zoom-fit'),
@@ -1039,6 +1245,9 @@ Table tblViolenceDiscrimination {
     let currentConnections = [];
     let currentTableGroups = new Map();
     let currentManualPositions = {};
+    let currentRenderStateByName = new Map();
+    let currentExpandedTables = {};
+    let currentSelectedTableName = null;
     let currentMetrics = getDiagramMetrics(1);
     let currentZoom = 1;
     let currentFontScale = 1;
@@ -1047,6 +1256,8 @@ Table tblViolenceDiscrimination {
     let resizeFrame = null;
     let panState = null;
     let dragState = null;
+    let suppressSelectionClick = false;
+    let currentEditorErrorMeta = extractErrorLineDetails([], 1);
 
     function getViewport() {
       return elements.stage.querySelector('.db-diagram-viewport');
@@ -1054,6 +1265,51 @@ Table tblViolenceDiscrimination {
 
     function updateZoomDisplay() {
       elements.zoomValue.textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function syncSchemaEditorScroll() {
+      elements.lineNumbers.scrollTop = elements.schemaInput.scrollTop;
+      elements.schemaHighlights.scrollTop = elements.schemaInput.scrollTop;
+      elements.schemaHighlights.scrollLeft = elements.schemaInput.scrollLeft;
+    }
+
+    function renderSchemaEditorDecorations(messages) {
+      const lines = elements.schemaInput.value.split(/\r?\n/);
+      const safeLines = lines.length ? lines : [''];
+      const lineCount = safeLines.length;
+      currentEditorErrorMeta = extractErrorLineDetails(messages || [], lineCount);
+
+      const lineNumberFragment = document.createDocumentFragment();
+      const highlightFragment = document.createDocumentFragment();
+
+      safeLines.forEach((lineText, index) => {
+        const lineNumber = index + 1;
+        const lineNumberElement = document.createElement('span');
+        lineNumberElement.className = 'db-line-number';
+        if (currentEditorErrorMeta.errorLines.has(lineNumber)) {
+          lineNumberElement.classList.add('is-error');
+        } else if (currentEditorErrorMeta.contextLines.has(lineNumber)) {
+          lineNumberElement.classList.add('is-context');
+        }
+        lineNumberElement.textContent = String(lineNumber);
+        lineNumberFragment.appendChild(lineNumberElement);
+
+        const highlightLine = document.createElement('span');
+        highlightLine.className = 'db-highlight-line';
+        if (currentEditorErrorMeta.errorLines.has(lineNumber)) {
+          highlightLine.classList.add('is-error');
+        } else if (currentEditorErrorMeta.contextLines.has(lineNumber)) {
+          highlightLine.classList.add('is-context');
+        }
+        highlightLine.textContent = lineText || ' ';
+        highlightFragment.appendChild(highlightLine);
+      });
+
+      elements.lineNumbers.innerHTML = '';
+      elements.lineNumbers.appendChild(lineNumberFragment);
+      elements.schemaHighlights.innerHTML = '';
+      elements.schemaHighlights.appendChild(highlightFragment);
+      syncSchemaEditorScroll();
     }
 
     function applyZoom(zoom) {
@@ -1071,6 +1327,24 @@ Table tblViolenceDiscrimination {
       viewport.style.height = `${svgHeight * currentZoom}px`;
       currentSvg.style.transform = `scale(${currentZoom})`;
       currentSvg.style.transformOrigin = 'top left';
+    }
+
+    function zoomAroundPoint(zoom, clientX, clientY) {
+      if (!currentSvg) {
+        applyZoom(zoom);
+        return;
+      }
+
+      const rect = elements.stage.getBoundingClientRect();
+      const localX = clientX - rect.left + elements.stage.scrollLeft;
+      const localY = clientY - rect.top + elements.stage.scrollTop;
+      const contentX = localX / currentZoom;
+      const contentY = localY / currentZoom;
+
+      applyZoom(zoom);
+
+      elements.stage.scrollLeft = contentX * currentZoom - (clientX - rect.left);
+      elements.stage.scrollTop = contentY * currentZoom - (clientY - rect.top);
     }
 
     function fitDiagramToViewport() {
@@ -1136,12 +1410,19 @@ Table tblViolenceDiscrimination {
       elements.tableCount.textContent = '0';
       elements.relationshipCount.textContent = '0';
       elements.status.textContent = statusMessage;
+      elements.selectionState.textContent = 'Select a table to highlight related tables and lines.';
+      elements.tableSearchInput.value = '';
+      elements.tableSearchOptions.innerHTML = '';
+      renderSchemaEditorDecorations([]);
       currentSvg = null;
       currentParsed = null;
       currentLayout = null;
       currentConnections = [];
       currentTableGroups = new Map();
       currentManualPositions = {};
+      currentRenderStateByName = new Map();
+      currentExpandedTables = {};
+      currentSelectedTableName = null;
       currentBackgroundRect = null;
       updateErrorPanel([], elements);
       mountDiagram(elements.stage, null, elements.emptyState);
@@ -1167,7 +1448,7 @@ Table tblViolenceDiscrimination {
     function updateConnectedRelationships(tableName) {
       currentConnections.forEach((connection) => {
         if (connection.fromTable === tableName || connection.toTable === tableName) {
-          updateRelationshipPath(connection, currentLayout, currentMetrics);
+          updateRelationshipPath(connection, currentLayout, currentMetrics, currentRenderStateByName);
         }
       });
       ensureCanvasFitsEditableState();
@@ -1178,6 +1459,7 @@ Table tblViolenceDiscrimination {
         return;
       }
 
+      suppressSelectionClick = Boolean(dragState.didMove);
       dragState.group.classList.remove('is-dragging');
       dragState = null;
     }
@@ -1189,6 +1471,9 @@ Table tblViolenceDiscrimination {
 
       const deltaX = (event.clientX - dragState.startX) / currentZoom;
       const deltaY = (event.clientY - dragState.startY) / currentZoom;
+      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+        dragState.didMove = true;
+      }
       const nextX = Math.max(24, dragState.originX + deltaX);
       const nextY = Math.max(32, dragState.originY + deltaY);
 
@@ -1221,11 +1506,125 @@ Table tblViolenceDiscrimination {
         startX: event.clientX,
         startY: event.clientY,
         originX: frame.x,
-        originY: frame.y
+        originY: frame.y,
+        didMove: false
       };
       group.classList.add('is-dragging');
       event.preventDefault();
       event.stopPropagation();
+    }
+
+    function updateSearchOptions(tables) {
+      elements.tableSearchOptions.innerHTML = '';
+      tables.forEach((table) => {
+        const option = document.createElement('option');
+        option.value = table.name;
+        elements.tableSearchOptions.appendChild(option);
+      });
+    }
+
+    function centerTableInView(tableName) {
+      if (!currentLayout || !currentLayout.positions[tableName]) {
+        return;
+      }
+
+      const frame = currentLayout.positions[tableName];
+      const targetLeft = Math.max(0, (frame.x + frame.width / 2) * currentZoom - elements.stage.clientWidth / 2);
+      const targetTop = Math.max(0, (frame.y + frame.height / 2) * currentZoom - elements.stage.clientHeight / 2);
+
+      elements.stage.scrollTo({
+        left: targetLeft,
+        top: targetTop,
+        behavior: 'smooth'
+      });
+    }
+
+    function applySelectionStyles() {
+      if (!currentSelectedTableName || !currentTableGroups.has(currentSelectedTableName)) {
+        currentSelectedTableName = null;
+        currentTableGroups.forEach((group) => {
+          group.classList.remove('is-selected', 'is-related', 'is-dimmed');
+        });
+        currentConnections.forEach((connection) => {
+          connection.group.classList.remove('is-highlighted', 'is-dimmed');
+        });
+        elements.selectionState.textContent = 'Select a table to highlight related tables and lines.';
+        return;
+      }
+
+      const connectedTables = new Set([currentSelectedTableName]);
+      let relationshipCount = 0;
+
+      currentConnections.forEach((connection) => {
+        const isConnected = connection.fromTable === currentSelectedTableName || connection.toTable === currentSelectedTableName;
+        connection.group.classList.toggle('is-highlighted', isConnected);
+        connection.group.classList.toggle('is-dimmed', !isConnected);
+
+        if (!isConnected) {
+          return;
+        }
+
+        relationshipCount += 1;
+        connectedTables.add(connection.fromTable);
+        connectedTables.add(connection.toTable);
+      });
+
+      currentTableGroups.forEach((group, tableName) => {
+        const isSelected = tableName === currentSelectedTableName;
+        const isRelated = !isSelected && connectedTables.has(tableName);
+        group.classList.toggle('is-selected', isSelected);
+        group.classList.toggle('is-related', isRelated);
+        group.classList.toggle('is-dimmed', !isSelected && !isRelated);
+      });
+
+      const connectedTableCount = Math.max(0, connectedTables.size - 1);
+      elements.selectionState.textContent = `${currentSelectedTableName} selected. ${connectedTableCount} connected table${connectedTableCount === 1 ? '' : 's'} and ${relationshipCount} relationship${relationshipCount === 1 ? '' : 's'} highlighted.`;
+    }
+
+    function selectTable(tableName, shouldCenter) {
+      if (!tableName || !currentTableGroups.has(tableName)) {
+        return false;
+      }
+
+      currentSelectedTableName = tableName;
+      elements.tableSearchInput.value = tableName;
+      applySelectionStyles();
+      if (shouldCenter) {
+        centerTableInView(tableName);
+      }
+      return true;
+    }
+
+    function clearSelection() {
+      currentSelectedTableName = null;
+      elements.tableSearchInput.value = '';
+      applySelectionStyles();
+    }
+
+    function resolveTableSearch(query) {
+      const normalizedQuery = query.trim().toLowerCase();
+      if (!normalizedQuery || !currentParsed) {
+        return null;
+      }
+
+      const exactMatch = currentParsed.tables.find((table) => table.name.toLowerCase() === normalizedQuery);
+      if (exactMatch) {
+        return exactMatch.name;
+      }
+
+      const partialMatch = currentParsed.tables.find((table) => table.name.toLowerCase().includes(normalizedQuery));
+      return partialMatch ? partialMatch.name : null;
+    }
+
+    function jumpToSearchResult() {
+      const tableName = resolveTableSearch(elements.tableSearchInput.value);
+      if (!tableName) {
+        elements.status.textContent = 'No matching table found.';
+        return;
+      }
+
+      selectTable(tableName, true);
+      elements.status.textContent = `Jumped to ${tableName}.`;
     }
 
     function bindTableDragging() {
@@ -1234,7 +1633,35 @@ Table tblViolenceDiscrimination {
       }
 
       currentTableGroups.forEach((group, tableName) => {
-        group.addEventListener('pointerdown', (event) => beginTableDrag(tableName, group, event));
+        group.addEventListener('pointerdown', (event) => {
+          if (event.target && typeof event.target.closest === 'function' && event.target.closest('[data-table-toggle="true"]')) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+
+          beginTableDrag(tableName, group, event);
+        });
+        group.addEventListener('click', (event) => {
+          if (event.target && typeof event.target.closest === 'function' && event.target.closest('[data-table-toggle="true"]')) {
+            currentExpandedTables[tableName] = !currentExpandedTables[tableName];
+            renderParsedDiagram(currentParsed, true);
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+
+          if (suppressSelectionClick) {
+            suppressSelectionClick = false;
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+
+          selectTable(tableName, false);
+          event.preventDefault();
+          event.stopPropagation();
+        });
       });
 
       currentSvg.addEventListener('pointermove', moveTableDrag);
@@ -1247,6 +1674,12 @@ Table tblViolenceDiscrimination {
       currentManualPositions = Object.fromEntries(
         Object.entries(currentManualPositions).filter(([tableName]) => validNames.has(tableName))
       );
+      currentExpandedTables = Object.fromEntries(
+        Object.entries(currentExpandedTables).filter(([tableName]) => validNames.has(tableName))
+      );
+      if (currentSelectedTableName && !validNames.has(currentSelectedTableName)) {
+        currentSelectedTableName = null;
+      }
     }
 
     function renderParsedDiagram(parsed, preserveScrollPosition) {
@@ -1254,17 +1687,23 @@ Table tblViolenceDiscrimination {
       const previousScrollTop = preserveScrollPosition ? elements.stage.scrollTop : 0;
       try {
         const stageWidth = Math.max(0, elements.stage.clientWidth - CANVAS_SIDE_PADDING * 2);
-        const rendered = renderDiagram(parsed, stageWidth, currentManualPositions, currentFontScale);
+        const rendered = renderDiagram(parsed, stageWidth, currentManualPositions, currentFontScale, currentExpandedTables);
         currentSvg = rendered.svg;
         currentLayout = rendered.layout;
         currentConnections = rendered.connections;
         currentTableGroups = rendered.tableGroups;
+        currentRenderStateByName = rendered.renderStateByName;
         currentMetrics = rendered.metrics;
         currentBackgroundRect = rendered.backgroundRect;
         currentMinimumCanvasWidth = rendered.minimumCanvasWidth;
         mountDiagram(elements.stage, currentSvg, elements.emptyState);
-        applyZoom(currentZoom);
+        if (preserveScrollPosition) {
+          applyZoom(currentZoom);
+        } else {
+          fitDiagramToViewport();
+        }
         bindTableDragging();
+        applySelectionStyles();
         if (preserveScrollPosition) {
           elements.stage.scrollLeft = previousScrollLeft;
           elements.stage.scrollTop = previousScrollTop;
@@ -1281,9 +1720,11 @@ Table tblViolenceDiscrimination {
       const parsed = parseDbmlSchema(elements.schemaInput.value);
       currentParsed = parsed;
       pruneManualPositions(parsed.tables);
+      updateSearchOptions(parsed.tables);
       elements.tableCount.textContent = String(parsed.tables.length);
       elements.relationshipCount.textContent = String(parsed.relationships.length);
       updateErrorPanel(parsed.errors, elements);
+      renderSchemaEditorDecorations(parsed.errors);
       renderParsedDiagram(parsed, Boolean(preserveScrollPosition));
     }
 
@@ -1296,7 +1737,7 @@ Table tblViolenceDiscrimination {
     elements.clearButton.addEventListener('click', () => {
       elements.schemaInput.value = '';
       setSchemaCollapsed(false);
-      resetToBlankState('Editor cleared.');
+      resetToBlankState('Schema cleared.');
     });
 
     elements.renderButton.addEventListener('click', () => {
@@ -1320,6 +1761,17 @@ Table tblViolenceDiscrimination {
       fitDiagramToViewport();
     });
 
+    elements.tableSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        jumpToSearchResult();
+        event.preventDefault();
+      }
+    });
+
+    elements.jumpTableButton.addEventListener('click', () => {
+      jumpToSearchResult();
+    });
+
     elements.fontScaleInput.addEventListener('input', () => {
       currentFontScale = Number(elements.fontScaleInput.value) / 100;
       elements.fontScaleValue.textContent = `${elements.fontScaleInput.value}%`;
@@ -1327,6 +1779,13 @@ Table tblViolenceDiscrimination {
         renderParsedDiagram(currentParsed, true);
       }
     });
+
+    elements.schemaInput.addEventListener('input', () => {
+      const liveParsed = parseDbmlSchema(elements.schemaInput.value);
+      renderSchemaEditorDecorations(liveParsed.errors);
+    });
+
+    elements.schemaInput.addEventListener('scroll', syncSchemaEditorScroll);
 
     elements.editSchemaButton.addEventListener('click', () => {
       setSchemaCollapsed(false);
@@ -1340,6 +1799,24 @@ Table tblViolenceDiscrimination {
     elements.stage.addEventListener('pointermove', movePan);
     elements.stage.addEventListener('pointerup', endPan);
     elements.stage.addEventListener('pointercancel', endPan);
+    elements.stage.addEventListener('wheel', (event) => {
+      if (!currentSvg || !(event.ctrlKey || event.metaKey)) {
+        return;
+      }
+
+      const nextZoom = currentZoom + (event.deltaY < 0 ? 0.12 : -0.12);
+      zoomAroundPoint(nextZoom, event.clientX, event.clientY);
+      event.preventDefault();
+    }, { passive: false });
+    elements.stage.addEventListener('click', (event) => {
+      if (!currentSvg) {
+        return;
+      }
+
+      if (event.target === currentBackgroundRect || event.target === currentSvg || event.target === getViewport()) {
+        clearSelection();
+      }
+    });
     elements.stage.addEventListener('pointerleave', (event) => {
       if (panState && !elements.stage.hasPointerCapture(event.pointerId)) {
         endPan();
@@ -1380,10 +1857,11 @@ Table tblViolenceDiscrimination {
     });
 
     elements.schemaInput.value = '';
+    renderSchemaEditorDecorations([]);
     elements.fontScaleValue.textContent = `${elements.fontScaleInput.value}%`;
     updateZoomDisplay();
     setSchemaCollapsed(false);
-    resetToBlankState('Paste a schema or load the sample to generate a diagram.');
+    resetToBlankState('Paste a schema or load the sample to start.');
 
     window.onThemeToggle = () => {
       if (currentParsed && currentSvg) {

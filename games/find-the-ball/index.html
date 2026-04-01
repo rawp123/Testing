@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Find The Ball | Robert Parrish</title>
+  <meta name="description" content="Track the shuffle and pick the cup hiding the ball." />
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/src/css/games/find-the-ball.css">
   <script src="/src/js/header.js" defer></script>
@@ -12,11 +13,11 @@
 <body data-page="find-the-ball">
   <div id="site-header"></div>
   <main>
-    <section class="container" style="margin-top:32px;margin-bottom:32px">
-      <section class="card shell-card" style="max-width:980px;margin:0 auto">
+    <section class="container page-shell">
+      <section class="card shell-card">
         <p class="shell-kicker">Game Lab</p>
-        <h1 class="shell-title" style="text-align:center">Find The Ball</h1>
-        <p class="shell-copy">Press start, watch the three cups shuffle for 10 moves, then guess which cup is hiding the ball.</p>
+        <h1 class="shell-title">Find The Ball</h1>
+        <p class="shell-copy">Press start, watch the cups shuffle, then pick the one hiding the ball.</p>
 
         <div class="shell-toolbar" aria-label="Game controls">
           <button id="shell-start" class="btn primary" type="button">Start Shuffle</button>
@@ -53,13 +54,13 @@
           </div>
         </div>
 
-        <p class="shell-help">The ball shows at the beginning so you know where it starts. Once the cups finish moving, click the cup you think has it.</p>
+        <p class="shell-help">The ball appears first so you can track where it starts. Once the cups stop, pick the one you think has it.</p>
       </section>
     </section>
   </main>
   <footer class="site-footer container">
-    <div>© JPML Dashboard. All rights reserved.</div>
-    <div class="muted small">Built with HTML • CSS • JavaScript</div>
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with HTML, CSS, and JavaScript.</div>
   </footer>
 </body>
 </html>

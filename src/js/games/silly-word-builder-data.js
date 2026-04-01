@@ -36,7 +36,7 @@ window.sillyWordBuilderData = {
       label: 'Short-Vowel Words',
       shortLabel: 'Band 2',
       description: 'Simple CVC words with short vowels.',
-      grownupNote: 'This band emphasizes basic CVC decoding and listening for beginning, middle, and ending sounds.',
+      grownupNote: 'This band focuses on basic CVC decoding and listening for beginning, middle, and ending sounds.',
       graphemes: {
         first: ['c', 'd', 'p', 's', 'm', 'b', 'f', 'l', 'h', 'v'],
         middle: ['a', 'e', 'i', 'o', 'u'],
@@ -79,8 +79,8 @@ window.sillyWordBuilderData = {
       id: 4,
       label: 'Snap Words',
       shortLabel: 'Band 4',
-      description: 'A tiny set of early high-frequency words.',
-      grownupNote: 'This band keeps high-frequency words separate from the decodable sets so they can be reviewed intentionally.',
+      description: 'A small set of early high-frequency words.',
+      grownupNote: 'This band keeps high-frequency words separate from the decodable sets so they can be reviewed on purpose.',
       graphemes: {
         first: ['th', 's', 'l', 'm', 'i'],
         middle: ['e', 'i', 'y'],

@@ -113,7 +113,7 @@
       name: 'Rocket',
       emoji: '🚀',
       unlockStars: 16,
-      heroCopy: 'Rocket zooms through big math missions.',
+      heroCopy: 'A quick mix of math questions.',
       praise: [
         'Rocket zoomed ahead!',
         'Rocket blasted to the right answer!',
@@ -169,7 +169,7 @@
     'Star explorer'
   ];
   const modeDescriptions = {
-    mixed: 'A playful mix of number questions.',
+    mixed: 'A mix of number questions.',
     addition: 'Add the numbers and grab the star.',
     subtraction: 'Take some away and find what is left.',
     multiplication: 'Make equal groups and zoom ahead.',
@@ -205,13 +205,13 @@
     }
   };
   const softFeedbackMessages = [
-    'Nice try!',
+    'Try again.',
     'Almost!',
     'Good try!',
     'Let’s try another one!'
   ];
   const warmPraiseMessages = [
-    'Great job!',
+    'Nice work!',
     'You got it!',
     'Wow!',
     'Amazing math!',
@@ -750,7 +750,7 @@
       return 'Blast off! ' + avatar.name + ' reached level ' + currentLevel + '.';
     }
     if (newlyUnlockedCount > 0) {
-      return avatarLine + ' New reward unlocked!';
+      return avatarLine + ' New item unlocked.';
     }
     if (isBossQuestion) {
       return avatarLine + ' Bonus stars earned!';
@@ -759,10 +759,10 @@
       return 'Super solver! ' + currentStreak + ' in a row!';
     }
     if (currentStreak >= 5) {
-      return 'Hot streak! ' + currentStreak + ' in a row!';
+      return 'Hot streak: ' + currentStreak + ' in a row.';
     }
     if (currentStreak >= 3) {
-      return avatarLine + ' Hot streak!';
+      return avatarLine + ' Hot streak.';
     }
     return randomItem(warmPraiseMessages) + ' ' + avatarLine;
   }
@@ -825,21 +825,21 @@
     getAvatarUnlockThresholds().forEach(function checkAvatarUnlock(reward) {
       if (profile.totalStarsEarned >= reward.unlockStars && !profile.unlockedAvatars.includes(reward.id)) {
         profile.unlockedAvatars.push(reward.id);
-        newUnlockMessages.push('New friend unlocked: ' + reward.label + '!');
+        newUnlockMessages.push(reward.label + ' is now available.');
       }
     });
 
     getThemeUnlockThresholds().forEach(function checkThemeUnlock(reward) {
       if (profile.totalStarsEarned >= reward.unlockStars && !profile.unlockedThemes.includes(reward.id)) {
         profile.unlockedThemes.push(reward.id);
-        newUnlockMessages.push('New theme unlocked: ' + reward.label + '!');
+        newUnlockMessages.push(reward.label + ' is now available.');
       }
     });
 
     getFireworkUnlockThresholds().forEach(function checkFireworkUnlock(reward) {
       if (profile.totalStarsEarned >= reward.unlockStars && !profile.unlockedFireworks.includes(reward.id)) {
         profile.unlockedFireworks.push(reward.id);
-        newUnlockMessages.push('New sparkle unlocked: ' + reward.label + '!');
+        newUnlockMessages.push(reward.label + ' is now available.');
       }
     });
 
@@ -909,9 +909,9 @@
       collectNewUnlocks();
       launchFireworks('big');
       launchConfetti('big');
-      setStatus('Perfect lightning round! Extra stars for your mission!', 'special');
+      setStatus('Perfect round. Extra stars awarded.', 'special');
     } else {
-      setStatus('Lightning Round done! ' + challengeState.correct + ' out of 10 correct.', 'special');
+      setStatus('Speed Round finished. ' + challengeState.correct + ' out of 10 correct.', 'special');
     }
 
     saveProfile();
@@ -931,7 +931,7 @@
       return 0;
     }
     sessionStarJar = 0;
-    starJarCopyElement.textContent = 'Star jar bonus! You earned 2 extra stars.';
+    starJarCopyElement.textContent = 'Star jar filled. You earned 2 extra stars.';
     launchFireworks('medium');
     return 2;
   }
@@ -1026,7 +1026,7 @@
       startedAt: Date.now()
     };
     challengeBannerElement.hidden = false;
-    setStatus('Lightning Round! Ten quick questions. You can do it!', 'special');
+    setStatus('Speed Round. Ten quick questions.', 'special');
     updateChallengeUI();
 
     if (challengeTicker) {
@@ -1042,8 +1042,8 @@
     startChallengeButton.disabled = roundActive;
     startChallengeSideButton.disabled = roundActive;
     nextProblemButton.disabled = roundActive;
-    startChallengeButton.textContent = roundActive ? 'Lightning Round Running' : 'Lightning Round';
-    startChallengeSideButton.textContent = roundActive ? 'Round Running' : 'Start Lightning Round';
+    startChallengeButton.textContent = roundActive ? 'Speed Round Running' : 'Speed Round';
+    startChallengeSideButton.textContent = roundActive ? 'Round Running' : 'Start Speed Round';
 
     if (roundActive) {
       const remaining = challengeQuestionCount - challengeState.answered;
@@ -1072,11 +1072,11 @@
       button.classList.toggle('is-locked', !unlocked);
       button.innerHTML = '<span class="game-avatar-option-emoji">' + avatar.emoji + '</span>'
         + '<span class="game-avatar-option-name">' + avatar.name + '</span>'
-        + '<span class="game-avatar-option-meta">' + (unlocked ? 'Ready to play' : 'Unlock at ' + avatar.unlockStars + ' stars') + '</span>';
+        + '<span class="game-avatar-option-meta">' + (unlocked ? 'Available' : 'Available at ' + avatar.unlockStars + ' stars') + '</span>';
 
       button.addEventListener('click', function handleAvatarPick() {
         if (!unlocked) {
-          setStatus('Keep collecting stars to unlock ' + avatar.name + '.', 'soft');
+          setStatus('Keep earning stars to unlock ' + avatar.name + '.', 'soft');
           return;
         }
         profile.selectedAvatar = avatarId;
@@ -1146,14 +1146,14 @@
         unlockStars: avatar.unlockStars,
         unlocked: profile.unlockedAvatars.includes(avatarId),
         equipped: profile.selectedAvatar === avatarId,
-        unlockedCopy: 'Friend ready to play',
+        unlockedCopy: 'Available',
         onSelect: function selectAvatar() {
           profile.selectedAvatar = avatarId;
           saveProfile();
           renderAvatarPicker();
           renderUnlockGrid();
           updateStats();
-          setStatus(avatar.name + ' joined the mission!', 'right');
+          setStatus(avatar.name + ' selected.', 'right');
         }
       };
     })));
@@ -1166,7 +1166,7 @@
         unlockStars: theme.unlockStars,
         unlocked: profile.unlockedThemes.includes(themeId),
         equipped: profile.equippedTheme === themeId,
-        unlockedCopy: 'Theme ready to use',
+        unlockedCopy: 'Available',
         onSelect: function selectTheme() {
           profile.equippedTheme = themeId;
           saveProfile();
@@ -1185,7 +1185,7 @@
         unlockStars: firework.unlockStars,
         unlocked: profile.unlockedFireworks.includes(fireworkId),
         equipped: profile.equippedFirework === fireworkId,
-        unlockedCopy: 'Sparkle pack ready',
+        unlockedCopy: 'Available',
         onSelect: function selectFireworkTheme() {
           profile.equippedFirework = fireworkId;
           saveProfile();
@@ -1198,8 +1198,8 @@
 
     const nextUnlock = getNextUnlock();
     unlockSummaryElement.textContent = nextUnlock
-      ? 'Earn ' + Math.max(0, nextUnlock.unlockStars - profile.totalStarsEarned) + ' more stars to unlock ' + nextUnlock.label + '.'
-      : 'Every current reward is unlocked. Great job!';
+      ? 'Earn ' + Math.max(0, nextUnlock.unlockStars - profile.totalStarsEarned) + ' more stars for ' + nextUnlock.label + '.'
+      : 'Everything available is unlocked.';
   }
 
   function getNextUnlock() {
@@ -1281,10 +1281,10 @@
     });
     starJarCopyElement.textContent = sessionStarJar
       ? sessionStarJar + ' of ' + starJarSize + ' stars lit up.'
-      : 'Fill all 5 stars for a bonus reward.';
+      : 'Fill all 5 stars to unlock the next item.';
     nextUnlockCopyElement.textContent = nextUnlock
       ? nextUnlock.label + ' unlocks at ' + nextUnlock.unlockStars + ' stars.'
-      : 'Every reward is unlocked. Keep playing for big streaks!';
+      : 'Everything is unlocked.';
 
     modeButtons.forEach(function updateModeButton(button) {
       const buttonMode = button.dataset.mode || '';
@@ -1358,5 +1358,5 @@
   }
   updateStats();
   renderProblem();
-  setStatus('Tap the answer and collect a star.', 'special');
+  setStatus('Tap the right answer.', 'special');
 })();
