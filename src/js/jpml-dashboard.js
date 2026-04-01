@@ -2016,10 +2016,13 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
 
     let totalPending = 0;
     let totalAll     = 0;
+    let mdlCount     = 0;
     for (const [mdl, info] of Object.entries(mdlCounts)) {
       if (permanentlyExcluded.has(mdl)) continue;
       totalPending += info.pending;
       totalAll     += info.total;
+      const hasCases = mode === 'all' ? info.total > 0 : info.pending > 0;
+      if (hasCases) mdlCount += 1;
     }
 
     const totalTerminated = totalAll - totalPending;
@@ -2042,6 +2045,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
       pending: totalPending,
       total: totalAll,
       terminated: totalTerminated,
+      mdlCount,
       dominantMDLs,
       excludedCount: permanentlyExcluded.size,
       excludedMDLs: [...permanentlyExcluded].map(mdl => {
@@ -2082,18 +2086,34 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
   
   // Create datasets based on mode
   let datasets = [];
-  let yAxisLabel = '';
   let stacked = false;
+  const claimsAxisLabel = mode === 'all' ? 'Claims Count' : 'Pending Claims Count';
+  const mdlAxisLabel = 'MDL Count';
+  const mdlCountDataset = {
+    type: 'line',
+    label: 'MDL Count',
+    data: chartData.map(d => d.mdlCount),
+    yAxisID: 'yMdl',
+    borderColor: 'rgba(255, 206, 86, 1)',
+    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+    borderWidth: 2,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+    tension: 0.25,
+    order: 0,
+    pointStyle: 'circle'
+  };
   
   if (mode === 'all') {
     // Stacked bar chart
     stacked = true;
-    yAxisLabel = 'Total Cases';
     datasets = [
       {
         type: 'bar',
         label: 'Pending Cases',
         data: chartData.map(d => d.pending),
+        yAxisID: 'yClaims',
         backgroundColor: 'rgba(54, 162, 235, 0.7)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -2104,6 +2124,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         type: 'bar',
         label: 'Terminated Cases',
         data: chartData.map(d => d.terminated),
+        yAxisID: 'yClaims',
         backgroundColor: 'rgba(75, 192, 192, 0.7)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
@@ -2114,6 +2135,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         type: 'line',
         label: '3-Month Moving Average',
         data: movingAverage,
+        yAxisID: 'yClaims',
         borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 3,
         pointRadius: 0,
@@ -2122,15 +2144,16 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         order: 1,
         spanGaps: true,
         pointStyle: 'line'
-      }
+      },
+      mdlCountDataset
     ];
   } else if (mode === 'pending') {
-    yAxisLabel = 'Pending Cases';
     datasets = [
       {
         type: 'bar',
         label: 'Pending Cases',
         data: chartData.map(d => d.pending),
+        yAxisID: 'yClaims',
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -2140,6 +2163,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         type: 'line',
         label: '3-Month Moving Average',
         data: movingAverage,
+        yAxisID: 'yClaims',
         borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 3,
         pointRadius: 0,
@@ -2148,16 +2172,17 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         order: 1,
         spanGaps: true,
         pointStyle: 'line'
-      }
+      },
+      mdlCountDataset
     ];
   } else {
     // total mode
-    yAxisLabel = 'Total Cases';
     datasets = [
       {
         type: 'bar',
         label: 'Total Cases',
         data: chartData.map(d => d.total),
+        yAxisID: 'yClaims',
         backgroundColor: 'rgba(153, 102, 255, 0.6)',
         borderColor: 'rgba(153, 102, 255, 1)',
         borderWidth: 1,
@@ -2167,6 +2192,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         type: 'line',
         label: '3-Month Moving Average',
         data: movingAverage,
+        yAxisID: 'yClaims',
         borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 3,
         pointRadius: 0,
@@ -2175,7 +2201,8 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         order: 1,
         spanGaps: true,
         pointStyle: 'line'
-      }
+      },
+      mdlCountDataset
     ];
   }
   
@@ -2261,12 +2288,12 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         }
       },
       scales: {
-        y: {
+        yClaims: {
           beginAtZero: true,
           stacked: stacked,
           title: {
             display: true,
-            text: yAxisLabel,
+            text: claimsAxisLabel,
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             }
@@ -2283,6 +2310,29 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#e0e0e0' : '#333';
             }
+          }
+        },
+        yMdl: {
+          beginAtZero: true,
+          position: 'right',
+          title: {
+            display: true,
+            text: mdlAxisLabel,
+            color: function(context) {
+              return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
+            }
+          },
+          ticks: {
+            precision: 0,
+            color: function(context) {
+              return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
+            },
+            callback: function(value) {
+              return value.toLocaleString();
+            }
+          },
+          grid: {
+            drawOnChartArea: false
           }
         },
         x: {

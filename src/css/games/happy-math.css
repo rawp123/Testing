@@ -25,6 +25,16 @@
 @media (min-width:960px){
   .game-shell{grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);align-items:start}
 }
+@media (max-width:1024px){
+  .game-panel,
+  .game-side-card{padding:20px}
+  .game-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .game-grade-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .game-modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .game-answer-grid{grid-template-columns:1fr}
+  .game-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+  .game-inline-copy{grid-column:1 / -1}
+}
 
 .game-panel{
   position:relative;

@@ -30,3 +30,5 @@
 .lab-card-word{background:linear-gradient(180deg,#f3ecdc,#f0e6d4);color:#241915;border-color:rgba(84,63,35,.18)}
 .lab-card-word p,.lab-card-word .lab-card-tags span{color:#6a5a44}
 .lab-card-word .lab-card-tags span{background:rgba(84,63,35,.06);border-color:rgba(84,63,35,.1)}
+@media (max-width:1024px){.lab-intro{padding:24px 24px 26px}.lab-group{padding:20px}.lab-card{padding:20px;border-radius:24px}}
+@media (max-width:640px){.lab-shell{gap:22px}.lab-intro{padding:20px;border-radius:24px}.lab-group{padding:18px 18px 20px;border-radius:24px}.lab-card{padding:18px;border-radius:22px}}

@@ -55,5 +55,6 @@
 .word-badge-copy{display:grid;gap:4px}
 .word-badge-copy strong{font-size:.95rem}
 .word-badge-copy span{font-size:.85rem;color:var(--muted)}
+@media (max-width:1024px){.word-panel,.word-side-card{padding:20px}.word-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.word-answer-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.word-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.word-answer-grid{grid-template-columns:1fr}.word-slot{min-width:76px;min-height:84px;font-size:2rem}}
 @media (max-width:560px){.word-panel,.word-side-card{padding:18px}.word-hero-main{align-items:flex-start}.word-mascot{width:68px;height:68px;font-size:2rem}.word-title{font-size:clamp(1.8rem,8vw,2.6rem)}}

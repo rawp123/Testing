@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Database Diagram Builder</title>
+  <meta name="description" content="Paste DBML-style table definitions and generate a complete database diagram.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/db-diagram.css">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/db-diagram.js" defer></script>
+</head>
+<body data-page="db-diagram">
+  <div id="site-header"></div>
+
+  <main class="db-page">
+    <section class="container db-hero">
+      <div class="db-hero-copy">
+        <p class="db-eyebrow">Project</p>
+        <h1>Database Diagram Builder</h1>
+        <p class="db-intro">Paste your table definitions, click render, and the app will build an ER-style diagram with primary keys and foreign-key relationships mapped out.</p>
+      </div>
+      <div class="db-hero-card">
+        <div class="db-stat">
+          <span class="db-stat-value" id="table-count">0</span>
+          <span class="db-stat-label">Tables</span>
+        </div>
+        <div class="db-stat">
+          <span class="db-stat-value" id="relationship-count">0</span>
+          <span class="db-stat-label">Relationships</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="container db-workspace">
+      <div class="db-panel db-editor-panel">
+        <div class="db-panel-header">
+          <div>
+            <h2>Schema Input</h2>
+            <p>Supports `Table ... { ... }`, `pk`, `not null`, and `ref: &gt; ...` annotations.</p>
+          </div>
+          <div class="db-actions">
+            <button type="button" class="btn ghost" id="load-sample">Load Sample</button>
+            <button type="button" class="btn ghost" id="clear-schema">Clear</button>
+            <button type="button" class="btn primary" id="render-diagram">Render Diagram</button>
+          </div>
+        </div>
+        <div class="db-schema-body" id="schema-body">
+          <label class="sr-only" for="schema-input">Database schema input</label>
+          <textarea id="schema-input" spellcheck="false"></textarea>
+          <div class="db-feedback-row">
+            <div id="schema-status" class="db-status" aria-live="polite">Ready to render.</div>
+          </div>
+          <div class="db-errors" id="error-panel" hidden>
+            <h3>Parser Notes</h3>
+            <ul id="error-list"></ul>
+          </div>
+        </div>
+        <div class="db-schema-collapsed-bar" id="schema-collapsed-bar" hidden>
+          <span class="db-schema-collapsed-text">Schema editor minimized. Use Edit Schema to make changes.</span>
+          <button type="button" class="btn ghost" id="edit-schema">Edit Schema</button>
+        </div>
+      </div>
+
+      <div class="db-panel db-diagram-panel">
+        <div class="db-panel-header">
+          <div>
+            <h2>Diagram</h2>
+            <p>The full database structure is rendered as SVG so you can scroll and export it cleanly.</p>
+          </div>
+          <div class="db-diagram-tools">
+            <div class="db-legend" aria-label="Diagram legend">
+              <span class="db-legend-item"><span class="db-legend-pill db-legend-pill-pk">PK</span> Primary key</span>
+              <span class="db-legend-item"><span class="db-legend-pill db-legend-pill-fk">FK</span> Foreign key</span>
+              <span class="db-legend-item"><span class="db-legend-pill db-legend-pill-nn">NN</span> Not null</span>
+            </div>
+            <div class="db-view-controls">
+              <div class="db-control-group">
+                <span class="db-control-label">Zoom</span>
+                <button type="button" class="btn ghost" id="zoom-out">-</button>
+                <button type="button" class="btn ghost" id="zoom-fit">Fit</button>
+                <button type="button" class="btn ghost" id="zoom-reset">100%</button>
+                <button type="button" class="btn ghost" id="zoom-in">+</button>
+                <span class="db-control-value" id="zoom-value">100%</span>
+              </div>
+              <div class="db-control-group">
+                <label class="db-control-label" for="font-scale">Font</label>
+                <input id="font-scale" type="range" min="80" max="150" step="5" value="100">
+                <span class="db-control-value" id="font-scale-value">100%</span>
+              </div>
+            </div>
+            <div class="db-export-actions">
+              <button type="button" class="btn ghost" id="download-dbml">Download DBML</button>
+              <button type="button" class="btn ghost" id="download-png">Download PNG</button>
+              <button type="button" class="btn ghost" id="download-svg">Download SVG</button>
+              <button type="button" class="btn ghost" id="edit-schema-secondary">Edit Schema</button>
+            </div>
+          </div>
+        </div>
+        <div class="db-diagram-shell">
+          <div class="db-diagram-stage" id="diagram-stage" aria-live="polite">
+            <div class="db-empty-state" id="diagram-empty-state">
+              Paste a schema or load the sample to generate the diagram.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="hp-footer-note muted small">Database Diagram Builder runs locally in your browser and does not require an external diagram service.</div>
+  </footer>
+</body>
+</html>
