@@ -1025,6 +1025,77 @@ function getDistrictBreakdownForMonth(monthData, districtName) {
   };
 }
 
+function getCombinedDistrictBreakdown(monthData, districtNames, metric = 'pending') {
+  const normalizedDistricts = (districtNames || []).filter(Boolean);
+  const districtSet = new Set(normalizedDistricts);
+  const longNames = new Set(normalizedDistricts.map(name => shortToLongDistrictMap[name] || name));
+  const rows = monthData.filter((row) => districtSet.has(row.District) || longNames.has(row.District));
+
+  if (!rows.length) {
+    return {
+      label: metric === 'total' ? 'Total Count' : 'Pending Count',
+      total: 0,
+      mdlsAvailable: false,
+      rows: []
+    };
+  }
+
+  const label = metric === 'total' ? 'Total Count' : 'Pending Count';
+  const breakdown = new Map();
+  let mdlsAvailable = false;
+  let total = 0;
+
+  rows.forEach((row) => {
+    const mdl = row.MDL || row['MDL Name'] || row['Case Name'] || '';
+    const title = row.Title || row['Case Name'] || '';
+    const count = metric === 'total' ? (row.Total || 0) : (row.Pending || 0);
+
+    total += count;
+    if (!mdl) {
+      return;
+    }
+
+    mdlsAvailable = true;
+    if (!breakdown.has(mdl)) {
+      breakdown.set(mdl, { mdlNum: mdl, title, count: 0 });
+    }
+    breakdown.get(mdl).count += count;
+  });
+
+  const sortedRows = [...breakdown.values()]
+    .filter((row) => row.count > 0)
+    .sort((left, right) => right.count - left.count);
+
+  return {
+    label,
+    total,
+    mdlsAvailable,
+    rows: sortedRows
+  };
+}
+
+function renderExecutiveDistrictDetails(monthData, districtNames, heading, metric = 'pending') {
+  const breakdown = getCombinedDistrictBreakdown(monthData, districtNames, metric);
+  const rows = breakdown.rows.slice(0, 12);
+  const remaining = Math.max(0, breakdown.rows.length - rows.length);
+
+  const tableHtml = renderInlineMdlsSection(rows, breakdown.total, breakdown.mdlsAvailable, breakdown.label);
+  const overflowNote = remaining
+    ? `<div class="es-dist-detail-note">Showing top ${rows.length} MDLs. ${remaining} more remain in this group.</div>`
+    : '';
+
+  return `
+    <div class="es-dist-detail-card">
+      <div class="es-dist-detail-head">
+        <div class="es-dist-detail-title">${heading}</div>
+        <div class="es-dist-detail-total">${breakdown.total.toLocaleString()} ${metric === 'total' ? 'total' : 'pending'}</div>
+      </div>
+      ${tableHtml}
+      ${overflowNote}
+    </div>
+  `;
+}
+
 async function handleExpandClick(btn) {
   const tr = btn.closest('tr');
   const table = btn.closest('table');
@@ -2706,16 +2777,26 @@ function renderExecutiveSummary(summary, endData) {
               const relWidth = (d.pending / top1BarWidth * 100).toFixed(1);
               const dc = d.pendingDelta >= 0 ? 'delta-positive' : 'delta-negative';
               const ds = d.pendingDelta >= 0 ? '+' : '';
+              const detailHtml = renderExecutiveDistrictDetails(
+                endData,
+                [d.District],
+                `${getFullDistrictName(d.District)} MDLs`,
+                'pending'
+              );
               return `
-              <div class="es-dist-row">
+              <div class="es-dist-row es-dist-row-expandable" data-expanded="false">
                 <div class="es-dist-rank">${i + 1}</div>
-                <div class="es-dist-name">${getFullDistrictName(d.District)}</div>
+                <button type="button" class="es-dist-name es-dist-toggle" data-district="${d.District}" aria-expanded="false">
+                  <span class="es-dist-name-text">${getFullDistrictName(d.District)}</span>
+                  <span class="es-dist-chevron" aria-hidden="true"></span>
+                </button>
                 <div class="es-dist-bar-wrap">
                   <div class="es-dist-bar" style="width:${relWidth}%"></div>
                 </div>
                 <div class="es-dist-pct">${pct.toFixed(1)}%</div>
                 <div class="es-dist-count">${d.pending.toLocaleString()}</div>
                 <div class="es-dist-delta ${dc}">${ds}${d.pendingDelta.toLocaleString()}</div>
+                <div class="es-dist-detail" hidden>${detailHtml}</div>
               </div>`;
             });
             if (others.length > 0) {
@@ -2723,16 +2804,26 @@ function renderExecutiveSummary(summary, endData) {
               const relWidth = (othersPending / top1BarWidth * 100).toFixed(1);
               const dc = othersDelta >= 0 ? 'delta-positive' : 'delta-negative';
               const ds = othersDelta >= 0 ? '+' : '';
+              const detailHtml = renderExecutiveDistrictDetails(
+                endData,
+                others.map((district) => district.District),
+                `All other districts (${others.length})`,
+                'pending'
+              );
               rows.push(`
-              <div class="es-dist-row es-dist-row-others">
+              <div class="es-dist-row es-dist-row-others es-dist-row-expandable" data-expanded="false">
                 <div class="es-dist-rank">11</div>
-                <div class="es-dist-name" style="color:var(--color-text-secondary)">All Others</div>
+                <button type="button" class="es-dist-name es-dist-toggle" data-district-group="others" aria-expanded="false">
+                  <span class="es-dist-name-text" style="color:var(--color-text-secondary)">All Others</span>
+                  <span class="es-dist-chevron" aria-hidden="true"></span>
+                </button>
                 <div class="es-dist-bar-wrap">
                   <div class="es-dist-bar" style="width:${relWidth}%;opacity:0.45"></div>
                 </div>
                 <div class="es-dist-pct" style="color:var(--color-text-secondary)">${pct.toFixed(1)}%</div>
                 <div class="es-dist-count" style="color:var(--color-text-secondary)">${othersPending.toLocaleString()}</div>
                 <div class="es-dist-delta ${dc}">${ds}${othersDelta.toLocaleString()}</div>
+                <div class="es-dist-detail" hidden>${detailHtml}</div>
               </div>`);
             }
             // Total row
@@ -3226,6 +3317,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target && (e.target.classList.contains('expand-btn') || e.target.parentElement?.classList.contains('expand-btn'))) {
       const btn = e.target.classList.contains('expand-btn') ? e.target : e.target.parentElement;
       await handleExpandClick(btn);
+    }
+
+    const executiveToggle = e.target.closest('.es-dist-toggle');
+    if (executiveToggle) {
+      const row = executiveToggle.closest('.es-dist-row-expandable');
+      const list = executiveToggle.closest('.es-dist-list');
+      const detail = row?.querySelector('.es-dist-detail');
+      if (row && list && detail) {
+        const isExpanded = row.getAttribute('data-expanded') === 'true';
+        list.querySelectorAll('.es-dist-row-expandable').forEach((candidate) => {
+          candidate.setAttribute('data-expanded', 'false');
+          const candidateButton = candidate.querySelector('.es-dist-toggle');
+          const candidateDetail = candidate.querySelector('.es-dist-detail');
+          if (candidateButton) {
+            candidateButton.setAttribute('aria-expanded', 'false');
+          }
+          if (candidateDetail) {
+            candidateDetail.hidden = true;
+          }
+        });
+
+        if (!isExpanded) {
+          row.setAttribute('data-expanded', 'true');
+          executiveToggle.setAttribute('aria-expanded', 'true');
+          detail.hidden = false;
+        }
+      }
+      return;
     }
     
     const closeButton = e.target.closest('#district-detail-close');

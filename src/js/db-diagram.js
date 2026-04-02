@@ -441,7 +441,7 @@ Table support_tickets {
     })[0];
   }
 
-  function rankTablesForHubLayout(tables, hubName, connectivity) {
+  function sortTablesByConnectivity(tables, hubName, connectivity) {
     return [...tables]
       .filter((table) => table.name !== hubName)
       .sort((left, right) => {
@@ -464,6 +464,153 @@ Table support_tickets {
 
         return left.name.localeCompare(right.name);
       });
+  }
+
+  function distributeTablesIntoColumns(tables, hubName, connectivity, columnCount) {
+    const centerColumn = Math.floor(columnCount / 2);
+    const columnBuckets = new Array(columnCount).fill(null).map(() => []);
+    const assignedColumns = new Map([[hubName, centerColumn]]);
+    const pendingTables = sortTablesByConnectivity(tables, hubName, connectivity);
+    let fallbackOffset = 1;
+
+    columnBuckets[centerColumn].push(hubName);
+
+    function getFallbackColumn() {
+      const direction = fallbackOffset % 2 === 1 ? -1 : 1;
+      const distance = Math.ceil(fallbackOffset / 2);
+      fallbackOffset += 1;
+      return Math.min(columnCount - 1, Math.max(0, centerColumn + direction * distance));
+    }
+
+    function chooseLessCrowdedColumn(targetColumn, preferredDirection = 0) {
+      const rankedColumns = new Array(columnCount).fill(null).map((_, columnIndex) => ({
+        columnIndex,
+        distance: Math.abs(columnIndex - targetColumn),
+        load: columnBuckets[columnIndex].length,
+        directionPenalty: preferredDirection === 0
+          ? 0
+          : preferredDirection < 0
+            ? Math.max(0, columnIndex - targetColumn)
+            : Math.max(0, targetColumn - columnIndex),
+        centerPenalty: targetColumn !== centerColumn && columnIndex === centerColumn ? 1.25 : 0
+      }));
+
+      rankedColumns.sort((left, right) => {
+        const leftScore = left.distance * 1.7 + left.load * 1.35 + left.directionPenalty * 1.15 + left.centerPenalty;
+        const rightScore = right.distance * 1.7 + right.load * 1.35 + right.directionPenalty * 1.15 + right.centerPenalty;
+
+        if (leftScore !== rightScore) {
+          return leftScore - rightScore;
+        }
+
+        if (left.distance !== right.distance) {
+          return left.distance - right.distance;
+        }
+
+        return left.columnIndex - right.columnIndex;
+      });
+
+      return rankedColumns[0].columnIndex;
+    }
+
+    while (pendingTables.length) {
+      let placedThisRound = false;
+
+      for (let index = 0; index < pendingTables.length; index += 1) {
+        const table = pendingTables[index];
+        const stats = connectivity.get(table.name);
+        const neighborColumns = [...stats.neighbors]
+          .filter((neighborName) => assignedColumns.has(neighborName))
+          .map((neighborName) => assignedColumns.get(neighborName));
+
+        let targetColumn;
+        const relationshipBalance = stats.outbound - stats.inbound;
+        const directionBias = relationshipBalance === 0 ? 0 : (relationshipBalance > 0 ? 1 : -1);
+        if (neighborColumns.length) {
+          const averageNeighborColumn = neighborColumns.reduce((sum, value) => sum + value, 0) / neighborColumns.length;
+          let desiredColumn = Math.round(averageNeighborColumn + directionBias);
+          if (directionBias !== 0 && desiredColumn === centerColumn) {
+            desiredColumn = centerColumn + directionBias;
+          }
+          targetColumn = chooseLessCrowdedColumn(
+            Math.min(columnCount - 1, Math.max(0, desiredColumn)),
+            directionBias
+          );
+        } else {
+          const fallbackColumn = getFallbackColumn();
+          targetColumn = chooseLessCrowdedColumn(fallbackColumn, directionBias);
+        }
+
+        columnBuckets[targetColumn].push(table.name);
+        assignedColumns.set(table.name, targetColumn);
+        pendingTables.splice(index, 1);
+        index -= 1;
+        placedThisRound = true;
+      }
+
+      if (!placedThisRound) {
+        const table = pendingTables.shift();
+        const targetColumn = chooseLessCrowdedColumn(getFallbackColumn());
+        columnBuckets[targetColumn].push(table.name);
+        assignedColumns.set(table.name, targetColumn);
+      }
+    }
+
+    return { columnBuckets, assignedColumns, centerColumn };
+  }
+
+  function reorderColumnBuckets(columnBuckets, assignedColumns, connectivity) {
+    const rowIndexByTable = new Map();
+
+    function refreshRowIndexes() {
+      rowIndexByTable.clear();
+      columnBuckets.forEach((bucket) => {
+        bucket.forEach((tableName, rowIndex) => {
+          rowIndexByTable.set(tableName, rowIndex);
+        });
+      });
+    }
+
+    refreshRowIndexes();
+
+    for (let pass = 0; pass < 4; pass += 1) {
+      columnBuckets.forEach((bucket, columnIndex) => {
+        if (bucket.length <= 1) {
+          return;
+        }
+
+        bucket.sort((leftName, rightName) => {
+          const leftStats = connectivity.get(leftName);
+          const rightStats = connectivity.get(rightName);
+
+          const leftNeighborRows = [...leftStats.neighbors]
+            .filter((neighborName) => assignedColumns.get(neighborName) !== columnIndex && rowIndexByTable.has(neighborName))
+            .map((neighborName) => rowIndexByTable.get(neighborName));
+          const rightNeighborRows = [...rightStats.neighbors]
+            .filter((neighborName) => assignedColumns.get(neighborName) !== columnIndex && rowIndexByTable.has(neighborName))
+            .map((neighborName) => rowIndexByTable.get(neighborName));
+
+          const leftScore = leftNeighborRows.length
+            ? leftNeighborRows.reduce((sum, value) => sum + value, 0) / leftNeighborRows.length
+            : Number.MAX_SAFE_INTEGER;
+          const rightScore = rightNeighborRows.length
+            ? rightNeighborRows.reduce((sum, value) => sum + value, 0) / rightNeighborRows.length
+            : Number.MAX_SAFE_INTEGER;
+
+          if (leftScore !== rightScore) {
+            return leftScore - rightScore;
+          }
+
+          if (rightStats.total !== leftStats.total) {
+            return rightStats.total - leftStats.total;
+          }
+
+          return leftName.localeCompare(rightName);
+        });
+      });
+
+      refreshRowIndexes();
+    }
   }
 
   function applyPositionOverrides(positions, positionOverrides) {
@@ -502,6 +649,7 @@ Table support_tickets {
     const gapY = 72;
     const topPadding = 48;
     const columnWidths = new Array(columnCount).fill(0);
+    const connectivity = buildConnectivity(tables, relationships);
 
     const specs = tables.map((table) => ({
       name: table.name,
@@ -512,8 +660,15 @@ Table support_tickets {
 
     if (columnCount <= 2) {
       const columnHeights = new Array(columnCount).fill(topPadding);
+      const orderedSpecs = columnCount === 1
+        ? specs
+        : (() => {
+            const hubTable = chooseHubTable(tables, connectivity);
+            const orderedTableNames = [hubTable.name, ...sortTablesByConnectivity(tables, hubTable.name, connectivity).map((table) => table.name)];
+            return orderedTableNames.map((tableName) => specByName.get(tableName)).filter(Boolean);
+          })();
 
-      specs.forEach((spec) => {
+      orderedSpecs.forEach((spec) => {
         let bestColumn = 0;
         for (let index = 1; index < columnCount; index += 1) {
           if (columnHeights[index] < columnHeights[bestColumn]) {
@@ -548,20 +703,14 @@ Table support_tickets {
       };
     }
 
-    const connectivity = buildConnectivity(tables, relationships);
     const hubTable = chooseHubTable(tables, connectivity);
-    const rankedTables = rankTablesForHubLayout(tables, hubTable.name, connectivity);
-    const centerColumn = Math.floor(columnCount / 2);
-    const columnBuckets = new Array(columnCount).fill(null).map(() => []);
-
-    columnBuckets[centerColumn].push(hubTable.name);
-
-    rankedTables.forEach((table, index) => {
-      const distance = Math.floor(index / 2) + 1;
-      const direction = index % 2 === 0 ? -1 : 1;
-      const targetColumn = Math.min(columnCount - 1, Math.max(0, centerColumn + direction * distance));
-      columnBuckets[targetColumn].push(table.name);
-    });
+    const { columnBuckets, assignedColumns, centerColumn } = distributeTablesIntoColumns(
+      tables,
+      hubTable.name,
+      connectivity,
+      columnCount
+    );
+    reorderColumnBuckets(columnBuckets, assignedColumns, connectivity);
 
     columnBuckets.forEach((bucket, columnIndex) => {
       bucket.forEach((tableName) => {
@@ -848,10 +997,85 @@ Table support_tickets {
     return { x, y };
   }
 
-  function buildOrthogonalPath(start, end, fromSide, toSide) {
+  function getConnectionSides(connection, layout) {
+    const fromFrame = layout.positions[connection.fromTable];
+    const toFrame = layout.positions[connection.toTable];
+    const fromSide = fromFrame.x <= toFrame.x ? 'right' : 'left';
+    const toSide = fromSide === 'right' ? 'left' : 'right';
+
+    return { fromSide, toSide };
+  }
+
+  function assignRelationshipRouteLanes(connections, layout, metrics, renderStateByName) {
+    const sourceGroups = new Map();
+    const targetGroups = new Map();
+
+    connections.forEach((connection) => {
+      const { fromSide, toSide } = getConnectionSides(connection, layout);
+      connection.fromSide = fromSide;
+      connection.toSide = toSide;
+
+      const fromFrame = layout.positions[connection.fromTable];
+      const toFrame = layout.positions[connection.toTable];
+      const fromRenderState = renderStateByName.get(connection.fromTable);
+      const toRenderState = renderStateByName.get(connection.toTable);
+      const start = getFieldCenter(fromFrame, fromRenderState, connection.fromRowIndex, fromSide, metrics);
+      const end = getFieldCenter(toFrame, toRenderState, connection.toRowIndex, toSide, metrics);
+
+      connection._anchorStartY = start.y;
+      connection._anchorEndY = end.y;
+
+      const sourceKey = `${connection.fromTable}|${fromSide}`;
+      const targetKey = `${connection.toTable}|${toSide}`;
+
+      if (!sourceGroups.has(sourceKey)) {
+        sourceGroups.set(sourceKey, []);
+      }
+      if (!targetGroups.has(targetKey)) {
+        targetGroups.set(targetKey, []);
+      }
+
+      sourceGroups.get(sourceKey).push(connection);
+      targetGroups.get(targetKey).push(connection);
+    });
+
+    function assignGroupOffsets(groups, propertyName, yPropertyName) {
+      groups.forEach((group) => {
+        group.sort((left, right) => {
+          if (left[yPropertyName] !== right[yPropertyName]) {
+            return left[yPropertyName] - right[yPropertyName];
+          }
+
+          if (left.fromTable !== right.fromTable) {
+            return left.fromTable.localeCompare(right.fromTable);
+          }
+
+          if (left.toTable !== right.toTable) {
+            return left.toTable.localeCompare(right.toTable);
+          }
+
+          return `${left.relationship.fromField}-${left.relationship.toField}`.localeCompare(
+            `${right.relationship.fromField}-${right.relationship.toField}`
+          );
+        });
+
+        group.forEach((connection, index) => {
+          connection[propertyName] = index;
+        });
+      });
+    }
+
+    assignGroupOffsets(sourceGroups, 'startLaneIndex', '_anchorStartY');
+    assignGroupOffsets(targetGroups, 'endLaneIndex', '_anchorEndY');
+  }
+
+  function buildOrthogonalPath(start, end, fromSide, toSide, startLaneIndex = 0, endLaneIndex = 0) {
     const outwardOffset = 28;
-    const startBendX = start.x + (fromSide === 'right' ? outwardOffset : -outwardOffset);
-    const endBendX = end.x + (toSide === 'left' ? -outwardOffset : outwardOffset);
+    const laneGap = 18;
+    const fromDirection = fromSide === 'right' ? 1 : -1;
+    const toDirection = toSide === 'right' ? 1 : -1;
+    const startBendX = start.x + fromDirection * (outwardOffset + startLaneIndex * laneGap);
+    const endBendX = end.x + toDirection * (outwardOffset + endLaneIndex * laneGap);
     const horizontalClearance = fromSide === 'right'
       ? endBendX - startBendX
       : startBendX - endBendX;
@@ -861,7 +1085,8 @@ Table support_tickets {
     ];
 
     if (horizontalClearance >= 24) {
-      const midX = (startBendX + endBendX) / 2;
+      const laneSpread = ((startLaneIndex + endLaneIndex) * laneGap) / 2;
+      const midX = ((startBendX + endBendX) / 2) + fromDirection * laneSpread;
       points.push(
         { x: midX, y: start.y },
         { x: midX, y: end.y }
@@ -891,12 +1116,18 @@ Table support_tickets {
     const toFrame = layout.positions[connection.toTable];
     const fromRenderState = renderStateByName.get(connection.fromTable);
     const toRenderState = renderStateByName.get(connection.toTable);
-    const fromSide = fromFrame.x <= toFrame.x ? 'right' : 'left';
-    const toSide = fromSide === 'right' ? 'left' : 'right';
+    const { fromSide, toSide } = getConnectionSides(connection, layout);
     const start = getFieldCenter(fromFrame, fromRenderState, connection.fromRowIndex, fromSide, metrics);
     const end = getFieldCenter(toFrame, toRenderState, connection.toRowIndex, toSide, metrics);
 
-    connection.path.setAttribute('d', buildOrthogonalPath(start, end, fromSide, toSide));
+    connection.path.setAttribute('d', buildOrthogonalPath(
+      start,
+      end,
+      fromSide,
+      toSide,
+      connection.startLaneIndex || 0,
+      connection.endLaneIndex || 0
+    ));
     connection.startDot.setAttribute('cx', String(start.x));
     connection.startDot.setAttribute('cy', String(start.y));
     connection.endDot.setAttribute('cx', String(end.x));
@@ -958,8 +1189,12 @@ Table support_tickets {
         startDot,
         endDot
       };
-      updateRelationshipPath(connection, layout, metrics, renderStateByName);
       connections.push(connection);
+    });
+
+    assignRelationshipRouteLanes(connections, layout, metrics, renderStateByName);
+    connections.forEach((connection) => {
+      updateRelationshipPath(connection, layout, metrics, renderStateByName);
     });
 
     return connections;
@@ -1219,6 +1454,7 @@ Table support_tickets {
       stage: document.getElementById('diagram-stage'),
       emptyState: document.getElementById('diagram-empty-state'),
       selectionState: document.getElementById('table-selection-state'),
+      resetFocusButton: document.getElementById('reset-focus'),
       tableSearchInput: document.getElementById('table-search'),
       tableSearchOptions: document.getElementById('table-search-options'),
       jumpTableButton: document.getElementById('jump-table'),
@@ -1411,6 +1647,7 @@ Table support_tickets {
       elements.relationshipCount.textContent = '0';
       elements.status.textContent = statusMessage;
       elements.selectionState.textContent = 'Select a table to highlight related tables and lines.';
+      elements.resetFocusButton.disabled = true;
       elements.tableSearchInput.value = '';
       elements.tableSearchOptions.innerHTML = '';
       renderSchemaEditorDecorations([]);
@@ -1446,6 +1683,7 @@ Table support_tickets {
     }
 
     function updateConnectedRelationships(tableName) {
+      assignRelationshipRouteLanes(currentConnections, currentLayout, currentMetrics, currentRenderStateByName);
       currentConnections.forEach((connection) => {
         if (connection.fromTable === tableName || connection.toTable === tableName) {
           updateRelationshipPath(connection, currentLayout, currentMetrics, currentRenderStateByName);
@@ -1542,6 +1780,7 @@ Table support_tickets {
     function applySelectionStyles() {
       if (!currentSelectedTableName || !currentTableGroups.has(currentSelectedTableName)) {
         currentSelectedTableName = null;
+        elements.resetFocusButton.disabled = true;
         currentTableGroups.forEach((group) => {
           group.classList.remove('is-selected', 'is-related', 'is-dimmed');
         });
@@ -1554,6 +1793,7 @@ Table support_tickets {
 
       const connectedTables = new Set([currentSelectedTableName]);
       let relationshipCount = 0;
+      elements.resetFocusButton.disabled = false;
 
       currentConnections.forEach((connection) => {
         const isConnected = connection.fromTable === currentSelectedTableName || connection.toTable === currentSelectedTableName;
@@ -1770,6 +2010,15 @@ Table support_tickets {
 
     elements.jumpTableButton.addEventListener('click', () => {
       jumpToSearchResult();
+    });
+
+    elements.resetFocusButton.addEventListener('click', () => {
+      if (!currentSelectedTableName) {
+        return;
+      }
+
+      clearSelection();
+      elements.status.textContent = 'Table focus cleared.';
     });
 
     elements.fontScaleInput.addEventListener('input', () => {

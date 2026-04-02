@@ -1734,6 +1734,7 @@ html.debug .inline-mdl-table {
 @media (max-width: 900px) {
   .es-dist-row { grid-template-columns: 20px 1fr 80px 64px; }
   .es-dist-bar-wrap, .es-dist-pct { display: none; }
+  .es-dist-detail { grid-column: 1 / -1; }
 }
 
 .es-dist-rank {
@@ -1748,6 +1749,104 @@ html.debug .inline-mdl-table {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.es-dist-toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  width:100%;
+  padding:0;
+  border:0;
+  background:none;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+
+.es-dist-name-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.es-dist-chevron{
+  flex:0 0 auto;
+  width:20px;
+  height:20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid var(--color-border);
+  color:var(--color-text-secondary);
+  font-size:.82rem;
+  font-weight:700;
+  line-height:1;
+}
+
+.es-dist-row-expandable{
+  padding:6px 0;
+  border-radius:12px;
+}
+
+.es-dist-row-expandable[data-expanded="true"]{
+  background:color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.es-dist-row-expandable[data-expanded="true"] .es-dist-chevron{
+  color:var(--color-accent);
+  border-color:color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+}
+
+.es-dist-row-expandable[data-expanded="true"] .es-dist-chevron::before{
+  content:"−";
+}
+
+.es-dist-toggle[aria-expanded="false"] .es-dist-chevron::before{
+  content:"+";
+}
+
+.es-dist-detail{
+  grid-column:2 / -1;
+  padding-top:10px;
+}
+
+.es-dist-detail-card{
+  border:1px solid var(--color-border);
+  border-radius:16px;
+  background:color-mix(in srgb, var(--color-bg-tertiary) 86%, transparent);
+  padding:14px 16px 12px;
+}
+
+.es-dist-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:baseline;
+  margin-bottom:12px;
+}
+
+.es-dist-detail-title{
+  font-size:.82rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--color-text-secondary);
+}
+
+.es-dist-detail-total{
+  font-size:.9rem;
+  font-weight:700;
+  color:var(--color-text-primary);
+}
+
+.es-dist-detail-note{
+  margin-top:10px;
+  font-size:.8rem;
+  color:var(--color-text-secondary);
 }
 
 .es-dist-bar-wrap {
