@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.591Z",
+  "episode": {
+    "id": "all-in-elon-musk-all-in-summit-2024",
+    "slug": "elon-musk-all-in-summit-2024",
+    "episodeNumber": null,
+    "title": "Elon Musk | All-In Summit 2024",
+    "publishDate": "2024-10-08",
+    "description": "(0:00) Announcement from Friedberg (0:24) Besties intro Elon Musk! (1:23) The Battle of Free Speech (10:24) Potential government efficiency agency (27:45) SpaceX updates,...",
+    "summary": "(0:00) Announcement from Friedberg (0:24) Besties intro Elon Musk! (1:23) The Battle of Free Speech (10:24) Potential government efficiency agency (27:45) SpaceX updates, overreaching regulations (36:10) Thoughts on Boeing's culture (38:27) The 80/20 AI Future (54:03) Elon and Jason share unaired SNL skits",
+    "durationSeconds": 3857,
+    "durationLabel": "01:04:17",
+    "guests": [
+      "Elon Musk"
+    ],
+    "topicTags": [
+      "AI",
+      "Tesla"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/elon-musk-all-in-summit-2024",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/elon-musk-all-in-summit-2024",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS24_ElonMusk_RSS_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/a/2/d/8a2d1b30e36d334227a2322813b393ee/1x1_Thumbnail__Elon_RSS.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-elon-musk-all-in-summit-2024",
+    "dataFile": "/data/all-in-podcast-search/episodes/elon-musk-all-in-summit-2024.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:24",
+      "text": "Announcement from Friedberg"
+    },
+    {
+      "startTimestamp": "00:24",
+      "endTimestamp": "01:23",
+      "text": "Besties intro Elon Musk!"
+    },
+    {
+      "startTimestamp": "01:23",
+      "endTimestamp": "10:24",
+      "text": "The Battle of Free Speech"
+    },
+    {
+      "startTimestamp": "10:24",
+      "endTimestamp": "27:45",
+      "text": "Potential government efficiency agency"
+    },
+    {
+      "startTimestamp": "27:45",
+      "endTimestamp": "36:10",
+      "text": "SpaceX updates, overreaching regulations"
+    },
+    {
+      "startTimestamp": "36:10",
+      "endTimestamp": "38:27",
+      "text": "Thoughts on Boeing's culture"
+    },
+    {
+      "startTimestamp": "38:27",
+      "endTimestamp": "54:03",
+      "text": "The 80/20 AI Future"
+    },
+    {
+      "startTimestamp": "54:03",
+      "text": "Elon and Jason share unaired SNL skits Follow Elon: https://x.com/elonmusk Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

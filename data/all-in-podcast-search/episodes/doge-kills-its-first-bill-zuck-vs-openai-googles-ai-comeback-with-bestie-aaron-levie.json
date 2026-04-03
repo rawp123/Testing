@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.531Z",
+  "episode": {
+    "id": "all-in-doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie",
+    "slug": "doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie",
+    "episodeNumber": null,
+    "title": "DOGE kills its first bill, Zuck vs OpenAI, Google's AI comeback with bestie Aaron Levie",
+    "publishDate": "2024-12-20",
+    "description": "(0:00) Bestie intros (3:07) The Besties welcome Box CEO Aaron Levie! (5:40) Thoughts on Sacks's new role, what areas he can have immediate positive impact on in crypto and AI...",
+    "summary": "(0:00) Bestie intros (3:07) The Besties welcome Box CEO Aaron Levie! (5:40) Thoughts on Sacks's new role, what areas he can have immediate positive impact on in crypto and AI (18:42) DOGE's first casualty and its paradigm-shifting potential (48:25) Conspiracy Corner: What are the drones over New Jersey!? (57:36) Zuck joins Team Elon against OpenAI, AI's...",
+    "durationSeconds": 5797,
+    "durationLabel": "01:36:37",
+    "guests": [
+      "Aaron Levie"
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Google",
+      "Meta",
+      "Crypto"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E208_v2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/0/3/1/4/0314f8c33223c613d959afa2a1bf1c87/1x1_CLASSIC_E208.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie",
+    "dataFile": "/data/all-in-podcast-search/episodes/doge-kills-its-first-bill-zuck-vs-openai-googles-ai-comeback-with-bestie-aaron-levie.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:07",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "03:07",
+      "endTimestamp": "05:40",
+      "text": "The Besties welcome Box CEO Aaron Levie!"
+    },
+    {
+      "startTimestamp": "05:40",
+      "endTimestamp": "18:42",
+      "text": "Thoughts on Sacks's new role, what areas he can have immediate positive impact on in crypto and AI"
+    },
+    {
+      "startTimestamp": "18:42",
+      "endTimestamp": "48:25",
+      "text": "DOGE's first casualty and its paradigm-shifting potential"
+    },
+    {
+      "startTimestamp": "48:25",
+      "endTimestamp": "57:36",
+      "text": "Conspiracy Corner: What are the drones over New Jersey!?"
+    },
+    {
+      "startTimestamp": "57:36",
+      "endTimestamp": "01:27:29",
+      "text": "Zuck joins Team Elon against OpenAI, AI's competitive landscape and downstream impact on business software"
+    },
+    {
+      "startTimestamp": "01:27:29",
+      "text": "Google's AI turnaround, future of AI physics and video models Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Aaron Levie: https://x.com/levie Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.cbsnews.com/news/government-shutdown-continuing-resolution-march-14 https://x.com/Jason/status/1869816646954823916 https://docs.house.gov/billsthisweek/20241216/CR.pdf https://www.cbsnews.com/news/government-shutdown-house-vote-continuing-resolution https://x.com/KobeissiLetter/status/1869730547851051029 https://www.cbsnews.com/news/continuing-resolution-government-shutdown-2024 https://x.com/VivekGRamaswamy/status/1869407887983821089 https://avalon.law.yale.edu/18th_century/fed58.asp https://x.com/patrickc/status/1869422495985750459 https://x.com/chamath/status/1869773044832718917 https://x.com/SpeakerPelosi/status/1869871681830879256 https://x.com/RepJayapal/status/1869823494588162475 https://x.com/elonmusk/status/1869485580276629975 https://x.com/elonmusk/status/1869482581181554704 https://x.com/elonmusk/status/1869487359420727338 https://www.wsj.com/politics/biden-white-house-age-function-diminished-3906a839 https://www.cnbc.com/2024/12/19/faa-drone-flights-are-temporarily-banned-new-jersey.html https://x.com/KanekoaTheGreat https://x.com/AutismCapital https://x.com/Geiger_Capital https://www.cnbc.com/2024/09/27/openai-sees-5-billion-loss-this-year-on-3point7-billion-in-revenue.html https://www.axios.com/2024/12/19/openai-bret-taylor-nonprofit-restructuring https://openai.com/index/scale-the-benefits-of-ai https://www.nytimes.com/2024/09/25/technology/mira-murati-openai.html https://apnews.com/article/elon-musk-openai-lawsuit-sam-altman-chatgpt-36bc55dbb8b4f9e1e5675ff7564e5fa0 https://www.theverge.com/2024/12/13/24320880/meta-california-ag-letter-openai-non-profit-elon-musk https://x.com/DailyPalantir/status/1869097046889882057 https://www.bloomberg.com/news/articles/2024-10-28/openai-cfo-says-75-of-its-revenue-comes-from-paying-consumers https://x.com/GoogleDeepMind/status/1868703624714395907 https://x.com/_philschmid/status/1869639246434246966"
+    }
+  ]
+}

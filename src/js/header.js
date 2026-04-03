@@ -47,12 +47,14 @@
   }
 
   function markActiveLink(page) {
-    if (!page) {
+    const pages = [page, document.body.dataset.pageParent].filter(Boolean);
+
+    if (!pages.length) {
       return;
     }
 
     document.querySelectorAll('[data-nav-link]').forEach((link) => {
-      if (link.dataset.navLink === page) {
+      if (pages.includes(link.dataset.navLink)) {
         link.classList.add('nav-active');
         link.setAttribute('aria-current', 'page');
       }

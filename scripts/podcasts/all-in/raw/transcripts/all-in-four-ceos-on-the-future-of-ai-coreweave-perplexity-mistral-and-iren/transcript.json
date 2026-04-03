@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "all-in-four-ceos-on-the-future-of-ai-coreweave-perplexity-mistral-and-iren",
+  "chunks": [
+    {
+      "startTimestamp": "00:00:00",
+      "speaker": "",
+      "text": "Intro live from Nvidia GTC, setting up a run of back-to-back conversations about the future of AI infrastructure, applications, and compute economics."
+    },
+    {
+      "startTimestamp": "00:00:37",
+      "endTimestamp": "00:32:58",
+      "speaker": "Michael Intrator",
+      "text": "The CoreWeave segment focuses on GPU demand, infrastructure bottlenecks, hyperscaler relationships, and what customers actually need from next-generation AI capacity."
+    },
+    {
+      "startTimestamp": "00:32:58",
+      "endTimestamp": "01:07:11",
+      "speaker": "Aravind Srinivas",
+      "text": "The Perplexity conversation centers on search behavior, answer engines, consumer habits, and how AI interfaces might change discovery on the web."
+    },
+    {
+      "startTimestamp": "01:07:11",
+      "endTimestamp": "01:18:57",
+      "speaker": "Arthur Mensch",
+      "text": "The Mistral section turns toward open-weight models, European AI strategy, and how teams can compete with much larger labs by staying focused."
+    },
+    {
+      "startTimestamp": "01:18:57",
+      "speaker": "Daniel Roberts",
+      "text": "The IREN interview digs into datacenters, power, site selection, and why energy access is becoming one of the hardest constraints in AI expansion."
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.386Z",
+  "episode": {
+    "id": "all-in-trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law",
+    "slug": "trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law",
+    "episodeNumber": null,
+    "title": "Trump vs Powell, Solving the Debt Crisis, The $10T AGI Prize, GENIUS Act Becomes Law",
+    "publishDate": "2025-07-19",
+    "description": "(0:00) The Besties welcome Gavin Baker! (1:51) Markets: Pricing in tariffs, Trump vs. Powell, solving the debt crisis (19:24) The $10 trillion AGI prize, what artificial general...",
+    "summary": "(0:00) The Besties welcome Gavin Baker! (1:51) Markets: Pricing in tariffs, Trump vs. Powell, solving the debt crisis (19:24) The $10 trillion AGI prize, what artificial general intelligence and superintelligence looks like in the economy (38:33) Sacks and Bo Hines join to discuss the GENIUS Act and the CLARITY Act passing the House this week, and what it...",
+    "durationSeconds": 4769,
+    "durationLabel": "01:19:29",
+    "guests": [
+      "Gavin Baker",
+      "Bo Hines",
+      "Bill Hagerty"
+    ],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Crypto",
+      "Politics",
+      "Infrastructure"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E236_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/6/6/a/666a29ffae425d9816c3140a3186d450/1x1_CLASSIC_E236.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law",
+    "dataFile": "/data/all-in-podcast-search/episodes/trump-vs-powell-solving-the-debt-crisis-the-10t-agi-prize-genius-act-becomes-law.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:51",
+      "text": "The Besties welcome Gavin Baker!"
+    },
+    {
+      "startTimestamp": "01:51",
+      "endTimestamp": "19:24",
+      "text": "Markets: Pricing in tariffs, Trump vs. Powell, solving the debt crisis"
+    },
+    {
+      "startTimestamp": "19:24",
+      "endTimestamp": "38:33",
+      "text": "The $10 trillion AGI prize, what artificial general intelligence and superintelligence looks like in the economy"
+    },
+    {
+      "startTimestamp": "38:33",
+      "endTimestamp": "52:42",
+      "text": "Sacks and Bo Hines join to discuss the GENIUS Act and the CLARITY Act passing the House this week, and what it means for crypto in the US"
+    },
+    {
+      "startTimestamp": "52:42",
+      "endTimestamp": "01:06:06",
+      "text": "AI Infrastructure: $90B in new investments announced, Nvidia H20 export restrictions lifted"
+    },
+    {
+      "startTimestamp": "01:06:06",
+      "text": "Sacks interviews Senator Bill Hagerty on the passing of the GENIUS Act Follow Gavin Baker: https://x.com/GavinSBaker Follow Bo Hines: https://x.com/bohines Follow Senator Bill Hagerty: https://x.com/SenatorHagerty Get The Besties All-In Tequila: https://tequila.allin.com Join us at the All-In Summit: https://allin.com/summit Summit scholarship application: http://bit.ly/4kyZqFJ Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.bloomberg.com/news/articles/2025-07-16/trump-likely-to-fire-powell-soon-white-house-official-says https://www.nytimes.com/2025/07/16/us/politics/trump-powell-firing-letter.html https://polymarket.com/event/fed-decision-in-september?tid=1752872350388 https://www.cnbc.com/2025/07/15/cpi-inflation-report-june-2025.html https://www.cnbc.com/quotes/US30Y https://polymarket.com/event/will-trump-remove-jerome-powell https://polymarket.com/event/who-will-trump-announce-as-next-fed-chair?tid=1752854752131 https://www.politico.com/live-updates/2025/07/15/congress/house-gop-crypto-bills-trump-00455645 https://www.nytimes.com/2025/07/15/us/politics/trump-ai-pittsburgh-speech.html"
+    }
+  ]
+}

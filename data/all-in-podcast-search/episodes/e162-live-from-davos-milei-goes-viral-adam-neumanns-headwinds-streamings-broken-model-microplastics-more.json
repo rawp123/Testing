@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.688Z",
+  "episode": {
+    "id": "all-in-e162",
+    "slug": "e162-live-from-davos-milei-goes-viral-adam-neumanns-headwinds-streamings-broken-model-microplastics-more",
+    "episodeNumber": 162,
+    "title": "E162: Live from Davos! Milei goes viral, Adam Neumann's headwinds, streaming's broken model, microplastics &amp; more",
+    "publishDate": "2024-01-19",
+    "description": "(0:00) Live from the WEF: \"Oh Davos, Kumbaya\" (4:25) Why Davos lost its luster, plus major moments: Milei's speech, Jamie Dimon on Trump (21:53) Boeing's regulatory capture...",
+    "summary": "(0:00) Live from the WEF: \"Oh Davos, Kumbaya\" (4:25) Why Davos lost its luster, plus major moments: Milei's speech, Jamie Dimon on Trump (21:53) Boeing's regulatory capture leading to negative impact on consumer safety (35:16) Adam Neumann facing familiar challenges at his new startup, Flow (50:24) Evaluating \"tech-enabled businesses\" vs. traditional...",
+    "durationSeconds": 5909,
+    "durationLabel": "01:38:29",
+    "guests": [],
+    "topicTags": [
+      "Politics",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e162-live-from-davos-milei-goes-viral-adam-neumanns-headwinds-streamings-broken-model-microplastics-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e162-live-from-davos-milei-goes-viral-adam-neumanns-headwinds-streamings-broken-model-microplastics-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E162.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e162",
+    "dataFile": "/data/all-in-podcast-search/episodes/e162-live-from-davos-milei-goes-viral-adam-neumanns-headwinds-streamings-broken-model-microplastics-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:25",
+      "text": "Live from the WEF: \"Oh Davos, Kumbaya\""
+    },
+    {
+      "startTimestamp": "04:25",
+      "endTimestamp": "21:53",
+      "text": "Why Davos lost its luster, plus major moments: Milei's speech, Jamie Dimon on Trump"
+    },
+    {
+      "startTimestamp": "21:53",
+      "endTimestamp": "35:16",
+      "text": "Boeing's regulatory capture leading to negative impact on consumer safety"
+    },
+    {
+      "startTimestamp": "35:16",
+      "endTimestamp": "50:24",
+      "text": "Adam Neumann facing familiar challenges at his new startup, Flow"
+    },
+    {
+      "startTimestamp": "50:24",
+      "endTimestamp": "01:00:47",
+      "text": "Evaluating \"tech-enabled businesses\" vs. traditional businesses that are utilizing technology"
+    },
+    {
+      "startTimestamp": "01:00:47",
+      "endTimestamp": "01:20:51",
+      "text": "Streaming at a crossroads: is the business model broken?"
+    },
+    {
+      "startTimestamp": "01:20:51",
+      "endTimestamp": "01:32:42",
+      "text": "Science Corner: New study on microplastics in water bottles"
+    },
+    {
+      "startTimestamp": "01:32:42",
+      "text": "All-In Poker Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/dschlopesisback/status/1747025441825640681 https://twitter.com/davidsacks/status/1747724966941139276 https://twitter.com/andrewrsorkin/status/1746723727574794537 https://twitter.com/Jason/status/1746951952578298264 https://twitter.com/aphysicist/status/1747868626948907325 https://www.weforum.org/agenda/2024/01/special-address-by-javier-milei-president-of-argentina https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000000100 https://www.opensecrets.org/federal-lobbying/top-spenders https://www.youtube.com/watch?v=wXMO0bhPhCw https://www.dodig.mil/reports.html/article/2871623/audit-of-the-business-model-for-transdigm-group-inc-and-its-impact-on-departmen https://www.google.com/finance/quote/TDG:NYSE https://stacksonmain.com/gallery https://www.societylasolas.com/photogallery https://therealdeal.com/national/nashville/2024/01/12/adam-neumann-faces-shortfalls-on-flow-property-in-nashville https://nypost.com/2024/01/11/sports/inside-nbcs-100-million-peacock-nfl-playoff-game-gamble https://www.sportsvideo.org/2024/01/16/peacocks-nfl-playoff-exclusive-sets-live-streaming-records https://www.businessofapps.com/data/disney-plus-statistics https://www.businessofapps.com/data/netflix-statistics https://finance.yahoo.com/news/americans-are-canceling-more-streaming-plans-as-prices-balloon-153035743.html https://www.manscaped.com/products/crop-preserver-manscaping https://www.pnas.org/doi/10.1073/pnas.2300582121 https://www.xometry.com/resources/materials/polyethylene https://www.bpf.co.uk/plastipedia/how-is-plastic-made.aspx https://www.reuters.com/business/environment/france-bans-plastic-packaging-fruit-vegetables-2021-10-11 https://www.pbs.org/wgbh/frontline/documentary/plastic-wars"
+    }
+  ]
+}

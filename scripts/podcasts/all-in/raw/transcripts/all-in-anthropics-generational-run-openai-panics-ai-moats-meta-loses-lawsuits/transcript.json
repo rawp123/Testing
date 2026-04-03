@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "all-in-anthropics-generational-run-openai-panics-ai-moats-meta-loses-lawsuits",
+  "chunks": [
+    {
+      "startTimestamp": "00:00:00",
+      "text": "Bestie intros and some early table-setting around Friedberg potentially running for governor in California."
+    },
+    {
+      "startTimestamp": "00:02:25",
+      "text": "The discussion turns to Anthropic's generational run, what is driving the company's momentum, and why the market is treating the model race as a genuine platform shift."
+    },
+    {
+      "startTimestamp": "00:15:45",
+      "text": "The group asks whether OpenAI is getting more focused or slipping into panic mode as competition sharpens across research, products, and talent retention."
+    },
+    {
+      "startTimestamp": "00:36:56",
+      "text": "They unpack AI valuation impacts, where moats might still exist, and which parts of the stack are getting disrupted fastest as model quality keeps moving."
+    },
+    {
+      "startTimestamp": "00:43:58",
+      "text": "Liquidity speaker announcements and the broader 100x AI moment come into focus as they compare investor appetite with the pace of real enterprise adoption."
+    },
+    {
+      "startTimestamp": "00:50:35",
+      "text": "Two landmark social media verdicts against Meta shift the conversation toward platform liability, moderation risk, and how legal pressure could change incentives."
+    },
+    {
+      "startTimestamp": "01:12:46",
+      "text": "Sacks and Friedberg joining PCAST closes the episode with a broader look at policy influence, credibility, and the government's evolving relationship with frontier AI."
+    }
+  ]
+}

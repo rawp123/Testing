@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.887Z",
+  "episode": {
+    "id": "all-in-e102",
+    "slug": "e102-elon-closes-twitter-deal-meta-uncertainty-zucks-historic-bet-big-tech-decline-more",
+    "episodeNumber": 102,
+    "title": "E102: Elon closes Twitter deal, $META uncertainty, Zuck's historic bet, big tech decline &amp; more",
+    "publishDate": "2022-10-29",
+    "description": "(0:00) Sacks is back! (1:01) Sacks recaps his week off (3:13) Elon finalizes Twitter deal, immediate content moderation decisions, platform potential (31:19) Meta's historic bet...",
+    "summary": "(0:00) Sacks is back! (1:01) Sacks recaps his week off (3:13) Elon finalizes Twitter deal, immediate content moderation decisions, platform potential (31:19) Meta's historic bet on VR and stock price predicament, governance structure, and more (1:02:52) Big tech's 2022 decline, macro outlook, market breakdown (1:06:32) Ukraine update: Progressives call for...",
+    "durationSeconds": 5761,
+    "durationLabel": "01:36:01",
+    "guests": [],
+    "topicTags": [
+      "Meta",
+      "Markets",
+      "China",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e102-elon-closes-twitter-deal-meta-uncertainty-zucks-historic-bet-big-tech-decline-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e102-elon-closes-twitter-deal-meta-uncertainty-zucks-historic-bet-big-tech-decline-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E102.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e102",
+    "dataFile": "/data/all-in-podcast-search/episodes/e102-elon-closes-twitter-deal-meta-uncertainty-zucks-historic-bet-big-tech-decline-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:01",
+      "text": "Sacks is back!"
+    },
+    {
+      "startTimestamp": "01:01",
+      "endTimestamp": "03:13",
+      "text": "Sacks recaps his week off"
+    },
+    {
+      "startTimestamp": "03:13",
+      "endTimestamp": "31:19",
+      "text": "Elon finalizes Twitter deal, immediate content moderation decisions, platform potential"
+    },
+    {
+      "startTimestamp": "31:19",
+      "endTimestamp": "01:02:52",
+      "text": "Meta's historic bet on VR and stock price predicament, governance structure, and more"
+    },
+    {
+      "startTimestamp": "01:02:52",
+      "endTimestamp": "01:06:32",
+      "text": "Big tech's 2022 decline, macro outlook, market breakdown"
+    },
+    {
+      "startTimestamp": "01:06:32",
+      "endTimestamp": "01:27:29",
+      "text": "Ukraine update: Progressives call for diplomacy, then flip flop, chip sanctions on China"
+    },
+    {
+      "startTimestamp": "01:27:29",
+      "text": "Science corner: Gut microbiome advancements Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.google.com/finance/quote/TWTR:NYSE https://twitter.com/elonmusk/status/1586059953311137792 https://medium.com/@alt.cap/time-to-get-fit-an-open-letter-from-altimeter-to-mark-zuckerberg-and-the-meta-board-of-392d94e80a18 https://www.google.com/finance/quote/META:NASDAQ https://fred.stlouisfed.org/series/JTSJOL https://fred.stlouisfed.org/series/EFFR https://thehill.com/homenews/house/3702113-progressives-urge-biden-to-push-harder-for-ukraine-peace-talks https://www.politico.com/news/magazine/2022/10/26/progressives-thought-crime-on-ukraine-00063621 https://twitter.com/BillAckman/status/1581831084219645952"
+    }
+  ]
+}

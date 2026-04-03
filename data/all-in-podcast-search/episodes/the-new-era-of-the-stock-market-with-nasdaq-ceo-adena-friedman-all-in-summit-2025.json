@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.355Z",
+  "episode": {
+    "id": "all-in-the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025",
+    "slug": "the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025",
+    "episodeNumber": null,
+    "title": "The New Era of the Stock Market with Nasdaq CEO Adena Friedman | All-In Summit 2025",
+    "publishDate": "2025-09-09",
+    "description": "(0:00) Introducing Adena Friedman (1:16) Nasdaq's business, expanding beyond a stock exchange (2:44) Big announcement! Nasdaq will offer tokenized securities, crypto going...",
+    "summary": "(0:00) Introducing Adena Friedman (1:16) Nasdaq's business, expanding beyond a stock exchange (2:44) Big announcement! Nasdaq will offer tokenized securities, crypto going mainstream, the 24/5 trading schedule (7:21) How the IPO market can change to help companies go public faster (13:37) Evolution of markets: predictions, options, SPVs, secondaries (18:18)...",
+    "durationSeconds": 1701,
+    "durationLabel": "28:21",
+    "guests": [],
+    "topicTags": [
+      "Crypto",
+      "Markets",
+      "IPOs",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_AdenaFriedman_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/b/1/0/eb10341ba43cd574d959afa2a1bf1c87/4.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025",
+    "dataFile": "/data/all-in-podcast-search/episodes/the-new-era-of-the-stock-market-with-nasdaq-ceo-adena-friedman-all-in-summit-2025.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:16",
+      "text": "Introducing Adena Friedman"
+    },
+    {
+      "startTimestamp": "01:16",
+      "endTimestamp": "02:44",
+      "text": "Nasdaq's business, expanding beyond a stock exchange"
+    },
+    {
+      "startTimestamp": "02:44",
+      "endTimestamp": "07:21",
+      "text": "Big announcement! Nasdaq will offer tokenized securities, crypto going mainstream, the 24/5 trading schedule"
+    },
+    {
+      "startTimestamp": "07:21",
+      "endTimestamp": "13:37",
+      "text": "How the IPO market can change to help companies go public faster"
+    },
+    {
+      "startTimestamp": "13:37",
+      "endTimestamp": "18:18",
+      "text": "Evolution of markets: predictions, options, SPVs, secondaries"
+    },
+    {
+      "startTimestamp": "18:18",
+      "text": "State of the stock market, role at the NY Fed, data issues at the Fed"
+    }
+  ]
+}

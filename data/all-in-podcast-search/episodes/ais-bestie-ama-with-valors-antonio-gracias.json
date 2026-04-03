@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.912Z",
+  "episode": {
+    "id": "all-in-ais-bestie-ama-with-valors-antonio-gracias",
+    "slug": "ais-bestie-ama-with-valors-antonio-gracias",
+    "episodeNumber": null,
+    "title": "#AIS: Bestie AMA with Valor's Antonio Gracias",
+    "publishDate": "2022-06-07",
+    "description": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Antonio...",
+    "summary": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Antonio Gracias joins to talk: Tesla's early days, investing in Elon, macroeconomic outlook, ROIC, importance of energy independence, future of manufacturing, financial-ization of the P&L...",
+    "durationSeconds": 5941,
+    "durationLabel": "01:39:01",
+    "guests": [
+      "Antonio Gracias"
+    ],
+    "topicTags": [
+      "Google",
+      "Tesla",
+      "Crypto",
+      "Markets",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ais-bestie-ama-with-valors-antonio-gracias",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ais-bestie-ama-with-valors-antonio-gracias",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS2022_BestieAMA_AntonioGracias.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 0,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "",
+    "transcriptAvailable": false,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ais-bestie-ama-with-valors-antonio-gracias",
+    "dataFile": "/data/all-in-podcast-search/episodes/ais-bestie-ama-with-valors-antonio-gracias.json"
+  },
+  "chunks": []
+}

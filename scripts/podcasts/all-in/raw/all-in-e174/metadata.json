@@ -1,0 +1,11 @@
+{
+  "id": "all-in-e174",
+  "episodeNumber": 174,
+  "title": "E174: Sample episode on media incentives, private markets, and energy bottlenecks",
+  "publishDate": "2024-04-12",
+  "description": "Sample structured episode data for the All-In Podcast Search utility.",
+  "summary": "A sample episode discussing media business models, valuation discipline in private markets, and grid constraints behind the AI buildout.",
+  "duration": "01:18:42",
+  "guests": ["David Sacks"],
+  "topicTags": ["Media", "Private Markets", "Energy"]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.211Z",
+  "episode": {
+    "id": "all-in-software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot",
+    "slug": "software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot",
+    "episodeNumber": null,
+    "title": "Software Stocks Implode, Claude's Hit List, State of the Union Reactions, Trump's Tariff Pivot",
+    "publishDate": "2026-02-28",
+    "description": "(0:00) Bestie intros (1:22) Claude's hit list, SaaS crash, and Citrini's AI letter (30:39) Why Doomer narratives are more popular, valuable new AI jobs (40:19) Understanding the...",
+    "summary": "(0:00) Bestie intros (1:22) Claude's hit list, SaaS crash, and Citrini's AI letter (30:39) Why Doomer narratives are more popular, valuable new AI jobs (40:19) Understanding the Rate Payer Protection Pledge, what's behind datacenter opposition? (52:13) State of the Union reactions (1:03:58) Science Corner: Cure for blindness via Yamanaka Factors? (1:10:17)...",
+    "durationSeconds": 4868,
+    "durationLabel": "01:21:08",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Anthropic",
+      "Politics",
+      "Markets",
+      "Datacenters"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E262_Ch_1.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/0/4/2/8042280528f65293d959afa2a1bf1c87/1_Pod_E262-20260228-vg0iehw4vb.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot",
+    "dataFile": "/data/all-in-podcast-search/episodes/software-stocks-implode-claudes-hit-list-state-of-the-union-reactions-trumps-tariff-pivot.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:22",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "01:22",
+      "endTimestamp": "30:39",
+      "text": "Claude's hit list, SaaS crash, and Citrini's AI letter"
+    },
+    {
+      "startTimestamp": "30:39",
+      "endTimestamp": "40:19",
+      "text": "Why Doomer narratives are more popular, valuable new AI jobs"
+    },
+    {
+      "startTimestamp": "40:19",
+      "endTimestamp": "52:13",
+      "text": "Understanding the Rate Payer Protection Pledge, what's behind datacenter opposition?"
+    },
+    {
+      "startTimestamp": "52:13",
+      "endTimestamp": "01:03:58",
+      "text": "State of the Union reactions"
+    },
+    {
+      "startTimestamp": "01:03:58",
+      "endTimestamp": "01:10:17",
+      "text": "Science Corner: Cure for blindness via Yamanaka Factors?"
+    },
+    {
+      "startTimestamp": "01:10:17",
+      "text": "SCOTUS strikes down tariffs, Trump pivots"
+    }
+  ]
+}

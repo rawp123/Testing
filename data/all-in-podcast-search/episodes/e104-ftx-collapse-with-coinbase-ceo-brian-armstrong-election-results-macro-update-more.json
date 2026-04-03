@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.884Z",
+  "episode": {
+    "id": "all-in-e104",
+    "slug": "e104-ftx-collapse-with-coinbase-ceo-brian-armstrong-election-results-macro-update-more",
+    "episodeNumber": 104,
+    "title": "E104: FTX collapse with Coinbase CEO Brian Armstrong + election results, macro update &amp; more",
+    "publishDate": "2022-11-12",
+    "description": "(0:00) New bestie game show! (6:20) Election recap: Red wave falls flat, Republican party flips from Trump to DeSantis, a rebuke of extremism (20:47) Coinbase CEO Brian Armstrong...",
+    "summary": "(0:00) New bestie game show! (6:20) Election recap: Red wave falls flat, Republican party flips from Trump to DeSantis, a rebuke of extremism (20:47) Coinbase CEO Brian Armstrong joins to break down the FTX collapse, further contagion risk, regulation, and more! (43:32) Red flags exhibited by Sam Bankman-Fried and FTX, lack of governance/diligence (1:06:00)...",
+    "durationSeconds": 5118,
+    "durationLabel": "01:25:18",
+    "guests": [],
+    "topicTags": [
+      "Politics",
+      "Markets",
+      "Regulation",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e104-ftx-collapse-with-coinbase-ceo-brian-armstrong-election-results-macro-update-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e104-ftx-collapse-with-coinbase-ceo-brian-armstrong-election-results-macro-update-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E104.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e104",
+    "dataFile": "/data/all-in-podcast-search/episodes/e104-ftx-collapse-with-coinbase-ceo-brian-armstrong-election-results-macro-update-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "06:20",
+      "text": "New bestie game show!"
+    },
+    {
+      "startTimestamp": "06:20",
+      "endTimestamp": "20:47",
+      "text": "Election recap: Red wave falls flat, Republican party flips from Trump to DeSantis, a rebuke of extremism"
+    },
+    {
+      "startTimestamp": "20:47",
+      "endTimestamp": "43:32",
+      "text": "Coinbase CEO Brian Armstrong joins to break down the FTX collapse, further contagion risk, regulation, and more!"
+    },
+    {
+      "startTimestamp": "43:32",
+      "endTimestamp": "01:06:00",
+      "text": "Red flags exhibited by Sam Bankman-Fried and FTX, lack of governance/diligence"
+    },
+    {
+      "startTimestamp": "01:06:00",
+      "text": "Macroeconomic picture, lower than expected CPI print catalyzes market tear, advice for founders Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.nytimes.com/2022/11/10/us/politics/biden-ukraine-russia-diplomacy.html https://www.wsj.com/articles/ftx-files-for-chapter-11-bankruptcy-11668176869 https://www.bloomberg.com/news/articles/2022-11-11/summers-says-ftx-meltdown-has-whiffs-of-enron-like-scandal https://fortune.com/2022/11/10/sam-bankman-fried-ftx-joe-biden-democratic-party-second-biggest-donor https://web.archive.org/web/20221109230422/https://www.sequoiacap.com/article/sam-bankman-fried-spotlight https://twitter.com/GordonJohnson19/status/1591062535586848768"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-04-03T03:02:25Z",
+  "feedUrl": "https://allinchamathjason.libsyn.com/rss",
+  "mode": "recent-test",
+  "requestedLimit": 2,
+  "dryRun": false,
+  "parsedEpisodeCount": 364,
+  "episodeCount": 2,
+  "downloadedCount": 0,
+  "skippedExistingCount": 2,
+  "dryRunCount": 0,
+  "errorCount": 0,
+  "outputDirectory": "/workspaces/Testing/scripts/podcasts/all-in/raw/audio-test-sample",
+  "episodes": [
+    {
+      "id": "all-in-anthropics-generational-run-openai-panics-ai-moats-meta-loses-lawsuits",
+      "slug": "anthropics-generational-run-openai-panics-ai-moats-meta-loses-lawsuits",
+      "episodeNumber": null,
+      "title": "Anthropic's Generational Run, OpenAI Panics, AI Moats, Meta Loses Lawsuits",
+      "publicationDate": "Fri, 27 Mar 2026 20:03:00 +0000",
+      "publicationDateIso": "2026-03-27",
+      "guid": "4a43da89-9d1a-4b9e-9304-aa9ab4a1ee97",
+      "link": "https://allinchamathjason.libsyn.com/anthropics-generational-run-openai-panics-ai-moats-meta-loses-lawsuits",
+      "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E266_Ch.mp3?dest-id=1928300",
+      "filename": "2026-03-27-anthropic-s-generational-run-openai-panics-ai-moats-meta-loses-lawsuits-a1b2e888f7.mp3",
+      "filePath": "/workspaces/Testing/scripts/podcasts/all-in/raw/audio-test-sample/2026-03-27-anthropic-s-generational-run-openai-panics-ai-moats-meta-loses-lawsuits-a1b2e888f7.mp3",
+      "status": "skipped-existing"
+    },
+    {
+      "id": "all-in-are-psychedelics-the-key-to-living-forever-ft-bryan-johnson",
+      "slug": "are-psychedelics-the-key-to-living-forever-ft-bryan-johnson",
+      "episodeNumber": null,
+      "title": "Bryan Johnson: I Just Took the Most Powerful Dose of DMT in the World... Here's What It Was Like",
+      "publicationDate": "Thu, 26 Mar 2026 00:10:00 +0000",
+      "publicationDateIso": "2026-03-26",
+      "guid": "46e387c4-d5e7-420d-9c02-d3677d026824",
+      "link": "https://allinchamathjason.libsyn.com/are-psychedelics-the-key-to-living-forever-ft-bryan-johnson",
+      "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/INTV_BJ_Ch_2.mp3?dest-id=1928300",
+      "filename": "2026-03-26-bryan-johnson-i-just-took-the-most-powerful-dose-of-dmt-in-the-world-here-s-what-it-was-like-dc29fcb5d8.mp3",
+      "filePath": "/workspaces/Testing/scripts/podcasts/all-in/raw/audio-test-sample/2026-03-26-bryan-johnson-i-just-took-the-most-powerful-dose-of-dmt-in-the-world-here-s-what-it-was-like-dc29fcb5d8.mp3",
+      "status": "skipped-existing"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.567Z",
+  "episode": {
+    "id": "all-in-new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale",
+    "slug": "new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale",
+    "episodeNumber": null,
+    "title": "New SEC Chair, Bitcoin, xAI Supercomputer, UnitedHealth CEO murder, with Gavin Baker &amp; Joe Lonsdale",
+    "publishDate": "2024-12-07",
+    "description": "(0:00) Bestie announcement! (2:53) Gavin Baker and Joe Lonsdale join the show (4:14) State of the Trump Bump: Debt focus, Deregulation, America's lucky position (20:08) Trump...",
+    "summary": "(0:00) Bestie announcement! (2:53) Gavin Baker and Joe Lonsdale join the show (4:14) State of the Trump Bump: Debt focus, Deregulation, America's lucky position (20:08) Trump nominates Paul Atkins as SEC Chair, replacing Gary Gensler: What this means for crypto and other markets (41:07) Thoughts on Michael Saylor's Bitcoin play, state of defense tech, and...",
+    "durationSeconds": 5060,
+    "durationLabel": "01:24:20",
+    "guests": [
+      "Gavin Baker",
+      "Joe Lonsdale"
+    ],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Crypto",
+      "Bitcoin",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E206.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/1/f/3/9/1f3970c28e2331e816c3140a3186d450/1x1_CLASSIC_E206.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale",
+    "dataFile": "/data/all-in-podcast-search/episodes/new-sec-chair-bitcoin-xai-supercomputer-unitedhealth-ceo-murder-with-gavin-baker-joe-lonsdale.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:53",
+      "text": "Bestie announcement!"
+    },
+    {
+      "startTimestamp": "02:53",
+      "endTimestamp": "04:14",
+      "text": "Gavin Baker and Joe Lonsdale join the show"
+    },
+    {
+      "startTimestamp": "04:14",
+      "endTimestamp": "20:08",
+      "text": "State of the Trump Bump: Debt focus, Deregulation, America's lucky position"
+    },
+    {
+      "startTimestamp": "20:08",
+      "endTimestamp": "41:07",
+      "text": "Trump nominates Paul Atkins as SEC Chair, replacing Gary Gensler: What this means for crypto and other markets"
+    },
+    {
+      "startTimestamp": "41:07",
+      "endTimestamp": "49:25",
+      "text": "Thoughts on Michael Saylor's Bitcoin play, state of defense tech, and the US/China AI competition"
+    },
+    {
+      "startTimestamp": "49:25",
+      "endTimestamp": "01:08:28",
+      "text": "xAI's massive GPU cluster, expanding to 1M GPUs, how Grok 3 will test AI scaling laws, and what's next"
+    },
+    {
+      "startTimestamp": "01:08:28",
+      "text": "UnitedHealth CEO murdered, reactions Get virtual tickets for The All-In Holiday Spectacular!: https://allin.com/events Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Gavin Baker: https://x.com/GavinSBaker Follow Joe Lonsdale: https://x.com/JTLonsdale Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://truthsocial.com/@realDonaldTrump/posts/113603133222686186 https://www.nytimes.com/2024/12/04/business/trump-sec-paul-atkins.html https://x.com/davidmarcus/status/1862654506774810641 https://www.bloomberg.com/news/articles/2024-12-05/convertible-bond-arbs-are-making-microstrategy-wall-street-s-hottest-trade https://www.ft.com/content/9c0516cf-dd12-4665-aa22-712de854fe2f https://www.nytimes.com/live/2024/12/04/nyregion/brian-thompson-uhc-ceo-shot https://abcnews.go.com/US/man-shot-chest-midtown-manhattan-masked-gunman-large/story?id=116446382&cid=social_twitter_abcn https://nypost.com/2024/12/06/media/taylor-lorenz-defends-unitedhealthcare-ceo-brian-thompson-jokes"
+    }
+  ]
+}

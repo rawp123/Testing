@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.642Z",
+  "episode": {
+    "id": "all-in-in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained",
+    "slug": "in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained",
+    "episodeNumber": null,
+    "title": "In conversation with Sheryl Sandberg, plus open-source AI gene editing explained",
+    "publishDate": "2024-05-03",
+    "description": "(0:00) Welcoming Sheryl Sandberg and remembering Dave Goldberg (11:10) What led Sheryl to get involved with \"Screams Before Silence\"; reaction to sexual violence on and after 10/7...",
+    "summary": "(0:00) Welcoming Sheryl Sandberg and remembering Dave Goldberg (11:10) What led Sheryl to get involved with \"Screams Before Silence\"; reaction to sexual violence on and after 10/7 (28:18) Paths forward, documentary decisions, involvement of women in protests (53:03) Post-interview debrief (59:45) Science Corner: Open-source AI gene editing with OpenCRISPR-1...",
+    "durationSeconds": 4523,
+    "durationLabel": "01:15:23",
+    "guests": [
+      "Sheryl Sandberg"
+    ],
+    "topicTags": [
+      "AI"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E177.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/1/6/0/a160d8283144476988c4a68c3ddbc4f2/AIT_1x1.png",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained",
+    "dataFile": "/data/all-in-podcast-search/episodes/in-conversation-with-sheryl-sandberg-plus-open-source-ai-gene-editing-explained.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "11:10",
+      "text": "Welcoming Sheryl Sandberg and remembering Dave Goldberg"
+    },
+    {
+      "startTimestamp": "11:10",
+      "endTimestamp": "28:18",
+      "text": "What led Sheryl to get involved with \"Screams Before Silence\"; reaction to sexual violence on and after 10/7"
+    },
+    {
+      "startTimestamp": "28:18",
+      "endTimestamp": "53:03",
+      "text": "Paths forward, documentary decisions, involvement of women in protests"
+    },
+    {
+      "startTimestamp": "53:03",
+      "endTimestamp": "59:45",
+      "text": "Post-interview debrief"
+    },
+    {
+      "startTimestamp": "59:45",
+      "text": "Science Corner: Open-source AI gene editing with OpenCRISPR-1 Follow Sheryl: https://twitter.com/sherylsandberg Watch Screams Before Silence: https://www.youtube.com/watch?v=zAr9oGSXgak&rco=1 Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/fakechamath https://www.youtube.com/watch?v=zAr9oGSXgak&rco=1 https://www.cnn.com/2023/11/20/opinions/sheryl-sandberg-something-we-can-all-agree-on/index.html https://news.un.org/en/story/2024/03/1147477 https://thegrayzone.com/2024/03/07/media-concocts-un-hamas-rape-report/amp/ https://www.nytimes.com/2024/01/29/world/middleeast/israel-hamas-sexual-violence-un.html https://github.com/Profluent-AI/OpenCRISPR"
+    }
+  ]
+}

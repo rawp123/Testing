@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.436Z",
+  "episode": {
+    "id": "all-in-fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world",
+    "slug": "fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world",
+    "episodeNumber": null,
+    "title": "Fed Hesitates on Tariffs, The New Mag 7, Death of VC, Google's Value in a Post-Search World",
+    "publishDate": "2025-05-09",
+    "description": "(0:00) The Besties intro Philippe Laffont! (2:12) Miami F1 Recap! (12:10) Fed holds rates steady on tariff uncertainty (32:47) Google drops after Apple sees fall in search queries...",
+    "summary": "(0:00) The Besties intro Philippe Laffont! (2:12) Miami F1 Recap! (12:10) Fed holds rates steady on tariff uncertainty (32:47) Google drops after Apple sees fall in search queries on Safari (56:48) Creating a new Mag 7 (1:07:00) Private markets: Is traditional VC dead? Philippe details Coatue's new fund structure and what makes a great investor",
+    "durationSeconds": 5769,
+    "durationLabel": "01:36:09",
+    "guests": [
+      "Philippe Laffont"
+    ],
+    "topicTags": [
+      "Google",
+      "Venture capital",
+      "Search",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E227.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/9/f/5/a9f5cd721c1170b516c3140a3186d450/1x1_CLASSIC_E227.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world",
+    "dataFile": "/data/all-in-podcast-search/episodes/fed-hesitates-on-tariffs-the-new-mag-7-death-of-vc-googles-value-in-a-post-search-world.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:12",
+      "text": "The Besties intro Philippe Laffont!"
+    },
+    {
+      "startTimestamp": "02:12",
+      "endTimestamp": "12:10",
+      "text": "Miami F1 Recap!"
+    },
+    {
+      "startTimestamp": "12:10",
+      "endTimestamp": "32:47",
+      "text": "Fed holds rates steady on tariff uncertainty"
+    },
+    {
+      "startTimestamp": "32:47",
+      "endTimestamp": "56:48",
+      "text": "Google drops after Apple sees fall in search queries on Safari"
+    },
+    {
+      "startTimestamp": "56:48",
+      "endTimestamp": "01:07:00",
+      "text": "Creating a new Mag 7"
+    },
+    {
+      "startTimestamp": "01:07:00",
+      "text": "Private markets: Is traditional VC dead? Philippe details Coatue's new fund structure and what makes a great investor Follow Philippe Laffont: https://x.com/plaffont Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://polymarket.com/event/fed-decision-in-june/fed-decreases-interest-rates-by-50-bps-after-june-2025-meeting?tid=1746821096114 https://www.federalreserve.gov/newsevents/pressreleases/monetary20250507a.htm https://www.mlex.com/mlex/antitrust/articles/2337168/apple-exec-testimony-on-search-volume-drop-hurts-google-stock-price https://www.bloomberg.com/news/articles/2025-05-07/apple-working-to-move-to-ai-search-in-browser-amid-google-fallout https://blog.google/products/search/statement-press-reports-about-search-traffic https://x.com/EconomyApp/status/1915501252420784499 https://x.com/Similarweb/status/1920026287625658628 https://openai.com/index/leadership-expansion-with-fidji-simo https://files.pitchbook.com/website/files/pdf/Q1_2025_PitchBook-NVCA_Venture_Monitor_19001.pdf https://stockanalysis.com/ipos/statistics"
+    }
+  ]
+}

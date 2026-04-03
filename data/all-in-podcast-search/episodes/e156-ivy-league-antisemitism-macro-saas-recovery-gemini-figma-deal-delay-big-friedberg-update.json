@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.711Z",
+  "episode": {
+    "id": "all-in-e156",
+    "slug": "e156-ivy-league-antisemitism-macro-saas-recovery-gemini-figma-deal-delay-big-friedberg-update",
+    "episodeNumber": 156,
+    "title": "E156: Ivy League antisemitism, macro, SaaS recovery, Gemini, Figma deal delay + big Friedberg update",
+    "publishDate": "2023-12-08",
+    "description": "(0:00) Bestie intro! (3:12) Ivy League antisemitism hearings (21:55) State of the economy for consumers (34:55) Signs of life in SaaS, VC shutdowns, and more (44:59) Why Friedberg...",
+    "summary": "(0:00) Bestie intro! (3:12) Ivy League antisemitism hearings (21:55) State of the economy for consumers (34:55) Signs of life in SaaS, VC shutdowns, and more (44:59) Why Friedberg chose to take the role of CEO at Ohalo, and the dearth of great leadership talent in tech (1:01:07) Google announces Gemini: Why this is a notable moment for Google, industry...",
+    "durationSeconds": 5549,
+    "durationLabel": "01:32:29",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Venture capital",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e156-ivy-league-antisemitism-macro-saas-recovery-gemini-figma-deal-delay-big-friedberg-update",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e156-ivy-league-antisemitism-macro-saas-recovery-gemini-figma-deal-delay-big-friedberg-update",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E156.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e156",
+    "dataFile": "/data/all-in-podcast-search/episodes/e156-ivy-league-antisemitism-macro-saas-recovery-gemini-figma-deal-delay-big-friedberg-update.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:12",
+      "text": "Bestie intro!"
+    },
+    {
+      "startTimestamp": "03:12",
+      "endTimestamp": "21:55",
+      "text": "Ivy League antisemitism hearings"
+    },
+    {
+      "startTimestamp": "21:55",
+      "endTimestamp": "34:55",
+      "text": "State of the economy for consumers"
+    },
+    {
+      "startTimestamp": "34:55",
+      "endTimestamp": "44:59",
+      "text": "Signs of life in SaaS, VC shutdowns, and more"
+    },
+    {
+      "startTimestamp": "44:59",
+      "endTimestamp": "01:01:07",
+      "text": "Why Friedberg chose to take the role of CEO at Ohalo, and the dearth of great leadership talent in tech"
+    },
+    {
+      "startTimestamp": "01:01:07",
+      "endTimestamp": "01:11:50",
+      "text": "Google announces Gemini: Why this is a notable moment for Google, industry impact, and more"
+    },
+    {
+      "startTimestamp": "01:11:50",
+      "text": "Adobe's $20B Figma acquisition has stalled out due to the UK's CMA Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow Tucker: https://twitter.com/TuckerCarlson Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://rankings.thefire.org/rank https://www.ft.com/content/9c7931aa-4973-475e-9841-d7ebd54b0f47 https://academic.oup.com/poq/article-abstract/82/1/135/4868126 https://fred.stlouisfed.org/series/CCLACBW027SBOG https://www.cnn.com/2023/11/07/economy/americans-401k-plans-bill-payments/index.html https://www.wsj.com/economy/consumers/inflation-consumer-spending-personal-income-october-2023-6a1ecb1d https://www.axios.com/2023/11/28/cyber-monday-spending-record-shopping https://www.cnn.com/2023/11/14/economy/consumer-price-index-october/index.html https://www.cnbc.com/2023/11/21/home-sales-fell-to-a-13-year-low-in-october-as-prices-rose.html https://kalshi.com/markets/fed/fed-funds-rate#fed-23dec https://twitter.com/KobeissiLetter/status/1730607188341624851 https://twitter.com/chamath/status/1718016818118553622 https://www.saastr.com/carta-startup-shutdowns-are-up-237 https://www.theinformation.com/articles/vc-firm-openview-abruptly-winds-down-as-industry-pressure-rises https://cloudedjudgement.substack.com/p/clouded-judgement-12123-net-new-arr https://twitter.com/friedberg/status/1732217863975641389 https://ohalogenetics.com https://www.youtube.com/watch?v=K4pX1VAxaAI https://www.youtube.com/watch?v=v5tRc_5-8G4 https://blog.google/technology/ai/google-gemini-ai https://twitter.com/chamath/status/1732482646419403077 https://www.figma.com/templates https://assets.publishing.service.gov.uk/media/656f3c941104cf000dfa7563/Provisional_findings_report_3.pdf"
+    }
+  ]
+}

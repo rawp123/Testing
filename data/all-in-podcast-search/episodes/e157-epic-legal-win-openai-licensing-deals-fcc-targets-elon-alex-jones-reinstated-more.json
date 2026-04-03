@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.709Z",
+  "episode": {
+    "id": "all-in-e157",
+    "slug": "e157-epic-legal-win-openai-licensing-deals-fcc-targets-elon-alex-jones-reinstated-more",
+    "episodeNumber": 157,
+    "title": "E157: Epic legal win, OpenAI licensing deals, FCC targets Elon, Alex Jones reinstated &amp; more",
+    "publishDate": "2023-12-16",
+    "description": "(0:00) Bestie intros: Mullets! (2:56) Recapping Friedberg's holiday party (9:29) Jury rules in favor of Epic Games over Google: How to handle the app store duopoly? (23:21) OpenAI...",
+    "summary": "(0:00) Bestie intros: Mullets! (2:56) Recapping Friedberg's holiday party (9:29) Jury rules in favor of Epic Games over Google: How to handle the app store duopoly? (23:21) OpenAI inks deal with Axel Springer (35:02) FCC cancels Starlink subsidy, dissenting FCC Commissioner says federal agencies are targeting Elon Musk on Biden's orders (58:25) Alex Jones...",
+    "durationSeconds": 5966,
+    "durationLabel": "01:39:26",
+    "guests": [],
+    "topicTags": [
+      "OpenAI",
+      "Google",
+      "Tesla",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e157-epic-legal-win-openai-licensing-deals-fcc-targets-elon-alex-jones-reinstated-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e157-epic-legal-win-openai-licensing-deals-fcc-targets-elon-alex-jones-reinstated-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E157.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e157",
+    "dataFile": "/data/all-in-podcast-search/episodes/e157-epic-legal-win-openai-licensing-deals-fcc-targets-elon-alex-jones-reinstated-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:56",
+      "text": "Bestie intros: Mullets!"
+    },
+    {
+      "startTimestamp": "02:56",
+      "endTimestamp": "09:29",
+      "text": "Recapping Friedberg's holiday party"
+    },
+    {
+      "startTimestamp": "09:29",
+      "endTimestamp": "23:21",
+      "text": "Jury rules in favor of Epic Games over Google: How to handle the app store duopoly?"
+    },
+    {
+      "startTimestamp": "23:21",
+      "endTimestamp": "35:02",
+      "text": "OpenAI inks deal with Axel Springer"
+    },
+    {
+      "startTimestamp": "35:02",
+      "endTimestamp": "58:25",
+      "text": "FCC cancels Starlink subsidy, dissenting FCC Commissioner says federal agencies are targeting Elon Musk on Biden's orders"
+    },
+    {
+      "startTimestamp": "58:25",
+      "endTimestamp": "01:22:59",
+      "text": "Alex Jones reinstated on X"
+    },
+    {
+      "startTimestamp": "01:22:59",
+      "endTimestamp": "01:27:32",
+      "text": "Sacks receives an unlikely apology"
+    },
+    {
+      "startTimestamp": "01:27:32",
+      "text": "Besties take two questions from the audience Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.theverge.com/23994174/epic-google-trial-jury-verdict-monopoly-google-play https://www.theverge.com/23959932/epic-v-google-trial-antitrust-play-store-fortnite-recap https://www.wsj.com/tech/google-loses-antitrust-case-brought-by-epic-games-651f5987 https://support.google.com/googleplay/android-developer/answer/112622 https://twitter.com/openai/status/1734940445824937993 https://www.ap.org/ap-in-the-news/2023/chatgpt-maker-openai-signs-deal-with-ap-to-license-news-stories https://www.axios.com/2023/12/13/openai-chatgpt-axel-springer-news-deal https://fairuse.stanford.edu/overview/fair-use/four-factors https://twitter.com/Jason/status/1730035957850833023 https://www.theverge.com/2023/12/12/23999070/spacex-starlink-fcc-rural-digital-opportunity-fund-fcc-rejected https://docs.fcc.gov/public/attachments/DOC-399068A1.pdf https://twitter.com/HansMahncke/status/1735003655697244308 https://www.nytimes.com/2023/12/13/us/politics/hunter-biden-impeachment-testimony.html https://twitter.com/BrendanCarrFCC/status/1734780816599703983 https://twitter.com/elonmusk/status/1733529033575465381 https://twitter.com/DrJBhattacharya/status/1602052936921939968 https://medium.com/craft-ventures/section-230-mend-it-dont-end-it-e33799a43a5f https://twitter.com/TheChiefNerd/status/1733496554701365582 https://twitter.com/Mark60480727/status/1735335623207038994 https://twitter.com/Jason/status/1735164131806986441 https://twitter.com/MomCooksFS/status/1735341157800915278"
+    }
+  ]
+}

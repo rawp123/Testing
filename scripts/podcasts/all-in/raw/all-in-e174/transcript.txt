@@ -1,0 +1,16 @@
+[00:00:00] Jason: The opening exchange frames the week around how quickly investors move from macro fear to speculative optimism when capital markets start reopening.
+The group keeps coming back to how quickly tone changes once financing windows look slightly less shut than they did a month earlier.
+
+[00:10:42] David Sacks: A long section on media incentives argues that outrage and certainty travel faster than nuance, which makes the best and worst takes look artificially similar in the feed.
+They also note that the social timeline rewards emotional confidence more than careful calibration, which can make durable analysis look slow even when it ends up being more accurate.
+
+[00:26:18] Chamath: The private market segment focuses on late-stage pricing discipline, secondary liquidity, and how founders react when public comps no longer justify peak-era valuations.
+That leads into a practical discussion about whether boards are finally accepting down-round math instead of waiting for narrative momentum to repair pricing on its own.
+
+[00:41:55] David Friedberg: The conversation shifts to data-center energy demand, with repeated emphasis on transmission bottlenecks, permitting friction, and how long real infrastructure buildouts take.
+The hosts argue that software timelines and grid timelines do not move at the same speed, which means AI demand forecasts can outrun the physical system meant to support them.
+
+[00:58:14] Chamath: They debate whether investor enthusiasm for the AI build cycle is already pricing in a best-case scenario on margins, adoption speed, and power availability.
+The conversation also turns to what happens if enterprise customers adopt more slowly than investors expect, even while infrastructure spending remains elevated.
+
+[01:14:36] Jason: The closing segment returns to portfolio construction, highlighting the difference between owning the enabling layer and chasing every application headline.

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.312Z",
+  "episode": {
+    "id": "all-in-sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built",
+    "slug": "sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built",
+    "episodeNumber": null,
+    "title": "Sequoia's Roelof Botha: Why Venture Capital is Broken &amp; How Great Companies Are Built",
+    "publishDate": "2025-10-09",
+    "description": "(0:00) Introducing Roelof Botha (1:08) Sequoia's Scout program and its best-performing funds ever (3:38) State of Venture Capital: Why it's broken, too much capital, not enough...",
+    "summary": "(0:00) Introducing Roelof Botha (1:08) Sequoia's Scout program and its best-performing funds ever (3:38) State of Venture Capital: Why it's broken, too much capital, not enough great companies (9:01) Why Sequoia separated from its China business, how they adapt to changing macro landscapes (13:05) Sequoia's culture, picking partners, investment...",
+    "durationSeconds": 1677,
+    "durationLabel": "27:57",
+    "guests": [],
+    "topicTags": [
+      "Venture capital",
+      "China",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_RoelofBotha_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/0/d/4/f/0d4f9232bb817bc216c3140a3186d450/1_Pod_Roelof.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built",
+    "dataFile": "/data/all-in-podcast-search/episodes/sequoias-roelof-botha-why-venture-capital-is-broken-how-great-companies-are-built.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:08",
+      "text": "Introducing Roelof Botha"
+    },
+    {
+      "startTimestamp": "01:08",
+      "endTimestamp": "03:38",
+      "text": "Sequoia's Scout program and its best-performing funds ever"
+    },
+    {
+      "startTimestamp": "03:38",
+      "endTimestamp": "09:01",
+      "text": "State of Venture Capital: Why it's broken, too much capital, not enough great companies"
+    },
+    {
+      "startTimestamp": "09:01",
+      "endTimestamp": "13:05",
+      "text": "Why Sequoia separated from its China business, how they adapt to changing macro landscapes"
+    },
+    {
+      "startTimestamp": "13:05",
+      "endTimestamp": "20:18",
+      "text": "Sequoia's culture, picking partners, investment decision-making, The Sequoia Capital Fund and holding winners"
+    },
+    {
+      "startTimestamp": "20:18",
+      "endTimestamp": "26:06",
+      "text": "What makes a great founder, what Roelof learned from Doug Leone and Michael Moritz"
+    },
+    {
+      "startTimestamp": "26:06",
+      "text": "Investing in biotech, importance of expertise in VC"
+    }
+  ]
+}

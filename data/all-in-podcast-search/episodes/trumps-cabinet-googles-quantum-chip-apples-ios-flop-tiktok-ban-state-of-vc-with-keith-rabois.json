@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.565Z",
+  "episode": {
+    "id": "all-in-trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois",
+    "slug": "trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois",
+    "episodeNumber": null,
+    "title": "Trump's Cabinet, Google's Quantum Chip, Apple's Flop, TikTok, State of VC with bestie Keith Rabois",
+    "publishDate": "2024-12-13",
+    "description": "(0:00) The Besties welcome Keith Rabois! (4:01) Keith explains why he returned to Khosla Ventures, the differences between Founders Fund and Khosla, and his husband Jacob...",
+    "summary": "(0:00) The Besties welcome Keith Rabois! (4:01) Keith explains why he returned to Khosla Ventures, the differences between Founders Fund and Khosla, and his husband Jacob Helberg's role in Trump Admin (13:09) Business acumen of Trump's cabinet and appointees, diversity of opinion (25:59) Google's new quantum chip: potential impact on encryption,...",
+    "durationSeconds": 5299,
+    "durationLabel": "01:28:19",
+    "guests": [
+      "Keith Rabois"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Crypto",
+      "Politics",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E207.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/c/4/1/ec412fda6b7ee027d959afa2a1bf1c87/1x1_CLASSIC_E207.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois",
+    "dataFile": "/data/all-in-podcast-search/episodes/trumps-cabinet-googles-quantum-chip-apples-ios-flop-tiktok-ban-state-of-vc-with-keith-rabois.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:01",
+      "text": "The Besties welcome Keith Rabois!"
+    },
+    {
+      "startTimestamp": "04:01",
+      "endTimestamp": "13:09",
+      "text": "Keith explains why he returned to Khosla Ventures, the differences between Founders Fund and Khosla, and his husband Jacob Helberg's role in Trump Admin"
+    },
+    {
+      "startTimestamp": "13:09",
+      "endTimestamp": "25:59",
+      "text": "Business acumen of Trump's cabinet and appointees, diversity of opinion"
+    },
+    {
+      "startTimestamp": "25:59",
+      "endTimestamp": "43:50",
+      "text": "Google's new quantum chip: potential impact on encryption, cryptography, and more"
+    },
+    {
+      "startTimestamp": "43:50",
+      "endTimestamp": "54:30",
+      "text": "Apple developing new server chip for AI inference, iOS flop, why its product culture is failing"
+    },
+    {
+      "startTimestamp": "54:30",
+      "endTimestamp": "01:03:55",
+      "text": "TikTok panics after appeals court upholds the \"divest-or-ban\" law, with a January 19th deadline"
+    },
+    {
+      "startTimestamp": "01:03:55",
+      "text": "State of Venture Capital, why Stripe is still private, thoughts on crypto Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Keith: https://x.com/rabois Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.tiktok.com/@frankielapenna/video/7010077215576575238 https://www.axios.com/2024/12/06/trump-billionaires-cabinet-elon-musk https://blog.google/technology/research/google-willow-quantum-chip https://www.nature.com/articles/s41586-024-08449-y https://research.google/blog/suppressing-quantum-errors-by-scaling-a-surface-code-logical-qubit https://quantumai.google/roadmap https://en.wikipedia.org/wiki/Hartmut_Neven https://en.wikipedia.org/wiki/Double-slit_experiment https://www.discovery.com/science/Double-Slit-Experiment https://en.wikipedia.org/wiki/Schr%C3%B6dinger%27s_cat https://www.theinformation.com/articles/apple-is-working-on-ai-chip-with-broadcom?rc=pxkrxo https://x.com/rabois/status/870673635375104000 https://www.amazon.com/Company-Giants-Conversations-Visionaries-Digital/dp/0070329656 https://www.cnn.com/2024/12/09/tech/bytedance-tiktok-halt-us-ban-intl/index.html https://apnews.com/article/tiktok-us-ban-sale-china-congress-de12b4d22aa8095e62cb0982a6e62235 https://apnews.com/article/tiktok-ban-congress-bill-1c48466df82f3684bd6eb21e61ebcb8d https://pitchbook.com/news/reports/q3-2024-pitchbook-nvca-venture-monitor https://www.cnbc.com/2024/12/12/servicetitan-starts-trading-on-nasdaq-after-ipo.html https://www.nytimes.com/2024/12/11/business/dealbook/ftc-trump-ferguson-khan.html https://www.ben-evans.com/benedictevans/2021/6/15/antitrust https://www.bloomberg.com/news/articles/2024-12-05/convertible-bond-arbs-are-making-microstrategy-wall-street-s-hottest-trade"
+    }
+  ]
+}

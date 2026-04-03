@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.675Z",
+  "episode": {
+    "id": "all-in-e164",
+    "slug": "e164-zucks-senate-apology-elons-comp-package-voided-crony-capitalism-reddit-ipo-drone-attack",
+    "episodeNumber": 164,
+    "title": "E164: Zuck's Senate apology, Elon's comp package voided, crony capitalism, Reddit IPO, drone attack",
+    "publishDate": "2024-02-02",
+    "description": "(0:00) Bestie intros! The guys try the Apple Vision Pro (8:24) Zuckerberg apologizes to parents in hearing, Section 230 under fire from child safety reforms (36:19) Delaware judge...",
+    "summary": "(0:00) Bestie intros! The guys try the Apple Vision Pro (8:24) Zuckerberg apologizes to parents in hearing, Section 230 under fire from child safety reforms (36:19) Delaware judge voids Elon's comp package, understanding Fortune 500 country club compensation (1:08:26) Reddit reportedly targeting $5B valuation in potential March IPO (1:16:17) Drone attack,...",
+    "durationSeconds": 5630,
+    "durationLabel": "01:33:50",
+    "guests": [],
+    "topicTags": [
+      "Meta",
+      "Defense",
+      "IPOs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e164-zucks-senate-apology-elons-comp-package-voided-crony-capitalism-reddit-ipo-drone-attack",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e164-zucks-senate-apology-elons-comp-package-voided-crony-capitalism-reddit-ipo-drone-attack",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E164_2.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e164",
+    "dataFile": "/data/all-in-podcast-search/episodes/e164-zucks-senate-apology-elons-comp-package-voided-crony-capitalism-reddit-ipo-drone-attack.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "08:24",
+      "text": "Bestie intros! The guys try the Apple Vision Pro"
+    },
+    {
+      "startTimestamp": "08:24",
+      "endTimestamp": "36:19",
+      "text": "Zuckerberg apologizes to parents in hearing, Section 230 under fire from child safety reforms"
+    },
+    {
+      "startTimestamp": "36:19",
+      "endTimestamp": "01:08:26",
+      "text": "Delaware judge voids Elon's comp package, understanding Fortune 500 country club compensation"
+    },
+    {
+      "startTimestamp": "01:08:26",
+      "endTimestamp": "01:16:17",
+      "text": "Reddit reportedly targeting $5B valuation in potential March IPO"
+    },
+    {
+      "startTimestamp": "01:16:17",
+      "text": "Drone attack, risks of greater Middle East conflict, failures of the military industrial complex Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.vanityfair.com/news/tim-cook-apple-vision-pro https://twitter.com/MKBHD/status/1752706894874202256 https://twitter.com/Box/status/1753085804115861766 https://twitter.com/briantong/status/1752645464204493147 https://www.meta.com/smart-glasses/shop-all https://www.instagram.com/p/C0w4Agjvq5_/?img_index=1 https://twitter.com/CollinRugg/status/1752749485070156025 https://www.nbcnews.com/video/zuckerberg-apologizes-to-parents-at-senate-child-safety-hearing-203338309674 https://ultimateclassicrock.com/judas-priest-suicide https://www.reuters.com/article/idUSKBN1GX0C0 https://www.google.com/finance/quote/TSLA:NASDAQ https://www.cnbc.com/2024/01/30/tesla-shares-slide-after-judge-voids-elon-musks-56-billion-compensation.html https://courts.delaware.gov/Opinions/Download.aspx?id=359340 https://www.google.com/finance/quote/GM:NYSE https://www.wsj.com/business/autos/mary-barra-spent-a-decade-transforming-gm-it-hasnt-been-enough-d82f4c5a https://www.ineteconomics.org/perspectives/blog/what-the-uaw-and-everyone-else-needs-to-know-about-ceo-pay https://buffett.cnbc.com/video/2004/05/01/munger-i-would-rather-throw-a-viper-down-my-shirtfront-than-hire-a-compensation-consultant.html https://www.bloomberg.com/news/articles/2024-01-28/reddit-advised-to-target-at-least-5-billion-valuation-in-ipo https://twitter.com/DavidSacks/status/1639459879546150913 https://www.reuters.com/world/middle-east/iraq-seeks-quick-exit-us-forces-no-deadline-set-pm-says-2024-01-10 https://www.politico.com/news/2023/12/19/missile-drone-pentagon-houthi-attacks-iran-00132480 https://weapons.substack.com/p/biden-dod-and-the-army-are-not-protecting https://twitter.com/Global_Mil_Info/status/1752786864900108547 https://inside.com/vc/posts/u-s-vc-funding-for-defense-tech-startups-continues-upward-trajectory-in-q1-2023-376404 https://www.forbes.com/sites/sarahemerson/2024/01/23/eric-schmidts-secret-white-stork-project-aims-to-build-ai-combat-drones https://www.saildrone.com"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.226Z",
+  "episode": {
+    "id": "all-in-coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos",
+    "slug": "coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos",
+    "episodeNumber": null,
+    "title": "Coinbase CEO's Top 3 Crypto Trends for 2026 + More from Davos!",
+    "publishDate": "2026-01-23",
+    "description": "(0:00) Intro (0:37) Coinbase CEO, Brian Armstrong on Crypto Adoption (38:51) Cerebras CEO, Andrew Feldman on Compute Power (1:18:50) Gecko Robotics CEO, Jake Loosararian on AI and...",
+    "summary": "(0:00) Intro (0:37) Coinbase CEO, Brian Armstrong on Crypto Adoption (38:51) Cerebras CEO, Andrew Feldman on Compute Power (1:18:50) Gecko Robotics CEO, Jake Loosararian on AI and Physical Robots This episode is sponsored by the New York Stock Exchange - a modern marketplace and exchange for building the future. It all happens at the NYSE. Featuring Brian...",
+    "durationSeconds": 5715,
+    "durationLabel": "01:35:15",
+    "guests": [
+      "Brian Armstrong",
+      "Andrew Feldman",
+      "Jake Loosararian"
+    ],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Markets",
+      "Datacenters",
+      "Infrastructure"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/Davos_NYSE_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/d/2/5/8d25cfe18fcfe1f7d959afa2a1bf1c87/1_Pod_BA_Davosi.png",
+    "chunkCount": 4,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos",
+    "dataFile": "/data/all-in-podcast-search/episodes/coinbase-ceo-brian-armstrong-breaks-down-the-three-biggest-trends-in-crypto-more-from-davos.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:37",
+      "text": "Intro"
+    },
+    {
+      "startTimestamp": "00:37",
+      "endTimestamp": "38:51",
+      "text": "Coinbase CEO, Brian Armstrong on Crypto Adoption"
+    },
+    {
+      "startTimestamp": "38:51",
+      "endTimestamp": "01:18:50",
+      "text": "Cerebras CEO, Andrew Feldman on Compute Power"
+    },
+    {
+      "startTimestamp": "01:18:50",
+      "text": "Gecko Robotics CEO, Jake Loosararian on AI and Physical Robots This episode is sponsored by the New York Stock Exchange - a modern marketplace and exchange for building the future. It all happens at the NYSE. https://www.nyse.com/ Featuring Brian Armstrong (CEO, Coinbase), Andrew Feldman (CEO, Cerebras), and Jake Loosararian (CEO, Gecko), this conversation explores how AI is changing work, infrastructure, and productivity in real time- from the builders shaping what comes next. Follow Brian: https://x.com/brian_armstrong Follow Andrew: https://x.com/andrewdfeldman Follow Jake: https://x.com/jakeloosy Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

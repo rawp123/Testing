@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.756Z",
+  "episode": {
+    "id": "all-in-e138",
+    "slug": "e138-presidential-candidate-vivek-ramaswamy-in-conversation-with-the-besties",
+    "episodeNumber": 138,
+    "title": "E138: Presidential Candidate Vivek Ramaswamy in conversation with the Besties",
+    "publishDate": "2023-07-21",
+    "description": "(0:00) Bestie intros! (1:08) Vivek's background, corporate political / ESG distractions, why he's running for president (19:16) Energy policy, unemployment work requirements,...",
+    "summary": "(0:00) Bestie intros! (1:08) Vivek's background, corporate political / ESG distractions, why he's running for president (19:16) Energy policy, unemployment work requirements, immigration (30:24) Foreign policy: How to handle Ukraine/Russia and Taiwan/China (44:46) Media strategy, Silicon Valley Bank's implosion (54:09) Thoughts on Trump (1:06:16) Campaign...",
+    "durationSeconds": 7817,
+    "durationLabel": "02:10:17",
+    "guests": [
+      "Vivek Ramaswamy"
+    ],
+    "topicTags": [
+      "Politics",
+      "Media",
+      "Energy",
+      "China",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e138-presidential-candidate-vivek-ramaswamy-in-conversation-with-the-besties",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e138-presidential-candidate-vivek-ramaswamy-in-conversation-with-the-besties",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLINE138.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e138",
+    "dataFile": "/data/all-in-podcast-search/episodes/e138-presidential-candidate-vivek-ramaswamy-in-conversation-with-the-besties.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:08",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "01:08",
+      "endTimestamp": "19:16",
+      "text": "Vivek's background, corporate political / ESG distractions, why he's running for president"
+    },
+    {
+      "startTimestamp": "19:16",
+      "endTimestamp": "30:24",
+      "text": "Energy policy, unemployment work requirements, immigration"
+    },
+    {
+      "startTimestamp": "30:24",
+      "endTimestamp": "44:46",
+      "text": "Foreign policy: How to handle Ukraine/Russia and Taiwan/China"
+    },
+    {
+      "startTimestamp": "44:46",
+      "endTimestamp": "54:09",
+      "text": "Media strategy, Silicon Valley Bank's implosion"
+    },
+    {
+      "startTimestamp": "54:09",
+      "endTimestamp": "01:06:16",
+      "text": "Thoughts on Trump"
+    },
+    {
+      "startTimestamp": "01:06:16",
+      "endTimestamp": "01:14:10",
+      "text": "Campaign strategy, establishment appeal"
+    },
+    {
+      "startTimestamp": "01:14:10",
+      "endTimestamp": "01:29:31",
+      "text": "Social issues: Abolishing the DOE, abortion, trans rights"
+    },
+    {
+      "startTimestamp": "01:29:31",
+      "endTimestamp": "01:39:27",
+      "text": "Defense budget, Military Industrial Complex, GOP division over Ukraine"
+    },
+    {
+      "startTimestamp": "01:39:27",
+      "endTimestamp": "01:41:33",
+      "text": "Bestie update!"
+    },
+    {
+      "startTimestamp": "01:41:33",
+      "text": "Post-interview debrief Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow Vivek Ramaswamy: https://twitter.com/VivekGRamaswamy Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.politico.com/news/magazine/2023/07/20/vivek-ramaswamy-pete-buttigieg-00107193 https://projects.fivethirtyeight.com/polls/president-primary-r/2024/national/ https://twitter.com/PatrickRuffini/status/1680204156953407488 https://twitter.com/DavidSacks/status/1680205700738211840 https://twitter.com/charliekirk11/status/1680665098765975558"
+    }
+  ]
+}

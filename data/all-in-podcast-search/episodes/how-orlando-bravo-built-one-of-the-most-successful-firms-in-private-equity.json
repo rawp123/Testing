@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.305Z",
+  "episode": {
+    "id": "all-in-how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity",
+    "slug": "how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity",
+    "episodeNumber": null,
+    "title": "How Orlando Bravo Built One of the Most Successful Firms in Private Equity",
+    "publishDate": "2025-10-15",
+    "description": "(0:00) Introducing Orlando Bravo (1:53) Orlando's history, Puerto Rico origins, how he got into private equity (7:10) How he runs Thoma Bravo: small team, outward facing,...",
+    "summary": "(0:00) Introducing Orlando Bravo (1:53) Orlando's history, Puerto Rico origins, how he got into private equity (7:10) How he runs Thoma Bravo: small team, outward facing, mentorship, patience in fundraising (9:01) Role of PE in the American economy, public perception, underwriting AI risks (15:23) Deal pricing philosophy, acquiring Boeing's avionics...",
+    "durationSeconds": 1737,
+    "durationLabel": "28:57",
+    "guests": [
+      "Orlando Bravo"
+    ],
+    "topicTags": [
+      "AI"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_OrlandoBravo_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/5/a/7/45a78108814db700d959afa2a1bf1c87/1_Pod_Orlando.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity",
+    "dataFile": "/data/all-in-podcast-search/episodes/how-orlando-bravo-built-one-of-the-most-successful-firms-in-private-equity.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:53",
+      "text": "Introducing Orlando Bravo"
+    },
+    {
+      "startTimestamp": "01:53",
+      "endTimestamp": "07:10",
+      "text": "Orlando's history, Puerto Rico origins, how he got into private equity"
+    },
+    {
+      "startTimestamp": "07:10",
+      "endTimestamp": "09:01",
+      "text": "How he runs Thoma Bravo: small team, outward facing, mentorship, patience in fundraising"
+    },
+    {
+      "startTimestamp": "09:01",
+      "endTimestamp": "15:23",
+      "text": "Role of PE in the American economy, public perception, underwriting AI risks"
+    },
+    {
+      "startTimestamp": "15:23",
+      "endTimestamp": "19:24",
+      "text": "Deal pricing philosophy, acquiring Boeing's avionics business"
+    },
+    {
+      "startTimestamp": "19:24",
+      "endTimestamp": "26:16",
+      "text": "Thoma Bravo's operating playbook after acquiring a company"
+    },
+    {
+      "startTimestamp": "26:16",
+      "text": "Thoughts on taking Thoma Bravo public"
+    }
+  ]
+}

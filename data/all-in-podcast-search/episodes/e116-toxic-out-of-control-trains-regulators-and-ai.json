@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.862Z",
+  "episode": {
+    "id": "all-in-e116",
+    "slug": "e116-toxic-out-of-control-trains-regulators-and-ai",
+    "episodeNumber": 116,
+    "title": "E116: Toxic out-of-control trains, regulators, and AI",
+    "publishDate": "2023-02-17",
+    "description": "(0:00) Bestie intros, poker recap, charity shoutouts! (8:34) Toxic Ohio train derailment (25:30) Lina Khan's flawed strategy and rough past few weeks as FTC Chair; rewriting...",
+    "summary": "(0:00) Bestie intros, poker recap, charity shoutouts! (8:34) Toxic Ohio train derailment (25:30) Lina Khan's flawed strategy and rough past few weeks as FTC Chair; rewriting Section 230 (57:27) AI chatbot bias and problems: Bing Chat's strange answers, jailbreaking ChatGPT, and more DONATE:",
+    "durationSeconds": 5472,
+    "durationLabel": "01:31:12",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e116-toxic-out-of-control-trains-regulators-and-ai",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e116-toxic-out-of-control-trains-regulators-and-ai",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E116_2.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 4,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e116",
+    "dataFile": "/data/all-in-podcast-search/episodes/e116-toxic-out-of-control-trains-regulators-and-ai.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "08:34",
+      "text": "Bestie intros, poker recap, charity shoutouts!"
+    },
+    {
+      "startTimestamp": "08:34",
+      "endTimestamp": "25:30",
+      "text": "Toxic Ohio train derailment"
+    },
+    {
+      "startTimestamp": "25:30",
+      "endTimestamp": "57:27",
+      "text": "Lina Khan's flawed strategy and rough past few weeks as FTC Chair; rewriting Section 230"
+    },
+    {
+      "startTimestamp": "57:27",
+      "text": "AI chatbot bias and problems: Bing Chat's strange answers, jailbreaking ChatGPT, and more DONATE: https://www.humanesociety.org/news/going-big-beagles https://www.beastphilanthropy.org/donate Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://techcrunch.com/2023/02/10/mrbeasts-blindness-video-puts-systemic-ableism-on-display https://doomberg.substack.com/p/railroaded https://www.usatoday.com/story/news/2023/02/14/norfolk-southerns-ohio-train-derailment-emblematic-rail-trends/11248956002 https://www.bloomberg.com/news/features/2023-02-15/zantac-cancer-risk-data-was-kept-quiet-by-manufacturer-glaxo-for-40-years https://www.foxnews.com/video/6320573959112 https://www.wsj.com/articles/why-im-resigning-from-the-ftc-commissioner-ftc-lina-khan-regulation-rule-violation-antitrust-339f115d https://fedsoc.org/commentary/fedsoc-blog/gonzalez-google-and-section-230-all-on-the-same-side https://www.investopedia.com/section-230-definition-5207317 https://www.usatoday.com/story/news/2023/02/14/norfolk-southerns-ohio-train-derailment-emblematic-rail-trends/11248956002 https://twitter.com/elonmusk/status/1626097497109311495 https://chat.openai.com/chat https://twitter.com/Jason/status/1626091654120894464 https://politiquerepublic.substack.com/p/chatgpt-is-democrat-propoganda https://www.bbc.com/news/technology-35902104 https://www.nytimes.com/2023/02/16/technology/bing-chatbot-microsoft-chatgpt.html https://unusualwhales.com/news/openais-chatgpt-has-reportedly-predicted-that-the-stock-market-will-crash-on-march-15-2023 https://www.history.com/news/josef-stalin-great-purge-photo-retouching https://www.hollywoodreporter.com/business/business-news/ec-funds-france-build-google-106934 https://www.nytimes.com/2008/03/21/technology/21iht-quaero24.html"
+    }
+  ]
+}

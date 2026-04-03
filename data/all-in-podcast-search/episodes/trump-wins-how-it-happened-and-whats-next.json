@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.573Z",
+  "episode": {
+    "id": "all-in-trump-wins-how-it-happened-and-whats-next",
+    "slug": "trump-wins-how-it-happened-and-whats-next",
+    "episodeNumber": null,
+    "title": "Trump wins! How it happened and what's next",
+    "publishDate": "2024-11-08",
+    "description": "(0:00) Bestie intros! (4:55) Sacks recaps election night at Mar-a-Lago (8:28) Analyzing the results: how Trump won, why Kamala and the Democratic Party lost (25:55) The failing...",
+    "summary": "(0:00) Bestie intros! (4:55) Sacks recaps election night at Mar-a-Lago (8:28) Analyzing the results: how Trump won, why Kamala and the Democratic Party lost (25:55) The failing Democratic coalition, campaign spend disparity, Trump's advantage in earned media (37:59) What mattered most: Policy, Candidate, or Campaign? (50:44) GOP will likely win House and...",
+    "durationSeconds": 6208,
+    "durationLabel": "01:43:28",
+    "guests": [],
+    "topicTags": [
+      "Politics",
+      "Media"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/trump-wins-how-it-happened-and-whats-next",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/trump-wins-how-it-happened-and-whats-next",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E203.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/b/5/5/e/b55e672fbcee8176e55e3c100dce7605/1x1_CLASSIC_E203.png",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-trump-wins-how-it-happened-and-whats-next",
+    "dataFile": "/data/all-in-podcast-search/episodes/trump-wins-how-it-happened-and-whats-next.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:55",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "04:55",
+      "endTimestamp": "08:28",
+      "text": "Sacks recaps election night at Mar-a-Lago"
+    },
+    {
+      "startTimestamp": "08:28",
+      "endTimestamp": "25:55",
+      "text": "Analyzing the results: how Trump won, why Kamala and the Democratic Party lost"
+    },
+    {
+      "startTimestamp": "25:55",
+      "endTimestamp": "37:59",
+      "text": "The failing Democratic coalition, campaign spend disparity, Trump's advantage in earned media"
+    },
+    {
+      "startTimestamp": "37:59",
+      "endTimestamp": "50:44",
+      "text": "What mattered most: Policy, Candidate, or Campaign?"
+    },
+    {
+      "startTimestamp": "50:44",
+      "endTimestamp": "01:10:42",
+      "text": "GOP will likely win House and Senate, potential cabinet positions, avoiding neocons"
+    },
+    {
+      "startTimestamp": "01:10:42",
+      "endTimestamp": "01:28:47",
+      "text": "Cabinet positions, shaking up the unelected bureaucratic branch"
+    },
+    {
+      "startTimestamp": "01:28:47",
+      "endTimestamp": "01:35:17",
+      "text": "California rejects progressives"
+    },
+    {
+      "startTimestamp": "01:35:17",
+      "text": "Abortion laws being settled around the US Get tickets for The All-In Holiday Spectacular!: https://allin.ticketsauce.com/e/all-in-holiday-spectacular Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/twobitidiot/status/1854192602985255042 https://www.270towin.com/2024-election-results-live/president https://x.com/ChrisCillizza/status/1854515791690953066 https://www.youtube.com/watch?v=_e8-KX3XKL8 https://x.com/Jason/status/1854209590424121464 https://x.com/SawyerMerritt/status/1854045298475110779 https://x.com/DavidSacks/status/1854342908356297068 https://x.com/arifleischer/status/1854270972775305291 https://www.fec.gov/data/spending-bythenumbers/?office=P https://www.usnews.com/news/national-news/articles/2024-11-01/16-billion-will-be-spent-in-the-2024-election-wheres-it-all-going https://x.com/DavidSacks/status/1829383729284067659 https://www.snopes.com/fact-check/trump-very-fine-people https://x.com/TheRabbitHole84/status/1840977783247286429 https://www.cnn.com/election/2024 https://polymarket.com/event/house-control-after-2024-election https://x.com/MarioNawfal/status/1854536321282519396 https://www.instagram.com/p/DCFJ4mlsmEG/?hl=en https://x.com/DavidSacks/status/1854202717637411199 https://www.scotusblog.com/2024/06/supreme-court-strikes-down-chevron-curtailing-power-of-federal-agencies https://x.com/chamath/status/1854229735477551600 https://www.nbcnews.com/politics/2024-election/la-district-attorney-progressive-loses-re-election-gascon-rcna175906 https://www.nytimes.com/interactive/2024/11/05/us/elections/results-abortion.html"
+    }
+  ]
+}

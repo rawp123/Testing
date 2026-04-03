@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.470Z",
+  "episode": {
+    "id": "all-in-all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson",
+    "slug": "all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson",
+    "episodeNumber": null,
+    "title": "All-In Live from Austin: Colin and Samir, Chris Williamson, and Bryan Johnson",
+    "publishDate": "2025-04-03",
+    "description": "(0:00) Friedberg and Jason are live from Austin! (2:51) How building an audience has impacted the Besties (11:15) Colin & Samir join the Besties! (12:01) Evolution of short-form...",
+    "summary": "(0:00) Friedberg and Jason are live from Austin! (2:51) How building an audience has impacted the Besties (11:15) Colin & Samir join the Besties! (12:01) Evolution of short-form and long-form content (22:18) Business models for creatives (35:04) Advice to up and coming creators (42:10) Chris Williamson joins the Besties! (50:17) Making it seem effortless...",
+    "durationSeconds": 6623,
+    "durationLabel": "01:50:23",
+    "guests": [
+      "Chris Williamson",
+      "Bryan Johnson"
+    ],
+    "topicTags": [],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/SXSW_Final_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/c/6/b/5/c6b5c314d06ac73216c3140a3186d450/1x1_CLASSIC_LIVE_AUSTION.png",
+    "chunkCount": 16,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson",
+    "dataFile": "/data/all-in-podcast-search/episodes/all-in-live-from-austin-colin-and-samir-chris-williamson-and-bryan-johnson.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:51",
+      "text": "Friedberg and Jason are live from Austin!"
+    },
+    {
+      "startTimestamp": "02:51",
+      "endTimestamp": "11:15",
+      "text": "How building an audience has impacted the Besties"
+    },
+    {
+      "startTimestamp": "11:15",
+      "endTimestamp": "12:01",
+      "text": "Colin & Samir join the Besties!"
+    },
+    {
+      "startTimestamp": "12:01",
+      "endTimestamp": "22:18",
+      "text": "Evolution of short-form and long-form content"
+    },
+    {
+      "startTimestamp": "22:18",
+      "endTimestamp": "35:04",
+      "text": "Business models for creatives"
+    },
+    {
+      "startTimestamp": "35:04",
+      "endTimestamp": "42:10",
+      "text": "Advice to up and coming creators"
+    },
+    {
+      "startTimestamp": "42:10",
+      "endTimestamp": "50:17",
+      "text": "Chris Williamson joins the Besties!"
+    },
+    {
+      "startTimestamp": "50:17",
+      "endTimestamp": "57:47",
+      "text": "Making it seem effortless"
+    },
+    {
+      "startTimestamp": "57:47",
+      "endTimestamp": "01:05:02",
+      "text": "Monetizing content"
+    },
+    {
+      "startTimestamp": "01:05:02",
+      "endTimestamp": "01:19:15",
+      "text": "Scaling a one-man show"
+    },
+    {
+      "startTimestamp": "01:19:15",
+      "endTimestamp": "01:20:13",
+      "text": "Bryan Johnson joins the Besties!"
+    },
+    {
+      "startTimestamp": "01:20:13",
+      "endTimestamp": "01:21:21",
+      "text": "Spotify's move to video"
+    },
+    {
+      "startTimestamp": "01:21:21",
+      "endTimestamp": "01:28:03",
+      "text": "Bryan's Ketamine experience"
+    },
+    {
+      "startTimestamp": "01:28:03",
+      "endTimestamp": "01:36:52",
+      "text": "Creators and value props"
+    },
+    {
+      "startTimestamp": "01:36:52",
+      "endTimestamp": "01:43:10",
+      "text": "Issues with the US food industry"
+    },
+    {
+      "startTimestamp": "01:43:10",
+      "text": "Top tips for healthy living"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.341Z",
+  "episode": {
+    "id": "all-in-tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies",
+    "slug": "tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies",
+    "episodeNumber": null,
+    "title": "Tulsi Gabbard on Russiagate Hoax Evidence and How She's Reforming Politicized Intelligence Agencies",
+    "publishDate": "2025-09-15",
+    "description": "(0:00) Introducing Tulsi Gabbard, US Director of National Intelligence (1:21) The Russiagate Hoax Conspiracy and the dangers of highly politicized intelligence agencies (17:31)...",
+    "summary": "(0:00) Introducing Tulsi Gabbard, US Director of National Intelligence (1:21) The Russiagate Hoax Conspiracy and the dangers of highly politicized intelligence agencies (17:31) Russian interference in 2016, cleaning up intelligence agencies, increasing accountability (25:54) How Tulsi is received in her home state of Hawaii after switching parties, the...",
+    "durationSeconds": 2514,
+    "durationLabel": "41:54",
+    "guests": [
+      "Tulsi Gabbard"
+    ],
+    "topicTags": [
+      "Crypto",
+      "Politics",
+      "Defense",
+      "China",
+      "Iran"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_TulsiGabbard_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/e/8/8/fe88a51904669b7d16c3140a3186d450/1_pod_tulsi.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies",
+    "dataFile": "/data/all-in-podcast-search/episodes/tulsi-gabbard-on-russiagate-hoax-evidence-and-how-shes-reforming-politicized-intelligence-agencies.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:21",
+      "text": "Introducing Tulsi Gabbard, US Director of National Intelligence"
+    },
+    {
+      "startTimestamp": "01:21",
+      "endTimestamp": "17:31",
+      "text": "The Russiagate Hoax Conspiracy and the dangers of highly politicized intelligence agencies"
+    },
+    {
+      "startTimestamp": "17:31",
+      "endTimestamp": "25:54",
+      "text": "Russian interference in 2016, cleaning up intelligence agencies, increasing accountability"
+    },
+    {
+      "startTimestamp": "25:54",
+      "endTimestamp": "30:16",
+      "text": "How Tulsi is received in her home state of Hawaii after switching parties, the drastic change of the Democratic Party"
+    },
+    {
+      "startTimestamp": "30:16",
+      "endTimestamp": "35:15",
+      "text": "Thoughts on bombing Iran, what impacts her views on foreign policy and war"
+    },
+    {
+      "startTimestamp": "35:15",
+      "text": "The impact of designating drug cartels as terrorist orgs, safety at the Southern Border, China"
+    }
+  ]
+}

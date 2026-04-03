@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.255Z",
+  "episode": {
+    "id": "all-in-all-in-x-kill-tony-a-hilarious-holiday-special",
+    "slug": "all-in-x-kill-tony-a-hilarious-holiday-special",
+    "episodeNumber": null,
+    "title": "All-In x Kill Tony: A Hilarious Holiday Special",
+    "publishDate": "2025-12-24",
+    "description": "(0:00) Intro! (2:47) Tony Hinchcliffe roasts the Besties (15:01) Interview: Kill Tony success, MSG rally, origin story, free speech in Europe (36:03) The Besties play Kill Tony!...",
+    "summary": "(0:00) Intro! (2:47) Tony Hinchcliffe roasts the Besties (15:01) Interview: Kill Tony success, MSG rally, origin story, free speech in Europe (36:03) The Besties play Kill Tony! (50:14) The 2025 Bestie Awards: Business, Politics, Tech, and more IREN: https://iren.com OKX: https://okx.com Google Cloud: https://cloud.google.com",
+    "durationSeconds": 4699,
+    "durationLabel": "01:18:19",
+    "guests": [],
+    "topicTags": [],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/all-in-x-kill-tony-a-hilarious-holiday-special",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/all-in-x-kill-tony-a-hilarious-holiday-special",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/25_HOLIDAY_FINAL_FINAL_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/7/7/2/f772d8573ea6682216c3140a3186d450/1_Pod.jpeg",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-all-in-x-kill-tony-a-hilarious-holiday-special",
+    "dataFile": "/data/all-in-podcast-search/episodes/all-in-x-kill-tony-a-hilarious-holiday-special.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:47",
+      "text": "Intro!"
+    },
+    {
+      "startTimestamp": "02:47",
+      "endTimestamp": "15:01",
+      "text": "Tony Hinchcliffe roasts the Besties"
+    },
+    {
+      "startTimestamp": "15:01",
+      "endTimestamp": "36:03",
+      "text": "Interview: Kill Tony success, MSG rally, origin story, free speech in Europe"
+    },
+    {
+      "startTimestamp": "36:03",
+      "endTimestamp": "50:14",
+      "text": "The Besties play Kill Tony!"
+    },
+    {
+      "startTimestamp": "50:14",
+      "text": "The 2025 Bestie Awards: Business, Politics, Tech, and more"
+    }
+  ]
+}

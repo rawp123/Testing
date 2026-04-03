@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.414Z",
+  "episode": {
+    "id": "all-in-nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami",
+    "slug": "nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami",
+    "episodeNumber": null,
+    "title": "Nico Rosberg on the Booming Business of F1 | All-In Live from Miami",
+    "publishDate": "2025-05-29",
+    "description": "(0:00) The Besties welcome Nico Rosberg! (0:27) Nico's history with F1, what makes a great driver (6:24) The business of F1 (10:05) Teammate rivalries, why \"Drive to Survive\"...",
+    "summary": "(0:00) The Besties welcome Nico Rosberg! (0:27) Nico's history with F1, what makes a great driver (6:24) The business of F1 (10:05) Teammate rivalries, why \"Drive to Survive\" works, future growth (16:48) Post-F1 career, best angel investments, becoming a VC (22:16) Partner shoutouts: Thanks to OKX, Circle, Polymarket, Solana, BVNK, and Google Cloud! Check...",
+    "durationSeconds": 1474,
+    "durationLabel": "24:34",
+    "guests": [
+      "Nico Rosberg"
+    ],
+    "topicTags": [
+      "Google",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_MIA25_NicoRosberg_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/3/6/c/e36ca911c27b587516c3140a3186d450/1x1_Thumbnail_v6-20250529-v8v0wtm6gv.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami",
+    "dataFile": "/data/all-in-podcast-search/episodes/nico-rosberg-on-the-booming-business-of-f1-all-in-live-from-miami.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:27",
+      "text": "The Besties welcome Nico Rosberg!"
+    },
+    {
+      "startTimestamp": "00:27",
+      "endTimestamp": "06:24",
+      "text": "Nico's history with F1, what makes a great driver"
+    },
+    {
+      "startTimestamp": "06:24",
+      "endTimestamp": "10:05",
+      "text": "The business of F1"
+    },
+    {
+      "startTimestamp": "10:05",
+      "endTimestamp": "16:48",
+      "text": "Teammate rivalries, why \"Drive to Survive\" works, future growth"
+    },
+    {
+      "startTimestamp": "16:48",
+      "endTimestamp": "22:16",
+      "text": "Post-F1 career, best angel investments, becoming a VC"
+    },
+    {
+      "startTimestamp": "22:16",
+      "text": "Partner shoutouts: Thanks to OKX, Circle, Polymarket, Solana, BVNK, and Google Cloud! Check out OKX: https://www.okx.com Check out Circle: https://www.circle.com Follow Nico: https://x.com/nicorosberg Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

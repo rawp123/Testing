@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.300Z",
+  "episode": {
+    "id": "all-in-california-forever-the-startup-building-americas-next-great-city",
+    "slug": "california-forever-the-startup-building-americas-next-great-city",
+    "episodeNumber": null,
+    "title": "California Forever: The Startup Building America's Next Great City",
+    "publishDate": "2025-10-21",
+    "description": "(0:00) Introducing Jan Sramek (0:51) How California Forever is building America's next great city Solana - Solana is the high performance network powering internet capital...",
+    "summary": "(0:00) Introducing Jan Sramek (0:51) How California Forever is building America's next great city Solana - Solana is the high performance network powering internet capital markets, payments, and crypto applications. Connect with investors, crypto founders, and entrepreneurs at Solana's global flagship event during Abu Dhabi Finance Week & F1:...",
+    "durationSeconds": 650,
+    "durationLabel": "10:50",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Nvidia",
+      "Crypto",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/california-forever-the-startup-building-americas-next-great-city",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/california-forever-the-startup-building-americas-next-great-city",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_JanSramek_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/5/3/2/e5321b289711954f16c3140a3186d450/Podcast_Graphic_-_Events.png",
+    "chunkCount": 2,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-california-forever-the-startup-building-americas-next-great-city",
+    "dataFile": "/data/all-in-podcast-search/episodes/california-forever-the-startup-building-americas-next-great-city.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:51",
+      "text": "Introducing Jan Sramek"
+    },
+    {
+      "startTimestamp": "00:51",
+      "text": "How California Forever is building America's next great city"
+    }
+  ]
+}

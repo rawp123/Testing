@@ -1,0 +1,11 @@
+{
+  "id": "all-in-e175",
+  "episodeNumber": 175,
+  "title": "E175: Sample episode on election messaging, healthcare costs, and software margins",
+  "publishDate": "2024-04-19",
+  "description": "Sample structured episode data for the All-In Podcast Search utility.",
+  "summary": "A sample episode covering election-year messaging, healthcare cost pressure, and how software operators defend margins in a slower market.",
+  "duration": "01:21:05",
+  "guests": ["Jason Calacanis"],
+  "topicTags": ["Politics", "Healthcare", "Software"]
+}

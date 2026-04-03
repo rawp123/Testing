@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>All-In Podcast Visuals | Robert Parrish</title>
+  <meta name="description" content="Explore keyword trends over time across the All-In podcast archive with interactive visuals and toggleable focus areas." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/all-in-podcast-search.css?v=20260402f">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/all-in-podcast-shared.js?v=20260402f" defer></script>
+  <script src="/src/js/all-in-podcast-visuals.js?v=20260402f" defer></script>
+</head>
+<body data-page="all-in-podcast-search" data-page-parent="podcast-utility" data-aps-view="visuals">
+  <div id="site-header"></div>
+  <main>
+    <section class="container page-shell aps-shell">
+      <section class="aps-hero aps-page-header card">
+        <div class="page-shell-head">
+          <div class="page-shell-copy">
+            <p class="page-kicker">Podcast utility</p>
+            <h1 class="page-title">All-In Podcast Utility</h1>
+            <p class="page-subtitle">Track how specific ideas, people, and themes rise or fade over time with a compact visuals workspace.</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn ghost" href="/all-in-podcast-search/">All Podcast Utilities</a>
+          </div>
+        </div>
+        <nav class="aps-tab-bar aps-page-header-tabs" aria-label="All-In podcast views">
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/">Episodes</a>
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/search/">Search</a>
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/visuals/" aria-current="page">Visuals</a>
+        </nav>
+      </section>
+
+      <section class="aps-workspace card" aria-labelledby="aps-visuals-title">
+        <section class="aps-tab-panel">
+          <div class="aps-panel-head">
+            <div>
+              <p class="la-section-kicker">Visual analysis</p>
+              <h2 id="aps-visuals-title" class="la-section-title">Keyword momentum over time</h2>
+            </div>
+            <p id="aps-visuals-summary" class="aps-panel-copy">Loading archive data for the visuals workspace.</p>
+          </div>
+
+          <div class="aps-visual-controls">
+            <div class="aps-visual-control-row">
+              <label class="aps-visual-search" for="aps-visual-keyword">
+                <span class="aps-filter-label">Keyword or phrase</span>
+                <div class="aps-search-row">
+                  <input id="aps-visual-keyword" class="aps-search-input" type="search" placeholder="AI, Greenland, OpenAI, Coinbase, inflation..." autocomplete="off" spellcheck="false" />
+                  <button id="aps-visual-apply" class="btn" type="button">Update visuals</button>
+                  <button id="aps-visual-clear" class="btn ghost" type="button">Reset</button>
+                </div>
+              </label>
+
+              <label class="aps-filter-field aps-visual-select-field">
+                <span class="aps-filter-label">Time bucket</span>
+                <select id="aps-visual-bucket" class="aps-filter-select">
+                  <option value="month">Monthly</option>
+                  <option value="quarter">Quarterly</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="aps-visual-toggle-grid">
+              <fieldset class="aps-visual-toggle-group">
+                <legend class="aps-filter-label">Focus fields</legend>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="title" checked>
+                  <span>Title</span>
+                </label>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="summary" checked>
+                  <span>Summary</span>
+                </label>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="transcript" checked>
+                  <span>Transcript / outline</span>
+                </label>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="guests">
+                  <span>Guests</span>
+                </label>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="topics">
+                  <span>Topics</span>
+                </label>
+              </fieldset>
+
+              <fieldset class="aps-visual-toggle-group">
+                <legend class="aps-filter-label">Chart series</legend>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="episodes" checked>
+                  <span>Matching episodes</span>
+                </label>
+                <label class="aps-visual-toggle">
+                  <input type="checkbox" value="mentions" checked>
+                  <span>Total mentions</span>
+                </label>
+              </fieldset>
+
+              <fieldset class="aps-visual-toggle-group">
+                <legend class="aps-filter-label">Breakdown</legend>
+                <div class="aps-visual-segmented" role="radiogroup" aria-label="Visual breakdown mode">
+                  <button type="button" class="aps-visual-segment is-active" data-breakdown="topics" aria-pressed="true">Topics</button>
+                  <button type="button" class="aps-visual-segment" data-breakdown="guests" aria-pressed="false">Guests</button>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="aps-visual-status-row">
+            <p id="aps-visual-status" class="aps-panel-copy">Preparing the first analysis.</p>
+          </div>
+
+          <div id="aps-visual-empty" class="aps-empty-state" hidden>
+            <h3>No visual data yet</h3>
+            <p>Choose a keyword and at least one focus field to generate the timeline and breakdown charts.</p>
+          </div>
+
+          <div id="aps-visual-content" class="aps-visual-content" hidden>
+            <div class="aps-visual-stats" id="aps-visual-stats"></div>
+
+            <div class="aps-visual-grid">
+              <article class="aps-visual-card">
+                <div class="aps-panel-head">
+                  <div>
+                    <p class="la-section-kicker">Trend</p>
+                    <h3 class="la-section-title">Mentions over time</h3>
+                  </div>
+                  <p class="aps-panel-copy">Toggle the series to compare raw mentions against episode-level coverage.</p>
+                </div>
+                <div id="aps-trend-chart" class="aps-chart-frame" aria-live="polite"></div>
+              </article>
+
+              <article class="aps-visual-card">
+                <div class="aps-panel-head">
+                  <div>
+                    <p class="la-section-kicker">Breakdown</p>
+                    <h3 id="aps-breakdown-title" class="la-section-title">Top topics in matching episodes</h3>
+                  </div>
+                  <p class="aps-panel-copy">This chart updates from the episodes that match the active keyword and focus fields.</p>
+                </div>
+                <div id="aps-breakdown-chart" class="aps-chart-frame" aria-live="polite"></div>
+              </article>
+            </div>
+
+            <article class="aps-visual-card">
+              <div class="aps-panel-head">
+                <div>
+                  <p class="la-section-kicker">Strongest matches</p>
+                  <h3 class="la-section-title">Episodes with the most hits</h3>
+                </div>
+                <p class="aps-panel-copy">A quick way to jump from the chart into the densest matching episodes.</p>
+              </div>
+              <div class="aps-table-scroll">
+                <table class="aps-visual-results-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Episode</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Matches</th>
+                      <th scope="col">Open</th>
+                    </tr>
+                  </thead>
+                  <tbody id="aps-visual-results-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with static HTML, CSS, JavaScript, local JSON, and Pagefind.</div>
+  </footer>
+</body>
+</html>

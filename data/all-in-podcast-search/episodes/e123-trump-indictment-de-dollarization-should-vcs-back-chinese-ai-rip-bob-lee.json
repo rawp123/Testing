@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.801Z",
+  "episode": {
+    "id": "all-in-e123",
+    "slug": "e123-trump-indictment-de-dollarization-should-vcs-back-chinese-ai-rip-bob-lee",
+    "episodeNumber": 123,
+    "title": "E123: Trump indictment, de-dollarization, should VCs back Chinese AI? RIP Bob Lee",
+    "publishDate": "2023-04-07",
+    "description": "(0:00) Bestie intros! (4:12) Trump indictment (16:52) De-dollarization: What's real and what's overblown? (39:35) Debt ceiling vote predictions (56:36) US investors indirectly...",
+    "summary": "(0:00) Bestie intros! (4:12) Trump indictment (16:52) De-dollarization: What's real and what's overblown? (39:35) Debt ceiling vote predictions (56:36) US investors indirectly backing Chinese AI startups: should it be allowed? Saudi Arabia discloses VC investments as institutional US LPs cycle out of venture (1:10:02) RIP Bob Lee, fixing San Francisco",
+    "durationSeconds": 5234,
+    "durationLabel": "01:27:14",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Venture capital",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e123-trump-indictment-de-dollarization-should-vcs-back-chinese-ai-rip-bob-lee",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e123-trump-indictment-de-dollarization-should-vcs-back-chinese-ai-rip-bob-lee",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E123_1.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e123",
+    "dataFile": "/data/all-in-podcast-search/episodes/e123-trump-indictment-de-dollarization-should-vcs-back-chinese-ai-rip-bob-lee.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:12",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "04:12",
+      "endTimestamp": "16:52",
+      "text": "Trump indictment"
+    },
+    {
+      "startTimestamp": "16:52",
+      "endTimestamp": "39:35",
+      "text": "De-dollarization: What's real and what's overblown?"
+    },
+    {
+      "startTimestamp": "39:35",
+      "endTimestamp": "56:36",
+      "text": "Debt ceiling vote predictions"
+    },
+    {
+      "startTimestamp": "56:36",
+      "endTimestamp": "01:10:02",
+      "text": "US investors indirectly backing Chinese AI startups: should it be allowed? Saudi Arabia discloses VC investments as institutional US LPs cycle out of venture"
+    },
+    {
+      "startTimestamp": "01:10:02",
+      "text": "RIP Bob Lee, fixing San Francisco Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.cbsnews.com/news/trump-indictment-34-felony-counts-charges-new-york-read https://nymag.com/intelligencer/2023/04/donald-trump-new-york-indictment-bragg-should-not-be-brought.html https://anncoulter.substack.com/p/youre-being-played-republicans https://theweek.com/donald-trump/1022331/former-manhattan-da-says-federal-prosecutors-asked-him-to-stand-down-on-trump https://www.barrons.com/news/china-brazil-strike-deal-to-ditch-dollar-for-trade-8ed4e799 https://twitter.com/DavidSacks/status/1638957986138959873 https://www.illinoispolicy.org/chicago-has-more-pension-debt-than-44-states https://www.yahoo.com/now/social-security-funds-could-run-120000267.html https://wsj.com/articles/the-coming-biden-bailout-of-blue-states-and-cities-rhode-island-california-pension-liability-underwater-rates-svb-5033c1e5 https://fred.stlouisfed.org/series/FYFRGDA188S https://fred.stlouisfed.org/series/FYONGDA188S https://www.longtermtrends.net/us-debt-to-gdp https://pitchbook.com/news/articles/Sanabil-Saudi-Arabia-PIF-disclosures https://www.bloomberg.com/news/articles/2023-03-31/adam-neumann-angles-to-take-new-startup-flow-to-saudi-arabia https://www.theinformation.com/articles/sequoia-and-other-u-s-backed-vcs-are-funding-chinas-answer-to-openai https://twitter.com/rabois/status/1643655946579607565 https://twitter.com/jarvis_best/status/1643667684247371776 https://twitter.com/FrancisSuarez/status/1642862135226126338 https://www.chicagotribune.com/politics/elections/ct-chicago-mayor-election-winner-declared-20230405-plratgzcbrewbngbjcsxwmycgi-story.html"
+    }
+  ]
+}

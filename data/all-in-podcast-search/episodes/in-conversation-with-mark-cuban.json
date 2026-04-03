@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.593Z",
+  "episode": {
+    "id": "all-in-in-conversation-with-mark-cuban",
+    "slug": "in-conversation-with-mark-cuban",
+    "episodeNumber": null,
+    "title": "In conversation with Mark Cuban",
+    "publishDate": "2024-10-03",
+    "description": "(0:00) The Besties intro Mark Cuban: Voting record, working with Ross Perot's campaign in 1992 (5:43) The history of Cuban's love/hate relationship with Trump (19:08) Trump's...",
+    "summary": "(0:00) The Besties intro Mark Cuban: Voting record, working with Ross Perot's campaign in 1992 (5:43) The history of Cuban's love/hate relationship with Trump (19:08) Trump's performance as President: what he got right and wrong (40:46) Party nominations: Kamala vs. Trump (49:18) Biden's performance as President: what he got right and wrong (55:45) Should...",
+    "durationSeconds": 7588,
+    "durationLabel": "02:06:28",
+    "guests": [
+      "Mark Cuban"
+    ],
+    "topicTags": [
+      "Crypto",
+      "Politics",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-mark-cuban",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-mark-cuban",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E198_v2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/2/6/6/9/2669d0ca13ae5d2427a2322813b393ee/1x1_Thumbnail_vE198_Cuban.png",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-in-conversation-with-mark-cuban",
+    "dataFile": "/data/all-in-podcast-search/episodes/in-conversation-with-mark-cuban.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "05:43",
+      "text": "The Besties intro Mark Cuban: Voting record, working with Ross Perot's campaign in 1992"
+    },
+    {
+      "startTimestamp": "05:43",
+      "endTimestamp": "19:08",
+      "text": "The history of Cuban's love/hate relationship with Trump"
+    },
+    {
+      "startTimestamp": "19:08",
+      "endTimestamp": "40:46",
+      "text": "Trump's performance as President: what he got right and wrong"
+    },
+    {
+      "startTimestamp": "40:46",
+      "endTimestamp": "49:18",
+      "text": "Party nominations: Kamala vs. Trump"
+    },
+    {
+      "startTimestamp": "49:18",
+      "endTimestamp": "55:45",
+      "text": "Biden's performance as President: what he got right and wrong"
+    },
+    {
+      "startTimestamp": "55:45",
+      "endTimestamp": "01:07:01",
+      "text": "Should Kamala share blame for Biden's failures?"
+    },
+    {
+      "startTimestamp": "01:07:01",
+      "endTimestamp": "01:21:33",
+      "text": "International conflict, national debt, crypto regulation"
+    },
+    {
+      "startTimestamp": "01:21:33",
+      "endTimestamp": "01:31:47",
+      "text": "General sense of Kamala Harris, why she's been avoiding adversarial interviews, why Sacks supports Trump"
+    },
+    {
+      "startTimestamp": "01:31:47",
+      "endTimestamp": "01:44:50",
+      "text": "Selling a majority of his Mavericks stake, changing business landscape of the NBA, what he's working on at Cost Plus Drugs"
+    },
+    {
+      "startTimestamp": "01:44:50",
+      "endTimestamp": "01:51:37",
+      "text": "Thoughts on AI, what's next for him"
+    },
+    {
+      "startTimestamp": "01:51:37",
+      "text": "Relationship with Elon, re-evaluating the Twitter deal, OpenAI's new fundraise Follow Mark: https://x.com/mcuban Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=pet&s=mcrfpus2&f=m https://fred.stlouisfed.org/series/GFDEBTN https://www.architecturaldigest.com/story/wait-are-windowless-bedrooms-going-to-be-a-thing https://washingtonreporter.news/editorial/scoop-kamala-harris-likely-to-nominate-gary-gensler-as-treasury-secretary-if-elected-senate-sources"
+    }
+  ]
+}

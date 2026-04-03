@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.381Z",
+  "episode": {
+    "id": "all-in-winning-the-ai-race-vice-president-jd-vance",
+    "slug": "winning-the-ai-race-vice-president-jd-vance",
+    "episodeNumber": null,
+    "title": "Winning the AI Race Part 2: Vice President JD Vance",
+    "publishDate": "2025-07-23",
+    "description": "(0:00) The Besties welcome JD Vance (1:24) Immigration (6:34) AI policy (9:27) Relationship with China: Technology competition, striking a balance, trade (12:42) Diplomatic...",
+    "summary": "(0:00) The Besties welcome JD Vance (1:24) Immigration (6:34) AI policy (9:27) Relationship with China: Technology competition, striking a balance, trade (12:42) Diplomatic relations when AI is at-scale, operating in a multipolar world (16:41) AI's impact on jobs (22:02) Should America facilitate \"National Champions\" in strategic industries? (24:09) Working...",
+    "durationSeconds": 1560,
+    "durationLabel": "26:00",
+    "guests": [
+      "JD Vance"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-vice-president-jd-vance",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-vice-president-jd-vance",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_AIDAY_VANCE_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/7/b/7/a7b7a751caea858116c3140a3186d450/Winning_the_AI_Race_Pod-20250723-g2xjdsv6d5.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-winning-the-ai-race-vice-president-jd-vance",
+    "dataFile": "/data/all-in-podcast-search/episodes/winning-the-ai-race-vice-president-jd-vance.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:24",
+      "text": "The Besties welcome JD Vance"
+    },
+    {
+      "startTimestamp": "01:24",
+      "endTimestamp": "06:34",
+      "text": "Immigration"
+    },
+    {
+      "startTimestamp": "06:34",
+      "endTimestamp": "09:27",
+      "text": "AI policy"
+    },
+    {
+      "startTimestamp": "09:27",
+      "endTimestamp": "12:42",
+      "text": "Relationship with China: Technology competition, striking a balance, trade"
+    },
+    {
+      "startTimestamp": "12:42",
+      "endTimestamp": "16:41",
+      "text": "Diplomatic relations when AI is at-scale, operating in a multipolar world"
+    },
+    {
+      "startTimestamp": "16:41",
+      "endTimestamp": "22:02",
+      "text": "AI's impact on jobs"
+    },
+    {
+      "startTimestamp": "22:02",
+      "endTimestamp": "24:09",
+      "text": "Should America facilitate \"National Champions\" in strategic industries?"
+    },
+    {
+      "startTimestamp": "24:09",
+      "text": "Working at the White House with Sacks"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.596Z",
+  "episode": {
+    "id": "all-in-openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war",
+    "slug": "openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war",
+    "episodeNumber": null,
+    "title": "OpenAI's $150B conversion, Meta's AR glasses, Blue-collar boom, Risk of nuclear war",
+    "publishDate": "2024-09-27",
+    "description": "(0:00) Bestie intros: In Memoriam (6:43) OpenAI's $150B valuation: bull and bear cases (24:46) Will AI hurt or help SaaS incumbents? (40:41) Implications from OpenAI's for-profit...",
+    "summary": "(0:00) Bestie intros: In Memoriam (6:43) OpenAI's $150B valuation: bull and bear cases (24:46) Will AI hurt or help SaaS incumbents? (40:41) Implications from OpenAI's for-profit conversion (49:57) Meta's impressive new AR glasses: is this the killer product for the age of AI? (1:09:05) Blue collar boom: trades are becoming more popular with young people as...",
+    "durationSeconds": 5749,
+    "durationLabel": "01:35:49",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Meta",
+      "Energy",
+      "Defense"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E197.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/0/1/e/801e11531dd0466de55e3c100dce7605/1x1_CLASSIC_E197.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war",
+    "dataFile": "/data/all-in-podcast-search/episodes/openais-150b-conversion-metas-ar-glasses-blue-collar-boom-risk-of-nuclear-war.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "06:43",
+      "text": "Bestie intros: In Memoriam"
+    },
+    {
+      "startTimestamp": "06:43",
+      "endTimestamp": "24:46",
+      "text": "OpenAI's $150B valuation: bull and bear cases"
+    },
+    {
+      "startTimestamp": "24:46",
+      "endTimestamp": "40:41",
+      "text": "Will AI hurt or help SaaS incumbents?"
+    },
+    {
+      "startTimestamp": "40:41",
+      "endTimestamp": "49:57",
+      "text": "Implications from OpenAI's for-profit conversion"
+    },
+    {
+      "startTimestamp": "49:57",
+      "endTimestamp": "01:09:05",
+      "text": "Meta's impressive new AR glasses: is this the killer product for the age of AI?"
+    },
+    {
+      "startTimestamp": "01:09:05",
+      "endTimestamp": "01:20:55",
+      "text": "Blue collar boom: trades are becoming more popular with young people as entry-level tech jobs dry up"
+    },
+    {
+      "startTimestamp": "01:20:55",
+      "text": "Risk of nuclear war increasing Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.reuters.com/technology/artificial-intelligence/openais-stunning-150-billionvaluation-hinges-upending-corporate-structure-2024-09-14/ https://www.bloomberg.com/news/articles/2024-09-25/openai-cto-mira-murati-says-she-will-leave-the-company https://x.com/chiefaioffice https://openai.com/our-structure https://x.com/unusual_whales/status/1658664383717978112 https://x.com/elonmusk/status/1839121268521492975 https://www.politico.com/news/2024/08/26/zuckerberg-meta-white-house-pressure-00176399 https://appleinsider.com/articles/12/12/28/early-apple-prototypes-by-frog-designs-hartmut-esslinger-featured-in-upcoming-book https://www.cnbc.com/2024/09/16/the-toolbelt-generation-why-teens-are-losing-faith-in-college.html https://www.wsj.com/tech/tech-jobs-artificial-intelligence-cce22393 https://layoffs.fyi https://educationdata.org/college-enrollment-statistics https://www.bloomberg.com/news/articles/2024-09-20/zelenskiy-to-push-us-for-nato-invite-weapons-guarantees"
+    }
+  ]
+}

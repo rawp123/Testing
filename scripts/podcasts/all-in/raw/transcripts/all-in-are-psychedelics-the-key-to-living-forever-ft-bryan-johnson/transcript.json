@@ -1,0 +1,967 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "all-in-are-psychedelics-the-key-to-living-forever-ft-bryan-johnson",
+  "source": "Offline ASR (faster-whisper tiny)",
+  "languageCode": "en",
+  "chunks": [
+    {
+      "startSeconds": 0,
+      "endSeconds": 4,
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:04",
+      "text": "Brian Johnson, thanks for being here. Yeah, it's good to see you. How are you feeling?"
+    },
+    {
+      "startSeconds": 4,
+      "endSeconds": 24,
+      "startTimestamp": "00:04",
+      "endTimestamp": "00:24",
+      "text": "Maybe just share with us what you did a few days ago and yeah, I did a I did a I did five MEO DMT, which is the most powerful psychedelic on the planet. Some are between five and 10 times more powerful than DMT. And so yeah, it's so it's been 48 hours. I'm still learning how to talk about it."
+    },
+    {
+      "startSeconds": 24,
+      "endSeconds": 33,
+      "startTimestamp": "00:24",
+      "endTimestamp": "00:33",
+      "text": "I'm doing the thing. You know what many of the biggest tech CEOs and Vc's have in common?"
+    },
+    {
+      "startSeconds": 33,
+      "endSeconds": 38,
+      "startTimestamp": "00:33",
+      "endTimestamp": "00:38",
+      "text": "They sleep on the pod by eight sleep. It's become tech's favorite way to sleep and for good reason."
+    },
+    {
+      "startSeconds": 38,
+      "endSeconds": 44,
+      "startTimestamp": "00:38",
+      "endTimestamp": "00:44",
+      "text": "A cover that goes on any mattress cools it down to 55 degrees and uses AI to adjust your temperature all night."
+    },
+    {
+      "startSeconds": 44,
+      "endSeconds": 59,
+      "startTimestamp": "00:44",
+      "endTimestamp": "00:59",
+      "text": "Up to 34% more deep sleep. No wearable needed. Go to eightsleep.com slash all in and use code all in for up to $350 off your pod purchase today. Before we get into your experience, why did you choose to do it?"
+    },
+    {
+      "startSeconds": 59,
+      "endSeconds": 69,
+      "startTimestamp": "00:59",
+      "endTimestamp": "01:09",
+      "text": "Two things, mostly as a longevity experiment. When I started this project five years ago, the approach we had was go through all the scientific evidence ever published on health and longevity."
+    },
+    {
+      "startSeconds": 69,
+      "endSeconds": 83,
+      "startTimestamp": "01:09",
+      "endTimestamp": "01:23",
+      "text": "Try to find the interventions that have the best evidence. For effect size and the we just went down and list from top performing on down. Of course, you start with exercise, nutrition, sleep."
+    },
+    {
+      "startSeconds": 83,
+      "endSeconds": 101,
+      "startTimestamp": "01:23",
+      "endTimestamp": "01:41",
+      "text": "You work your way down to things like hyperbolic oxygen therapy and sauna and then repomize in metformin. We never actually had on our radar psychedelics. They were always either an ancient medicine being used in ritualistic practices or being pointed at things like depression or anxiety"
+    },
+    {
+      "startSeconds": 101,
+      "endSeconds": 107,
+      "startTimestamp": "01:41",
+      "endTimestamp": "01:47",
+      "text": "and certain trials. It was never understood as a rejuvenation protocol. Something that was for anti-aging."
+    },
+    {
+      "startSeconds": 107,
+      "endSeconds": 121,
+      "startTimestamp": "01:47",
+      "endTimestamp": "02:01",
+      "text": "We found a pre-critical evidence in mice on psilocybin. That's interesting. We did the world's most studied, the most quantified experiment doing psilocybin. Three doses of 25 milligrams of psilocybin."
+    },
+    {
+      "startSeconds": 121,
+      "endSeconds": 125,
+      "startTimestamp": "02:01",
+      "endTimestamp": "02:05",
+      "text": "Which were pretty high doses. It's a clinical dose. They have very, very close to a hero dose."
+    },
+    {
+      "startSeconds": 125,
+      "endSeconds": 130,
+      "startTimestamp": "02:05",
+      "endTimestamp": "02:10",
+      "text": "We found that we think it's a longevity therapy. Let's get to that data in a minute."
+    },
+    {
+      "startSeconds": 130,
+      "endSeconds": 151,
+      "startTimestamp": "02:10",
+      "endTimestamp": "02:31",
+      "text": "But then you decided to try five MEO this weekend. Yes. Walk me through the experience because you televised the whole thing. It was live streamed. You looked amazingly calm. Going into it and going through the process. Walk us through your experience. I think those who have done five MEO"
+    },
+    {
+      "startSeconds": 151,
+      "endSeconds": 157,
+      "startTimestamp": "02:31",
+      "endTimestamp": "02:37",
+      "text": "would probably relate with me that it feels like an impossible task to explain what it's like."
+    },
+    {
+      "startSeconds": 157,
+      "endSeconds": 166,
+      "startTimestamp": "02:37",
+      "endTimestamp": "02:46",
+      "text": "So that caveat said, I'll give it a go. I'm stunned. Absolutely floored. speechless."
+    },
+    {
+      "startSeconds": 166,
+      "endSeconds": 174,
+      "startTimestamp": "02:46",
+      "endTimestamp": "02:54",
+      "text": "You basically experience raw consciousness and raw intelligence. It's this."
+    },
+    {
+      "startSeconds": 174,
+      "endSeconds": 198,
+      "startTimestamp": "02:54",
+      "endTimestamp": "03:18",
+      "text": "So whatever, when I say these words, take these words that I commit to you, take that idea, multiply it by a thousand and then move out infinite depth, infinite width and then dimensions. That gives you kind of like a rough map of the size and space that you deal with. It was incredibly hard because"
+    },
+    {
+      "startSeconds": 198,
+      "endSeconds": 217,
+      "startTimestamp": "03:18",
+      "endTimestamp": "03:37",
+      "text": "you get blasted into this space that is so foreign. You don't even know what's happening. It happens very quickly. You inhale it. I did 9 milligrams of intramuscular and then 17 18 of vaporized and it hit you within 10 seconds. You're just out and so what happens is you get in that space"
+    },
+    {
+      "startSeconds": 218,
+      "endSeconds": 241,
+      "startTimestamp": "03:38",
+      "endTimestamp": "04:01",
+      "text": "and then visual changes every very little visual. You see on DMT it's a very visual. You'll meet the like the alms or whatever else. This is not a visual experience. But you get in this world and you lock in to basically you either panic because you feel like the gates of hell are going to open."
+    },
+    {
+      "startSeconds": 241,
+      "endSeconds": 259,
+      "startTimestamp": "04:01",
+      "endTimestamp": "04:19",
+      "text": "That the the the stream of existence is going to just tear you to shred. It's going to shard you and if you give up like break your brain. Yeah, you feel like it's going to like threaten your sanity. Like is it going to chop you up into little pieces? And so in that moment you have to say"
+    },
+    {
+      "startSeconds": 259,
+      "endSeconds": 282,
+      "startTimestamp": "04:19",
+      "endTimestamp": "04:42",
+      "text": "do I try to wrestle this and I need to just like wait it out until it's over or you just relent. You yes and you have to in that moment you have to say yes so thoroughly. You have to release all attachment all preconditions all want all desire. If you release self ego control you just have to just"
+    },
+    {
+      "startSeconds": 282,
+      "endSeconds": 309,
+      "startTimestamp": "04:42",
+      "endTimestamp": "05:09",
+      "text": "relent entirely and then when you do that it opened up this unimaginable bliss and euphoria and like I begin this like a V one to try to explain this but if I list out the the most dynamic experiences I've had of a human you know like certain accomplishments or getting married or"
+    },
+    {
+      "startSeconds": 309,
+      "endSeconds": 328,
+      "startTimestamp": "05:09",
+      "endTimestamp": "05:28",
+      "text": "having a child or overcoming a difficulty or like you know state your list of things. This is without question the most dynamic experience I've ever experienced in the human. Does the internal chatter the internal monologue of the ego turn off? Does it so you can't hear yourself speaking how"
+    },
+    {
+      "startSeconds": 328,
+      "endSeconds": 344,
+      "startTimestamp": "05:28",
+      "endTimestamp": "05:44",
+      "text": "do you rationalize what's going on if you don't have a dialogue going on? It's this visceral feeling like your your hyper where of what's happening it's not like you you you block out in the first like we think of very high dose you don't really know what's happening the first few minutes but then you kind of come"
+    },
+    {
+      "startSeconds": 344,
+      "endSeconds": 355,
+      "startTimestamp": "05:44",
+      "endTimestamp": "05:55",
+      "text": "to your hyper where everything it's not visual but it's this your in the depth of existence like this"
+    },
+    {
+      "startSeconds": 359,
+      "endSeconds": 386,
+      "startTimestamp": "05:59",
+      "endTimestamp": "06:26",
+      "text": "it's just the most majestic experience achievable by a human by a intelligent life. I just can't imagine anything more miraculous. You've studied the biology the biochemistry what goes on in the brain as this molecule hits your neurons. It's like it's one it completely dissolves your default mode"
+    },
+    {
+      "startSeconds": 386,
+      "endSeconds": 398,
+      "startTimestamp": "06:26",
+      "endTimestamp": "06:38",
+      "text": "network. It's described what that is. So like it's this is the engine that constructs self and ego and so as you rumenate you know like you're going through thinking through your day what's next?"
+    },
+    {
+      "startSeconds": 398,
+      "endSeconds": 413,
+      "startTimestamp": "06:38",
+      "endTimestamp": "06:53",
+      "text": "Is on my feeling yeah what should I be doing right now? What constant conversation? Yes I feel bad about myself do I feel like I'm my shy you know my like do I feel bad about whatever I hear doing this rumination stuff kids don't have this rumination loop that their default mode network is"
+    },
+    {
+      "startSeconds": 413,
+      "endSeconds": 429,
+      "startTimestamp": "06:53",
+      "endTimestamp": "07:09",
+      "text": "this quiet and as you age you basically build up this default mode network into more different patterns and so as you age your experience of reality becomes increasingly narrow you have these big ruts that form and so you can see people in their patterns are how open a child is to say like very random things"
+    },
+    {
+      "startSeconds": 429,
+      "endSeconds": 445,
+      "startTimestamp": "07:09",
+      "endTimestamp": "07:25",
+      "text": "and it's adults you're just very you're shut in like when I did still Simon one of the reasons why we did it is because it does have this effect where it dampens the default mode network and we could pick this up with kernel the brainer face you can see how the default mode network weakens like it's basically like"
+    },
+    {
+      "startSeconds": 445,
+      "endSeconds": 463,
+      "startTimestamp": "07:25",
+      "endTimestamp": "07:43",
+      "text": "thinking the brain like a globe with airports scattered about and you have certain traffic patterns like New York to London you have a certain number of flights every day that's like a very strong connection but New York to you know some small town in Arkansas has a very low traffic map and so when you do"
+    },
+    {
+      "startSeconds": 463,
+      "endSeconds": 480,
+      "startTimestamp": "07:43",
+      "endTimestamp": "08:00",
+      "text": "something like SILS I've been it basically takes the airports picks them up and the repositions are in the world so it's all scrambled so the traffic patterns are the same and then over the time your ons don't physically move but the activity shifts around exactly right then your ons are a little bit more random"
+    },
+    {
+      "startSeconds": 480,
+      "endSeconds": 496,
+      "startTimestamp": "08:00",
+      "endTimestamp": "08:16",
+      "text": "yeah normally would be which arguably drives neuro plasticity causes those neurons to reach out for new connections and when new connections are made new behavior is new ways of thinking emerge Zaffy coming out of these therapeutics is a fair way to describe it exactly right so you look at my brain on"
+    },
+    {
+      "startSeconds": 496,
+      "endSeconds": 512,
+      "startTimestamp": "08:16",
+      "endTimestamp": "08:32",
+      "text": "SILS I've been from kernel you see my patterns before like the New York to London connection you see my brain afterwards and it's exactly what you said new patterns are emergent the old ones have have have quieted down so like a new map of connectivity and so we saw that happen and that does generate a lot"
+    },
+    {
+      "startSeconds": 512,
+      "endSeconds": 530,
+      "startTimestamp": "08:32",
+      "endTimestamp": "08:50",
+      "text": "of neuro plasticity and obviously this neuro plasticity rewiring these connections in the brain is what allows trauma victims or folks that have a certain wiring that they keep repeating in their brain which causes the trauma and the anxiety in their lives to get rewired and then that trauma and that"
+    },
+    {
+      "startSeconds": 530,
+      "endSeconds": 546,
+      "startTimestamp": "08:50",
+      "endTimestamp": "09:06",
+      "text": "anxiety feels like it dissolves their melts away is that a fair exactly right yeah yeah and so this is this has been documented in SILS I then it's kind of well understood how did you connect that SILS SILS I then data to an effort in longevity or was this just like a random idea let's try it out"
+    },
+    {
+      "startSeconds": 546,
+      "endSeconds": 562,
+      "startTimestamp": "09:06",
+      "endTimestamp": "09:22",
+      "text": "well so we we saw some mouse data that it had these effects it also showed reduced inflammation so we said like this is interesting because most longevity therapies do something with inflammation right like inflammation is the killer so if you can lower inflammation to very good sign"
+    },
+    {
+      "startSeconds": 562,
+      "endSeconds": 580,
+      "startTimestamp": "09:22",
+      "endTimestamp": "09:40",
+      "text": "if you can do something that makes the brain more youthful and takes down those big gruts that's used also useful what we found it still silent though is that it had we found a first in human observation it had this this metabolic reset in the brain where my blood glucose before this was in the top"
+    },
+    {
+      "startSeconds": 580,
+      "endSeconds": 599,
+      "startTimestamp": "09:40",
+      "endTimestamp": "09:59",
+      "text": "99.5% tile of all the population after it went to the top 99.9% tile like to move my blood glucose found levels very very hard but it basically like not like metformer were you doing something of blood glucose they just had a reset across the body also changed my microbiome so we saw full"
+    },
+    {
+      "startSeconds": 599,
+      "endSeconds": 617,
+      "startTimestamp": "09:59",
+      "endTimestamp": "10:17",
+      "text": "on effects and then we said okay if that had that consequence 5Mio may have some similar characteristics and so no one had done this in 5Mio before exactly so there's like there's a similar animal evidence but it's the similar dynamics of like can you take the brain and can you basically"
+    },
+    {
+      "startSeconds": 617,
+      "endSeconds": 637,
+      "startTimestamp": "10:17",
+      "endTimestamp": "10:37",
+      "text": "like smooth out the barnacles that accumulate and 5Mio DMT compared to psilocybin like just absolutely like blasted clean my default mode network okay it felt like psilocybin dampens it you know like it's softens it but this thing just annihilated my default mode. I've heard it off just lately yeah"
+    },
+    {
+      "startSeconds": 637,
+      "endSeconds": 653,
+      "startTimestamp": "10:37",
+      "endTimestamp": "10:53",
+      "text": "I just it just doesn't run the same way but like let's put an example like the smorning I woke up uh catching myself laughing in a dream I have not last in a dream I don't even know whatever last in a dream but that is I after I woke up I was like that's really weird like I"
+    },
+    {
+      "startSeconds": 653,
+      "endSeconds": 671,
+      "startTimestamp": "10:53",
+      "endTimestamp": "11:11",
+      "text": "don't remember laughing I looked it up and like that is a characteristic of a child right and so you are restored to this child like state and I mean the past couple days I have felt child like you know yesterday morning I felt that you know that emergent excitement the bubbling of like today is so"
+    },
+    {
+      "startSeconds": 671,
+      "endSeconds": 688,
+      "startTimestamp": "11:11",
+      "endTimestamp": "11:28",
+      "text": "exciting I'm going to do new things I'm gonna have new experiences um that you're just excited about all things I haven't felt that I don't know it you know for so many years so like it really was um profound on every layer and I see and I'm stumbling too excited I'm gonna talk about it yet"
+    },
+    {
+      "startSeconds": 688,
+      "endSeconds": 706,
+      "startTimestamp": "11:28",
+      "endTimestamp": "11:46",
+      "text": "during the day you're hanging out you're walking around is your brain having the same normal chatter that it did before or do you think that there's a persistent change in that default mode network yeah definitely change like without I was just my partner Kate yesterday and we um I did something"
+    },
+    {
+      "startSeconds": 706,
+      "endSeconds": 727,
+      "startTimestamp": "11:46",
+      "endTimestamp": "12:07",
+      "text": "that made her upset and so like in that situation you know like when when couples are in that moment you have like this negotiation how do I sort this and it all just became so clear to me like when children have a fight you have it out and then just like done yeah and you move on but then adults take"
+    },
+    {
+      "startSeconds": 727,
+      "endSeconds": 741,
+      "startTimestamp": "12:07",
+      "endTimestamp": "12:21",
+      "text": "that and they like package it up and they want to weaponize it be like I got something on you but I'm like move it I'm gonna move the chess pieces and try to leverage it and um or they store it up like a snake in one of those things it pops out all these things like yeah yeah yeah yeah yeah yeah yeah yeah yeah yeah"
+    },
+    {
+      "startSeconds": 741,
+      "endSeconds": 758,
+      "startTimestamp": "12:21",
+      "endTimestamp": "12:38",
+      "text": "and so like we had this that I just felt um absolutely like no need to escalate or to defend or to like it was just easy and um it was a break through our relationship where I was able to communicate with her in a"
+    },
+    {
+      "startSeconds": 758,
+      "endSeconds": 772,
+      "startTimestamp": "12:38",
+      "endTimestamp": "12:52",
+      "text": "way and so it's like laughing in my sleep it's how I deal with my partner when I walk around I just feel so much I uh I feel so much more funny you know like my ability to make quips that are just immediate uh you"
+    },
+    {
+      "startSeconds": 772,
+      "endSeconds": 792,
+      "startTimestamp": "12:52",
+      "endTimestamp": "13:12",
+      "text": "know like so yeah I just feel renewed as a person in a way that I just really didn't imagine you had you tried hallucinogenic before you started your longevity path a couple of years ago yeah and did you do that recreationally or therapeutically it was mostly therapeutic and that yeah I I had sold my company"
+    },
+    {
+      "startSeconds": 792,
+      "endSeconds": 808,
+      "startTimestamp": "13:12",
+      "endTimestamp": "13:28",
+      "text": "branch of MMO I got a divorce I left the Mormon church and I was trying to remap like what is life who am I what do I do so I was in that rebuilding stage where I just dabble to like you know I did I did ketamine at kernel so one of our first studies at kernel is we said ketamine was an up and"
+    },
+    {
+      "startSeconds": 808,
+      "endSeconds": 825,
+      "startTimestamp": "13:28",
+      "endTimestamp": "13:45",
+      "text": "coming therapy for depression and we pose the question what happens when you do ketamine and so we did the world's most extensive measurement of ketamine was kernel before during and after and so that was interesting I can had some kind of you know transient effect but that's like a like a like a little"
+    },
+    {
+      "startSeconds": 825,
+      "endSeconds": 843,
+      "startTimestamp": "13:45",
+      "endTimestamp": "14:03",
+      "text": "league relative to 5 MMO and so as you've gone through this maybe share a little bit of the MRI data that you're gathering and the other data mapping your logical effects yeah and tell us a little bit about what you've learned so far nothing I have my subjective experience to share but we we have a structural"
+    },
+    {
+      "startSeconds": 843,
+      "endSeconds": 862,
+      "startTimestamp": "14:03",
+      "endTimestamp": "14:22",
+      "text": "brain MRI we have a functional brain MRI we did kernel which is like an optical interface and then I did real-time EEG capture and we should just talk about I think it's important structural you can see the physical brain functional you can see the activity in the brain so neurons firing and neurons that are"
+    },
+    {
+      "startSeconds": 862,
+      "endSeconds": 879,
+      "startTimestamp": "14:22",
+      "endTimestamp": "14:39",
+      "text": "not firing yes right yeah and then electrical actions that are measured by electrical device yeah so it we basically like wanted because the brain is very so we've had a lot of success rejuvenating my heart and my lungs and muscle and body fat but rejuvenating the brain is very hard right"
+    },
+    {
+      "startSeconds": 879,
+      "endSeconds": 896,
+      "startTimestamp": "14:39",
+      "endTimestamp": "14:56",
+      "text": "and so we this is why this is such a promising therapy so we wanted to look at the brain every modality possible we wanted to look at blood flow structural molecular you know the wave pattern form so it's a it's a it's a very high fidelity quantification and so we'll see what the data comes out"
+    },
+    {
+      "startSeconds": 896,
+      "endSeconds": 924,
+      "startTimestamp": "14:56",
+      "endTimestamp": "15:24",
+      "text": "I'm very excited yeah you did this on psilocybin as well right you map the brain over time what did you learn there dramatic restoration of youthful brain patterns yeah right yeah and what comes after five of mio you know I mean how far do you take this yeah honestly I am so encouraged by psychedelics I you know"
+    },
+    {
+      "startSeconds": 924,
+      "endSeconds": 943,
+      "startTimestamp": "15:24",
+      "endTimestamp": "15:43",
+      "text": "like in in the community where I hang out psychedelics have always been understood as you know it's like a retreat or it's like a ritual you go to like do various explorations but never in the world alone jeopardy's never been understood as that thing and now after seeing the data now I am"
+    },
+    {
+      "startSeconds": 944,
+      "endSeconds": 960,
+      "startTimestamp": "15:44",
+      "endTimestamp": "16:00",
+      "text": "and before she has to be very careful when talking about psychedelics because they're extremely powerful it's not like go do them everybody right it's like in this we've done properly with licensed professional and you speed up carefully the person is being the right state like it is not to be taken lightly but I am"
+    },
+    {
+      "startSeconds": 960,
+      "endSeconds": 981,
+      "startTimestamp": "16:00",
+      "endTimestamp": "16:21",
+      "text": "more interested than ever in psychedel compounds they're just uniquely powerful there's some arguments to be made that psychedelics can induce permanent psychosis yeah cause functional changes and drive some people that might be predisposed into schizophrenia states that's right how did you get over those risks"
+    },
+    {
+      "startSeconds": 981,
+      "endSeconds": 996,
+      "startTimestamp": "16:21",
+      "endTimestamp": "16:36",
+      "text": "because for a lot of people that would turn them off to trying psychedelics and it's not a non-zero percentage of people that suffer these consequences yeah I agree and and also people who have really bad trips that leave them star scarred so it's it really is and I think in part of it is"
+    },
+    {
+      "startSeconds": 996,
+      "endSeconds": 1013,
+      "startTimestamp": "16:36",
+      "endTimestamp": "16:53",
+      "text": "what could be contributing to this is people who for example who have tried magic mushrooms you know it's in a social situation someone's got a bag you pull out some mushrooms it's like yeah like ways blank and they pop it in but they have no idea kind of much in the reading they don't know"
+    },
+    {
+      "startSeconds": 1013,
+      "endSeconds": 1030,
+      "startTimestamp": "16:53",
+      "endTimestamp": "17:10",
+      "text": "what they dose the psilocybin is so it's like unqualified unsupervised wrong set and setting and so much of it I think you can they're the risk persists but I don't think we we've we've approached psychedelics with the appropriate rigor that we should to make a safe and so it's not to say that we can solve for"
+    },
+    {
+      "startSeconds": 1030,
+      "endSeconds": 1047,
+      "startTimestamp": "17:10",
+      "endTimestamp": "17:27",
+      "text": "the safety issues for all people some people it's may not be the appropriate candidate for it but I think if we do create a safety structure around it they could deliver the benefits people want without with less of the risk but definitely I agree to you like it's again it deserves all the caution in the"
+    },
+    {
+      "startSeconds": 1047,
+      "endSeconds": 1065,
+      "startTimestamp": "17:27",
+      "endTimestamp": "17:45",
+      "text": "world you think it's like neurogenic neuroplasticity trauma resolution I mean what is the way that this is going to be allowed to become call it a medical therapeutic that can be more broadly trialed than then eventually figure out how to bring it to people without it being carrying all the"
+    },
+    {
+      "startSeconds": 1065,
+      "endSeconds": 1088,
+      "startTimestamp": "17:45",
+      "endTimestamp": "18:08",
+      "text": "risks and burdens that I'm going to say I mean if I just subjectively compare my experience with five of meo to having a better diet and exercising every day and sleeping well and doing the sauna doing hyper-recoxion therapy this was more efficacious than all of them in terms of the reset of me as a human"
+    },
+    {
+      "startSeconds": 1088,
+      "endSeconds": 1106,
+      "startTimestamp": "18:08",
+      "endTimestamp": "18:26",
+      "text": "it just is incomparable and I guess I'm I'm really left pondering I made for this molecule to have such a gigantic impact now like how long will it last what's the decay curve like you know well I find I I become the former brine within 30 days 60 days I have to repeat this again I don't know"
+    },
+    {
+      "startSeconds": 1106,
+      "endSeconds": 1125,
+      "startTimestamp": "18:26",
+      "endTimestamp": "18:45",
+      "text": "but it really is you know when you sleep well you feel great you exercise great but like nothing like well five emio did in terms of like the reset of meo's a human so let's just talk about the consequences outside of the physiological which is life yeah there are lots of stories in friends that I"
+    },
+    {
+      "startSeconds": 1125,
+      "endSeconds": 1143,
+      "startTimestamp": "18:45",
+      "endTimestamp": "19:03",
+      "text": "have that and people that I know that have tried a heavy psychedelic like an ayahuasca or something they're the CEO of a company and then they quit their company and they go off to the jungle leave their family divorce their their partner make such dramatic life changes because their perspective has"
+    },
+    {
+      "startSeconds": 1143,
+      "endSeconds": 1165,
+      "startTimestamp": "19:03",
+      "endTimestamp": "19:25",
+      "text": "been shifted so much that they reevaluate what matters in life to such a degree that they give up a lot of the things that mattered before yeah in the wake of that there are people that feel their a victim of that behavioral shift the investors in the company the employees the family members etc can you just talk a"
+    },
+    {
+      "startSeconds": 1165,
+      "endSeconds": 1183,
+      "startTimestamp": "19:25",
+      "endTimestamp": "19:43",
+      "text": "little bit about those broad risks because we've seen it and I don't know if you've seen the same but friends that have kind of like said I have this new perspective I'm given up my life I've seen the same thing and I one investor told me that he even put it in the deal docs that if we invest you're not going to"
+    },
+    {
+      "startSeconds": 1183,
+      "endSeconds": 1200,
+      "startTimestamp": "19:43",
+      "endTimestamp": "20:00",
+      "text": "do these psychedelics they wanted to minimize the risk profile it's a thing in your deal in an investment in you know I just hope because I've been doing this people bring this up as a topic of conversation right and so they say like I see you doing this for longevity but you know like I've seen so many examples"
+    },
+    {
+      "startSeconds": 1200,
+      "endSeconds": 1219,
+      "startTimestamp": "20:00",
+      "endTimestamp": "20:19",
+      "text": "where people put money in and you lose the founder like they're off they're not everyone's high and dry and so they were telling me that they put into deal docs that they can't do this for the duration of the company so it is a thing and you know I have nothing to say about it other than I know it happens"
+    },
+    {
+      "startSeconds": 1219,
+      "endSeconds": 1240,
+      "startTimestamp": "20:19",
+      "endTimestamp": "20:40",
+      "text": "also I would say that most people in the tech world that I'm familiar with again they've done this in retreat centers or in social environments it's not quantified it's not set and setting it's a different thing but I will say like you know I I guess me as a person what I'm trying to focus on I came back"
+    },
+    {
+      "startSeconds": 1240,
+      "endSeconds": 1255,
+      "startTimestamp": "20:40",
+      "endTimestamp": "20:55",
+      "text": "even more motivated to do what I'm doing now I don't have a desire to go off in the woods you know and like and live that kind of life it it it it emboldened me to work on these things but no question about it you you do"
+    },
+    {
+      "startSeconds": 1255,
+      "endSeconds": 1280,
+      "startTimestamp": "20:55",
+      "endTimestamp": "21:20",
+      "text": "have a dramatic shift in perspective and it's very important to have a very important philosophical question who am I yes if I'm defined by my experiences it roughly equates to my neurons or wired in a way yes that's a consequence of my experiences and if I go in and take a drug and in a few hours rewire all my neurons"
+    },
+    {
+      "startSeconds": 1280,
+      "endSeconds": 1299,
+      "startTimestamp": "21:20",
+      "endTimestamp": "21:39",
+      "text": "am I the same person yeah what makes Brian Brian you can maybe recall some memories of Brian prior to taking the psychedelic but Brian as a person has been rewire yes are you a different person now and what does that say about are we ever a persistent person yeah right yeah your question"
+    },
+    {
+      "startSeconds": 1299,
+      "endSeconds": 1319,
+      "startTimestamp": "21:39",
+      "endTimestamp": "21:59",
+      "text": "is spot on probably the most dramatic reconstruction of your 60 plus trillion cells then anything can do in life you know like it maybe like a near-death experience you know it would maybe be close but it's a dramatic rewire in a view as a human your values can change too that's right and you could"
+    },
+    {
+      "startSeconds": 1319,
+      "endSeconds": 1337,
+      "startTimestamp": "21:59",
+      "endTimestamp": "22:17",
+      "text": "judge the values pre and post right you could judge values ascribed to you by a religion or perhaps values ascribed to you by responsibility to family members children spouses partners what have you you abandon them after you go through this change so your values have changed is it right or wrong that's right"
+    },
+    {
+      "startSeconds": 1337,
+      "endSeconds": 1355,
+      "startTimestamp": "22:17",
+      "endTimestamp": "22:35",
+      "text": "I think it's another important question that comes out of all of it like you know like you now think about that that's it through the frame where the world changes the certain speed now you take the world where it's changing faster so we now know that it's hard to predict what's going to happen two weeks from now or a"
+    },
+    {
+      "startSeconds": 1355,
+      "endSeconds": 1374,
+      "startTimestamp": "22:35",
+      "endTimestamp": "22:54",
+      "text": "month right like things are changing very quickly and so now you come up with this practical question can humans change fast enough and the world where AI is the dominant engine of innovation and so in that case that you may want psychedelics how's your ally to say as a human I'm struggling to like move"
+    },
+    {
+      "startSeconds": 1374,
+      "endSeconds": 1393,
+      "startTimestamp": "22:54",
+      "endTimestamp": "23:13",
+      "text": "with the change and so there's there's potentially a where it flips from a liability to an asset where now I do want that restructure changing even though you have some tell risk of like maybe my priorities will shift I think you have profound what I would call psychophlexibility and I think most people don't they have"
+    },
+    {
+      "startSeconds": 1393,
+      "endSeconds": 1412,
+      "startTimestamp": "23:13",
+      "endTimestamp": "23:32",
+      "text": "either a disinterest in changing who they are overnight or they're fearful of the the ramifications or the experience and that they wouldn't go through it how far would you take it would you wire yourself up to a neural link or neural enhancement device that would give you the ability to have information on demand"
+    },
+    {
+      "startSeconds": 1412,
+      "endSeconds": 1428,
+      "startTimestamp": "23:32",
+      "endTimestamp": "23:48",
+      "text": "and maybe change your personality and capacity as a human through an implant would you consider doing something like that you would would you consider a transgenic system where you basically take a plasma which would then express a set of proteins in your body and change gene expression profiles and"
+    },
+    {
+      "startSeconds": 1428,
+      "endSeconds": 1448,
+      "startTimestamp": "23:48",
+      "endTimestamp": "24:08",
+      "text": "cells in your body and basically could rewire you as a different person yes yes is there a limit to what you would try interesting where do you think that comes from I think I find it to be the most exciting configuration of life the ability to play on the frontier novelty and expedition and challenge"
+    },
+    {
+      "startSeconds": 1448,
+      "endSeconds": 1466,
+      "startTimestamp": "24:08",
+      "endTimestamp": "24:26",
+      "text": "that's really my did you always have it or are you responding to childhood suppression of those probably is probably an overcompensation of trauma response like most things are so you know as a child I lived in a very structured religious environment where things were cemented like here's the story"
+    },
+    {
+      "startSeconds": 1466,
+      "endSeconds": 1483,
+      "startTimestamp": "24:26",
+      "endTimestamp": "24:43",
+      "text": "here's the plan here's what you do and what you don't do and so yeah maybe it's probably just I'm now a flipped in the opposite and so I mean that's probably true that I really I don't trust my internal generation of reality you know I know I'm always making things up I've got 188"
+    },
+    {
+      "startSeconds": 1483,
+      "endSeconds": 1499,
+      "startTimestamp": "24:43",
+      "endTimestamp": "24:59",
+      "text": "Chronicle biases like all humans do so I'm just I'm generally suspicious of all things all time and I don't take myself very seriously so I just find the frontier place base to be like right now I mean you know what you're doing in building companies like you just open up a toolkit and say like"
+    },
+    {
+      "startSeconds": 1499,
+      "endSeconds": 1517,
+      "startTimestamp": "24:59",
+      "endTimestamp": "25:17",
+      "text": "what can I build and how do I modify and so I agree to you I do have a strong proclivity towards openness play do you find that you've been challenged in maintaining I would call it external responsibility as you explore and enhance yourself so much do you give up the responsibility to others"
+    },
+    {
+      "startSeconds": 1517,
+      "endSeconds": 1534,
+      "startTimestamp": "25:17",
+      "endTimestamp": "25:34",
+      "text": "around you who may be our dependent on you or or in need of you yeah I have three kids and so I do think about them a lot and I mean being a father is a really important thing to me and it's an important part of my identity and so that has not changed so I've never"
+    },
+    {
+      "startSeconds": 1534,
+      "endSeconds": 1552,
+      "startTimestamp": "25:34",
+      "endTimestamp": "25:52",
+      "text": "vacillated on that or changed the might just position towards that for those around me I guess fortunately I have a social group that just says go and play there's really no one in my life that tries to claw me back there's no velcro you know it's just all encouraging and so that I guess I feel very fortunate"
+    },
+    {
+      "startSeconds": 1552,
+      "endSeconds": 1567,
+      "startTimestamp": "25:52",
+      "endTimestamp": "26:07",
+      "text": "that everyone around me and they're willing to take the risks I mean this is it can when I sat down for five M.O. I mean my partner Kate like she's got a ton of risk like what if it goes porty what if I change my perspective what if something bad happens so well one could make an argument that taking"
+    },
+    {
+      "startSeconds": 1567,
+      "endSeconds": 1586,
+      "startTimestamp": "26:07",
+      "endTimestamp": "26:26",
+      "text": "that degree of risk or something could have gone wrong the people around you are enabling versus yes it's a port of right I mean that's a consequence but let's shift topics to other modalities for longevity yeah what else is on the horizon so you've had this profound"
+    },
+    {
+      "startSeconds": 1586,
+      "endSeconds": 1600,
+      "startTimestamp": "26:26",
+      "endTimestamp": "26:40",
+      "text": "set of experiences with psychedelics you've documented in a very extraordinary and exquisite fashion all of the other things that you've been doing with interventions other other things that are on the horizon yeah but you're either excited about or that you're considering yourself"
+    },
+    {
+      "startSeconds": 1600,
+      "endSeconds": 1617,
+      "startTimestamp": "26:40",
+      "endTimestamp": "26:57",
+      "text": "yeah I mean two of the ones that we've spoken about sell therapy in gen therapy yeah they they they're all in the pipeline so they're not ready yet we've we've knocked out all the stuff you can do today like we've gone through it all then it all the next gen therapies are just not there yet so we're looking"
+    },
+    {
+      "startSeconds": 1617,
+      "endSeconds": 1633,
+      "startTimestamp": "26:57",
+      "endTimestamp": "27:13",
+      "text": "at mitochondrial rejuvenation I think that's incredible I think mitochondrial augmentation therapy and there was a paper I saw where in order to get the mitochondria in the cell they coded the mitochondria in effectively a red blood cell envelope which made it more transportable in the cells and less"
+    },
+    {
+      "startSeconds": 1633,
+      "endSeconds": 1648,
+      "startTimestamp": "27:13",
+      "endTimestamp": "27:28",
+      "text": "attacked by the immune system exactly which is incredible and I'm a big big big believer in this this course of therapy I mean it's going to be a whole therapeutic modality that no one has even recognized I agree we have our first mitochondrial therapy lined up so how are you going to do it you're like 99.9%"
+    },
+    {
+      "startSeconds": 1648,
+      "endSeconds": 1666,
+      "startTimestamp": "27:28",
+      "endTimestamp": "27:46",
+      "text": "you need someone who's like 48.7% to try the mind of a particular like you know I think they tried it in Parkinson's patients yeah Alzheimer's patients that's where you can really see profound shift in in certain metrics for you it's like 99.9 to what like yeah yeah I had the mitochondria you know"
+    },
+    {
+      "startSeconds": 1666,
+      "endSeconds": 1684,
+      "startTimestamp": "27:46",
+      "endTimestamp": "28:04",
+      "text": "have a 48 year old right so like what what is it what is it what is it like yes you could go to your siblings child because the mitochondria is path maternal it's in the it's in the it's in the it's the mother's mitochondria so if you go down in the mother's line maternally if you have a sister"
+    },
+    {
+      "startSeconds": 1684,
+      "endSeconds": 1699,
+      "startTimestamp": "28:04",
+      "endTimestamp": "28:19",
+      "text": "who has a kid they're going to have very young mitochondria you can take a little blood sample and then grow their mitochondria extensively and use that as a biological match to you this is a a perfect extension I've had a blood boy is a son yeah it's not she can go to the extent of family and be like guys"
+    },
+    {
+      "startSeconds": 1699,
+      "endSeconds": 1713,
+      "startTimestamp": "28:19",
+      "endTimestamp": "28:33",
+      "text": "it's a it's a family project yeah family project yeah exactly yeah well that one super interesting and we also have one do we're doing um I'm now building sorry are you going to do your own mitochondrial transplantation you're going to build a bioreactor or you're using working with one of the third"
+    },
+    {
+      "startSeconds": 1713,
+      "endSeconds": 1728,
+      "startTimestamp": "28:33",
+      "endTimestamp": "28:48",
+      "text": "parties that are a third company yes I'll get I'll do a blood draw in the next week or two the spin up and the little do it yeah okay yep so you're going to get your mitochondria which have some you know the the problem with mitochondria you know is mitochondrial DNA degradation over time right and"
+    },
+    {
+      "startSeconds": 1728,
+      "endSeconds": 1742,
+      "startTimestamp": "28:48",
+      "endTimestamp": "29:02",
+      "text": "accelerates for certain people but that way if you go back to a young person you have young mitochondria exactly then you're going to multiply yours out yes and probably select a little bit for healthier ones yeah right okay and then sort of back it's very I mean explore to have"
+    },
+    {
+      "startSeconds": 1742,
+      "endSeconds": 1753,
+      "startTimestamp": "29:02",
+      "endTimestamp": "29:13",
+      "text": "we don't know uh we're the first they're in phase two now do you sprint yeah I do so you could probably score if you did it in term muscular like mitochondrial there but you could spritz your score that's a great idea"
+    },
+    {
+      "startSeconds": 1753,
+      "endSeconds": 1770,
+      "startTimestamp": "29:13",
+      "endTimestamp": "29:30",
+      "text": "yeah thank you yeah yeah yeah that would be a great way to measure it from rather than just a basic biomarker perspective be really interesting to see yeah sprint you is one of the most underappreciated on genomic therapies yeah I don't do it oh I've got the the age of a 74 year old roughly is"
+    },
+    {
+      "startSeconds": 1770,
+      "endSeconds": 1788,
+      "startTimestamp": "29:30",
+      "endTimestamp": "29:48",
+      "text": "you know I'm definitely not keeping track with you would you consider or have you looked at any plasma do you take a gene as DNA put in your body and then that gene makes a protein in your body that that there's something like the one we were looking at in the foxhole three expression yeah exactly so"
+    },
+    {
+      "startSeconds": 1788,
+      "endSeconds": 1798,
+      "startTimestamp": "29:48",
+      "endTimestamp": "29:58",
+      "text": "the mesicomal stem cells you package up with the foxhole three delivery you know that showed that over 50% of tissue is getting that germination it's unbelievable it's like the unbelievable it's the best"
+    },
+    {
+      "startSeconds": 1798,
+      "endSeconds": 1809,
+      "startTimestamp": "29:58",
+      "endTimestamp": "30:09",
+      "text": "demonstration in the entire world that's perfect for tissue regeneration like as a particular application said tissue regeneration using that sort of system seems like a no brainer it's like yeah it's safe right yeah yes I"
+    },
+    {
+      "startSeconds": 1809,
+      "endSeconds": 1819,
+      "startTimestamp": "30:09",
+      "endTimestamp": "30:19",
+      "text": "I've we shot to that Chinese professor I'm really interested in replicating I would love you reach out to the Chinese professor yeah it's awesome yeah we said then paper yeah yeah yeah yeah that's awesome so"
+    },
+    {
+      "startSeconds": 1819,
+      "endSeconds": 1834,
+      "startTimestamp": "30:19",
+      "endTimestamp": "30:34",
+      "text": "any respond yeah yeah yeah yeah good so we I'd love to do that I'd love to actually build it ourselves yeah that's like a two year project so hey I can help make it fast that's true yeah yeah the project manager for"
+    },
+    {
+      "startSeconds": 1834,
+      "endSeconds": 1850,
+      "startTimestamp": "30:34",
+      "endTimestamp": "30:50",
+      "text": "these sorts of programs is you know that's true yeah we spoke about this six months ago yeah and things are so different so different now six years later and in terms of stem that up that was cool so I think that's a good option but also I'm doing Brian Johnson or Ginoids so we took my IPSB IPSEs we now have"
+    },
+    {
+      "startSeconds": 1850,
+      "endSeconds": 1865,
+      "startTimestamp": "30:50",
+      "endTimestamp": "31:05",
+      "text": "the youth pluripotent stem cells so you took yourself turn them into stem cells yeah yeah so now we're doing in dish so now we have like a Brian Johnson heart liver lungs and now we're gonna try molecules on me and in so you've a lot so so let me just walk the audience through this so you take cells off of your skin or"
+    },
+    {
+      "startSeconds": 1865,
+      "endSeconds": 1882,
+      "startTimestamp": "31:05",
+      "endTimestamp": "31:22",
+      "text": "something but and then you put these yamanocca factor proteins on those cells causes those cells to become stem cells which means they can then turn into any other cell yeah and then you put other proteins on them to turn them into a heart cell or a isel or what has that you and now you've got a store of these"
+    },
+    {
+      "startSeconds": 1882,
+      "endSeconds": 1899,
+      "startTimestamp": "31:22",
+      "endTimestamp": "31:39",
+      "text": "tissue specific Brian Johnson cells yes that you then use for like you can say okay uh what if you get Brian Johnson blank your drug what is what happens is a good is a bad what is a side effects in the previous you put the drug in there exactly what happens yeah okay you just simulate all these experiments so now"
+    },
+    {
+      "startSeconds": 1899,
+      "endSeconds": 1914,
+      "startTimestamp": "31:39",
+      "endTimestamp": "31:54",
+      "text": "you get the advantage of time of acceleration have like what to take why what dose that's also what combinatorial things to consider yeah so we we have the organoid stood up we haven't done our first take yet yeah so that's interesting because now I have to do this old school methodology like put it in my"
+    },
+    {
+      "startSeconds": 1914,
+      "endSeconds": 1930,
+      "startTimestamp": "31:54",
+      "endTimestamp": "32:10",
+      "text": "body wait to see what happens is a good is a bad what you know how does affect everything yeah totally that's good one but I mean I don't know we'll see it it's cool and concept it mean TBD if it actually works so yeah see I have you tracked any of the alternative to yaman aqua factors the factor discovery work"
+    },
+    {
+      "startSeconds": 1930,
+      "endSeconds": 1947,
+      "startTimestamp": "32:10",
+      "endTimestamp": "32:27",
+      "text": "that's going on and you think there's anything worth testing at this stage yeah I'm an investor new limit so I've talked to them about the weather at and Blake and Brian's company they've done they've made remarkable progress yeah they they figured out how to computationally solve the discovery"
+    },
+    {
+      "startSeconds": 1947,
+      "endSeconds": 1964,
+      "startTimestamp": "32:27",
+      "endTimestamp": "32:44",
+      "text": "process yeah and so they the much faster than they initially thought and so that's very encourage you know the big challenge with yaman aqua factors is always dosing if you overdose a cell a one cell that cell can become a cancer cell and take off as a tumor yeah so the sensitivity that you need to"
+    },
+    {
+      "startSeconds": 1964,
+      "endSeconds": 1980,
+      "startTimestamp": "32:44",
+      "endTimestamp": "33:00",
+      "text": "have to get the right number of the factors which is a protein into the cell needs to be perfectly tuned yep so I have a theory that this will end up being solved by cellular switches that will end up putting which machinery into the cells that can turn on or off the protein synthesis"
+    },
+    {
+      "startSeconds": 1980,
+      "endSeconds": 1994,
+      "startTimestamp": "33:00",
+      "endTimestamp": "33:14",
+      "text": "at the right dosing based on the measurement of gene expression and the cell yeah that's my theory on where this will end up in the other control mechanism will be inadequate that's right that's the few switches all you need is one error and you're you're you're you're you're you're a robot yeah but it is it is"
+    },
+    {
+      "startSeconds": 1994,
+      "endSeconds": 2004,
+      "startTimestamp": "33:14",
+      "endTimestamp": "33:24",
+      "text": "the most profound i think technology that humanity's dealing with today besides AI we're not quite there with fusion which i would argue is probably a distant third but it is very powerful i agree with possible and again the"
+    },
+    {
+      "startSeconds": 2004,
+      "endSeconds": 2020,
+      "startTimestamp": "33:24",
+      "endTimestamp": "33:40",
+      "text": "future like i think we'll look back and we'll see glp ones as the first big drop you know like what i can just inject myself and like it solves hunger and totally yeah and then the second will probably be something like new limit or one of these foxes let me's plasma and base foxes will be there be swear it will show"
+    },
+    {
+      "startSeconds": 2020,
+      "endSeconds": 2039,
+      "startTimestamp": "33:40",
+      "endTimestamp": "33:59",
+      "text": "real life like dramatic changes and then humanity will shift as like longevity being a vision of sci-fi you know rich people pursuit to like something that is truly chamony glad to like the conversation on on the temptation towards socialism right like if you can fill"
+    },
+    {
+      "startSeconds": 2039,
+      "endSeconds": 2058,
+      "startTimestamp": "33:59",
+      "endTimestamp": "34:18",
+      "text": "robust in your ability to pursue life and be healthy and vibrant and in control i think these things have dramatic changes inside not just at health but like well any form of abundance whether it's abundance and food in energy and housing in mobility and lifespan the more abundance people get the happier they"
+    },
+    {
+      "startSeconds": 2058,
+      "endSeconds": 2069,
+      "startTimestamp": "34:18",
+      "endTimestamp": "34:29",
+      "text": "are and the more you're improving abundance in the world the better we are going to live as a group of people together on planet earth exactly yeah the happier we will all be with each other right i think like honestly like a lot"
+    },
+    {
+      "startSeconds": 2069,
+      "endSeconds": 2087,
+      "startTimestamp": "34:29",
+      "endTimestamp": "34:47",
+      "text": "of the the internal conflict only comes from internal unhappiness hundred percent yeah so if you look at the general malaise of like american society like no wonder uh things like you've got met a 84% of people have met a bulge disorder but 40% of people are obese like we're just in really poor health nobody's"
+    },
+    {
+      "startSeconds": 2087,
+      "endSeconds": 2100,
+      "startTimestamp": "34:47",
+      "endTimestamp": "35:00",
+      "text": "sleeping everyone's on their phone like mental health issues like no wonder you have the proclivity towards these kinds of outcomes like so if you could get the health and check it changes the psychological decision of you your community your country like you have much more"
+    },
+    {
+      "startSeconds": 2100,
+      "endSeconds": 2115,
+      "startTimestamp": "35:00",
+      "endTimestamp": "35:15",
+      "text": "of a can do attitude like i can't take on the world and i can do hard things but when you're not feeling well like it's just everything is just so much harder yeah 100% and so in light of all of these new therapeutic modalities and these new opportunities that seem to be biologically proven and have these profound"
+    },
+    {
+      "startSeconds": 2115,
+      "endSeconds": 2130,
+      "startTimestamp": "35:15",
+      "endTimestamp": "35:30",
+      "text": "effects why continue to tinker with psychedelics like are they as profound or they a compliment or like how do you think about fitting all of this portfolio of things that you're looking at together yeah i mean i guess the question is um i figured on the foxle three study out i don't know if they saw brain rejuvenation"
+    },
+    {
+      "startSeconds": 2130,
+      "endSeconds": 2149,
+      "startTimestamp": "35:30",
+      "endTimestamp": "35:49",
+      "text": "didn't see that i did not see that and i don't i don't remember i mean it is a very complicated organ yeah exactly it's insane you know you can grow muscle tissue back and you can grow skin tissue back and it's kind of like okay i grow a little like like if you grow the the neurons back maybe in the wrong way like"
+    },
+    {
+      "startSeconds": 2149,
+      "endSeconds": 2170,
+      "startTimestamp": "35:49",
+      "endTimestamp": "36:10",
+      "text": "we don't know yeah because it's never been done before yeah so understanding the consequence of neuro regeneration like so i'm like if the role in that play like you know maybe psilocybin of 5myo won't be um you know meaningful for like basic functions of body but maybe"
+    },
+    {
+      "startSeconds": 2170,
+      "endSeconds": 2193,
+      "startTimestamp": "36:10",
+      "endTimestamp": "36:33",
+      "text": "it's the the the out performer in ufleness of your of your disposition towards reality like one thing i'm i'm apprehensive about is you're on 48 and so as you start climbing to your 50s 60s you do really narrow like your ambition goes from i can do anything just start you know narrowing down further and further"
+    },
+    {
+      "startSeconds": 2193,
+      "endSeconds": 2212,
+      "startTimestamp": "36:33",
+      "endTimestamp": "36:52",
+      "text": "and i worry about using a youthful disposition of a can do attitude of anything is possible kind of like and maybe that's the role it's like a delix is you know but just get a wash of like the snap back of like i can and i can bounce yeah that definitely been the case for me so i think they do probably"
+    },
+    {
+      "startSeconds": 2212,
+      "endSeconds": 2233,
+      "startTimestamp": "36:52",
+      "endTimestamp": "37:13",
+      "text": "play a really important role of like they're probably a set of things that for certain people that will um it basically like i mean i feel like it was like 30 40 years of psychological rejuvenation like you know it's like to transform me back to a child like state yeah that is insane i don't get that"
+    },
+    {
+      "startSeconds": 2233,
+      "endSeconds": 2250,
+      "startTimestamp": "37:13",
+      "endTimestamp": "37:30",
+      "text": "from the sauna or from 18 well for a stupid way i'm still right so it's right yeah just unique yeah well listen i'm gonna go drink alcohol and eat carbs and stay up late i don't know what are you gonna do yeah you're gonna go to bed on time yeah okay do it my one-douard teen yeah you do you yeah"
+    },
+    {
+      "startSeconds": 2250,
+      "endSeconds": 2260,
+      "startTimestamp": "37:30",
+      "endTimestamp": "37:40",
+      "text": "yeah but then you're a useful enjoy yeah i'm free shade it doesn't been great yeah fine Johnson thank you thanks yeah that was awesome that was great i'm doing"
+    }
+  ]
+}

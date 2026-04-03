@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.473Z",
+  "episode": {
+    "id": "all-in-the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations",
+    "slug": "the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations",
+    "episodeNumber": null,
+    "title": "The AI Cold War, Signalgate, CoreWeave IPO, Tariff Endgames, El Salvador Deportations",
+    "publishDate": "2025-03-29",
+    "description": "(0:00) The Besties welcome Gavin Baker back on the show! (1:20) Nvidia balance sheet questions, CoreWeave IPO, M&A/IPO bounce back (16:22) US vs China in AI: Manus, China building...",
+    "summary": "(0:00) The Besties welcome Gavin Baker back on the show! (1:20) Nvidia balance sheet questions, CoreWeave IPO, M&A/IPO bounce back (16:22) US vs China in AI: Manus, China building its own Nvidia, and more (28:37) The Administration's endgame for tariffs (53:05) Signalgate: context and fallout (1:09:42) El Salvador deportations",
+    "durationSeconds": 5280,
+    "durationLabel": "01:28:00",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Datacenters",
+      "Defense",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E221.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/5/f/0/45f03d889e0f1e10d959afa2a1bf1c87/1x1_CLASSIC_E221.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations",
+    "dataFile": "/data/all-in-podcast-search/episodes/the-ai-cold-war-signalgate-coreweave-ipo-tariff-endgames-el-salvador-deportations.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:20",
+      "text": "The Besties welcome Gavin Baker back on the show!"
+    },
+    {
+      "startTimestamp": "01:20",
+      "endTimestamp": "16:22",
+      "text": "Nvidia balance sheet questions, CoreWeave IPO, M&A/IPO bounce back"
+    },
+    {
+      "startTimestamp": "16:22",
+      "endTimestamp": "28:37",
+      "text": "US vs China in AI: Manus, China building its own Nvidia, and more"
+    },
+    {
+      "startTimestamp": "28:37",
+      "endTimestamp": "53:05",
+      "text": "The Administration's endgame for tariffs"
+    },
+    {
+      "startTimestamp": "53:05",
+      "endTimestamp": "01:09:42",
+      "text": "Signalgate: context and fallout"
+    },
+    {
+      "startTimestamp": "01:09:42",
+      "text": "El Salvador deportations Follow Gavin: https://x.com/GavinSBaker Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.reuters.com/technology/coreweave-planning-cut-us-ipo-size-price-below-range-source-says-2025-03-27 https://www.reuters.com/world/us/us-adds-dozens-entities-export-restriction-list-2025-03-25 https://modelcontextprotocol.io/introduction https://www.theinformation.com/articles/openai-plots-charging-20-000-a-month-for-phd-level-agents?rc=pxkrxo https://www.youtube.com/watch?v=A8wJc7vHcTs https://x.com/JohnArnoldFndtn/status/1905296181208416744 https://x.com/chamath/status/1904547884877701610 https://www.theatlantic.com/politics/archive/2025/03/trump-administration-accidentally-texted-me-its-war-plans/682151 https://www.whitehouse.gov/presidential-actions/2025/03/invocation-of-the-alien-enemies-act-regarding-the-invasion-of-the-united-states-by-tren-de-aragua https://www.statista.com/statistics/696152/homicide-rate-in-el-salvador https://x.com/Sec_Noem/status/1905034256826408982"
+    }
+  ]
+}

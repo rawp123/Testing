@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.761Z",
+  "episode": {
+    "id": "all-in-e136",
+    "slug": "e136-hacking-the-pod-threads-launches-fed-minutes-immigration-debate-balloon-farce-heart-health",
+    "episodeNumber": 136,
+    "title": "E136 Hacking the pod, Threads launches, Fed minutes, immigration debate, balloon farce, heart health",
+    "publishDate": "2023-07-09",
+    "description": "(0:00) We hacked the pod! Jcal is on vaca (5:34) Meta launches Threads (17:15) Chat AI interest in decline? (28:36) Fed meeting minutes, economic data and outlook, and EU risk...",
+    "summary": "(0:00) We hacked the pod! Jcal is on vaca (5:34) Meta launches Threads (17:15) Chat AI interest in decline? (28:36) Fed meeting minutes, economic data and outlook, and EU risk (56:07) Florida Senate Bill 1718, jobs, and immigration debate (1:21:48) Chinese balloon: political farce? (1:31:47) Gerstner Science Corner: preventative heart health",
+    "durationSeconds": 5901,
+    "durationLabel": "01:38:21",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Meta",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e136-hacking-the-pod-threads-launches-fed-minutes-immigration-debate-balloon-farce-heart-health",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e136-hacking-the-pod-threads-launches-fed-minutes-immigration-debate-balloon-farce-heart-health",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E136.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e136",
+    "dataFile": "/data/all-in-podcast-search/episodes/e136-hacking-the-pod-threads-launches-fed-minutes-immigration-debate-balloon-farce-heart-health.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "05:34",
+      "text": "We hacked the pod! Jcal is on vaca"
+    },
+    {
+      "startTimestamp": "05:34",
+      "endTimestamp": "17:15",
+      "text": "Meta launches Threads"
+    },
+    {
+      "startTimestamp": "17:15",
+      "endTimestamp": "28:36",
+      "text": "Chat AI interest in decline?"
+    },
+    {
+      "startTimestamp": "28:36",
+      "endTimestamp": "56:07",
+      "text": "Fed meeting minutes, economic data and outlook, and EU risk"
+    },
+    {
+      "startTimestamp": "56:07",
+      "endTimestamp": "01:21:48",
+      "text": "Florida Senate Bill 1718, jobs, and immigration debate"
+    },
+    {
+      "startTimestamp": "01:21:48",
+      "endTimestamp": "01:31:47",
+      "text": "Chinese balloon: political farce?"
+    },
+    {
+      "startTimestamp": "01:31:47",
+      "text": "Gerstner Science Corner: preventative heart health Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect"
+    }
+  ]
+}

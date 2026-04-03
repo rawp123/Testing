@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.409Z",
+  "episode": {
+    "id": "all-in-miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami",
+    "slug": "miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami",
+    "episodeNumber": null,
+    "title": "Miami Mayor Francis Suarez: The Recipe for Creating America's Happiest City | All-In Live from Miami",
+    "publishDate": "2025-06-03",
+    "description": "(0:00) The Besties welcome Mayor Francis Suarez! (0:23) How Miami significantly decreased homelessness and homicides (5:17) Formula for turning Miami into America's happiest and...",
+    "summary": "(0:00) The Besties welcome Mayor Francis Suarez! (0:23) How Miami significantly decreased homelessness and homicides (5:17) Formula for turning Miami into America's happiest and healthiest city (10:32) Addressing overregulation at the local level (17:05) Ambitions for his post-Mayor career (21:39) Partner shoutouts: Thanks to OKX, Circle, Polymarket,...",
+    "durationSeconds": 1443,
+    "durationLabel": "24:03",
+    "guests": [
+      "Mayor Francis Suarez",
+      "Mayor Suarez"
+    ],
+    "topicTags": [
+      "Google"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_MIA25_Suarez_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/0/8/7/d08774c1c160b25e16c3140a3186d450/1x1_Thumbnail_v6-20250603-nxnvn9hur0.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami",
+    "dataFile": "/data/all-in-podcast-search/episodes/miami-mayor-francis-suarez-the-recipe-for-creating-americas-happiest-city-all-in-live-from-miami.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:23",
+      "text": "The Besties welcome Mayor Francis Suarez!"
+    },
+    {
+      "startTimestamp": "00:23",
+      "endTimestamp": "05:17",
+      "text": "How Miami significantly decreased homelessness and homicides"
+    },
+    {
+      "startTimestamp": "05:17",
+      "endTimestamp": "10:32",
+      "text": "Formula for turning Miami into America's happiest and healthiest city"
+    },
+    {
+      "startTimestamp": "10:32",
+      "endTimestamp": "17:05",
+      "text": "Addressing overregulation at the local level"
+    },
+    {
+      "startTimestamp": "17:05",
+      "endTimestamp": "21:39",
+      "text": "Ambitions for his post-Mayor career"
+    },
+    {
+      "startTimestamp": "21:39",
+      "text": "Partner shoutouts: Thanks to OKX, Circle, Polymarket, Solana, BVNK, and Google Cloud!"
+    }
+  ]
+}

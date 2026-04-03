@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.326Z",
+  "episode": {
+    "id": "all-in-arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war",
+    "slug": "arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war",
+    "episodeNumber": null,
+    "title": "Arm CEO Rene Haas on AI: Nvidia Lessons, Intel's Decline and the US-China Chip War",
+    "publishDate": "2025-09-30",
+    "description": "(0:00) Introducing Arm CEO Rene Haas (1:08) Lessons from working with Jensen Huang (3:20) Arm's history, understanding Nvidia's dominance in AI, training vs inference, physical AI...",
+    "summary": "(0:00) Introducing Arm CEO Rene Haas (1:08) Lessons from working with Jensen Huang (3:20) Arm's history, understanding Nvidia's dominance in AI, training vs inference, physical AI market size (10:01) China's AI ecosystem, the US-Intel deal, rare earths, creating a US \"national champion\" (15:35) Manufacturing in America: how to create a culture of...",
+    "durationSeconds": 1505,
+    "durationLabel": "25:05",
+    "guests": [
+      "Rene Haas"
+    ],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Markets",
+      "Defense",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_ReneHaas_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/7/0/d/a70d0f1d0be71b80d959afa2a1bf1c87/1_Pod_ReneHaas.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war",
+    "dataFile": "/data/all-in-podcast-search/episodes/arm-ceo-rene-haas-on-ai-nvidia-lessons-intels-decline-and-the-us-china-chip-war.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:08",
+      "text": "Introducing Arm CEO Rene Haas"
+    },
+    {
+      "startTimestamp": "01:08",
+      "endTimestamp": "03:20",
+      "text": "Lessons from working with Jensen Huang"
+    },
+    {
+      "startTimestamp": "03:20",
+      "endTimestamp": "10:01",
+      "text": "Arm's history, understanding Nvidia's dominance in AI, training vs inference, physical AI market size"
+    },
+    {
+      "startTimestamp": "10:01",
+      "endTimestamp": "15:35",
+      "text": "China's AI ecosystem, the US-Intel deal, rare earths, creating a US \"national champion\""
+    },
+    {
+      "startTimestamp": "15:35",
+      "endTimestamp": "18:34",
+      "text": "Manufacturing in America: how to create a culture of excellence?"
+    },
+    {
+      "startTimestamp": "18:34",
+      "endTimestamp": "23:42",
+      "text": "US export controls, building in the UK"
+    },
+    {
+      "startTimestamp": "23:42",
+      "text": "US-China AI arms race"
+    }
+  ]
+}

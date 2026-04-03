@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.225Z",
+  "episode": {
+    "id": "all-in-healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos",
+    "slug": "healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos",
+    "episodeNumber": null,
+    "title": "Dr. Mehmet Oz on Fixing American Healthcare + Fraud | Live from Davos",
+    "publishDate": "2026-01-24",
+    "description": "(0:00) The Besties introduce Dr. Oz (3:26) Trump's vision for healthcare in America (13:26) AI & self-directed healthcare (30:10) The future of GLP-1s and affordability (35:06)...",
+    "summary": "(0:00) The Besties introduce Dr. Oz (3:26) Trump's vision for healthcare in America (13:26) AI & self-directed healthcare (30:10) The future of GLP-1s and affordability (35:06) The Medical Fraud Crisis (44:02) California fraud and accountability (56:57) Immigration and addiction",
+    "durationSeconds": 3943,
+    "durationLabel": "01:05:43",
+    "guests": [
+      "Mehmet Oz"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Healthcare"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/Davos_Oz_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/9/a/f/f9afb2c64cb8476ed959afa2a1bf1c87/1_Pod_DrOz.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos",
+    "dataFile": "/data/all-in-podcast-search/episodes/healthcare-needs-builders-not-bureaucrats-dr-mehmet-oz-live-from-davos.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:26",
+      "text": "The Besties introduce Dr. Oz"
+    },
+    {
+      "startTimestamp": "03:26",
+      "endTimestamp": "13:26",
+      "text": "Trump's vision for healthcare in America"
+    },
+    {
+      "startTimestamp": "13:26",
+      "endTimestamp": "30:10",
+      "text": "AI & self-directed healthcare"
+    },
+    {
+      "startTimestamp": "30:10",
+      "endTimestamp": "35:06",
+      "text": "The future of GLP-1s and affordability"
+    },
+    {
+      "startTimestamp": "35:06",
+      "endTimestamp": "44:02",
+      "text": "The Medical Fraud Crisis"
+    },
+    {
+      "startTimestamp": "44:02",
+      "endTimestamp": "56:57",
+      "text": "California fraud and accountability"
+    },
+    {
+      "startTimestamp": "56:57",
+      "text": "Immigration and addiction Follow Dr. Oz: https://x.com/DrOz Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.nature.com/articles/s41746-025-01671-6"
+    }
+  ]
+}

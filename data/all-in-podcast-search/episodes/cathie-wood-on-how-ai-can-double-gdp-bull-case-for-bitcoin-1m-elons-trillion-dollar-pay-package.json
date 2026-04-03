@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.308Z",
+  "episode": {
+    "id": "all-in-cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package",
+    "slug": "cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package",
+    "episodeNumber": null,
+    "title": "Cathie Wood on How AI Can Double GDP, Bull Case for Bitcoin $1M, Elon's Trillion-Dollar Pay Package",
+    "publishDate": "2025-10-14",
+    "description": "(0:00) Introducing Cathie Wood (0:47) Cathie Wood on AI's once in a lifetime opportunity: doubling GDP, deflation, and more (9:23) Cathie's bull case for Bitcoin $1M (11:38)...",
+    "summary": "(0:00) Introducing Cathie Wood (0:47) Cathie Wood on AI's once in a lifetime opportunity: doubling GDP, deflation, and more (9:23) Cathie's bull case for Bitcoin $1M (11:38) Opening up access to innovation for retail (14:32) Cathie explains Ark's strategies for bull and bear markets (16:01) Thoughts on Elon's trillion-dollar pay package Solana - Solana is...",
+    "durationSeconds": 1155,
+    "durationLabel": "19:15",
+    "guests": [
+      "Cathie Wood"
+    ],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Bitcoin",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_CathieWood_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/0/3/9/5039816e92dee91316c3140a3186d450/1_Pod_Cathie.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package",
+    "dataFile": "/data/all-in-podcast-search/episodes/cathie-wood-on-how-ai-can-double-gdp-bull-case-for-bitcoin-1m-elons-trillion-dollar-pay-package.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:47",
+      "text": "Introducing Cathie Wood"
+    },
+    {
+      "startTimestamp": "00:47",
+      "endTimestamp": "09:23",
+      "text": "Cathie Wood on AI's once in a lifetime opportunity: doubling GDP, deflation, and more"
+    },
+    {
+      "startTimestamp": "09:23",
+      "endTimestamp": "11:38",
+      "text": "Cathie's bull case for Bitcoin $1M"
+    },
+    {
+      "startTimestamp": "11:38",
+      "endTimestamp": "14:32",
+      "text": "Opening up access to innovation for retail"
+    },
+    {
+      "startTimestamp": "14:32",
+      "endTimestamp": "16:01",
+      "text": "Cathie explains Ark's strategies for bull and bear markets"
+    },
+    {
+      "startTimestamp": "16:01",
+      "text": "Thoughts on Elon's trillion-dollar pay package"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.868Z",
+  "episode": {
+    "id": "all-in-e113",
+    "slug": "e113-doj-tries-to-break-up-google-vaccine-questions-ukraine-escalation-more",
+    "episodeNumber": 113,
+    "title": "E113: DOJ tries to break up Google, vaccine questions, Ukraine escalation &amp; more",
+    "publishDate": "2023-01-27",
+    "description": "(0:00) David Sacks does bestie intros! (2:49) DOJ sues Google over ads business (23:09) EU probes Microsoft over Slack complaint based on \"bundling\" Teams (40:27) Pfizer CEO...",
+    "summary": "(0:00) David Sacks does bestie intros! (2:49) DOJ sues Google over ads business (23:09) EU probes Microsoft over Slack complaint based on \"bundling\" Teams (40:27) Pfizer CEO grilled at Davos, studies questioning vaccine effectiveness (1:12:14) Ukraine escalation: US to send tanks and warms to Crimea invasion, reconstruction costs, and more (1:22:39) Science...",
+    "durationSeconds": 5910,
+    "durationLabel": "01:38:30",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Ukraine",
+      "Regulation",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e113-doj-tries-to-break-up-google-vaccine-questions-ukraine-escalation-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e113-doj-tries-to-break-up-google-vaccine-questions-ukraine-escalation-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E113.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e113",
+    "dataFile": "/data/all-in-podcast-search/episodes/e113-doj-tries-to-break-up-google-vaccine-questions-ukraine-escalation-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:49",
+      "text": "David Sacks does bestie intros!"
+    },
+    {
+      "startTimestamp": "02:49",
+      "endTimestamp": "23:09",
+      "text": "DOJ sues Google over ads business"
+    },
+    {
+      "startTimestamp": "23:09",
+      "endTimestamp": "40:27",
+      "text": "EU probes Microsoft over Slack complaint based on \"bundling\" Teams"
+    },
+    {
+      "startTimestamp": "40:27",
+      "endTimestamp": "01:12:14",
+      "text": "Pfizer CEO grilled at Davos, studies questioning vaccine effectiveness"
+    },
+    {
+      "startTimestamp": "01:12:14",
+      "endTimestamp": "01:22:39",
+      "text": "Ukraine escalation: US to send tanks and warms to Crimea invasion, reconstruction costs, and more"
+    },
+    {
+      "startTimestamp": "01:22:39",
+      "text": "Science Corner: Will we soon be able to reverse aging? Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://thebulletin.org/2023/01/press-release-doomsday-clock-set-at-90-seconds-to-midnight https://www.nytimes.com/2023/01/24/us/doomsday-clock-midnight.html https://www.wsj.com/articles/u-s-sues-google-for-alleged-antitrust-violations-in-its-ad-tech-business-11674582792 https://blog.google/outreach-initiatives/public-policy/doj-ad-tech-lawsuit-response https://noahpinion.substack.com/p/would-breaking-up-google-really-do https://thehustle.co/12232022-ad-spend https://www.adweek.com/programmatic/advertisers-sweet-tooth-fades-with-many-unfazed-by-googles-latest-cookie-removal-delay https://www.politico.eu/article/microsoft-european-union-antitrust-video-calls-software-giant https://twitter.com/rebelnewsonline/status/1615770518606561282 https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.122.061025 https://www.nature.com/articles/s41467-022-31401-5 https://www.seacoastonline.com/story/opinion/columns/2022/01/29/kerr-covid-vaccines-anti-vaxxers-should-reject-hospital-beds-too/9246198002/ https://www.cnn.com/videos/media/2021/12/05/marcus-lamb-death-covid-19-vaccines-rs-vpx.cnn https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9451592 https://twitter.com/jason/status/1478587551271161857 https://twitter.com/EricTopol/status/1618381912413962240 https://www.cnbc.com/2023/01/25/ukraine-war-news-us-will-send-abrams-tanks.html https://www.businessinsider.com/ukraine-now-getting-western-tanks-looking-at-fighter-jets-next-2023-1 https://www.nytimes.com/2023/01/18/us/politics/ukraine-crimea-military.html https://www.dailymail.co.uk/debate/article-11661589/PETER-HITCHENS-Sending-Ukraine-tanks-turn-Europe-one-big-radioactive-graveyard.html https://twitter.com/DavidSacks/status/1618321900324950018 https://intellinews.com/ukraine-spiralling-towards-default-according-to-fitch-267768 https://www.wsj.com/articles/roman-abramovich-ukraine-russia-peace-sanctions-11674572583 https://www.cell.com/cell/fulltext/S0092-8674(22)01570-7#%20"
+    }
+  ]
+}

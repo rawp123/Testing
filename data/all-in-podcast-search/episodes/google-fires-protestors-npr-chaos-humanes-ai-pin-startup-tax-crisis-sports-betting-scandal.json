@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.646Z",
+  "episode": {
+    "id": "all-in-google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal",
+    "slug": "google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal",
+    "episodeNumber": null,
+    "title": "Google fires protestors, NPR chaos, Humane's AI Pin, Startup tax crisis, sports betting scandal",
+    "publishDate": "2024-04-19",
+    "description": "(0:00) Bestie Intros: Chamath recaps the Breakthrough Prize Ceremony, \"High IQ foods\" (9:49) All-In Summit update, Poker styles of Andrew Robl, Jason Koon, and Phil Hellmuth...",
+    "summary": "(0:00) Bestie Intros: Chamath recaps the Breakthrough Prize Ceremony, \"High IQ foods\" (9:49) All-In Summit update, Poker styles of Andrew Robl, Jason Koon, and Phil Hellmuth (14:38) Google fires protestors (35:08) Chaos and culture wars at NPR (40:43) Humane's AI Pin: Marques Brownlee's review, the Ex-Apple issue, polarizing reactions (1:02:28) Startup tax...",
+    "durationSeconds": 5812,
+    "durationLabel": "01:36:52",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E175.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/b/c/7/5bc71cdb7bb9d9ce88c4a68c3ddbc4f2/1x1_CLASSIC_E175.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal",
+    "dataFile": "/data/all-in-podcast-search/episodes/google-fires-protestors-npr-chaos-humanes-ai-pin-startup-tax-crisis-sports-betting-scandal.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "09:49",
+      "text": "Bestie Intros: Chamath recaps the Breakthrough Prize Ceremony, \"High IQ foods\""
+    },
+    {
+      "startTimestamp": "09:49",
+      "endTimestamp": "14:38",
+      "text": "All-In Summit update, Poker styles of Andrew Robl, Jason Koon, and Phil Hellmuth"
+    },
+    {
+      "startTimestamp": "14:38",
+      "endTimestamp": "35:08",
+      "text": "Google fires protestors"
+    },
+    {
+      "startTimestamp": "35:08",
+      "endTimestamp": "40:43",
+      "text": "Chaos and culture wars at NPR"
+    },
+    {
+      "startTimestamp": "40:43",
+      "endTimestamp": "01:02:28",
+      "text": "Humane's AI Pin: Marques Brownlee's review, the Ex-Apple issue, polarizing reactions"
+    },
+    {
+      "startTimestamp": "01:02:28",
+      "endTimestamp": "01:12:39",
+      "text": "Startup tax crisis: How a recent provision upended R&D deductions"
+    },
+    {
+      "startTimestamp": "01:12:39",
+      "endTimestamp": "01:23:33",
+      "text": "Sports betting scandal: NBA player Jontay Porter banned for life, explosion of sports betting in the US"
+    },
+    {
+      "startTimestamp": "01:23:33",
+      "text": "How to get better at chess, childhood Bestie schemes Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/NoTechApartheid/status/1780278895058518468 https://www.cnbc.com/2024/04/17/google-workers-arrested-after-nine-hour-protest-in-google-cloud-ceos-office.html https://www.notechforapartheid.com https://www.theverge.com/2024/4/17/24133700/google-fires-28-employees-protest-israel-cloud-contract https://twitter.com/CollinRugg/status/1779914595156808045 https://www.haaretz.com/israel-news/2024-04-11/ty-article-magazine/.premium/saying-what-cant-be-said-israel-has-been-defeated-a-total-defeat/0000018e-cdab-dba9-a78e-efef6ba10000 https://www.wsj.com/world/middle-east/israel-wins-gaza-battles-but-risks-losing-the-war-c6a3823f https://www.cnn.com/2024/01/19/middleeast/eisenkot-netanyahu-israel-war-politics-gaza-intl/index.html https://www.youtube.com/watch?v=3-APSXZy9UI https://www.nytimes.com/2024/04/02/world/middleeast/israel-gaza-aid-workers-killed.html https://www.haaretz.com/israel-news/2024-03-31/ty-article-magazine/.premium/israel-created-kill-zones-in-gaza-anyone-who-crosses-into-them-is-shot/0000018e-946c-d4de-afee-f46da9ee0000 https://www.haaretz.com/israel-news/2023-12-15/ty-article/.premium/israeli-army-says-killed-three-hostages-mistakenly-identified-as-threat-in-northern-gaza/0000018c-6edd-dbd5-a39c-ffff08470000 https://www.nytimes.com/2024/02/06/world/middleeast/israel-idf-soldiers-war-social-media-video.html https://twitter.com/JustStop_Oil/status/1580883249228046336 https://www.npr.org/2024/01/24/1226035539/npr-ceo-katherine-maher-wikimedia https://www.npr.org/about-npr/178659563/our-mission-and-vision https://www.thefp.com/p/npr-editor-how-npr-lost-americas-trust https://www.npr.org/sections/npr-extra/2024/04/12/1244456600/from-npr-president-and-ceo-katherine-maher-thoughts-on-our-mission-and-our-work https://twitter.com/realchrisrufo https://twitter.com/wokal_distance/status/1780695504210567335 https://www.theinformation.com/articles/has-humane-created-the-next-iphone-or-the-next-google-glass https://humane.com https://www.youtube.com/watch?v=TitZV6k8zfA https://www.youtube.com/watch?v=6xWXRk3yaSw https://www.amazon.com/Anxious-Generation-Rewiring-Childhood-Epidemic/dp/0593655036 https://www.amazon.com/Nexus-Trilogy-Book-1-ebook/dp/B00TOZI7FM https://www.amazon.com/Bad-Therapy-Kids-Arent-Growing/dp/0593542924 https://www.wsj.com/sports/basketball/jontay-porter-banned-gambling-5dd9c1a8 https://nypost.com/2024/04/17/sports/how-jontay-porter-orchestrated-failed-nba-gambling-scandal https://dknetwork.draftkings.com/2024/1/31/24054415/lebron-james-joins-draftkings-football-sports https://www.espn.com/espn/betting/story/_/id/39563784/sports-betting-industry-posts-record-11b-2023-revenue https://www.espn.com/nba/story/_/id/38386013/how-nba-new-rules-resting-stars-work https://www.youtube.com/watch?v=U2huVf1l4UE"
+    }
+  ]
+}

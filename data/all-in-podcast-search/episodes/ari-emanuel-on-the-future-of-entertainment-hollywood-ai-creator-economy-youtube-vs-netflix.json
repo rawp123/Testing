@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.273Z",
+  "episode": {
+    "id": "all-in-ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix",
+    "slug": "ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix",
+    "episodeNumber": null,
+    "title": "Ari Emanuel on the Future of Entertainment: Hollywood, AI, Creator Economy, YouTube vs Netflix",
+    "publishDate": "2025-11-05",
+    "description": "(0:00) Introducing Ari Emanuel (1:03) Ari's background in the content business and Hollywood (4:14) How infinite distribution is changing Hollywood, the future of podcasting,...",
+    "summary": "(0:00) Introducing Ari Emanuel (1:03) Ari's background in the content business and Hollywood (4:14) How infinite distribution is changing Hollywood, the future of podcasting, creators owning advertising products (9:21) AI's impact: anticipating the 3-day workweek (12:13) Splitting time between TKO and WME, YouTube vs Netflix for creators, modern IP...",
+    "durationSeconds": 1645,
+    "durationLabel": "27:25",
+    "guests": [
+      "Ari Emanuel"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Tesla",
+      "Media"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_AriEmanuel_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/1/4/1/9/1419a51b6c3871d7d959afa2a1bf1c87/1_Pod_AriEmanuel.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix",
+    "dataFile": "/data/all-in-podcast-search/episodes/ari-emanuel-on-the-future-of-entertainment-hollywood-ai-creator-economy-youtube-vs-netflix.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:03",
+      "text": "Introducing Ari Emanuel"
+    },
+    {
+      "startTimestamp": "01:03",
+      "endTimestamp": "04:14",
+      "text": "Ari's background in the content business and Hollywood"
+    },
+    {
+      "startTimestamp": "04:14",
+      "endTimestamp": "09:21",
+      "text": "How infinite distribution is changing Hollywood, the future of podcasting, creators owning advertising products"
+    },
+    {
+      "startTimestamp": "09:21",
+      "endTimestamp": "12:13",
+      "text": "AI's impact: anticipating the 3-day workweek"
+    },
+    {
+      "startTimestamp": "12:13",
+      "endTimestamp": "18:20",
+      "text": "Splitting time between TKO and WME, YouTube vs Netflix for creators, modern IP ownership"
+    },
+    {
+      "startTimestamp": "18:20",
+      "endTimestamp": "22:12",
+      "text": "How he got a fighter's reputation, relationship with Michael Ovitz, how he built on Ovitz's vision"
+    },
+    {
+      "startTimestamp": "22:12",
+      "endTimestamp": "24:21",
+      "text": "Future of sports entertainment: adapting to attention spans, clip culture, going global"
+    },
+    {
+      "startTimestamp": "24:21",
+      "text": "Ari's relationship with his brothers and Elon Musk"
+    }
+  ]
+}

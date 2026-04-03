@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.507Z",
+  "episode": {
+    "id": "all-in-deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks",
+    "slug": "deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks",
+    "episodeNumber": null,
+    "title": "DeepSeek Panic, US vs China, OpenAI $40B?, and Doge Delivers with Travis Kalanick and David Sacks",
+    "publishDate": "2025-01-31",
+    "description": "(0:00) The Besties intro Travis Kalanick! (2:11) Travis breaks down the future of food and the state of CloudKitchens (13:34) Sacks breaks in! (15:38) DeepSeek panic: What's real,...",
+    "summary": "(0:00) The Besties intro Travis Kalanick! (2:11) Travis breaks down the future of food and the state of CloudKitchens (13:34) Sacks breaks in! (15:38) DeepSeek panic: What's real, training innovation, China, impact on markets and the AI industry (50:14) US vs China in AI, the Singapore backdoor (1:01:51) OpenAI reportedly in talks to raise ~$40B with Masa...",
+    "durationSeconds": 6559,
+    "durationLabel": "01:49:19",
+    "guests": [
+      "Travis Kalanick"
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Tesla",
+      "China",
+      "Autonomy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E213.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/5/e/9/a5e9396708161d3d16c3140a3186d450/1x1_CLASSIC_E213.png",
+    "chunkCount": 10,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks",
+    "dataFile": "/data/all-in-podcast-search/episodes/deepseek-panic-us-vs-china-openai-40b-and-doge-delivers-with-travis-kalanick-and-david-sacks.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:11",
+      "text": "The Besties intro Travis Kalanick!"
+    },
+    {
+      "startTimestamp": "02:11",
+      "endTimestamp": "13:34",
+      "text": "Travis breaks down the future of food and the state of CloudKitchens"
+    },
+    {
+      "startTimestamp": "13:34",
+      "endTimestamp": "15:38",
+      "text": "Sacks breaks in!"
+    },
+    {
+      "startTimestamp": "15:38",
+      "endTimestamp": "50:14",
+      "text": "DeepSeek panic: What's real, training innovation, China, impact on markets and the AI industry"
+    },
+    {
+      "startTimestamp": "50:14",
+      "endTimestamp": "01:01:51",
+      "text": "US vs China in AI, the Singapore backdoor"
+    },
+    {
+      "startTimestamp": "01:01:51",
+      "endTimestamp": "01:10:37",
+      "text": "OpenAI reportedly in talks to raise ~$40B with Masa as the lead investor"
+    },
+    {
+      "startTimestamp": "01:10:37",
+      "endTimestamp": "01:25:13",
+      "text": "DOGE's first 10 days"
+    },
+    {
+      "startTimestamp": "01:25:13",
+      "endTimestamp": "01:38:04",
+      "text": "Future of Self Driving: Uber, Waymo, Tesla"
+    },
+    {
+      "startTimestamp": "01:38:04",
+      "endTimestamp": "01:44:17",
+      "text": "Fed holds rates steady, how DOGE can impact rate cuts"
+    },
+    {
+      "startTimestamp": "01:44:17",
+      "text": "Fatal DC plane crash Follow Travis: https://x.com/travisk Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://github.com/deepseek-ai/DeepSeek-R1/blob/main/DeepSeek_R1.pdf https://www.tomshardware.com/tech-industry/artificial-intelligence/chinese-company-trained-gpt-4-rival-with-just-2-000-gpus-01-ai-spent-usd3m-compared-to-openais-usd80m-to-usd100m https://www.cnbc.com/2025/01/27/nvidia-sheds-almost-600-billion-in-market-cap-biggest-drop-ever.html https://x.com/shrihacker/status/1884414667503853749 https://x.com/balajis/status/1884975064283812270 https://www.fool.com/earnings/call-transcripts/2025/01/29/meta-platforms-meta-q4-2024 earnings-call-transcri https://x.com/mrexits/status/1885017400308806121 https://www.wsj.com/livecoverage/stock-market-today-dow-sp500-nasdaq-live-01-28-2025/card/deepseek-s-ai-learned-from-chatgpt-trump-s-ai-czar-says-LoCYvz2Lm0riS0AuEoB5 https://www.wsj.com/tech/ai/why-distillation-has-become-the-scariest-wordfor-ai-companies-aa146ae3 https://techcrunch.com/2024/12/27/why-deepseeks-new-ai-model-thinks-its-chatgpt https://x.com/rauchg/status/1875627666113740892 https://www.ft.com/content/a0dfedd1-5255-4fa9-8ccc-1fe01de87ea6 https://x.com/satyanadella/status/1883753899255046301 https://en.m.wikipedia.org/wiki/Jevons_paradox https://x.com/pitdesi/status/1883192498274873513 https://x.com/rihardjarc/status/1884263865703358726 https://x.com/austen/status/1884444298130674000 https://www.cnbc.com/2025/01/30/openai-in-talks-to-raise-up-to-40-billion-at-340-billion-valuation.html https://x.com/america/status/1884372526144598056 https://x.com/DOGE/status/1884396041786524032 https://fred.stlouisfed.org/series/FYFSD https://www.whitehouse.gov/presidential-actions/2025/01/establishing-and-implementing-the-presidents-department-of-government-efficiency https://x.com/Jason/status/1884671945800573018 https://abcnews.go.com/538/trump-starts-term-weak-approval-rating/story?id=118146633 https://www.cnbc.com/2025/01/15/cpi-inflation-december-2024-.html https://x.com/chamath/status/1885068981905875241"
+    }
+  ]
+}

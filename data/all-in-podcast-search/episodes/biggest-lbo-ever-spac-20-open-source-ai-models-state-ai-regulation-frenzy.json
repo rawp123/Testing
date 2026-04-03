@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.320Z",
+  "episode": {
+    "id": "all-in-biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy",
+    "slug": "biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy",
+    "episodeNumber": null,
+    "title": "Biggest LBO Ever, SPAC 2.0, Open Source AI Models, State AI Regulation Frenzy",
+    "publishDate": "2025-10-03",
+    "description": "(0:00) Bestie intros! (1:53) EA acquired for $55B in biggest LBO ever, why PE is in trouble (17:42) IPO market, SPAC 2.0 (27:41) The AI rollup opportunity (36:01) Sacks joins the...",
+    "summary": "(0:00) Bestie intros! (1:53) EA acquired for $55B in biggest LBO ever, why PE is in trouble (17:42) IPO market, SPAC 2.0 (27:41) The AI rollup opportunity (36:01) Sacks joins the show! (38:27) OpenAI and Meta launch short-form video apps: \"AI Slop\" or the future of content? (45:04) Open source AI: DeepSeek's new model, pressure on US AI industry (1:05:11)...",
+    "durationSeconds": 5371,
+    "durationLabel": "01:29:31",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Meta",
+      "Markets",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E245_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/c/9/c/6/c9c666e5b339aa5c16c3140a3186d450/1x1_CLASSIC_E245.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy",
+    "dataFile": "/data/all-in-podcast-search/episodes/biggest-lbo-ever-spac-20-open-source-ai-models-state-ai-regulation-frenzy.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:53",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "01:53",
+      "endTimestamp": "17:42",
+      "text": "EA acquired for $55B in biggest LBO ever, why PE is in trouble"
+    },
+    {
+      "startTimestamp": "17:42",
+      "endTimestamp": "27:41",
+      "text": "IPO market, SPAC 2.0"
+    },
+    {
+      "startTimestamp": "27:41",
+      "endTimestamp": "36:01",
+      "text": "The AI rollup opportunity"
+    },
+    {
+      "startTimestamp": "36:01",
+      "endTimestamp": "38:27",
+      "text": "Sacks joins the show!"
+    },
+    {
+      "startTimestamp": "38:27",
+      "endTimestamp": "45:04",
+      "text": "OpenAI and Meta launch short-form video apps: \"AI Slop\" or the future of content?"
+    },
+    {
+      "startTimestamp": "45:04",
+      "endTimestamp": "01:05:11",
+      "text": "Open source AI: DeepSeek's new model, pressure on US AI industry"
+    },
+    {
+      "startTimestamp": "01:05:11",
+      "text": "State AI regulation frenzy: States' rights vs Federal control, overregulation Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://apnews.com/article/ea-electronic-arts-video-game-silver-lake-pif-d17dc7dd3412a990d2c0a6758aaa6900 https://www.ign.com/articles/xbox-game-pass-ultimate-price-rises-to-30-a-month-microsoft-adds-more-day-one-games-and-throws-in-fortnite-crew-and-ubisoft-classics-to-help-justify-the-cost https://x.com/Jason/status/1973461806585966655 https://www.npr.org/2025/09/05/nx-s1-5529404/anthropic-settlement-authors-copyright-ai https://x.com/scaling01/status/1972650237266465214 https://www.insidetechlaw.com/blog/2025/09/californias-transparency-in-frontier-artificial-intelligence-act https://www.datacenterdynamics.com/en/news/google-withdraws-rezoning-proposal-for-468-acre-data-center-project-in-franklin-township-indianapolis"
+    }
+  ]
+}

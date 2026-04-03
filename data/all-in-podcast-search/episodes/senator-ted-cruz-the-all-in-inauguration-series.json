@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.519Z",
+  "episode": {
+    "id": "all-in-senator-ted-cruz-the-all-in-inauguration-series",
+    "slug": "senator-ted-cruz-the-all-in-inauguration-series",
+    "episodeNumber": null,
+    "title": "Senator Ted Cruz | The All-In Inauguration Series",
+    "publishDate": "2025-01-19",
+    "description": "(0:00) Besties intro Senator Ted Cruz; history of the \"Come and take it\" flag (2:21) Texas vs. California: how to approach building and entrepreneurship (10:25) Thoughts on...",
+    "summary": "(0:00) Besties intro Senator Ted Cruz; history of the \"Come and take it\" flag (2:21) Texas vs. California: how to approach building and entrepreneurship (10:25) Thoughts on immigration, serving in the Senate, over-politicization (16:55) How to create a bipartisan consensus on immigration, increasing prosperity through opportunity (23:54) How Sen. Cruz would...",
+    "durationSeconds": 2892,
+    "durationLabel": "48:12",
+    "guests": [
+      "Ted Cruz"
+    ],
+    "topicTags": [
+      "Politics",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/senator-ted-cruz-the-all-in-inauguration-series",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/senator-ted-cruz-the-all-in-inauguration-series",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/250119_CRUZ_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/7/5/5/f755dca92bc21282d959afa2a1bf1c87/1x1_CLASSIC_TEDCRUZ.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-senator-ted-cruz-the-all-in-inauguration-series",
+    "dataFile": "/data/all-in-podcast-search/episodes/senator-ted-cruz-the-all-in-inauguration-series.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:21",
+      "text": "Besties intro Senator Ted Cruz; history of the \"Come and take it\" flag"
+    },
+    {
+      "startTimestamp": "02:21",
+      "endTimestamp": "10:25",
+      "text": "Texas vs. California: how to approach building and entrepreneurship"
+    },
+    {
+      "startTimestamp": "10:25",
+      "endTimestamp": "16:55",
+      "text": "Thoughts on immigration, serving in the Senate, over-politicization"
+    },
+    {
+      "startTimestamp": "16:55",
+      "endTimestamp": "23:54",
+      "text": "How to create a bipartisan consensus on immigration, increasing prosperity through opportunity"
+    },
+    {
+      "startTimestamp": "23:54",
+      "endTimestamp": "29:02",
+      "text": "How Sen. Cruz would approach Trump's first two weeks of his second term"
+    },
+    {
+      "startTimestamp": "29:02",
+      "endTimestamp": "35:22",
+      "text": "DOGE's two major challenges, unlimited Congressional terms, ideology over party, the great political flip"
+    },
+    {
+      "startTimestamp": "35:22",
+      "endTimestamp": "42:45",
+      "text": "Trump's strategy on Greenland/Denmark, Panama Canal, and Canada"
+    },
+    {
+      "startTimestamp": "42:45",
+      "text": "Thoughts on Senate confirmation hearings Follow the Besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Senator Cruz: https://x.com/tedcruz Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

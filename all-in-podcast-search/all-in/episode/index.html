@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Episode Detail | All-In Podcast Utility</title>
+  <meta name="description" content="Episode detail view for the All-In podcast utility, with timestamped transcript chunks and moment links." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/all-in-podcast-search.css?v=20260402f">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/all-in-podcast-shared.js?v=20260402f" defer></script>
+  <script src="/src/js/all-in-podcast-episode.js?v=20260402f" defer></script>
+</head>
+<body data-page="all-in-podcast-episode" data-page-parent="podcast-utility">
+  <div id="site-header"></div>
+  <main>
+    <section class="container page-shell aps-shell aps-shell-episode">
+      <section id="aps-episode-hero" class="aps-hero aps-page-header card" aria-labelledby="aps-episode-title">
+        <div class="page-shell-head">
+          <div class="page-shell-copy">
+            <p class="page-kicker">Podcast transcript page</p>
+            <h1 id="aps-episode-title" class="page-title">Loading episode</h1>
+            <p id="aps-episode-subtitle" class="page-subtitle">Preparing episode details and transcript context.</p>
+          </div>
+          <div class="page-actions">
+            <a id="aps-back-to-search" href="/all-in-podcast-search/all-in/" class="btn ghost">Back to Episodes</a>
+            <a id="aps-open-full-episode" class="btn ghost" href="#" target="_blank" rel="noopener noreferrer" hidden>Open Full Episode</a>
+          </div>
+        </div>
+        <div id="aps-episode-meta" class="aps-meta-row" aria-live="polite"></div>
+      </section>
+
+      <section class="aps-episode-overview-grid">
+        <section class="aps-player-column">
+          <article class="aps-player-card card">
+            <div class="aps-panel-head">
+              <div>
+                <p class="la-section-kicker">Player</p>
+                <h2 class="la-section-title">Listen from the selected moment</h2>
+              </div>
+              <p class="aps-panel-copy">Keep the source audio or video close to the highlighted quote.</p>
+            </div>
+            <div id="aps-player-shell" class="aps-player-shell">
+              <iframe id="aps-player-frame" title="YouTube player for All-In Podcast Search" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen hidden></iframe>
+              <audio id="aps-audio-player" class="aps-audio-player" controls hidden></audio>
+              <div id="aps-player-fallback" class="aps-player-fallback">
+                <h3>Playback source unavailable</h3>
+                <p>This episode does not have a playable media source attached yet. You can still browse the timestamped coverage below and open the full episode link when it exists.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section class="aps-episode-body-grid">
+        <section class="aps-sidebar">
+          <article class="aps-summary-card card">
+            <div class="aps-panel-head">
+              <div>
+                <p class="la-section-kicker">Episode summary</p>
+                <h2 class="la-section-title">What’s covered</h2>
+              </div>
+            </div>
+            <div id="aps-episode-summary" class="aps-summary-copy">Loading summary.</div>
+          </article>
+        </section>
+
+        <section class="aps-transcript-column">
+          <article class="aps-transcript-card card" aria-labelledby="aps-transcript-title">
+            <div class="aps-panel-head">
+              <div>
+                <p class="la-section-kicker">Transcript</p>
+                <h2 id="aps-transcript-title" class="la-section-title">Full transcript</h2>
+              </div>
+              <p id="aps-transcript-summary" class="aps-panel-copy">Transcript chunks will appear here.</p>
+            </div>
+            <div id="aps-transcript-empty" class="aps-empty-state">
+              <h3>Loading transcript data</h3>
+              <p>The full transcript will update once the episode data file is available.</p>
+            </div>
+            <div id="aps-transcript-list" class="aps-transcript-list" hidden></div>
+          </article>
+        </section>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Moment links support both query timestamps and transcript chunk hashes.</div>
+  </footer>
+</body>
+</html>

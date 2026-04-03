@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.361Z",
+  "episode": {
+    "id": "all-in-inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust",
+    "slug": "inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust",
+    "episodeNumber": null,
+    "title": "Inside the White House Tech Dinner, Weak Jobs Report, Tariffs Court Challenge, Google Wins Antitrust",
+    "publishDate": "2025-09-07",
+    "description": "(0:00) Bestie intros (0:52) Behind the scenes of the White House Tech Dinner! (28:39) Tariff showdown headed to the Supreme Court (42:44) Other Trump Administration legal battles...",
+    "summary": "(0:00) Bestie intros (0:52) Behind the scenes of the White House Tech Dinner! (28:39) Tariff showdown headed to the Supreme Court (42:44) Other Trump Administration legal battles (46:58) Weak jobs report: what is the state of the economy? (57:52) Google avoids worst-case scenario in antitrust case",
+    "durationSeconds": 4025,
+    "durationLabel": "01:07:05",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Politics",
+      "Regulation",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E242_Ch_2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/8/a/7/f8a7cb1535f8da9816c3140a3186d450/1x1_CLASSIC_E242png.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust",
+    "dataFile": "/data/all-in-podcast-search/episodes/inside-the-white-house-tech-dinner-weak-jobs-report-tariffs-court-challenge-google-wins-antitrust.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:52",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "00:52",
+      "endTimestamp": "28:39",
+      "text": "Behind the scenes of the White House Tech Dinner!"
+    },
+    {
+      "startTimestamp": "28:39",
+      "endTimestamp": "42:44",
+      "text": "Tariff showdown headed to the Supreme Court"
+    },
+    {
+      "startTimestamp": "42:44",
+      "endTimestamp": "46:58",
+      "text": "Other Trump Administration legal battles"
+    },
+    {
+      "startTimestamp": "46:58",
+      "endTimestamp": "57:52",
+      "text": "Weak jobs report: what is the state of the economy?"
+    },
+    {
+      "startTimestamp": "57:52",
+      "text": "Google avoids worst-case scenario in antitrust case Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/EdLudlow/status/1963763066988110177 https://www.whitehouse.gov/articles/2025/09/president-trump-tech-leaders-unite-american-ai-dominance https://www.youtube.com/watch?v=opn9soJ5TYM&t=11s https://truthsocial.com/@realDonaldTrump/posts/115119151783895076 https://www.congress.gov/bill/94th-congress/house-bill/3884 https://www.cbo.gov/publication/61697 https://x.com/tkl_adam/status/1963961233368924464 https://www.cbsnews.com/news/jobs-report-today-august-2025-three-takeways-federal-reserve https://www.cnbc.com/2025/09/02/google-antitrust-search-ruling.html https://polymarket.com/event/us-recession-in-2025?tid=1757216927232 https://www.wsj.com/opinion/google-antitrust-lawsuit-artificial-intelligence-amit-mehta-doj-trump-administration-d3b675b4"
+    }
+  ]
+}

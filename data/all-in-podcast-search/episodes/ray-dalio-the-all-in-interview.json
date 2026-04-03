@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.510Z",
+  "episode": {
+    "id": "all-in-ray-dalio-the-all-in-interview",
+    "slug": "ray-dalio-the-all-in-interview",
+    "episodeNumber": null,
+    "title": "Ray Dalio | The All-In Interview",
+    "publishDate": "2025-01-28",
+    "description": "(0:00) Ray Dalio joins Friedberg! (0:50) The current US fiscal situation (6:23) Breaking down \"The Big Debt Cycle,\" a potential US debt spiral, and the impact on real wealth...",
+    "summary": "(0:00) Ray Dalio joins Friedberg! (0:50) The current US fiscal situation (6:23) Breaking down \"The Big Debt Cycle,\" a potential US debt spiral, and the impact on real wealth (24:54) USD vs other currencies and assets, best hedges against the dollar (33:20) Portfolio construction, how China increases risk for US AI companies, why this market reminds Ray of...",
+    "durationSeconds": 4582,
+    "durationLabel": "01:16:22",
+    "guests": [
+      "Ray Dalio"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Markets",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ray-dalio-the-all-in-interview",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ray-dalio-the-all-in-interview",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_INTV_RayDalio_250127.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/1/5/4/a1544664e7a33edf16c3140a3186d450/1x1_Thumbnail_v6_RayDalio.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ray-dalio-the-all-in-interview",
+    "dataFile": "/data/all-in-podcast-search/episodes/ray-dalio-the-all-in-interview.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:50",
+      "text": "Ray Dalio joins Friedberg!"
+    },
+    {
+      "startTimestamp": "00:50",
+      "endTimestamp": "06:23",
+      "text": "The current US fiscal situation"
+    },
+    {
+      "startTimestamp": "06:23",
+      "endTimestamp": "24:54",
+      "text": "Breaking down \"The Big Debt Cycle,\" a potential US debt spiral, and the impact on real wealth"
+    },
+    {
+      "startTimestamp": "24:54",
+      "endTimestamp": "33:20",
+      "text": "USD vs other currencies and assets, best hedges against the dollar"
+    },
+    {
+      "startTimestamp": "33:20",
+      "endTimestamp": "41:45",
+      "text": "Portfolio construction, how China increases risk for US AI companies, why this market reminds Ray of 1998-1999"
+    },
+    {
+      "startTimestamp": "41:45",
+      "endTimestamp": "53:29",
+      "text": "How the US can avoid a debt crisis"
+    },
+    {
+      "startTimestamp": "53:29",
+      "endTimestamp": "01:05:31",
+      "text": "DOGE, Trump, and AI's greatest risk"
+    },
+    {
+      "startTimestamp": "01:05:31",
+      "text": "Chances of conflict between the US and China Follow the Besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Ray Dalio: https://x.com/RayDalio Read Part 1 of \"How Countries Go Broke\": https://x.com/RayDalio/status/1878840018770210979 Pre-order \"How Countries Go Broke\": https://www.amazon.com/Principles-Investment-Economic-Ray-Dalio/dp/1501124064 Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://tradingeconomics.com/united-states/government-debt-to-gdp https://www.crfb.org/press-releases/treasury-confirms-calendar-year-2024-deficit-tops-20-trillion https://www.cbo.gov/publication/61172 https://www.institutionalinvestor.com/article/2bstne1l09npgdk1s5yww/corner-office/ray-dalio-makes-his-exit-from-bridgewater https://fred.stlouisfed.org/series/M2SL https://www.jpmorgan.com/insights/outlook/economic-outlook/fed-meeting-september-2024 https://www.forbes.com/sites/robertfarrington/2024/11/08/fed-cut-interest-rates-so-why-do-mortgage-rates-keep-climbing https://www.chathamfinancial.com/insights/fomc-recap-december-2024 https://www.cnbc.com/2025/01/14/a-global-bond-sell-off-is-deepening-as-hopes-for-multiple-fed-rate-cuts-fizzle.html"
+    }
+  ]
+}

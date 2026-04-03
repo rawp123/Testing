@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.277Z",
+  "episode": {
+    "id": "all-in-inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower",
+    "slug": "inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower",
+    "episodeNumber": null,
+    "title": "Inside Saudi Arabia's AI Ambition: Tareq Amin on Building a New Tech Superpower",
+    "publishDate": "2025-11-04",
+    "description": "(0:00) Introducing Tareq Amin (0:39) Saudi Arabia's evolution, Humain's business (8:11) How Humain works with foundational model providers (13:14) Saudi's energy and talent...",
+    "summary": "(0:00) Introducing Tareq Amin (0:39) Saudi Arabia's evolution, Humain's business (8:11) How Humain works with foundational model providers (13:14) Saudi's energy and talent advantages, the AI race in the Middle East (18:11) Working in the era of MBS, Vision 2030 (21:40) How Saudi manages their relationships with the US and China (23:51) Sacks on the...",
+    "durationSeconds": 1756,
+    "durationLabel": "29:16",
+    "guests": [
+      "Tareq Amin"
+    ],
+    "topicTags": [
+      "AI",
+      "Energy",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_TareqAmin_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/f/9/0/5f903c7a7bfe4afbd959afa2a1bf1c87/1_Pod_TareqAmin.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower",
+    "dataFile": "/data/all-in-podcast-search/episodes/inside-saudi-arabias-ai-ambition-tareq-amin-on-building-a-new-tech-superpower.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:39",
+      "text": "Introducing Tareq Amin"
+    },
+    {
+      "startTimestamp": "00:39",
+      "endTimestamp": "08:11",
+      "text": "Saudi Arabia's evolution, Humain's business"
+    },
+    {
+      "startTimestamp": "08:11",
+      "endTimestamp": "13:14",
+      "text": "How Humain works with foundational model providers"
+    },
+    {
+      "startTimestamp": "13:14",
+      "endTimestamp": "18:11",
+      "text": "Saudi's energy and talent advantages, the AI race in the Middle East"
+    },
+    {
+      "startTimestamp": "18:11",
+      "endTimestamp": "21:40",
+      "text": "Working in the era of MBS, Vision 2030"
+    },
+    {
+      "startTimestamp": "21:40",
+      "endTimestamp": "23:51",
+      "text": "How Saudi manages their relationships with the US and China"
+    },
+    {
+      "startTimestamp": "23:51",
+      "text": "Sacks on the US-Saudi AI alliance"
+    }
+  ]
+}

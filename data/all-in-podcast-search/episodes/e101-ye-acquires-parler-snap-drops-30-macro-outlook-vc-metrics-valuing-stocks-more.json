@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.889Z",
+  "episode": {
+    "id": "all-in-e101",
+    "slug": "e101-ye-acquires-parler-snap-drops-30-macro-outlook-vc-metrics-valuing-stocks-more",
+    "episodeNumber": 101,
+    "title": "E101: Ye acquires Parler, Snap drops 30%, macro outlook, VC metrics, valuing stocks &amp; more",
+    "publishDate": "2022-10-22",
+    "description": "(0:00) Bestie intros: Brad Gerstner joins in place of Sacks, and brigadoons! (2:02) Ye's current situation and acquisition of Parler (14:17) Snap drops ~30%, corporate...",
+    "summary": "(0:00) Bestie intros: Brad Gerstner joins in place of Sacks, and brigadoons! (2:02) Ye's current situation and acquisition of Parler (14:17) Snap drops ~30%, corporate misgovernance, super-voting shares (32:53) Macro outlook, Stability AI $101M fundraise, VC fund metrics (1:05:38) The difficulty of active stock picking and valuing businesses (1:21:38) Lyft...",
+    "durationSeconds": 6065,
+    "durationLabel": "01:41:05",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Markets",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e101-ye-acquires-parler-snap-drops-30-macro-outlook-vc-metrics-valuing-stocks-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e101-ye-acquires-parler-snap-drops-30-macro-outlook-vc-metrics-valuing-stocks-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E101.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e101",
+    "dataFile": "/data/all-in-podcast-search/episodes/e101-ye-acquires-parler-snap-drops-30-macro-outlook-vc-metrics-valuing-stocks-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:02",
+      "text": "Bestie intros: Brad Gerstner joins in place of Sacks, and brigadoons!"
+    },
+    {
+      "startTimestamp": "02:02",
+      "endTimestamp": "14:17",
+      "text": "Ye's current situation and acquisition of Parler"
+    },
+    {
+      "startTimestamp": "14:17",
+      "endTimestamp": "32:53",
+      "text": "Snap drops ~30%, corporate misgovernance, super-voting shares"
+    },
+    {
+      "startTimestamp": "32:53",
+      "endTimestamp": "01:05:38",
+      "text": "Macro outlook, Stability AI $101M fundraise, VC fund metrics"
+    },
+    {
+      "startTimestamp": "01:05:38",
+      "endTimestamp": "01:21:38",
+      "text": "The difficulty of active stock picking and valuing businesses"
+    },
+    {
+      "startTimestamp": "01:21:38",
+      "text": "Lyft vs Gavin Newsom on Prop 30, PSA from Chamath Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.google.com/finance/quote/SNAP:NYSE https://www.statista.com/statistics/545967/snapchat-app-dau https://www.washingtonpost.com/technology/2022/10/20/musk-twitter-acquisition-staff-cuts https://www.bloomberg.com/news/articles/2022-10-17/digital-media-firm-stability-ai-raises-funds-at-1-billion-value https://twitter.com/elonmusk/status/1520643441994387456 https://www.wsj.com/articles/lyft-battles-gavin-newsom-over-california-measure-to-fund-evs-11665864256 https://voterguide.sos.ca.gov/propositions/30 https://fred.stlouisfed.org/series/GFDEGDQ188S"
+    }
+  ]
+}

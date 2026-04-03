@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.898Z",
+  "episode": {
+    "id": "all-in-e94",
+    "slug": "e94-nft-volume-plummets-californias-overreach-fbi-meddling-climate-change-national-security",
+    "episodeNumber": 94,
+    "title": "E94: NFT volume plummets, California's overreach, FBI meddling, climate change &amp; national security",
+    "publishDate": "2022-09-01",
+    "description": "(0:00) Bestie intros + Burning Man debate (4:16) NFT trading volume plummets (10:20) California's new fast food wages bill, government creating bad incentives, how the free market...",
+    "summary": "(0:00) Bestie intros + Burning Man debate (4:16) NFT trading volume plummets (10:20) California's new fast food wages bill, government creating bad incentives, how the free market response will further the labor issue (40:15) Zuckerberg on Rogan, FBI interference with the Hunter Biden laptop story (52:00) Balancing fighting climate change without harming...",
+    "durationSeconds": 4982,
+    "durationLabel": "01:23:02",
+    "guests": [],
+    "topicTags": [
+      "Meta",
+      "Politics",
+      "Markets",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e94-nft-volume-plummets-californias-overreach-fbi-meddling-climate-change-national-security",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e94-nft-volume-plummets-californias-overreach-fbi-meddling-climate-change-national-security",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E94_1.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e94",
+    "dataFile": "/data/all-in-podcast-search/episodes/e94-nft-volume-plummets-californias-overreach-fbi-meddling-climate-change-national-security.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:16",
+      "text": "Bestie intros + Burning Man debate"
+    },
+    {
+      "startTimestamp": "04:16",
+      "endTimestamp": "10:20",
+      "text": "NFT trading volume plummets"
+    },
+    {
+      "startTimestamp": "10:20",
+      "endTimestamp": "40:15",
+      "text": "California's new fast food wages bill, government creating bad incentives, how the free market response will further the labor issue"
+    },
+    {
+      "startTimestamp": "40:15",
+      "endTimestamp": "52:00",
+      "text": "Zuckerberg on Rogan, FBI interference with the Hunter Biden laptop story"
+    },
+    {
+      "startTimestamp": "52:00",
+      "endTimestamp": "01:06:04",
+      "text": "Balancing fighting climate change without harming the economy or national security, EU energy policy failure"
+    },
+    {
+      "startTimestamp": "01:06:04",
+      "text": "Besties reflect on Mikhail Gorbachev's passing Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://cointelegraph.com/news/looks-bare-opensea-turns-into-nft-ghost-town-after-volume-plunges-99-in-90-days https://www.youtube.com/watch?v=XlXSGqvP-A8 https://thefederalist.com/2022/08/30/zuckerbergs-admission-of-fbi-meddling-in-2020-election-is-even-bigger-than-it-seems/ https://www.nytimes.com/2022/08/23/us/california-nuclear-power-diablo.html https://www.wsj.com/articles/california-fast-food-wages-would-be-set-by-government-under-bill-passed-by-state-senate-11661811509"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.333Z",
+  "episode": {
+    "id": "all-in-eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america",
+    "slug": "eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america",
+    "episodeNumber": null,
+    "title": "Eric Schmidt on AI, the Battle with China, and the Future of America",
+    "publishDate": "2025-09-24",
+    "description": "(0:00) Introducing Eric Schmidt (1:59) Thoughts on remote work and work-life balance (3:49) Approaching AI: US vs China (8:04) Relativity Space, rockets, drones, defense, and more...",
+    "summary": "(0:00) Introducing Eric Schmidt (1:59) Thoughts on remote work and work-life balance (3:49) Approaching AI: US vs China (8:04) Relativity Space, rockets, drones, defense, and more (17:32) Future role of America, and the decline of the West (21:51) AGI: boom or bust? Solana - Solana is the high performance network powering internet capital markets, payments,...",
+    "durationSeconds": 1738,
+    "durationLabel": "28:58",
+    "guests": [
+      "Eric Schmidt"
+    ],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Defense",
+      "China",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_EricSchmidt_CH_2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/6/9/6/e69655029a82d725d959afa2a1bf1c87/1_Pod_Schmidt.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america",
+    "dataFile": "/data/all-in-podcast-search/episodes/eric-schmidt-on-ai-the-battle-with-china-and-the-future-of-america.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:59",
+      "text": "Introducing Eric Schmidt"
+    },
+    {
+      "startTimestamp": "01:59",
+      "endTimestamp": "03:49",
+      "text": "Thoughts on remote work and work-life balance"
+    },
+    {
+      "startTimestamp": "03:49",
+      "endTimestamp": "08:04",
+      "text": "Approaching AI: US vs China"
+    },
+    {
+      "startTimestamp": "08:04",
+      "endTimestamp": "17:32",
+      "text": "Relativity Space, rockets, drones, defense, and more"
+    },
+    {
+      "startTimestamp": "17:32",
+      "endTimestamp": "21:51",
+      "text": "Future role of America, and the decline of the West"
+    },
+    {
+      "startTimestamp": "21:51",
+      "text": "AGI: boom or bust?"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.476Z",
+  "episode": {
+    "id": "all-in-white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue",
+    "slug": "white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue",
+    "episodeNumber": null,
+    "title": "White House BTS, Google buys Wiz, Treasury vs Fed, Space Rescue",
+    "publishDate": "2025-03-22",
+    "description": "(0:00) Welcoming Cyan Banister and David Sacks! (3:23) Behind the scenes of the Besties in DC: White House, cabinet interviews, and more (33:00) How M&A will be unleashed, Google...",
+    "summary": "(0:00) Welcoming Cyan Banister and David Sacks! (3:23) Behind the scenes of the Besties in DC: White House, cabinet interviews, and more (33:00) How M&A will be unleashed, Google buys Wiz for $32B, Tim Walz on Tesla (49:09) Deep dive on Google/Wiz: breakup fee, impact on VC, ROIC, cloud advantage (1:00:28) Treasury vs Fed tension, Bond markets, consumers,...",
+    "durationSeconds": 5443,
+    "durationLabel": "01:30:43",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Tesla",
+      "Politics",
+      "Venture capital",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E220.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/4/d/1/d4d1c0cc8de85168d959afa2a1bf1c87/1x1_CLASSIC_E220.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue",
+    "dataFile": "/data/all-in-podcast-search/episodes/white-house-bts-google-buys-wiz-treasury-vs-fed-space-rescue.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:23",
+      "text": "Welcoming Cyan Banister and David Sacks!"
+    },
+    {
+      "startTimestamp": "03:23",
+      "endTimestamp": "33:00",
+      "text": "Behind the scenes of the Besties in DC: White House, cabinet interviews, and more"
+    },
+    {
+      "startTimestamp": "33:00",
+      "endTimestamp": "49:09",
+      "text": "How M&A will be unleashed, Google buys Wiz for $32B, Tim Walz on Tesla"
+    },
+    {
+      "startTimestamp": "49:09",
+      "endTimestamp": "01:00:28",
+      "text": "Deep dive on Google/Wiz: breakup fee, impact on VC, ROIC, cloud advantage"
+    },
+    {
+      "startTimestamp": "01:00:28",
+      "endTimestamp": "01:12:57",
+      "text": "Treasury vs Fed tension, Bond markets, consumers, deregulation"
+    },
+    {
+      "startTimestamp": "01:12:57",
+      "text": "Space rescue, SpaceX vs China, lunar landing"
+    }
+  ]
+}

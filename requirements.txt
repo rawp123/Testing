@@ -2,3 +2,5 @@ pdfplumber
 pandas
 requests
 tqdm
+youtube-transcript-api
+faster-whisper

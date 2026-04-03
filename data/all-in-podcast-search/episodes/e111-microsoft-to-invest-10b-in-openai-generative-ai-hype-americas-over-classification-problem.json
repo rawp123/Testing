@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.872Z",
+  "episode": {
+    "id": "all-in-e111",
+    "slug": "e111-microsoft-to-invest-10b-in-openai-generative-ai-hype-americas-over-classification-problem",
+    "episodeNumber": 111,
+    "title": "E111: Microsoft to invest $10B in OpenAI, generative AI hype, America's over-classification problem",
+    "publishDate": "2023-01-13",
+    "description": "(0:00) Bestie intro! (0:43) Reacting to Slate's article on All-In (11:18) SF business owner caught spraying homeless person on camera (29:22) Microsoft to invest $10B into OpenAI...",
+    "summary": "(0:00) Bestie intro! (0:43) Reacting to Slate's article on All-In (11:18) SF business owner caught spraying homeless person on camera (29:22) Microsoft to invest $10B into OpenAI with unique terms, generative AI VC hype cycle (1:09:57) Biden's documents, America's over-classification problem (1:27:16) Best cabinet positions/ambassadorships",
+    "durationSeconds": 5519,
+    "durationLabel": "01:31:59",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Politics",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e111-microsoft-to-invest-10b-in-openai-generative-ai-hype-americas-over-classification-problem",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e111-microsoft-to-invest-10b-in-openai-generative-ai-hype-americas-over-classification-problem",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E111.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e111",
+    "dataFile": "/data/all-in-podcast-search/episodes/e111-microsoft-to-invest-10b-in-openai-generative-ai-hype-americas-over-classification-problem.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:43",
+      "text": "Bestie intro!"
+    },
+    {
+      "startTimestamp": "00:43",
+      "endTimestamp": "11:18",
+      "text": "Reacting to Slate's article on All-In"
+    },
+    {
+      "startTimestamp": "11:18",
+      "endTimestamp": "29:22",
+      "text": "SF business owner caught spraying homeless person on camera"
+    },
+    {
+      "startTimestamp": "29:22",
+      "endTimestamp": "01:09:57",
+      "text": "Microsoft to invest $10B into OpenAI with unique terms, generative AI VC hype cycle"
+    },
+    {
+      "startTimestamp": "01:09:57",
+      "endTimestamp": "01:27:16",
+      "text": "Biden's documents, America's over-classification problem"
+    },
+    {
+      "startTimestamp": "01:27:16",
+      "text": "Best cabinet positions/ambassadorships Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/mattyglesias/status/1613135006272045056 https://www.epsilontheory.com/gell-mann-amnesia https://slate.com/technology/2023/01/all-in-podcast-elon-musk-david-sacks-jason-calacanis-chamath-palihapitiya-david-friedberg.html https://newrepublic.com/article/168125/david-sacks-elon-musk-peter-thiel https://twitter.com/BettyKPIX/status/1613080547022229504 https://www.bloomberg.com/news/articles/2023-01-12/bankers-bet-millions-on-sovereign-debt-deals-tied-to-green-goals https://fortune.com/2023/01/11/structure-openai-investment-microsoft https://www.ft.com/content/6670acad-8a5b-4c4a-b6a8-48dc307b6d4d https://openai.com/blog/introducing-openai https://ai.facebook.com/tools/pytorch https://fairuse.stanford.edu/overview/fair-use/four-factors https://fred.stlouisfed.org/series/USAPEFANA"
+    }
+  ]
+}

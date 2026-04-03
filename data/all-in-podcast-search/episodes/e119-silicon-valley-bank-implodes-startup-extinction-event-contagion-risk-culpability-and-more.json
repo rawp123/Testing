@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.854Z",
+  "episode": {
+    "id": "all-in-e119",
+    "slug": "e119-silicon-valley-bank-implodes-startup-extinction-event-contagion-risk-culpability-and-more",
+    "episodeNumber": 119,
+    "title": "E119: Silicon Valley Bank implodes: startup extinction event, contagion risk, culpability, and more",
+    "publishDate": "2023-03-11",
+    "description": "(0:00) Bestie intro! (1:57) Overview of the SVB collapse and bank run (17:53) Who or what is to blame? Debating venture debt (37:11) Contagion risk, second- and third-order...",
+    "summary": "(0:00) Bestie intro! (1:57) Overview of the SVB collapse and bank run (17:53) Who or what is to blame? Debating venture debt (37:11) Contagion risk, second- and third-order effects, government backstops (1:00:36) What does this mean for the VC industry? Silicon Valley panic cycle, advice for founders",
+    "durationSeconds": 5367,
+    "durationLabel": "01:29:27",
+    "guests": [],
+    "topicTags": [
+      "Venture capital",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e119-silicon-valley-bank-implodes-startup-extinction-event-contagion-risk-culpability-and-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e119-silicon-valley-bank-implodes-startup-extinction-event-contagion-risk-culpability-and-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E119.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e119",
+    "dataFile": "/data/all-in-podcast-search/episodes/e119-silicon-valley-bank-implodes-startup-extinction-event-contagion-risk-culpability-and-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:57",
+      "text": "Bestie intro!"
+    },
+    {
+      "startTimestamp": "01:57",
+      "endTimestamp": "17:53",
+      "text": "Overview of the SVB collapse and bank run"
+    },
+    {
+      "startTimestamp": "17:53",
+      "endTimestamp": "37:11",
+      "text": "Who or what is to blame? Debating venture debt"
+    },
+    {
+      "startTimestamp": "37:11",
+      "endTimestamp": "01:00:36",
+      "text": "Contagion risk, second- and third-order effects, government backstops"
+    },
+    {
+      "startTimestamp": "01:00:36",
+      "text": "What does this mean for the VC industry? Silicon Valley panic cycle, advice for founders Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg https://twitter.com/altcap Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.fdic.gov/news/press-releases/2023/pr23016.html https://s201.q4cdn.com/589201576/files/doc_downloads/2023/03/r/Q1-2023-Investor-Letter.FINAL-030823.pdf https://s201.q4cdn.com/589201576/files/doc_downloads/2023/03/Q1-2023-Mid-Quarter-Update-vFINAL3-030823.pdf https://twitter.com/garrytan/status/1634260576431136768 https://seekingalpha.com/article/4565388-svb-financial-blow-up-risk https://www.youtube.com/watch?v=Ymo6Yzjv_KY https://www.bloomberg.com/news/articles/2023-03-10/treasury-closely-watching-siliconvalley-bank-share-plunge https://www.cbsnews.com/news/janet-yellen-ukraine-treasury-secretary-kyiv-visit-volodymyr-zelenskyy https://twitter.com/Rippling/status/1634201986894577665 https://en.wikipedia.org/wiki/Troubled_Asset_Relief_Program https://www.wsj.com/articles/bond-losses-push-silicon-valley-bank-parent-to-raise-capital-125e89d4 https://dfpi.ca.gov/wp-content/uploads/sites/337/2023/03/DFPI-Orders-Silicon-Valley-Bank-03102023.pdf?emrc=bedc09 https://www.google.com/finance/quote/IAT:NYSEARCA"
+    }
+  ]
+}

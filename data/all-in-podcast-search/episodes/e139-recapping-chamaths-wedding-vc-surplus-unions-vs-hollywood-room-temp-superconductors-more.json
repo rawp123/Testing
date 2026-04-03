@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.753Z",
+  "episode": {
+    "id": "all-in-e139",
+    "slug": "e139-recapping-chamaths-wedding-vc-surplus-unions-vs-hollywood-room-temp-superconductors-more",
+    "episodeNumber": 139,
+    "title": "E139: Recapping Chamath's wedding, VC surplus, unions vs Hollywood, room-temp superconductors &amp; more",
+    "publishDate": "2023-07-27",
+    "description": "(0:00) All-In in Italy!: Recapping Chamath's wedding (11:55) Discourse around obesity and weight loss in the US (21:56) Are there too many VCs? (38:18) Actors/Writers unions vs....",
+    "summary": "(0:00) All-In in Italy!: Recapping Chamath's wedding (11:55) Discourse around obesity and weight loss in the US (21:56) Are there too many VCs? (38:18) Actors/Writers unions vs. Corporate Hollywood, endgame for the modern Hollywood machine (54:07) Equity participations vs. unions, ownership upside vs. downside protections (1:05:04) Potential impact of...",
+    "durationSeconds": 4667,
+    "durationLabel": "01:17:47",
+    "guests": [],
+    "topicTags": [
+      "Venture capital",
+      "Media"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e139-recapping-chamaths-wedding-vc-surplus-unions-vs-hollywood-room-temp-superconductors-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e139-recapping-chamaths-wedding-vc-surplus-unions-vs-hollywood-room-temp-superconductors-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E139.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e139",
+    "dataFile": "/data/all-in-podcast-search/episodes/e139-recapping-chamaths-wedding-vc-surplus-unions-vs-hollywood-room-temp-superconductors-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "11:55",
+      "text": "All-In in Italy!: Recapping Chamath's wedding"
+    },
+    {
+      "startTimestamp": "11:55",
+      "endTimestamp": "21:56",
+      "text": "Discourse around obesity and weight loss in the US"
+    },
+    {
+      "startTimestamp": "21:56",
+      "endTimestamp": "38:18",
+      "text": "Are there too many VCs?"
+    },
+    {
+      "startTimestamp": "38:18",
+      "endTimestamp": "54:07",
+      "text": "Actors/Writers unions vs. Corporate Hollywood, endgame for the modern Hollywood machine"
+    },
+    {
+      "startTimestamp": "54:07",
+      "endTimestamp": "01:05:04",
+      "text": "Equity participations vs. unions, ownership upside vs. downside protections"
+    },
+    {
+      "startTimestamp": "01:05:04",
+      "text": "Potential impact of room-temp superconductors Special thanks to our Italian audio/video team!: https://twitter.com/domdalmatico https://www.mattiacaruso.com Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/DavidSacks/status/1684176015948488704 https://www.youtube.com/watch?v=sPelOnd7Sik https://www.vice.com/en/article/4a3az9/venture-capital-vcs-existential-too-many https://twitter.com/jason/status/1681985828820766720 https://twitter.com/chamath/status/1679765658517610496 https://twitter.com/chamath/status/1679935918164135936 https://arxiv.org/pdf/2307.12008.pdf"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.183Z",
+  "episode": {
+    "id": "all-in-jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis",
+    "slug": "jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis",
+    "episodeNumber": null,
+    "title": "Jensen Huang LIVE: Nvidia's Future, Physical AI, Rise of the Agent, Inference Explosion, AI PR Crisis",
+    "publishDate": "2026-03-19",
+    "description": "(0:00) Jensen Huang joins the show! (0:26) Acquiring Groq and the inference explosion (8:53) Decision making at the world's most valuable company (10:47) Physical AI's $50T...",
+    "summary": "(0:00) Jensen Huang joins the show! (0:26) Acquiring Groq and the inference explosion (8:53) Decision making at the world's most valuable company (10:47) Physical AI's $50T market, OpenClaw's future, the new operating system for modern AI computing (16:38) AI's PR crisis, refuting doomer narratives, Anthropic's comms mistakes (20:48) Revenue capacity, token...",
+    "durationSeconds": 3966,
+    "durationLabel": "01:06:06",
+    "guests": [
+      "Jensen Huang"
+    ],
+    "topicTags": [
+      "AI",
+      "Anthropic",
+      "Nvidia",
+      "Crypto",
+      "Markets"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-INTV_Jensen_V2_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/e/7/0/5e700e85441bf0e216c3140a3186d450/1_Pod_Jensen.png",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis",
+    "dataFile": "/data/all-in-podcast-search/episodes/jensen-huang-live-nvidias-future-physical-ai-rise-of-the-agent-inference-explosion-ai-pr-crisis.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:26",
+      "text": "Jensen Huang joins the show!"
+    },
+    {
+      "startTimestamp": "00:26",
+      "endTimestamp": "08:53",
+      "text": "Acquiring Groq and the inference explosion"
+    },
+    {
+      "startTimestamp": "08:53",
+      "endTimestamp": "10:47",
+      "text": "Decision making at the world's most valuable company"
+    },
+    {
+      "startTimestamp": "10:47",
+      "endTimestamp": "16:38",
+      "text": "Physical AI's $50T market, OpenClaw's future, the new operating system for modern AI computing"
+    },
+    {
+      "startTimestamp": "16:38",
+      "endTimestamp": "20:48",
+      "text": "AI's PR crisis, refuting doomer narratives, Anthropic's comms mistakes"
+    },
+    {
+      "startTimestamp": "20:48",
+      "endTimestamp": "30:50",
+      "text": "Revenue capacity, token allocation for employees, Karpathy's autoresearch, agentic future"
+    },
+    {
+      "startTimestamp": "30:50",
+      "endTimestamp": "39:45",
+      "text": "Open source, global diffusion, Iran/Taiwan supply chain impact"
+    },
+    {
+      "startTimestamp": "39:45",
+      "endTimestamp": "47:32",
+      "text": "Self-driving platform, facing competition from active customers, responding to growth slowdown predictions"
+    },
+    {
+      "startTimestamp": "47:32",
+      "endTimestamp": "56:10",
+      "text": "Datacenters in space, AI healthcare, Robotics"
+    },
+    {
+      "startTimestamp": "56:10",
+      "endTimestamp": "59:04",
+      "text": "OpenAI/Anthropic revenue potential, how to build an AI moat"
+    },
+    {
+      "startTimestamp": "59:04",
+      "text": "Advice to young people on excelling in the AI era Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

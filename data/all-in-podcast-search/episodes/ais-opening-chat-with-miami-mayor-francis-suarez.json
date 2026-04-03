@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.912Z",
+  "episode": {
+    "id": "all-in-ais-opening-chat-with-miami-mayor-francis-suarez",
+    "slug": "ais-opening-chat-with-miami-mayor-francis-suarez",
+    "episodeNumber": null,
+    "title": "#AIS: Opening chat with Miami Mayor Francis Suarez",
+    "publishDate": "2022-06-03",
+    "description": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Yung...",
+    "summary": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Yung Spielburg intros the Besties + Besties give reactions to the All-In Summit 5:56 Miami Mayor Francis Suarez joins the Besties on stage to chat: Miami's emergence as a tech hub, his...",
+    "durationSeconds": 1464,
+    "durationLabel": "24:24",
+    "guests": [
+      "Mayor Suarez"
+    ],
+    "topicTags": [
+      "Google",
+      "Crypto"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ais-opening-chat-with-miami-mayor-francis-suarez",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ais-opening-chat-with-miami-mayor-francis-suarez",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS2022_Open_MayorSuarez_AUDIO.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 0,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "",
+    "transcriptAvailable": false,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ais-opening-chat-with-miami-mayor-francis-suarez",
+    "dataFile": "/data/all-in-podcast-search/episodes/ais-opening-chat-with-miami-mayor-francis-suarez.json"
+  },
+  "chunks": []
+}

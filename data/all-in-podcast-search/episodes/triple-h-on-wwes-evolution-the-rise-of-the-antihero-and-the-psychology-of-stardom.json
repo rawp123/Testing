@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.281Z",
+  "episode": {
+    "id": "all-in-triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom",
+    "slug": "triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom",
+    "episodeNumber": null,
+    "title": "Triple H on WWE's Evolution, the Rise of the Antihero, and the Psychology of Stardom",
+    "publishDate": "2025-11-03",
+    "description": "(0:00) Introducing Paul \"Triple H\" Levesque (0:56) The skills needed to be an effective professional wrestler, understanding the characteristics of President Trump and The Rock...",
+    "summary": "(0:00) Introducing Paul \"Triple H\" Levesque (0:56) The skills needed to be an effective professional wrestler, understanding the characteristics of President Trump and The Rock (5:41) The rise of the antihero / heel persona, and why modern wrestling is more morally grey (8:43) WWE vs UFC: Why they are opposites, star building (11:21) Physicality of the WWE...",
+    "durationSeconds": 1565,
+    "durationLabel": "26:05",
+    "guests": [
+      "Triple H"
+    ],
+    "topicTags": [
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_TripleH_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/9/6/b/b/96bb7b9eb1759dc1d959afa2a1bf1c87/1_Pod_TripleH.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom",
+    "dataFile": "/data/all-in-podcast-search/episodes/triple-h-on-wwes-evolution-the-rise-of-the-antihero-and-the-psychology-of-stardom.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:56",
+      "text": "Introducing Paul \"Triple H\" Levesque"
+    },
+    {
+      "startTimestamp": "00:56",
+      "endTimestamp": "05:41",
+      "text": "The skills needed to be an effective professional wrestler, understanding the characteristics of President Trump and The Rock"
+    },
+    {
+      "startTimestamp": "05:41",
+      "endTimestamp": "08:43",
+      "text": "The rise of the antihero / heel persona, and why modern wrestling is more morally grey"
+    },
+    {
+      "startTimestamp": "08:43",
+      "endTimestamp": "11:21",
+      "text": "WWE vs UFC: Why they are opposites, star building"
+    },
+    {
+      "startTimestamp": "11:21",
+      "endTimestamp": "14:13",
+      "text": "Physicality of the WWE and how they support wrestlers"
+    },
+    {
+      "startTimestamp": "14:13",
+      "endTimestamp": "21:28",
+      "text": "The business of the WWE: using streaming and social as a funnel for live events, the magic of live WWE"
+    },
+    {
+      "startTimestamp": "21:28",
+      "endTimestamp": "23:35",
+      "text": "Helping America's youth via physical fitness"
+    },
+    {
+      "startTimestamp": "23:35",
+      "text": "How the internet forced wrestlers to blend their in ring personas with real-life"
+    }
+  ]
+}

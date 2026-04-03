@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.192Z",
+  "episode": {
+    "id": "all-in-iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare",
+    "slug": "iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare",
+    "episodeNumber": null,
+    "title": "Iran War, Oil Shock, Off Ramps, AI's Revenue Explosion and PR Nightmare",
+    "publishDate": "2026-03-13",
+    "description": "(0:00) The Besties welcome Brad Gerstner! (3:48) Economic fallout of the Iran War, escalation scenarios, impact on midterms (19:18) Off ramp strategies, Gulf state involvement,...",
+    "summary": "(0:00) The Besties welcome Brad Gerstner! (3:48) Economic fallout of the Iran War, escalation scenarios, impact on midterms (19:18) Off ramp strategies, Gulf state involvement, the China angle (27:05) Anthropic and OpenAI scaling revenue faster than any company ever (46:11) AI's PR disaster, open source's future (1:07:51) Washington passes \"Millionaire...",
+    "durationSeconds": 4823,
+    "durationLabel": "01:20:23",
+    "guests": [
+      "Brad Gerstner"
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Anthropic",
+      "Energy",
+      "Defense"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E264_V2_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/0/9/0/4/0904d896e43c983a16c3140a3186d450/1_Pod_E264-20260313-7wen55e4z1.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare",
+    "dataFile": "/data/all-in-podcast-search/episodes/iran-war-oil-shock-off-ramps-ais-revenue-explosion-and-pr-nightmare.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:48",
+      "text": "The Besties welcome Brad Gerstner!"
+    },
+    {
+      "startTimestamp": "03:48",
+      "endTimestamp": "19:18",
+      "text": "Economic fallout of the Iran War, escalation scenarios, impact on midterms"
+    },
+    {
+      "startTimestamp": "19:18",
+      "endTimestamp": "27:05",
+      "text": "Off ramp strategies, Gulf state involvement, the China angle"
+    },
+    {
+      "startTimestamp": "27:05",
+      "endTimestamp": "46:11",
+      "text": "Anthropic and OpenAI scaling revenue faster than any company ever"
+    },
+    {
+      "startTimestamp": "46:11",
+      "endTimestamp": "01:07:51",
+      "text": "AI's PR disaster, open source's future"
+    },
+    {
+      "startTimestamp": "01:07:51",
+      "text": "Washington passes \"Millionaire Tax,\" Howard Schultz bails for Miami Follow Brad: https://x.com/altcap"
+    }
+  ]
+}

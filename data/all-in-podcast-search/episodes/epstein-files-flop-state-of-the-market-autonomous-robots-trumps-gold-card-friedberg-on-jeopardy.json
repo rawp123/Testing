@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.494Z",
+  "episode": {
+    "id": "all-in-epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy",
+    "slug": "epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy",
+    "episodeNumber": null,
+    "title": "Epstein Files Flop, State of the Market, Autonomous Robots, Trump's Gold Card, Friedberg on Jeopardy",
+    "publishDate": "2025-03-01",
+    "description": "(0:00) Bestie intros (1:41) Epstein files first release underwhelms (4:40) Friedberg recaps his experience on Celebrity Jeopardy! (14:22) State of autonomous robots (21:06)...",
+    "summary": "(0:00) Bestie intros (1:41) Epstein files first release underwhelms (4:40) Friedberg recaps his experience on Celebrity Jeopardy! (14:22) State of autonomous robots (21:06) Comparing annual reports from Stripe and Adyen; Stripe's network effects, stablecoin infra, and the pace of AI company building (29:12) State of the market: stocks, tariffs, spending...",
+    "durationSeconds": 4515,
+    "durationLabel": "01:15:15",
+    "guests": [
+      "Gold Card"
+    ],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Politics",
+      "Markets",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E217.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/e/8/b/fe8b4f619a88879ad959afa2a1bf1c87/1x1_CLASSIC_E217.png",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy",
+    "dataFile": "/data/all-in-podcast-search/episodes/epstein-files-flop-state-of-the-market-autonomous-robots-trumps-gold-card-friedberg-on-jeopardy.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:41",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "01:41",
+      "endTimestamp": "04:40",
+      "text": "Epstein files first release underwhelms"
+    },
+    {
+      "startTimestamp": "04:40",
+      "endTimestamp": "14:22",
+      "text": "Friedberg recaps his experience on Celebrity Jeopardy!"
+    },
+    {
+      "startTimestamp": "14:22",
+      "endTimestamp": "21:06",
+      "text": "State of autonomous robots"
+    },
+    {
+      "startTimestamp": "21:06",
+      "endTimestamp": "29:12",
+      "text": "Comparing annual reports from Stripe and Adyen; Stripe's network effects, stablecoin infra, and the pace of AI company building"
+    },
+    {
+      "startTimestamp": "29:12",
+      "endTimestamp": "49:07",
+      "text": "State of the market: stocks, tariffs, spending bill, the \"great reset\""
+    },
+    {
+      "startTimestamp": "49:07",
+      "endTimestamp": "56:19",
+      "text": "Trump's Gold Card"
+    },
+    {
+      "startTimestamp": "56:19",
+      "endTimestamp": "01:06:57",
+      "text": "Sophisticated investor test, changing accreditation laws"
+    },
+    {
+      "startTimestamp": "01:06:57",
+      "text": "USPS, Bezos refocuses the WaPo's opinion page Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/bennyjohnson/status/1895195194947183047 https://x.com/adcock_brett/status/1895175400160133543 https://x.com/markjeffrey/status/1892735775550406828 https://x.com/pitdesi/status/1895117427480109238 https://x.com/jmover/status/1895129169882661100 https://coinmarketcap.com/currencies/tether https://coinmarketcap.com/currencies/usd-coin https://fred.stlouisfed.org/series/UNRATE https://www.cnbc.com/2025/02/12/cpi-january-2025.html https://x.com/StealthQE4/status/1894227465616171361 https://www.youtube.com/watch?v=7-ttACozP8s https://www.cnbc.com/quotes/US10Y https://x.com/chamath/status/1888371069322686895 https://polymarket.com/event/how-many-gold-cards-will-trump-sell-in-2025/will-trump-sell-2pt5k-5k-gold-cards-in-2025?tid=1740688723350 https://x.com/Jason/status/1706067572226244789 https://www.washingtonpost.com/business/2025/02/20/trump-usps-takeover-dejoy/ https://x.com/Jason/status/1894412028279693546 https://x.com/JeffBezos/status/1894757287052362088"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.630Z",
+  "episode": {
+    "id": "all-in-in-conversation-with-president-trump",
+    "slug": "in-conversation-with-president-trump",
+    "episodeNumber": null,
+    "title": "In conversation with President Trump",
+    "publishDate": "2024-06-20",
+    "description": "(0:00) Bestie intros: Big house talk! (1:37) Economy: Regulation, taxes, tariffs, taming inflation, de-dollarization (12:02) Federal debt: growth, spend control, where to cut,...",
+    "summary": "(0:00) Bestie intros: Big house talk! (1:37) Economy: Regulation, taxes, tariffs, taming inflation, de-dollarization (12:02) Federal debt: growth, spend control, where to cut, role of energy, nuclear (20:22) Foreign policy: Ukraine/Russia (25:05) Foreign policy: Israel/Palestine (28:13) Abortion: Stance on a national ban (31:09) Foreign policy: China...",
+    "durationSeconds": 4835,
+    "durationLabel": "01:20:35",
+    "guests": [],
+    "topicTags": [
+      "Politics",
+      "Energy",
+      "China",
+      "Israel",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-president-trump",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-president-trump",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E184.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/b/5/a/eb5aa9d2c140529327a2322813b393ee/1x1_Thumbnail_E184-20240620-6e5kzd0ns2.png",
+    "chunkCount": 12,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-in-conversation-with-president-trump",
+    "dataFile": "/data/all-in-podcast-search/episodes/in-conversation-with-president-trump.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:37",
+      "text": "Bestie intros: Big house talk!"
+    },
+    {
+      "startTimestamp": "01:37",
+      "endTimestamp": "12:02",
+      "text": "Economy: Regulation, taxes, tariffs, taming inflation, de-dollarization"
+    },
+    {
+      "startTimestamp": "12:02",
+      "endTimestamp": "20:22",
+      "text": "Federal debt: growth, spend control, where to cut, role of energy, nuclear"
+    },
+    {
+      "startTimestamp": "20:22",
+      "endTimestamp": "25:05",
+      "text": "Foreign policy: Ukraine/Russia"
+    },
+    {
+      "startTimestamp": "25:05",
+      "endTimestamp": "28:13",
+      "text": "Foreign policy: Israel/Palestine"
+    },
+    {
+      "startTimestamp": "28:13",
+      "endTimestamp": "31:09",
+      "text": "Abortion: Stance on a national ban"
+    },
+    {
+      "startTimestamp": "31:09",
+      "endTimestamp": "32:33",
+      "text": "Foreign policy: China"
+    },
+    {
+      "startTimestamp": "32:33",
+      "endTimestamp": "39:39",
+      "text": "COVID: Origins, Fauci relationship, deep state, bad deals"
+    },
+    {
+      "startTimestamp": "39:39",
+      "endTimestamp": "46:07",
+      "text": "Border: Wall, immigration, H-1Bs, recruiting global talent"
+    },
+    {
+      "startTimestamp": "46:07",
+      "endTimestamp": "48:06",
+      "text": "JFK Files: Full release, importance of transparency"
+    },
+    {
+      "startTimestamp": "48:06",
+      "endTimestamp": "50:15",
+      "text": "Debate prediction"
+    },
+    {
+      "startTimestamp": "50:15",
+      "text": "Post-interview debrief Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://x.com/tyler/status/1803872859938549920 https://x.com/cameron/status/1803876953860247831 https://x.com/LHSummers/status/1802097688269181436 https://x.com/davidsacks/status/179888324567070746"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.717Z",
+  "episode": {
+    "id": "all-in-e153",
+    "slug": "e153-in-conversation-with-jared-kushner-israel-hamas-war-paths-forward-macro-picture-ai",
+    "episodeNumber": 153,
+    "title": "E153: In conversation with Jared Kushner: Israel-Hamas War, paths forward, macro picture, AI",
+    "publishDate": "2023-11-11",
+    "description": "(0:00) Bestie Intros: Sacks keeps receipts! (1:14) Jared Kushner joins the show: background, Trump's campaign validation (13:12) State of Israel vs Hamas, escalation risks (23:04)...",
+    "summary": "(0:00) Bestie Intros: Sacks keeps receipts! (1:14) Jared Kushner joins the show: background, Trump's campaign validation (13:12) State of Israel vs Hamas, escalation risks (23:04) Historical context around Israel's relationship with the Arab world, understanding the modern Middle East (38:55) Failed solutions, Israel's response, paths to stability (1:04:54)...",
+    "durationSeconds": 6619,
+    "durationLabel": "01:50:19",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Defense",
+      "Israel",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e153-in-conversation-with-jared-kushner-israel-hamas-war-paths-forward-macro-picture-ai",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e153-in-conversation-with-jared-kushner-israel-hamas-war-paths-forward-macro-picture-ai",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E153.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e153",
+    "dataFile": "/data/all-in-podcast-search/episodes/e153-in-conversation-with-jared-kushner-israel-hamas-war-paths-forward-macro-picture-ai.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:14",
+      "text": "Bestie Intros: Sacks keeps receipts!"
+    },
+    {
+      "startTimestamp": "01:14",
+      "endTimestamp": "13:12",
+      "text": "Jared Kushner joins the show: background, Trump's campaign validation"
+    },
+    {
+      "startTimestamp": "13:12",
+      "endTimestamp": "23:04",
+      "text": "State of Israel vs Hamas, escalation risks"
+    },
+    {
+      "startTimestamp": "23:04",
+      "endTimestamp": "38:55",
+      "text": "Historical context around Israel's relationship with the Arab world, understanding the modern Middle East"
+    },
+    {
+      "startTimestamp": "38:55",
+      "endTimestamp": "01:04:54",
+      "text": "Failed solutions, Israel's response, paths to stability"
+    },
+    {
+      "startTimestamp": "01:04:54",
+      "endTimestamp": "01:15:36",
+      "text": "GOP debate, establishment blind spots, pragmatic politics, tribal infighting"
+    },
+    {
+      "startTimestamp": "01:15:36",
+      "endTimestamp": "01:28:03",
+      "text": "Improving macro picture, potential impact on 2024 election cycle"
+    },
+    {
+      "startTimestamp": "01:28:03",
+      "endTimestamp": "01:32:53",
+      "text": "Russia-Ukraine"
+    },
+    {
+      "startTimestamp": "01:32:53",
+      "text": "Big week in AI: OpenAI DevDay, xAI launches Grok, Kai-Fu Lee's announcement Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow Jared: https://twitter.com/jaredkushner Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/DavidSacks/status/1722342698110304752 https://twitter.com/DavidSacks/status/1722288226235498511 https://www.youtube.com/watch?v=In1MYEc0-10 https://fred.stlouisfed.org/series/WM2NS https://fred.stlouisfed.org/series/CORESTICKM159SFRBATL https://fred.stlouisfed.org/series/T10YIE https://fred.stlouisfed.org/series/MMMFFAQ027S https://www.google.com/finance/quote/ADYEY:OTCMKTS https://www.google.com/finance/quote/DASH:NASDAQ https://www.google.com/finance/quote/DDOG:NASDAQ https://twitter.com/sundeep/status/1722635065983897910 https://twitter.com/elonmusk/status/1721029443160772875 https://twitter.com/kaifulee/status/1721321096727994590 https://openai.com/blog/introducing-gpts https://openai.com/blog/new-models-and-developer-products-announced-at-devday https://twitter.com/chamath/status/1721234497482670438"
+    }
+  ]
+}

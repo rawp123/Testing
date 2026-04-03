@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.435Z",
+  "episode": {
+    "id": "all-in-sundar-pichai-ceo-of-alphabet-the-all-in-interview",
+    "slug": "sundar-pichai-ceo-of-alphabet-the-all-in-interview",
+    "episodeNumber": null,
+    "title": "Sundar Pichai, CEO of Alphabet | The All-In Interview",
+    "publishDate": "2025-05-16",
+    "description": "(0:00) David Friedberg welcomes Alphabet CEO Sundar Pichai (2:58) Will AI kill search?: Google disrupting itself, evolving search to follow the user (15:32) Infrastructure...",
+    "summary": "(0:00) David Friedberg welcomes Alphabet CEO Sundar Pichai (2:58) Will AI kill search?: Google disrupting itself, evolving search to follow the user (15:32) Infrastructure advantage, foundational model differentiation (25:08) Future of human-computer interaction, hardware, competitive landscape in AI (35:29) Energy constraints in AI (41:20) Google's...",
+    "durationSeconds": 3741,
+    "durationLabel": "01:02:21",
+    "guests": [
+      "Sundar Pichai"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Search",
+      "Infrastructure",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/sundar-pichai-ceo-of-alphabet-the-all-in-interview",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/sundar-pichai-ceo-of-alphabet-the-all-in-interview",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/250514_ALLIN_INTV_SundarPichai.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/c/d/b/1/cdb19d4b8fc3b6d5d959afa2a1bf1c87/1x1_Thumbnail_SUNDAR.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-sundar-pichai-ceo-of-alphabet-the-all-in-interview",
+    "dataFile": "/data/all-in-podcast-search/episodes/sundar-pichai-ceo-of-alphabet-the-all-in-interview.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:58",
+      "text": "David Friedberg welcomes Alphabet CEO Sundar Pichai"
+    },
+    {
+      "startTimestamp": "02:58",
+      "endTimestamp": "15:32",
+      "text": "Will AI kill search?: Google disrupting itself, evolving search to follow the user"
+    },
+    {
+      "startTimestamp": "15:32",
+      "endTimestamp": "25:08",
+      "text": "Infrastructure advantage, foundational model differentiation"
+    },
+    {
+      "startTimestamp": "25:08",
+      "endTimestamp": "35:29",
+      "text": "Future of human-computer interaction, hardware, competitive landscape in AI"
+    },
+    {
+      "startTimestamp": "35:29",
+      "endTimestamp": "41:20",
+      "text": "Energy constraints in AI"
+    },
+    {
+      "startTimestamp": "41:20",
+      "endTimestamp": "47:56",
+      "text": "Google's progress in quantum computing and robotics"
+    },
+    {
+      "startTimestamp": "47:56",
+      "endTimestamp": "56:50",
+      "text": "Culture, coddling, and talent recruitment in the age of AI"
+    },
+    {
+      "startTimestamp": "56:50",
+      "text": "Does he consider Alphabet a holding company searching for Google's next $100B business? Follow Sundar: https://x.com/sundarpichai Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

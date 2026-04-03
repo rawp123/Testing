@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.942Z",
+  "episode": {
+    "id": "all-in-e65",
+    "slug": "redirect-mp3-traffic-libsyn-com-allinchamathjason-allin-e65-mp3",
+    "episodeNumber": 65,
+    "title": "E65: VC markup dynamics, Russia/US tensions over Ukraine, Altos Labs raises $3B, Stripe mafia &amp; more",
+    "publishDate": "2022-01-29",
+    "description": "1:35 Reflecting on bad investment decisions and markup dynamics 15:20 Rising tensions between US and Russia over Ukraine, Putin's demands, NATO negotiations as the underreported...",
+    "summary": "1:35 Reflecting on bad investment decisions and markup dynamics 15:20 Rising tensions between US and Russia over Ukraine, Putin's demands, NATO negotiations as the underreported key piece, Obama's savvy Russia dealings 39:16 Bill Ackman buys the Netflix dip, Tesla and Microsoft crush earnings, the Fed signals rate hikes 55:18 Altos Labs raises $3B in the...",
+    "durationSeconds": 4452,
+    "durationLabel": "01:14:12",
+    "guests": [],
+    "topicTags": [
+      "Tesla",
+      "Markets",
+      "Venture capital",
+      "Media",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/allinchamathjason/ALLIN-E65.mp3",
+    "fullEpisodeUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/allinchamathjason/ALLIN-E65.mp3",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E65.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 0,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "",
+    "transcriptAvailable": false,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e65",
+    "dataFile": "/data/all-in-podcast-search/episodes/redirect-mp3-traffic-libsyn-com-allinchamathjason-allin-e65-mp3.json"
+  },
+  "chunks": []
+}

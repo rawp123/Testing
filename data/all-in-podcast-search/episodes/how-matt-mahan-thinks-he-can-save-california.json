@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.179Z",
+  "episode": {
+    "id": "all-in-how-matt-mahan-thinks-he-can-save-california",
+    "slug": "how-matt-mahan-thinks-he-can-save-california",
+    "episodeNumber": null,
+    "title": "How Matt Mahan Thinks He Can Save California",
+    "publishDate": "2026-03-23",
+    "description": "(0:00) Matt Mahan: Why He's Running for Governor (1:51) How California Went From Bad to Worse (12:05) Public Sector Unions & Lobbying in Sacramento (19:05) California's Housing...",
+    "summary": "(0:00) Matt Mahan: Why He's Running for Governor (1:51) How California Went From Bad to Worse (12:05) Public Sector Unions & Lobbying in Sacramento (19:05) California's Housing Crisis: Regulation & Fees (34:52) California Energy Crisis: Gas Taxes & Green Policy (43:57) The $1 Trillion Pension Time Bomb (1:02:37) Trump, Tariffs & the Rise of Dangerous...",
+    "durationSeconds": 4633,
+    "durationLabel": "01:17:13",
+    "guests": [
+      "Matt Mahan"
+    ],
+    "topicTags": [
+      "Politics",
+      "Energy",
+      "Regulation",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/how-matt-mahan-thinks-he-can-save-california",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/how-matt-mahan-thinks-he-can-save-california",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_INTV_MAHAN_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/b/8/8/6b88af06c8af4151d959afa2a1bf1c87/1_Pod_Mahan.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-how-matt-mahan-thinks-he-can-save-california",
+    "dataFile": "/data/all-in-podcast-search/episodes/how-matt-mahan-thinks-he-can-save-california.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:51",
+      "text": "Matt Mahan: Why He's Running for Governor"
+    },
+    {
+      "startTimestamp": "01:51",
+      "endTimestamp": "12:05",
+      "text": "How California Went From Bad to Worse"
+    },
+    {
+      "startTimestamp": "12:05",
+      "endTimestamp": "19:05",
+      "text": "Public Sector Unions & Lobbying in Sacramento"
+    },
+    {
+      "startTimestamp": "19:05",
+      "endTimestamp": "34:52",
+      "text": "California's Housing Crisis: Regulation & Fees"
+    },
+    {
+      "startTimestamp": "34:52",
+      "endTimestamp": "43:57",
+      "text": "California Energy Crisis: Gas Taxes & Green Policy"
+    },
+    {
+      "startTimestamp": "43:57",
+      "endTimestamp": "01:02:37",
+      "text": "The $1 Trillion Pension Time Bomb"
+    },
+    {
+      "startTimestamp": "01:02:37",
+      "endTimestamp": "01:09:14",
+      "text": "Trump, Tariffs & the Rise of Dangerous Populism"
+    },
+    {
+      "startTimestamp": "01:09:14",
+      "text": "Immigration Reform: ICE & the Path to Legal Status Follow Matt Mahan: https://x.com/MattMahanSJ?lang=en https://www.instagram.com/mattmahansj/ https://www.tiktok.com/@mattmahansj Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect #allin #tech #news"
+    }
+  ]
+}

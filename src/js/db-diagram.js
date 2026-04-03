@@ -990,18 +990,49 @@ Table support_tickets {
 
   function getFieldCenter(frame, renderState, rowIndex, side, metrics) {
     const displayIndex = renderState.visibleFieldIndexMap.get(rowIndex);
-    const y = displayIndex === undefined
+    const innerWidth = Math.max(1, frame.width - metrics.tablePaddingX * 2);
+    const slotCount = Math.max(1, renderState.totalFields);
+    const fieldSlotIndex = Math.max(0, Math.min(slotCount - 1, rowIndex));
+    const fieldX = frame.x + metrics.tablePaddingX + ((fieldSlotIndex + 0.5) / slotCount) * innerWidth;
+    const fieldY = displayIndex === undefined
       ? frame.y + frame.height - (renderState.canExpand ? metrics.tableFooterHeight / 2 : metrics.tablePaddingY)
       : frame.y + metrics.tableHeaderHeight + metrics.tablePaddingY + displayIndex * metrics.tableRowHeight + metrics.fieldCenterOffsetY;
-    const x = side === 'left' ? frame.x : frame.x + frame.width;
+    const x = side === 'left'
+      ? frame.x
+      : side === 'right'
+        ? frame.x + frame.width
+        : fieldX;
+    const y = side === 'top'
+      ? frame.y
+      : side === 'bottom'
+        ? frame.y + frame.height
+        : fieldY;
     return { x, y };
+  }
+
+  function isVerticalSide(side) {
+    return side === 'top' || side === 'bottom';
   }
 
   function getConnectionSides(connection, layout) {
     const fromFrame = layout.positions[connection.fromTable];
     const toFrame = layout.positions[connection.toTable];
-    const fromSide = fromFrame.x <= toFrame.x ? 'right' : 'left';
-    const toSide = fromSide === 'right' ? 'left' : 'right';
+    const overlapWidth = Math.min(fromFrame.x + fromFrame.width, toFrame.x + toFrame.width) - Math.max(fromFrame.x, toFrame.x);
+    const overlapRatio = overlapWidth / Math.max(1, Math.min(fromFrame.width, toFrame.width));
+    const isVerticallyStacked = overlapWidth > 0 && overlapRatio >= 0.45;
+    let fromSide;
+    let toSide;
+
+    if (isVerticallyStacked) {
+      const fromCenterY = fromFrame.y + fromFrame.height / 2;
+      const toCenterY = toFrame.y + toFrame.height / 2;
+      const fromAboveTarget = fromCenterY <= toCenterY;
+      fromSide = fromAboveTarget ? 'bottom' : 'top';
+      toSide = fromAboveTarget ? 'top' : 'bottom';
+    } else {
+      fromSide = fromFrame.x <= toFrame.x ? 'right' : 'left';
+      toSide = fromSide === 'right' ? 'left' : 'right';
+    }
 
     return { fromSide, toSide };
   }
@@ -1022,8 +1053,8 @@ Table support_tickets {
       const start = getFieldCenter(fromFrame, fromRenderState, connection.fromRowIndex, fromSide, metrics);
       const end = getFieldCenter(toFrame, toRenderState, connection.toRowIndex, toSide, metrics);
 
-      connection._anchorStartY = start.y;
-      connection._anchorEndY = end.y;
+      connection._anchorStartAxis = isVerticalSide(fromSide) ? start.x : start.y;
+      connection._anchorEndAxis = isVerticalSide(toSide) ? end.x : end.y;
 
       const sourceKey = `${connection.fromTable}|${fromSide}`;
       const targetKey = `${connection.toTable}|${toSide}`;
@@ -1039,11 +1070,11 @@ Table support_tickets {
       targetGroups.get(targetKey).push(connection);
     });
 
-    function assignGroupOffsets(groups, propertyName, yPropertyName) {
+    function assignGroupOffsets(groups, propertyName, axisPropertyName) {
       groups.forEach((group) => {
         group.sort((left, right) => {
-          if (left[yPropertyName] !== right[yPropertyName]) {
-            return left[yPropertyName] - right[yPropertyName];
+          if (left[axisPropertyName] !== right[axisPropertyName]) {
+            return left[axisPropertyName] - right[axisPropertyName];
           }
 
           if (left.fromTable !== right.fromTable) {
@@ -1065,47 +1096,82 @@ Table support_tickets {
       });
     }
 
-    assignGroupOffsets(sourceGroups, 'startLaneIndex', '_anchorStartY');
-    assignGroupOffsets(targetGroups, 'endLaneIndex', '_anchorEndY');
+    assignGroupOffsets(sourceGroups, 'startLaneIndex', '_anchorStartAxis');
+    assignGroupOffsets(targetGroups, 'endLaneIndex', '_anchorEndAxis');
   }
 
   function buildOrthogonalPath(start, end, fromSide, toSide, startLaneIndex = 0, endLaneIndex = 0) {
     const outwardOffset = 28;
     const laneGap = 18;
-    const fromDirection = fromSide === 'right' ? 1 : -1;
-    const toDirection = toSide === 'right' ? 1 : -1;
-    const startBendX = start.x + fromDirection * (outwardOffset + startLaneIndex * laneGap);
-    const endBendX = end.x + toDirection * (outwardOffset + endLaneIndex * laneGap);
-    const horizontalClearance = fromSide === 'right'
-      ? endBendX - startBendX
-      : startBendX - endBendX;
-    const points = [
-      start,
-      { x: startBendX, y: start.y }
-    ];
+    const points = [start];
 
-    if (horizontalClearance >= 24) {
-      const laneSpread = ((startLaneIndex + endLaneIndex) * laneGap) / 2;
-      const midX = ((startBendX + endBendX) / 2) + fromDirection * laneSpread;
+    if (isVerticalSide(fromSide) && isVerticalSide(toSide)) {
+      const fromDirection = fromSide === 'bottom' ? 1 : -1;
+      const toDirection = toSide === 'bottom' ? 1 : -1;
+      const startBendY = start.y + fromDirection * (outwardOffset + startLaneIndex * laneGap);
+      const endBendY = end.y + toDirection * (outwardOffset + endLaneIndex * laneGap);
+      const verticalClearance = fromSide === 'bottom'
+        ? endBendY - startBendY
+        : startBendY - endBendY;
+
+      points.push({ x: start.x, y: startBendY });
+
+      if (verticalClearance >= 24) {
+        const laneSpread = ((startLaneIndex + endLaneIndex) * laneGap) / 2;
+        const midY = ((startBendY + endBendY) / 2) + fromDirection * laneSpread;
+        points.push(
+          { x: start.x, y: midY },
+          { x: end.x, y: midY }
+        );
+      } else {
+        const deltaX = end.x - start.x;
+        const midX = Math.abs(deltaX) >= 16
+          ? start.x + deltaX / 2
+          : start.x + (start.x <= end.x ? 40 : -40);
+        points.push(
+          { x: midX, y: startBendY },
+          { x: midX, y: endBendY }
+        );
+      }
+
       points.push(
-        { x: midX, y: start.y },
-        { x: midX, y: end.y }
+        { x: end.x, y: endBendY },
+        end
       );
     } else {
-      const deltaY = end.y - start.y;
-      const midY = Math.abs(deltaY) >= 16
-        ? start.y + deltaY / 2
-        : start.y + (start.y <= end.y ? 40 : -40);
+      const fromDirection = fromSide === 'right' ? 1 : -1;
+      const toDirection = toSide === 'right' ? 1 : -1;
+      const startBendX = start.x + fromDirection * (outwardOffset + startLaneIndex * laneGap);
+      const endBendX = end.x + toDirection * (outwardOffset + endLaneIndex * laneGap);
+      const horizontalClearance = fromSide === 'right'
+        ? endBendX - startBendX
+        : startBendX - endBendX;
+
+      points.push({ x: startBendX, y: start.y });
+
+      if (horizontalClearance >= 24) {
+        const laneSpread = ((startLaneIndex + endLaneIndex) * laneGap) / 2;
+        const midX = ((startBendX + endBendX) / 2) + fromDirection * laneSpread;
+        points.push(
+          { x: midX, y: start.y },
+          { x: midX, y: end.y }
+        );
+      } else {
+        const deltaY = end.y - start.y;
+        const midY = Math.abs(deltaY) >= 16
+          ? start.y + deltaY / 2
+          : start.y + (start.y <= end.y ? 40 : -40);
+        points.push(
+          { x: startBendX, y: midY },
+          { x: endBendX, y: midY }
+        );
+      }
+
       points.push(
-        { x: startBendX, y: midY },
-        { x: endBendX, y: midY }
+        { x: endBendX, y: end.y },
+        end
       );
     }
-
-    points.push(
-      { x: endBendX, y: end.y },
-      end
-    );
 
     const deduped = points.filter((point, index) => index === 0 || point.x !== points[index - 1].x || point.y !== points[index - 1].y);
     return deduped.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
@@ -1149,6 +1215,8 @@ Table support_tickets {
       const group = createSvgElement('g', {
         class: 'db-relationship'
       });
+      const title = createSvgElement('title');
+      title.textContent = `${relationship.fromTable}.${relationship.fromField} -> ${relationship.toTable}.${relationship.toField}`;
       const path = createSvgElement('path', {
         class: 'db-relationship-path',
         fill: 'none',
@@ -1174,6 +1242,7 @@ Table support_tickets {
         fill: palette.relationshipDot
       });
 
+      group.appendChild(title);
       group.appendChild(path);
       group.appendChild(startDot);
       group.appendChild(endDot);

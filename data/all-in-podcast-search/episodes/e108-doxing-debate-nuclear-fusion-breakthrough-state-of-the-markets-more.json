@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.878Z",
+  "episode": {
+    "id": "all-in-e108",
+    "slug": "e108-doxing-debate-nuclear-fusion-breakthrough-state-of-the-markets-more",
+    "episodeNumber": 108,
+    "title": "E108: Doxing debate, Nuclear fusion breakthrough, state of the markets &amp; more",
+    "publishDate": "2022-12-16",
+    "description": "(0:00) Jason's new gig! (1:05) Twitter's new privacy rules, notable suspension, doxing dynamics (20:48) Nuclear fusion breakthrough and geopolitical ramifications (42:58) Jason...",
+    "summary": "(0:00) Jason's new gig! (1:05) Twitter's new privacy rules, notable suspension, doxing dynamics (20:48) Nuclear fusion breakthrough and geopolitical ramifications (42:58) Jason and Sacks's big night (51:11) State of the markets: Coupa acquired by Thoma Bravo, startups at all stages seeing heavy valuation reductions, what LPs are thinking (1:22:08) TV catch...",
+    "durationSeconds": 5364,
+    "durationLabel": "01:29:24",
+    "guests": [],
+    "topicTags": [
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e108-doxing-debate-nuclear-fusion-breakthrough-state-of-the-markets-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e108-doxing-debate-nuclear-fusion-breakthrough-state-of-the-markets-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E108.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e108",
+    "dataFile": "/data/all-in-podcast-search/episodes/e108-doxing-debate-nuclear-fusion-breakthrough-state-of-the-markets-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:05",
+      "text": "Jason's new gig!"
+    },
+    {
+      "startTimestamp": "01:05",
+      "endTimestamp": "20:48",
+      "text": "Twitter's new privacy rules, notable suspension, doxing dynamics"
+    },
+    {
+      "startTimestamp": "20:48",
+      "endTimestamp": "42:58",
+      "text": "Nuclear fusion breakthrough and geopolitical ramifications"
+    },
+    {
+      "startTimestamp": "42:58",
+      "endTimestamp": "51:11",
+      "text": "Jason and Sacks's big night"
+    },
+    {
+      "startTimestamp": "51:11",
+      "endTimestamp": "01:22:08",
+      "text": "State of the markets: Coupa acquired by Thoma Bravo, startups at all stages seeing heavy valuation reductions, what LPs are thinking"
+    },
+    {
+      "startTimestamp": "01:22:08",
+      "text": "TV catch up, worst person in tech bracket Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.finextra.com/newsarticle/41483/checkoutcom-chalks-70-off-valuation https://twitter.com/Cernovich/status/1602457619431493634 https://twitter.com/elonmusk/status/1603190155107794944 https://en.wikipedia.org/wiki/National_Ignition_Facility https://www.ft.com/content/4b6f0fab-66ef-4e33-adec-cfc345589dc7 https://www.neimagazine.com/news/newsfusion-industry-survey-shows-significant-increase-in-private-investment-9860867 https://www.reuters.com/markets/deals/thoma-bravo-buy-coupa-software-615-billion-2022-12-12 https://www.finextra.com/newsarticle/41483/checkoutcom-chalks-70-off-valuation"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.376Z",
+  "episode": {
+    "id": "all-in-winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan",
+    "slug": "winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan",
+    "episodeNumber": null,
+    "title": "Winning the AI Race Part 5: President Trump on the AI Action Plan",
+    "publishDate": "2025-07-24",
+    "description": "(0:00) President Trump on the AI Agenda (54:14) Executive Order signing NYSE : https://www.nyse.com Visa: https://usa.visa.com",
+    "summary": "(0:00) President Trump on the AI Agenda (54:14) Executive Order signing NYSE : https://www.nyse.com Visa: https://usa.visa.com",
+    "durationSeconds": 3440,
+    "durationLabel": "57:20",
+    "guests": [
+      "President Trump"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_AIDAY_SESSION5_Trump_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/2/2/3/2/22328f6cf64524e1d959afa2a1bf1c87/Winning_the_AI_Race_Pod-20250724-r40rahy8eu.png",
+    "chunkCount": 2,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan",
+    "dataFile": "/data/all-in-podcast-search/episodes/winning-the-ai-race-part-5-president-trump-on-the-ai-action-plan.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "54:14",
+      "text": "President Trump on the AI Agenda"
+    },
+    {
+      "startTimestamp": "54:14",
+      "text": "Executive Order signing"
+    }
+  ]
+}

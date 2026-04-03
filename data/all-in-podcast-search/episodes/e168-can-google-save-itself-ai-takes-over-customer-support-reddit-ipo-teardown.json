@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.665Z",
+  "episode": {
+    "id": "all-in-e168",
+    "slug": "e168-can-google-save-itself-ai-takes-over-customer-support-reddit-ipo-teardown",
+    "episodeNumber": 168,
+    "title": "E168: Can Google save itself? AI takes over Customer Support, Reddit IPO teardown",
+    "publishDate": "2024-03-01",
+    "description": "(0:00) Bestie intros! Jato Caelin (1:36) Groq update!: The key metric developer platforms should care about (5:55) Google's make or break moment: Should Sundar be fired, AI safety...",
+    "summary": "(0:00) Bestie intros! Jato Caelin (1:36) Groq update!: The key metric developer platforms should care about (5:55) Google's make or break moment: Should Sundar be fired, AI safety team's power, RIF potential, stock pressure, and more (29:17) How bloated HR departments slow down companies (40:15) Google's licensing deals: Is this TAC 2.0? How can Reddit...",
+    "durationSeconds": 5212,
+    "durationLabel": "01:26:52",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Markets",
+      "Infrastructure",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e168-can-google-save-itself-ai-takes-over-customer-support-reddit-ipo-teardown",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e168-can-google-save-itself-ai-takes-over-customer-support-reddit-ipo-teardown",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E168.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e168",
+    "dataFile": "/data/all-in-podcast-search/episodes/e168-can-google-save-itself-ai-takes-over-customer-support-reddit-ipo-teardown.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:36",
+      "text": "Bestie intros! Jato Caelin"
+    },
+    {
+      "startTimestamp": "01:36",
+      "endTimestamp": "05:55",
+      "text": "Groq update!: The key metric developer platforms should care about"
+    },
+    {
+      "startTimestamp": "05:55",
+      "endTimestamp": "29:17",
+      "text": "Google's make or break moment: Should Sundar be fired, AI safety team's power, RIF potential, stock pressure, and more"
+    },
+    {
+      "startTimestamp": "29:17",
+      "endTimestamp": "40:15",
+      "text": "How bloated HR departments slow down companies"
+    },
+    {
+      "startTimestamp": "40:15",
+      "endTimestamp": "53:50",
+      "text": "Google's licensing deals: Is this TAC 2.0? How can Reddit capitalize on its data?"
+    },
+    {
+      "startTimestamp": "53:50",
+      "endTimestamp": "01:13:06",
+      "text": "Klarna's huge AI innovation: AI disruption, open-source benefits, a new class of billion-dollar startups"
+    },
+    {
+      "startTimestamp": "01:13:06",
+      "endTimestamp": "01:22:52",
+      "text": "Reddit S-1 breakdown"
+    },
+    {
+      "startTimestamp": "01:22:52",
+      "text": "The Apple Car is dead: Apple cancels Project Titan Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.google.com/finance/quote/GOOG:NASDAQ https://twitter.com/PirateWires/status/1762842476744708171 https://twitter.com/lulumeservey/status/1762864255437516932 https://x.com/pmarca/status/1762532979317043515 https://twitter.com/shellenberger/status/1762900581134557636 https://twitter.com/shaunmmaguire/status/1760885099984261564 https://www.reuters.com/technology/reddit-ai-content-licensing-deal-with-google-sources-say-2024-02-22 https://techcrunch.com/2024/02/29/google-brings-stack-overflows-knowledge-base-to-gemini https://www.sec.gov/Archives/edgar/data/1713445/000162828024006294/reddits-1q423.htm https://static01.nyt.com/newsgraphics/documenttools/82a013b9ba852548/9d4b1790-full.pdf https://www.klarna.com/international/press/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month https://www.google.com/finance/quote/TLPFY:OTCMKTS https://tech.facebook.com/artificial-intelligence/2022/10/ai-translation-unwritten-language https://www.engadget.com/metas-new-multimodal-translator-uses-a-single-model-to-speak-100-languages-133040214.html https://twitter.com/balajis/status/1763067849218850939 https://old.reddit.com/r/AskReddit/comments/3cs78i/whats_the_best_long_con_you_ever_pulled/cszjqg2 https://www.bloomberg.com/news/articles/2024-02-27/apple-cancels-work-on-electric-car-shifts-team-to-generative-ai"
+    }
+  ]
+}

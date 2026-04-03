@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.866Z",
+  "episode": {
+    "id": "all-in-e114",
+    "slug": "v2-e114-markets-update-whipsaw-macro-picture-big-tech-startup-mass-extinction-event-vc-reckoning",
+    "episodeNumber": 114,
+    "title": "E114: Markets update: whipsaw macro picture, big tech, startup mass extinction event, VC reckoning",
+    "publishDate": "2023-02-04",
+    "description": "(0:00) Bestie intro! (1:15) Macro picture update: 0.25% raise, jobs rip up, wage growth continues to slow (17:52) Interest rates impact on mega-cap company creation (33:58) Mass...",
+    "summary": "(0:00) Bestie intro! (1:15) Macro picture update: 0.25% raise, jobs rip up, wage growth continues to slow (17:52) Interest rates impact on mega-cap company creation (33:58) Mass extinction event coming to startups, reckoning for VCs, venture debt issues (1:02:33) Adani's potential fraud, role of short sellers",
+    "durationSeconds": 4353,
+    "durationLabel": "01:12:33",
+    "guests": [],
+    "topicTags": [
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/v2-e114-markets-update-whipsaw-macro-picture-big-tech-startup-mass-extinction-event-vc-reckoning",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/v2-e114-markets-update-whipsaw-macro-picture-big-tech-startup-mass-extinction-event-vc-reckoning",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E114_V2.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e114",
+    "dataFile": "/data/all-in-podcast-search/episodes/v2-e114-markets-update-whipsaw-macro-picture-big-tech-startup-mass-extinction-event-vc-reckoning.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:15",
+      "text": "Bestie intro!"
+    },
+    {
+      "startTimestamp": "01:15",
+      "endTimestamp": "17:52",
+      "text": "Macro picture update: 0.25% raise, jobs rip up, wage growth continues to slow"
+    },
+    {
+      "startTimestamp": "17:52",
+      "endTimestamp": "33:58",
+      "text": "Interest rates impact on mega-cap company creation"
+    },
+    {
+      "startTimestamp": "33:58",
+      "endTimestamp": "01:02:33",
+      "text": "Mass extinction event coming to startups, reckoning for VCs, venture debt issues"
+    },
+    {
+      "startTimestamp": "01:02:33",
+      "text": "Adani's potential fraud, role of short sellers Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.washingtonpost.com/business/2023/02/03/january-jobs-labor-market https://www.wsj.com/articles/fed-approves-quarter-point-rate-hike-signals-more-increaseslikely-11675278190 https://fred.stlouisfed.org/series/CIVPART https://www.ustreasuryyieldcurve.com https://www.amazon.com/Intelligent-Investor-Definitive-Investing-Essentials/dp/0060555661 https://chamathreads.substack.com/p/higher-rates-will-lead-to-the-next https://www.google.com/finance/quote/META:NASDAQ https://medium.com/@alt.cap/time-to-get-fit-an-open-letter-from-altimeter-to-mark-zuckerberg-and-the-meta-board-of-392d94e80a18 https://www.freightwaves.com/news/fedex-to-cut-global-officer-director-workforce-by-at-least-10 https://www.theverge.com/2023/1/27/23574322/zuckerberg-puts-metas-middle-managers-on-notice https://twitter.com/tomloverro/status/1620466827519496194 https://twitter.com/msuster/status/1620653106387386368 https://twitter.com/gradypb/status/1620937502248034304 https://www.axios.com/2023/02/01/david-cahn-leaves-coatue-for-sequoia-capital https://www.google.com/finance/quote/ADANIENT:NSE?window=1Y https://hindenburgresearch.com/adani https://www.bloomberg.com/news/articles/2023-01-30/most-adani-stocks-drop-as-rebuttal-draws-hindenburg-response https://www.sec.gov/rules/proposed/2022/34-94313.pdf https://www.theatlantic.com/magazine/archive/2023/03/wall-street-muddy-waters-activist-short-sellers-tesla-gamestop/672774"
+    }
+  ]
+}

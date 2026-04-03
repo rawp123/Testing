@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.913Z",
+  "episode": {
+    "id": "all-in-ais-joe-lonsdale-on-the-problem-with-higher-education",
+    "slug": "ais-joe-lonsdale-on-the-problem-with-higher-education",
+    "episodeNumber": null,
+    "title": "#AIS: Joe Lonsdale on the problem with higher education",
+    "publishDate": "2022-06-02",
+    "description": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Joe...",
+    "summary": "This talk was recorded LIVE at the All-In Summit in Miami and included slides. To watch on YouTube, check out our All-In Summit playlist: https://bit.ly/aisytplaylist 0:00 Joe Lonsdale speaks about the problem with higher education and the importance of debate/truth-seeking 10:13 Bestie Q&A with Joe: Why Americans feel victimized, what happened in 1971,...",
+    "durationSeconds": 1730,
+    "durationLabel": "28:50",
+    "guests": [
+      "Joe Lonsdale"
+    ],
+    "topicTags": [
+      "Google"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ais-joe-lonsdale-on-the-problem-with-higher-education",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ais-joe-lonsdale-on-the-problem-with-higher-education",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS2022_JoeLonsdale.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 0,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "",
+    "transcriptAvailable": false,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ais-joe-lonsdale-on-the-problem-with-higher-education",
+    "dataFile": "/data/all-in-podcast-search/episodes/ais-joe-lonsdale-on-the-problem-with-higher-education.json"
+  },
+  "chunks": []
+}

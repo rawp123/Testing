@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.351Z",
+  "episode": {
+    "id": "all-in-elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding",
+    "slug": "elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding",
+    "episodeNumber": null,
+    "title": "Elon Musk on DOGE, Optimus, Starlink Smartphones, Evolving with AI, Why the West is Imploding",
+    "publishDate": "2025-09-10",
+    "description": "(0:00) Introducing Elon Musk, and reflecting on his DOGE experience (2:47) Optimus: Progress and potential, the \"hands problem\" (12:20) Tesla: AI5 chips, impact on FSD (16:50)...",
+    "summary": "(0:00) Introducing Elon Musk, and reflecting on his DOGE experience (2:47) Optimus: Progress and potential, the \"hands problem\" (12:20) Tesla: AI5 chips, impact on FSD (16:50) SpaceX: Vision for Starlink-enabled smartphones, $17B spectrum deal, Starship update (26:16) xAI: Next-gen Grok models, Colossus 2, scaling laws, \"Grokipedia\" (31:29) Evolving...",
+    "durationSeconds": 2688,
+    "durationLabel": "44:48",
+    "guests": [
+      "Elon Musk"
+    ],
+    "topicTags": [
+      "AI",
+      "Tesla",
+      "Robotics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ELON_AIS25.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/7/c/8/d7c8937155250cbfd959afa2a1bf1c87/elon_podcast.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding",
+    "dataFile": "/data/all-in-podcast-search/episodes/elon-musk-on-doge-optimus-starlink-smartphones-evolving-with-ai-why-the-west-is-imploding.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:47",
+      "text": "Introducing Elon Musk, and reflecting on his DOGE experience"
+    },
+    {
+      "startTimestamp": "02:47",
+      "endTimestamp": "12:20",
+      "text": "Optimus: Progress and potential, the \"hands problem\""
+    },
+    {
+      "startTimestamp": "12:20",
+      "endTimestamp": "16:50",
+      "text": "Tesla: AI5 chips, impact on FSD"
+    },
+    {
+      "startTimestamp": "16:50",
+      "endTimestamp": "26:16",
+      "text": "SpaceX: Vision for Starlink-enabled smartphones, $17B spectrum deal, Starship update"
+    },
+    {
+      "startTimestamp": "26:16",
+      "endTimestamp": "31:29",
+      "text": "xAI: Next-gen Grok models, Colossus 2, scaling laws, \"Grokipedia\""
+    },
+    {
+      "startTimestamp": "31:29",
+      "endTimestamp": "37:36",
+      "text": "Evolving alongside AI, implosion of the West, the religion vacuum"
+    },
+    {
+      "startTimestamp": "37:36",
+      "text": "Understanding the universe, going to the Moon, what happens on Mars?"
+    }
+  ]
+}

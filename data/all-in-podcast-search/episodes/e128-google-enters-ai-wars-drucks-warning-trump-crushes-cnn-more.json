@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.787Z",
+  "episode": {
+    "id": "all-in-e128",
+    "slug": "e128-google-enters-ai-wars-drucks-warning-trump-crushes-cnn-more",
+    "episodeNumber": 128,
+    "title": "E128: Google enters AI wars, Druck's warning, Trump crushes CNN &amp; more",
+    "publishDate": "2023-05-12",
+    "description": "(0:00) All-In Summit 2023 announcement! (3:10) Google IO releases, updated Bard demo, fighting the innovator's dilemma (18:33) AI regulation updates (23:41) Druckenmiller's...",
+    "summary": "(0:00) All-In Summit 2023 announcement! (3:10) Google IO releases, updated Bard demo, fighting the innovator's dilemma (18:33) AI regulation updates (23:41) Druckenmiller's warning, macro overview (40:22) RFK Jr. feedback, pushback, conspiracy accusations (49:52) Trump dominates CNN \"Town Hall,\" Trump vs. Biden potential (1:10:24) Jason reflects on his trip...",
+    "durationSeconds": 4760,
+    "durationLabel": "01:19:20",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Politics",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e128-google-enters-ai-wars-drucks-warning-trump-crushes-cnn-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e128-google-enters-ai-wars-drucks-warning-trump-crushes-cnn-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E128_1.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e128",
+    "dataFile": "/data/all-in-podcast-search/episodes/e128-google-enters-ai-wars-drucks-warning-trump-crushes-cnn-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:10",
+      "text": "All-In Summit 2023 announcement!"
+    },
+    {
+      "startTimestamp": "03:10",
+      "endTimestamp": "18:33",
+      "text": "Google IO releases, updated Bard demo, fighting the innovator's dilemma"
+    },
+    {
+      "startTimestamp": "18:33",
+      "endTimestamp": "23:41",
+      "text": "AI regulation updates"
+    },
+    {
+      "startTimestamp": "23:41",
+      "endTimestamp": "40:22",
+      "text": "Druckenmiller's warning, macro overview"
+    },
+    {
+      "startTimestamp": "40:22",
+      "endTimestamp": "49:52",
+      "text": "RFK Jr. feedback, pushback, conspiracy accusations"
+    },
+    {
+      "startTimestamp": "49:52",
+      "endTimestamp": "01:10:24",
+      "text": "Trump dominates CNN \"Town Hall,\" Trump vs. Biden potential"
+    },
+    {
+      "startTimestamp": "01:10:24",
+      "text": "Jason reflects on his trip to the Middle East, and the besties wrap the show! Register for All-In Summit 2023: https://summit.allinpodcast.co Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://blog.google/technology/ai/google-palm-2-ai-large-language-model https://cloud.google.com/blog/products/application-modernization/introducing-duet-ai-for-google-cloud https://www.google.com/finance/quote/GOOGL:NASDAQ https://hedgefollow.com/funds/Duquesne+Family+Office https://twitter.com/joincolossus/status/1656258955780456448 https://www.whitehouse.gov/briefing-room/statements-releases/2023/05/04/fact-sheet-biden-harris-administration-announces-new-actions-to-promote-responsible-ai-innovation-that-protects-americans-rights-and-safety https://www.nytimes.com/2023/05/03/opinion/ai-lina-khan-ftc-technology.html https://uscmarshallweb.s3-us-west-2.amazonaws.com/assets/uploads/s1/files/keynote_speech_of_stan_druckenmiller_at_the_37th_usc_marshall_center_for_investment_studies_annual_meeting_may_1_2023_hdmqn6eb4m.pdf https://www.nytimes.com/live/2023/05/10/business/cpi-inflation-fed https://www.reuters.com/graphics/USA-BIDEN/POLL/nmopagnqapa https://www.cnn.com/2023/05/10/politics/comer-bank-records-biden-family-members-payments-foreign-entities/index.html https://twitter.com/JoshWalkos/status/1655748898357477379 https://nypost.com/2023/05/07/ex-cia-chief-michael-morell-misled-signers-of-hunter-biden-spy-letter-by-saying-hed-clear-it-with-agency https://www.youtube.com/watch?v=KrjL_TSOFrI https://twitter.com/PodiumDotPage/status/1656315157952200704"
+    }
+  ]
+}

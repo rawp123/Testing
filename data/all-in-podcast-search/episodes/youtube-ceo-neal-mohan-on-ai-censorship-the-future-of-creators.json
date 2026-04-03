@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.316Z",
+  "episode": {
+    "id": "all-in-youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators",
+    "slug": "youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators",
+    "episodeNumber": null,
+    "title": "YouTube CEO Neal Mohan on AI, Censorship &amp; the Future of Creators",
+    "publishDate": "2025-10-08",
+    "description": "(0:00) Introducing YouTube CEO Neal Mohan (1:08) YouTube's revenue split with creators (7:30) How Neal thinks about enabling monoculture and connective threads at YouTube (11:23)...",
+    "summary": "(0:00) Introducing YouTube CEO Neal Mohan (1:08) YouTube's revenue split with creators (7:30) How Neal thinks about enabling monoculture and connective threads at YouTube (11:23) Censorship on YouTube, demonetization decisions, dealing with different regimes and laws globally (19:58) YouTube TV, YouTube Premium, and channel subscriptions (24:00) Generative...",
+    "durationSeconds": 1693,
+    "durationLabel": "28:13",
+    "guests": [
+      "Neal Mohan"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Crypto",
+      "Media",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_NealMohan_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/c/b/4/d/cb4d6168db063dbcd959afa2a1bf1c87/1_Pod_Neal.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators",
+    "dataFile": "/data/all-in-podcast-search/episodes/youtube-ceo-neal-mohan-on-ai-censorship-the-future-of-creators.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:08",
+      "text": "Introducing YouTube CEO Neal Mohan"
+    },
+    {
+      "startTimestamp": "01:08",
+      "endTimestamp": "07:30",
+      "text": "YouTube's revenue split with creators"
+    },
+    {
+      "startTimestamp": "07:30",
+      "endTimestamp": "11:23",
+      "text": "How Neal thinks about enabling monoculture and connective threads at YouTube"
+    },
+    {
+      "startTimestamp": "11:23",
+      "endTimestamp": "19:58",
+      "text": "Censorship on YouTube, demonetization decisions, dealing with different regimes and laws globally"
+    },
+    {
+      "startTimestamp": "19:58",
+      "endTimestamp": "24:00",
+      "text": "YouTube TV, YouTube Premium, and channel subscriptions"
+    },
+    {
+      "startTimestamp": "24:00",
+      "text": "Generative AI on YouTube: labeling AI, likeness concerns, possibilities"
+    }
+  ]
+}

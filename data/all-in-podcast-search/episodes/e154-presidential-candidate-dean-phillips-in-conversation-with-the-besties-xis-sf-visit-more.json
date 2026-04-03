@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.715Z",
+  "episode": {
+    "id": "all-in-e154",
+    "slug": "e154-presidential-candidate-dean-phillips-in-conversation-with-the-besties-xis-sf-visit-more",
+    "episodeNumber": 154,
+    "title": "E154: Presidential Candidate Dean Phillips in conversation with the Besties + Xi's SF visit &amp; more",
+    "publishDate": "2023-11-17",
+    "description": "(0:00) Bestie intros! (1:25) Democratic Presidential Candidate Dean Phillips shares his business background (13:11) Dean's time in Congress: witnessing legal corruption, thoughts...",
+    "summary": "(0:00) Bestie intros! (1:25) Democratic Presidential Candidate Dean Phillips shares his business background (13:11) Dean's time in Congress: witnessing legal corruption, thoughts on Biden's mental state, advantages of not being a career politician (29:10) Foreign Policy: Russia/Ukraine, Israel/Hamas, China/US de-escalation, how he'd handle TikTok,...",
+    "durationSeconds": 6979,
+    "durationLabel": "01:56:19",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Politics",
+      "Defense",
+      "China",
+      "Israel"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e154-presidential-candidate-dean-phillips-in-conversation-with-the-besties-xis-sf-visit-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e154-presidential-candidate-dean-phillips-in-conversation-with-the-besties-xis-sf-visit-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E154.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e154",
+    "dataFile": "/data/all-in-podcast-search/episodes/e154-presidential-candidate-dean-phillips-in-conversation-with-the-besties-xis-sf-visit-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:25",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "01:25",
+      "endTimestamp": "13:11",
+      "text": "Democratic Presidential Candidate Dean Phillips shares his business background"
+    },
+    {
+      "startTimestamp": "13:11",
+      "endTimestamp": "29:10",
+      "text": "Dean's time in Congress: witnessing legal corruption, thoughts on Biden's mental state, advantages of not being a career politician"
+    },
+    {
+      "startTimestamp": "29:10",
+      "endTimestamp": "56:08",
+      "text": "Foreign Policy: Russia/Ukraine, Israel/Hamas, China/US de-escalation, how he'd handle TikTok, immigration, border security"
+    },
+    {
+      "startTimestamp": "56:08",
+      "endTimestamp": "01:19:30",
+      "text": "US fiscal situation, healthcare, defense spending, restoring cross-party common ground"
+    },
+    {
+      "startTimestamp": "01:19:30",
+      "endTimestamp": "01:29:12",
+      "text": "Post-interview debrief"
+    },
+    {
+      "startTimestamp": "01:29:12",
+      "endTimestamp": "01:45:00",
+      "text": "Xi and Biden meet in San Francisco, Newsom up next?"
+    },
+    {
+      "startTimestamp": "01:45:00",
+      "text": "Science Corner!: DeepMind's new weather forecasting model Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/TalentiGelato/status/487275228952014848 https://www.pinterest.com/pin/491244271857449720 https://designreplace.com/dean-phillips-us-congress https://braveneweurope.com/michael-von-der-schulenburg-hajo-funke-harald-kujat-peace-for-ukraine https://www.sfgate.com/politics/article/biden-floats-newsom-for-president-apec-in-sf-18496249.php https://www.axios.com/2023/11/07/china-economy-negative-foreign-investments https://twitter.com/chamath/status/1718016818118553622 https://twitter.com/disclosetv/status/1724093441519341573 https://www.sfgate.com/politics/article/biden-floats-newsom-for-president-apec-in-sf18496249.php https://deepmind.google/discover/blog/graphcast-ai-model-for-faster-and-more-accurate-global-weather-forecasting"
+    }
+  ]
+}

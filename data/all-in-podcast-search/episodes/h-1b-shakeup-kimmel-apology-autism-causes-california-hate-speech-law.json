@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.331Z",
+  "episode": {
+    "id": "all-in-h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law",
+    "slug": "h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law",
+    "episodeNumber": null,
+    "title": "H-1B Shakeup, Kimmel Apology, Autism Causes, California Hate Speech Law",
+    "publishDate": "2025-09-27",
+    "description": "(0:00) Bestie intros! (2:23) H-1B overhaul: origins and exploitation (25:26) Autism linked to Tylenol usage during pregnancy (43:42) Jimmy Kimmel returns to ABC: comments and...",
+    "summary": "(0:00) Bestie intros! (2:23) H-1B overhaul: origins and exploitation (25:26) Autism linked to Tylenol usage during pregnancy (43:42) Jimmy Kimmel returns to ABC: comments and reactions (59:21) Two major AI papers (1:09:00) YouTube update (1:12:53) Alphabet admits to COVID censorship under Biden, new CA online hate speech law",
+    "durationSeconds": 5028,
+    "durationLabel": "01:23:48",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Politics",
+      "Media"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E244_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/8/5/e/485e756c1e08b343d959afa2a1bf1c87/1x1_CLASSIC_E244.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law",
+    "dataFile": "/data/all-in-podcast-search/episodes/h-1b-shakeup-kimmel-apology-autism-causes-california-hate-speech-law.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:23",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "02:23",
+      "endTimestamp": "25:26",
+      "text": "H-1B overhaul: origins and exploitation"
+    },
+    {
+      "startTimestamp": "25:26",
+      "endTimestamp": "43:42",
+      "text": "Autism linked to Tylenol usage during pregnancy"
+    },
+    {
+      "startTimestamp": "43:42",
+      "endTimestamp": "59:21",
+      "text": "Jimmy Kimmel returns to ABC: comments and reactions"
+    },
+    {
+      "startTimestamp": "59:21",
+      "endTimestamp": "01:09:00",
+      "text": "Two major AI papers"
+    },
+    {
+      "startTimestamp": "01:09:00",
+      "endTimestamp": "01:12:53",
+      "text": "YouTube update"
+    },
+    {
+      "startTimestamp": "01:12:53",
+      "text": "Alphabet admits to COVID censorship under Biden, new CA online hate speech law Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://polymarket.com/event/will-courts-block-trumps-100k-h1b-by-september-30 https://www.cnbc.com/2015/08/18/trump-sort-of-right-on-silicon-valley-visas-calacanis.html https://x.com/RobertMSterling/status/1873174358535110953 https://www.firstpost.com/explainers/deepseek-employees-travel-ban-china-13872040.html https://www.axios.com/2019/12/29/trump-att-outsourcing-h1b-visa-foreign-workers https://hub.jhu.edu/2019/11/05/acetaminophen-pregnancy-autism-adhd/ https://x.com/ThaaatColin/status/1958690862185230539 https://x.com/ThaaatColin/status/1958690862185230539 https://polymarket.com/event/jimmy-kimmel-out-by-september-30?tid=1758935046582 https://x.com/sahilkapur/status/1970211641124847711 https://x.com/shawn_farash/status/1971289990283002022 https://x.com/Scott_Wiener/status/1970307297999007773 https://x.com/thackerpd/status/1971246303243010172 https://support.google.com/youtube/answer/7354993?hl=en https://judiciary.house.gov/media/press-releases/google-admits-censorship-under-biden-promises-end-bans-youtube-accounts https://arxiv.org/pdf/2509.13351 https://www.nature.com/articles/s43588-025-00854-1#Abs1"
+    }
+  ]
+}

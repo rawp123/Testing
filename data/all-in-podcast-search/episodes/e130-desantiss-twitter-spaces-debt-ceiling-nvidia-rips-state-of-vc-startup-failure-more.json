@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.780Z",
+  "episode": {
+    "id": "all-in-e130",
+    "slug": "e130-desantiss-twitter-spaces-debt-ceiling-nvidia-rips-state-of-vc-startup-failure-more",
+    "episodeNumber": 130,
+    "title": "E130: DeSantis's Twitter Spaces, debt ceiling, Nvidia rips, state of VC, startup failure &amp; more",
+    "publishDate": "2023-05-26",
+    "description": "(0:00) Bestie intros! (3:03) Sacks goes behind the scenes on the DeSantis Twitter Spaces experience (28:18) Debt ceiling, government spending, and lack of accountability (40:44)...",
+    "summary": "(0:00) Bestie intros! (3:03) Sacks goes behind the scenes on the DeSantis Twitter Spaces experience (28:18) Debt ceiling, government spending, and lack of accountability (40:44) Ways to force more government accountability, who really wins from higher taxes (57:46) Nvidia up 30% due to massive Q2 guidance, rebuilding and upgrading cloud infrastructure,...",
+    "durationSeconds": 5863,
+    "durationLabel": "01:37:43",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Venture capital",
+      "Infrastructure"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e130-desantiss-twitter-spaces-debt-ceiling-nvidia-rips-state-of-vc-startup-failure-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e130-desantiss-twitter-spaces-debt-ceiling-nvidia-rips-state-of-vc-startup-failure-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E130.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e130",
+    "dataFile": "/data/all-in-podcast-search/episodes/e130-desantiss-twitter-spaces-debt-ceiling-nvidia-rips-state-of-vc-startup-failure-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:03",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "03:03",
+      "endTimestamp": "28:18",
+      "text": "Sacks goes behind the scenes on the DeSantis Twitter Spaces experience"
+    },
+    {
+      "startTimestamp": "28:18",
+      "endTimestamp": "40:44",
+      "text": "Debt ceiling, government spending, and lack of accountability"
+    },
+    {
+      "startTimestamp": "40:44",
+      "endTimestamp": "57:46",
+      "text": "Ways to force more government accountability, who really wins from higher taxes"
+    },
+    {
+      "startTimestamp": "57:46",
+      "endTimestamp": "01:06:20",
+      "text": "Nvidia up 30% due to massive Q2 guidance, rebuilding and upgrading cloud infrastructure, understanding phases of value creation in technology"
+    },
+    {
+      "startTimestamp": "01:06:20",
+      "endTimestamp": "01:11:43",
+      "text": "Adobe's new AI product, why they might have overpaid for Figma"
+    },
+    {
+      "startTimestamp": "01:11:43",
+      "endTimestamp": "01:33:36",
+      "text": "State of Silicon Valley, VC, and startups; dealing with failure"
+    },
+    {
+      "startTimestamp": "01:33:36",
+      "text": "Bestie wrap! Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/MarioNawfal https://twitter.com/joebiden/status/1661496322980028423 https://www.wsj.com/articles/ron-desantis-presidential-campaign-twitter-announcement-ead63b25 https://www.politico.com/news/2023/05/25/iowa-voters-dont-think-desantis-twitter-failure-is-real-life-00098777 https://www.vanityfair.com/news/2023/05/ron-desantis-elon-musk-2024-announcement https://www.reuters.com/markets/us/fitch-puts-us-negative-credit-watch-2023-05-24/ https://www.reuters.com/markets/us/slimmed-down-us-debt-ceiling-deal-takes-shape-sources-2023-05-25 https://youtu.be/50MusF365U0 https://www.bloomberg.com/news/articles/2023-05-23/pentagon-can-t-account-for-thousands-of-f-35-parts-the-gao-says https://fred.stlouisfed.org/series/FYFRGDA188S https://en.wikipedia.org/wiki/Authorization_for_Use_of_Military_Force_of_2001 https://twitter.com/friedberg/status/1658163970979823616 https://www.270towin.com/1980_Election https://www.google.com/finance/quote/NVDA https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-first-quarter-fiscal-2024 https://twitter.com/carlquintanilla/status/1661761614918426624 https://en.wikipedia.org/wiki/Huang%27s_law https://twitter.com/scottbelsky/status/1660992735040663553 https://twitter.com/chamath/status/1661467059341914112 https://www.globenewswire.com/en/news-release/2023/05/15/2669326/0/en/Rumble-Acquires-Podcasting-and-Live-Streaming-Platform-CallIn.html https://www.google.com/finance/quote/RUM:NASDAQ"
+    }
+  ]
+}

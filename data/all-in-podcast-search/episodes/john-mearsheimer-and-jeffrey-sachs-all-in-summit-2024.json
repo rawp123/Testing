@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.594Z",
+  "episode": {
+    "id": "all-in-john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024",
+    "slug": "john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024",
+    "episodeNumber": null,
+    "title": "John Mearsheimer and Jeffrey Sachs | All-In Summit 2024",
+    "publishDate": "2024-10-01",
+    "description": "(0:00) Announcement from Friedberg! (0:21) Sacks intros John Mearsheimer and Jeffrey Sachs (1:32) What is the Deep State Party, and what are their goals? (13:56) Should America...",
+    "summary": "(0:00) Announcement from Friedberg! (0:21) Sacks intros John Mearsheimer and Jeffrey Sachs (1:32) What is the Deep State Party, and what are their goals? (13:56) Should America leverage its power against dictators? (22:07) The China threat: avoiding the escalatory path to nuclear war (36:08) India's growing role; are China's wounds self-inflicted? (47:07)...",
+    "durationSeconds": 3267,
+    "durationLabel": "54:27",
+    "guests": [
+      "John Mearsheimer",
+      "Jeffrey Sachs"
+    ],
+    "topicTags": [
+      "Infrastructure",
+      "Energy",
+      "Defense",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS24_GeoPol.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/e/4/c/8e4c1abf6a6a337ae55e3c100dce7605/1x1_Thumbnail_AIS_GEOPOL.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024",
+    "dataFile": "/data/all-in-podcast-search/episodes/john-mearsheimer-and-jeffrey-sachs-all-in-summit-2024.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:21",
+      "text": "Announcement from Friedberg!"
+    },
+    {
+      "startTimestamp": "00:21",
+      "endTimestamp": "01:32",
+      "text": "Sacks intros John Mearsheimer and Jeffrey Sachs"
+    },
+    {
+      "startTimestamp": "01:32",
+      "endTimestamp": "13:56",
+      "text": "What is the Deep State Party, and what are their goals?"
+    },
+    {
+      "startTimestamp": "13:56",
+      "endTimestamp": "22:07",
+      "text": "Should America leverage its power against dictators?"
+    },
+    {
+      "startTimestamp": "22:07",
+      "endTimestamp": "36:08",
+      "text": "The China threat: avoiding the escalatory path to nuclear war"
+    },
+    {
+      "startTimestamp": "36:08",
+      "endTimestamp": "47:07",
+      "text": "India's growing role; are China's wounds self-inflicted?"
+    },
+    {
+      "startTimestamp": "47:07",
+      "text": "Conflict in the Middle East and the path to peace Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

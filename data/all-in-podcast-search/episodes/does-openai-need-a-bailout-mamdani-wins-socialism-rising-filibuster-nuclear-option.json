@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.270Z",
+  "episode": {
+    "id": "all-in-does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option",
+    "slug": "does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option",
+    "episodeNumber": null,
+    "title": "Does OpenAI Need a Bailout? Mamdani Wins, Socialism Rising, Filibuster Nuclear Option",
+    "publishDate": "2025-11-07",
+    "description": "(0:00) Brad Gerstner joins the show! (0:49) OpenAI's rough week: Altman's controversial comments on BG2, CFO's \"federal backstop\" faux pas, clarifications (18:33) Why Jensen Huang...",
+    "summary": "(0:00) Brad Gerstner joins the show! (0:49) OpenAI's rough week: Altman's controversial comments on BG2, CFO's \"federal backstop\" faux pas, clarifications (18:33) Why Jensen Huang said \"China is going to win the AI race.\"; the need for a federal framework on AI (30:39) OpenAI's strengths and headwinds: breakout product, trust issues, competition, betting on...",
+    "durationSeconds": 5249,
+    "durationLabel": "01:27:29",
+    "guests": [
+      "Brad Gerstner"
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Nvidia",
+      "Politics",
+      "Markets"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E250_POD_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/3/3/8/f/338fec154d61fe29d959afa2a1bf1c87/1_Pod_250.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option",
+    "dataFile": "/data/all-in-podcast-search/episodes/does-openai-need-a-bailout-mamdani-wins-socialism-rising-filibuster-nuclear-option.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:49",
+      "text": "Brad Gerstner joins the show!"
+    },
+    {
+      "startTimestamp": "00:49",
+      "endTimestamp": "18:33",
+      "text": "OpenAI's rough week: Altman's controversial comments on BG2, CFO's \"federal backstop\" faux pas, clarifications"
+    },
+    {
+      "startTimestamp": "18:33",
+      "endTimestamp": "30:39",
+      "text": "Why Jensen Huang said \"China is going to win the AI race.\"; the need for a federal framework on AI"
+    },
+    {
+      "startTimestamp": "30:39",
+      "endTimestamp": "36:47",
+      "text": "OpenAI's strengths and headwinds: breakout product, trust issues, competition, betting on the AI supercycle"
+    },
+    {
+      "startTimestamp": "36:47",
+      "endTimestamp": "39:19",
+      "text": "Holiday party announcement! allin.com/events for tickets"
+    },
+    {
+      "startTimestamp": "39:19",
+      "endTimestamp": "01:05:58",
+      "text": "State of the market, consumer is cracking, need for domestic/\"main street\" wins, is Trump losing the middle class?"
+    },
+    {
+      "startTimestamp": "01:05:58",
+      "text": "Zohran wins NYC, socialism's rise in America, solutions, should Republicans end the filibuster? Join us at the All-In Holiday Spectacular!: https://allin.com/events Follow Brad: https://x.com/altcap Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.cnbc.com/2025/10/29/alphabet-google-q3-earnings.html https://www.cnbc.com/2025/10/29/meta-q3-earnings-report-2025.html https://www.bloomberg.com/news/articles/2025-11-05/apple-plans-to-use-1-2-trillion-parameter-google-gemini-model-to-power-new-siri https://www.wsj.com/video/openai-wants-federal-backstop-for-new-investments/4F6C864C-7332-448B-A9B4-66C321E60FE7 https://www.linkedin.com/feed/update/urn:li:activity:7392049356012507136/ https://x.com/DavidSacks/status/1986476840207122440 https://x.com/sama/status/1986514377470845007 https://www.ft.com/content/53295276-ba8d-4ec2-b0de-081e73b3ba43 https://x.com/nvidianewsroom/status/1986221177099194484 https://www.aipanic.news/p/the-ai-existential-risk-industrial https://fred.stlouisfed.org/series/LES1252881600Q https://x.com/MorningBrew/status/1986464568470888935 https://x.com/chamath/status/1986076707196162068 https://polymarket.com/event/new-york-city-mayoral-election https://www.nbcnews.com/politics/2025-elections/new-york-city-mayor-results https://x.com/JDVance/status/1986099131845136594 https://x.com/houmanhemmati/status/1980499276229931034"
+    }
+  ]
+}

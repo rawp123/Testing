@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.484Z",
+  "episode": {
+    "id": "all-in-fixing-the-american-dream-with-andrew-schulz",
+    "slug": "fixing-the-american-dream-with-andrew-schulz",
+    "episodeNumber": null,
+    "title": "Fixing the American Dream with Andrew Schulz",
+    "publishDate": "2025-03-15",
+    "description": "(0:00) The Besties intro Andrew Schulz! (3:29) Friedberg hits a quick Science Corner on the future of fertility (9:35) Reacting to Gavin Newsom's new podcast: genius or pandering?...",
+    "summary": "(0:00) The Besties intro Andrew Schulz! (3:29) Friedberg hits a quick Science Corner on the future of fertility (9:35) Reacting to Gavin Newsom's new podcast: genius or pandering? (19:36) Tariff experiment so far: risks, communication issues, and more (30:44) Why the American Dream is broken and how to fix it: cracking the housing market, social security...",
+    "durationSeconds": 5952,
+    "durationLabel": "01:39:12",
+    "guests": [
+      "Andrew Schulz"
+    ],
+    "topicTags": [
+      "Google",
+      "Politics",
+      "Markets",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/fixing-the-american-dream-with-andrew-schulz",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/fixing-the-american-dream-with-andrew-schulz",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E219.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/1/2/8/9/128932cf2266190dd959afa2a1bf1c87/1x1_CLASSIC_E219-20250315-tshq9alowm.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-fixing-the-american-dream-with-andrew-schulz",
+    "dataFile": "/data/all-in-podcast-search/episodes/fixing-the-american-dream-with-andrew-schulz.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:29",
+      "text": "The Besties intro Andrew Schulz!"
+    },
+    {
+      "startTimestamp": "03:29",
+      "endTimestamp": "09:35",
+      "text": "Friedberg hits a quick Science Corner on the future of fertility"
+    },
+    {
+      "startTimestamp": "09:35",
+      "endTimestamp": "19:36",
+      "text": "Reacting to Gavin Newsom's new podcast: genius or pandering?"
+    },
+    {
+      "startTimestamp": "19:36",
+      "endTimestamp": "30:44",
+      "text": "Tariff experiment so far: risks, communication issues, and more"
+    },
+    {
+      "startTimestamp": "30:44",
+      "endTimestamp": "55:45",
+      "text": "Why the American Dream is broken and how to fix it: cracking the housing market, social security reform"
+    },
+    {
+      "startTimestamp": "55:45",
+      "endTimestamp": "01:11:23",
+      "text": "Aligning upside via increased stock market participation"
+    },
+    {
+      "startTimestamp": "01:11:23",
+      "endTimestamp": "01:22:25",
+      "text": "How Andrew blew up in comedy, going direct via YouTube, building a cancel-proof following"
+    },
+    {
+      "startTimestamp": "01:22:25",
+      "text": "State of America, conspiracy obsession, thoughts on Trump and DOGE GET TICKETS for All-In Live: Miami https://allin.com/events Follow Andrew: https://x.com/andrewschulz Check out Andrew's new special LIFE: https://www.netflix.com/title/81741999 Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/chamath/status/1895948351516131515 https://x.com/ChineseEmbinUS/status/1897132043362034153 https://electrek.co/2025/02/07/renewables-90-percent-new-us-capacity-2024-ferc https://www.wsj.com/opinion/bidens-mortgage-relief-fuels-higher-housing-prices-policy-loans-risk-cb0a1974"
+    }
+  ]
+}

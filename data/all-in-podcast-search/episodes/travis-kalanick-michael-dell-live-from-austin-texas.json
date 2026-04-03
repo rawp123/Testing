@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.189Z",
+  "episode": {
+    "id": "all-in-travis-kalanick-michael-dell-live-from-austin-texas",
+    "slug": "travis-kalanick-michael-dell-live-from-austin-texas",
+    "episodeNumber": null,
+    "title": "Travis Kalanick &amp; Michael Dell Live from Austin, Texas",
+    "publishDate": "2026-03-17",
+    "description": "(0:00) Travis Kalanick: Officially exiting stealth mode, what he's been working on (5:52) How to automate the physical world, markets to go after (11:00) Return to self-driving:...",
+    "summary": "(0:00) Travis Kalanick: Officially exiting stealth mode, what he's been working on (5:52) How to automate the physical world, markets to go after (11:00) Return to self-driving: Tesla, Waymo, and the autonomous race (16:17) Leaving Los Angeles for Austin, the decline of truth and justice in California (25:51) Actuators, robot hands, \"Capital as a weapon,\"...",
+    "durationSeconds": 4556,
+    "durationLabel": "01:15:56",
+    "guests": [
+      "Travis Kalanick",
+      "Michael Dell"
+    ],
+    "topicTags": [
+      "AI",
+      "Tesla",
+      "Infrastructure",
+      "Defense",
+      "Iran"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/travis-kalanick-michael-dell-live-from-austin-texas",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/travis-kalanick-michael-dell-live-from-austin-texas",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-ATX_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/0/a/4/e/0a4edf4c234bcad516c3140a3186d450/1_Pod_TKMD-20260317-ys2ryzxzls.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-travis-kalanick-michael-dell-live-from-austin-texas",
+    "dataFile": "/data/all-in-podcast-search/episodes/travis-kalanick-michael-dell-live-from-austin-texas.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "05:52",
+      "text": "Travis Kalanick: Officially exiting stealth mode, what he's been working on"
+    },
+    {
+      "startTimestamp": "05:52",
+      "endTimestamp": "11:00",
+      "text": "How to automate the physical world, markets to go after"
+    },
+    {
+      "startTimestamp": "11:00",
+      "endTimestamp": "16:17",
+      "text": "Return to self-driving: Tesla, Waymo, and the autonomous race"
+    },
+    {
+      "startTimestamp": "16:17",
+      "endTimestamp": "25:51",
+      "text": "Leaving Los Angeles for Austin, the decline of truth and justice in California"
+    },
+    {
+      "startTimestamp": "25:51",
+      "endTimestamp": "36:00",
+      "text": "Actuators, robot hands, \"Capital as a weapon,\" Middle East SWF impacted by Iran War"
+    },
+    {
+      "startTimestamp": "36:00",
+      "endTimestamp": "43:46",
+      "text": "Michael Dell: Dorm room to $140B in annual revenue, why Texas attracts founders"
+    },
+    {
+      "startTimestamp": "43:46",
+      "endTimestamp": "01:03:50",
+      "text": "Dell's $50B AI infrastructure bet"
+    },
+    {
+      "startTimestamp": "01:03:50",
+      "text": "Invest America: Michael Dell's $6.25B gift - A 401k from birth for 25M kids This podcast was recorded LIVE at Arena Hall in Austin, Texas"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.328Z",
+  "episode": {
+    "id": "all-in-science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton",
+    "slug": "science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton",
+    "episodeNumber": null,
+    "title": "Science Corner Special: David Friedberg, Cleo Abram, Alex Filippenko, and Keller Rinaudo Cliffton",
+    "publishDate": "2025-09-30",
+    "description": "(0:00) Introducing Cleo Abram (1:12) Why YouTube has become the best platform for creators, techno-optimism at Huge If True (8:35) Astrophysicist Alex Filippenko on the James Webb...",
+    "summary": "(0:00) Introducing Cleo Abram (1:12) Why YouTube has become the best platform for creators, techno-optimism at Huge If True (8:35) Astrophysicist Alex Filippenko on the James Webb Space Telescope (23:14) Q&A with Alex Filippenko, Cleo, and Friedberg: The universe, Fermi Paradox, black holes, NIH grants and the \"war on science\" (37:37) Zipline CEO Keller...",
+    "durationSeconds": 4070,
+    "durationLabel": "01:07:50",
+    "guests": [],
+    "topicTags": [
+      "Google",
+      "Crypto",
+      "Defense",
+      "Healthcare",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_ScienceCornerSpecial_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/6/d/6/66d6ac20beffddbed959afa2a1bf1c87/1_Pod_SciCor.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton",
+    "dataFile": "/data/all-in-podcast-search/episodes/science-corner-special-david-friedberg-cleo-abram-alex-filippenko-and-keller-rinaudo-cliffton.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:12",
+      "text": "Introducing Cleo Abram"
+    },
+    {
+      "startTimestamp": "01:12",
+      "endTimestamp": "08:35",
+      "text": "Why YouTube has become the best platform for creators, techno-optimism at Huge If True"
+    },
+    {
+      "startTimestamp": "08:35",
+      "endTimestamp": "23:14",
+      "text": "Astrophysicist Alex Filippenko on the James Webb Space Telescope"
+    },
+    {
+      "startTimestamp": "23:14",
+      "endTimestamp": "37:37",
+      "text": "Q&A with Alex Filippenko, Cleo, and Friedberg: The universe, Fermi Paradox, black holes, NIH grants and the \"war on science\""
+    },
+    {
+      "startTimestamp": "37:37",
+      "endTimestamp": "53:29",
+      "text": "Zipline CEO Keller Rinaudo Cliffton on the future of drone delivery"
+    },
+    {
+      "startTimestamp": "53:29",
+      "text": "Q&A with Keller Rinaudo Cliffton, Cleo, and Friedberg: Instant delivery explosion, competitors, impact on healthcare"
+    }
+  ]
+}

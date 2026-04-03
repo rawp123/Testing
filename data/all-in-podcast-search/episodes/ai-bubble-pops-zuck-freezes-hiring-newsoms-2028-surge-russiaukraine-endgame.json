@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.366Z",
+  "episode": {
+    "id": "all-in-ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame",
+    "slug": "ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame",
+    "episodeNumber": null,
+    "title": "AI Bubble Pops, Zuck Freezes Hiring, Newsom's 2028 Surge, Russia/Ukraine Endgame",
+    "publishDate": "2025-08-22",
+    "description": "(0:00) Bestie intros (1:59) What's new with the All-In Summit (9:02) AI Mania hits the brakes: sign of a bubble or a healthy correction? (30:49) Meta's AI hiring freeze: are the...",
+    "summary": "(0:00) Bestie intros (1:59) What's new with the All-In Summit (9:02) AI Mania hits the brakes: sign of a bubble or a healthy correction? (30:49) Meta's AI hiring freeze: are the AI talent wars slowing down? (39:09) Gavin Newsom is the early favorite to be the 2028 Democratic nominee (54:03) Russia/Ukraine: Trump's two summits, what endgame to expect? Join...",
+    "durationSeconds": 4305,
+    "durationLabel": "01:11:45",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Meta",
+      "Politics",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E240_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/3/d/7/d/3d7d5571644a612416c3140a3186d450/1x1_CLASSIC_E240.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame",
+    "dataFile": "/data/all-in-podcast-search/episodes/ai-bubble-pops-zuck-freezes-hiring-newsoms-2028-surge-russiaukraine-endgame.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:59",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "01:59",
+      "endTimestamp": "09:02",
+      "text": "What's new with the All-In Summit"
+    },
+    {
+      "startTimestamp": "09:02",
+      "endTimestamp": "30:49",
+      "text": "AI Mania hits the brakes: sign of a bubble or a healthy correction?"
+    },
+    {
+      "startTimestamp": "30:49",
+      "endTimestamp": "39:09",
+      "text": "Meta's AI hiring freeze: are the AI talent wars slowing down?"
+    },
+    {
+      "startTimestamp": "39:09",
+      "endTimestamp": "54:03",
+      "text": "Gavin Newsom is the early favorite to be the 2028 Democratic nominee"
+    },
+    {
+      "startTimestamp": "54:03",
+      "text": "Russia/Ukraine: Trump's two summits, what endgame to expect? Join us at the All-In Summit: https://allin.com/summit Summit scholarship application: http://bit.ly/4kyZqFJ Get The Besties All-In Tequila: https://tequila.allin.com Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/autismcapital/status/1958566758719398351 https://fortune.com/2025/08/18/mit-report-95-percent-generative-ai-pilots-at-companies-failing-cfo https://www.cnbc.com/2025/08/18/openai-sam-altman-warns-ai-market-is-in-a-bubble.html https://www.theverge.com/command-line-newsletter/759897/sam-altman-chatgpt-openai-social-media-google-chrome-interview https://www.nytimes.com/2025/08/19/technology/mark-zuckerberg-meta-ai.html https://www.wsj.com/tech/ai/meta-ai-hiring-freeze-fda6b3c4 https://www.cnbc.com/2025/06/19/meta-tried-to-buy-safe-superintelligence-hired-ceo-daniel-gross.html https://www.nytimes.com/2025/06/12/technology/meta-scale-ai.html https://www.cnbc.com/2025/06/18/sam-altman-says-meta-tried-to-poach-openai-staff-with-100-million-bonuses-mark-zuckerberg.html https://polymarket.com/event/democratic-presidential-nominee-2028 https://www.politico.com/f/?id=00000198-c46f-da96-abff-d66f4c1e0000 https://www.businesswire.com/news/home/20250820615513/en/Statement-from-Marcus-Lemonis-Executive-Chairman-of-Bed-Bath-Beyond https://news.gallup.com/poll/693203/ukrainian-support-war-effort-collapses.aspx"
+    }
+  ]
+}

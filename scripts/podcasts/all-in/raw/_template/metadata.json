@@ -1,0 +1,12 @@
+{
+  "id": "all-in-e000",
+  "episodeNumber": 0,
+  "title": "Episode title goes here",
+  "publishDate": "2024-01-01",
+  "description": "Short one-line description for the episode record.",
+  "summary": "Short summary used on the search and episode pages.",
+  "duration": "01:12:34",
+  "guests": [],
+  "topicTags": [],
+  "youtubeId": ""
+}

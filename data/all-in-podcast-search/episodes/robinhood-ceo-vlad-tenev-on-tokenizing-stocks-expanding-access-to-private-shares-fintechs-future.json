@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.344Z",
+  "episode": {
+    "id": "all-in-robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future",
+    "slug": "robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future",
+    "episodeNumber": null,
+    "title": "Robinhood CEO Vlad Tenev on tokenizing stocks, expanding access to private shares, fintech's future",
+    "publishDate": "2025-09-15",
+    "description": "(0:00) Introducing Vlad Tenev (0:51) Jason tells his story of investing in Robinhood (3:17) Tokenizing securities, offering tokenized shares in OpenAI and SpaceX, controversy...",
+    "summary": "(0:00) Introducing Vlad Tenev (0:51) Jason tells his story of investing in Robinhood (3:17) Tokenizing securities, offering tokenized shares in OpenAI and SpaceX, controversy (7:29) Operating under Trump vs Biden, why offering tokenized securities for private companies could be revolutionary (17:01) Criticisms around expanding access to sophisticated...",
+    "durationSeconds": 1569,
+    "durationLabel": "26:09",
+    "guests": [
+      "Vlad Tenev"
+    ],
+    "topicTags": [
+      "OpenAI",
+      "Politics",
+      "Markets",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_VladTenev_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/4/5/c/545c976190229ac4d959afa2a1bf1c87/1_Pod_Vlad.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future",
+    "dataFile": "/data/all-in-podcast-search/episodes/robinhood-ceo-vlad-tenev-on-tokenizing-stocks-expanding-access-to-private-shares-fintechs-future.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:51",
+      "text": "Introducing Vlad Tenev"
+    },
+    {
+      "startTimestamp": "00:51",
+      "endTimestamp": "03:17",
+      "text": "Jason tells his story of investing in Robinhood"
+    },
+    {
+      "startTimestamp": "03:17",
+      "endTimestamp": "07:29",
+      "text": "Tokenizing securities, offering tokenized shares in OpenAI and SpaceX, controversy"
+    },
+    {
+      "startTimestamp": "07:29",
+      "endTimestamp": "17:01",
+      "text": "Operating under Trump vs Biden, why offering tokenized securities for private companies could be revolutionary"
+    },
+    {
+      "startTimestamp": "17:01",
+      "endTimestamp": "19:34",
+      "text": "Criticisms around expanding access to sophisticated financial products"
+    },
+    {
+      "startTimestamp": "19:34",
+      "endTimestamp": "23:28",
+      "text": "Current landscape of financial companies, Robinhood's future, competing with incumbents"
+    },
+    {
+      "startTimestamp": "23:28",
+      "text": "Harmonic and building mathematical superintelligence"
+    }
+  ]
+}

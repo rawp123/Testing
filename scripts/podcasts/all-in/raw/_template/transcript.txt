@@ -1,0 +1,5 @@
+[00:00:00] Opening segment text goes here.
+Continuation lines are allowed and will be folded into the same source block.
+
+[00:05:12] Add the next timestamped section here.
+Use blank lines between paragraphs when you want the build step to preserve those boundaries before chunk normalization.

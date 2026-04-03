@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.323Z",
+  "episode": {
+    "id": "all-in-multicoin-capitals-kyle-samani-on-internet-capital-markets",
+    "slug": "multicoin-capitals-kyle-samani-on-internet-capital-markets",
+    "episodeNumber": null,
+    "title": "Multicoin Capital's Kyle Samani on Internet Capital Markets",
+    "publishDate": "2025-10-01",
+    "description": "(0:00) Introducing Kyle Samani (1:07) History of modern capital markets (3:25) What a redesigned capital market structure would look like in 2025 (8:22) Examples of the future of...",
+    "summary": "(0:00) Introducing Kyle Samani (1:07) History of modern capital markets (3:25) What a redesigned capital market structure would look like in 2025 (8:22) Examples of the future of internet capital markets Solana - Solana is the high performance network powering internet capital markets, payments, and crypto applications. Connect with investors, crypto...",
+    "durationSeconds": 812,
+    "durationLabel": "13:32",
+    "guests": [
+      "Kyle Samani"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Crypto",
+      "Markets",
+      "Infrastructure"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/multicoin-capitals-kyle-samani-on-internet-capital-markets",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/multicoin-capitals-kyle-samani-on-internet-capital-markets",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_KyleSamani_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/8/c/f/f8cf4c488902d76c16c3140a3186d450/1_Pod_Samani.png",
+    "chunkCount": 4,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-multicoin-capitals-kyle-samani-on-internet-capital-markets",
+    "dataFile": "/data/all-in-podcast-search/episodes/multicoin-capitals-kyle-samani-on-internet-capital-markets.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:07",
+      "text": "Introducing Kyle Samani"
+    },
+    {
+      "startTimestamp": "01:07",
+      "endTimestamp": "03:25",
+      "text": "History of modern capital markets"
+    },
+    {
+      "startTimestamp": "03:25",
+      "endTimestamp": "08:22",
+      "text": "What a redesigned capital market structure would look like in 2025"
+    },
+    {
+      "startTimestamp": "08:22",
+      "text": "Examples of the future of internet capital markets"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "all-in-example-episode-id",
+  "chunks": [
+    {
+      "startTimestamp": "00:00:00",
+      "endTimestamp": "00:04:12",
+      "speaker": "Speaker",
+      "text": "Opening topic text."
+    },
+    {
+      "startTimestamp": "00:04:12",
+      "speaker": "",
+      "text": "Next timestamped section."
+    }
+  ]
+}

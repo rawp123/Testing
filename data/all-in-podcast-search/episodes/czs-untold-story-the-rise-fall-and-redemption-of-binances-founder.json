@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.215Z",
+  "episode": {
+    "id": "all-in-czs-untold-story-the-rise-fall-and-redemption-of-binances-founder",
+    "slug": "czs-untold-story-the-rise-fall-and-redemption-of-binances-founder",
+    "episodeNumber": null,
+    "title": "CZ's Untold Story: The Rise, Fall, and Redemption of Binance's Founder",
+    "publishDate": "2026-02-10",
+    "description": "(0:00) From China to Canada (6:13) CZ's Early Career: Shockingly Normal (17:39) First Company in Shanghai (23:08) Discovering Bitcoin (30:11) Going All-In on Crypto (41:27)...",
+    "summary": "(0:00) From China to Canada (6:13) CZ's Early Career: Shockingly Normal (17:39) First Company in Shanghai (23:08) Discovering Bitcoin (30:11) Going All-In on Crypto (41:27) Founding Binance (1:03:57) The FTX Story: SBF Relationship and Collapse (1:09:46) Facing Biden's Anti-Crypto DOJ (1:25:25) Inside Federal Prison (1:40:10) Life After Binance and New...",
+    "durationSeconds": 7044,
+    "durationLabel": "01:57:24",
+    "guests": [],
+    "topicTags": [
+      "Crypto",
+      "Bitcoin",
+      "Politics",
+      "China",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/czs-untold-story-the-rise-fall-and-redemption-of-binances-founder",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/czs-untold-story-the-rise-fall-and-redemption-of-binances-founder",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_CZ_CP_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/3/9/1/e/391e389ffa39ed5b16c3140a3186d450/1_Pod_CZ.png",
+    "chunkCount": 10,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-czs-untold-story-the-rise-fall-and-redemption-of-binances-founder",
+    "dataFile": "/data/all-in-podcast-search/episodes/czs-untold-story-the-rise-fall-and-redemption-of-binances-founder.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "06:13",
+      "text": "From China to Canada"
+    },
+    {
+      "startTimestamp": "06:13",
+      "endTimestamp": "17:39",
+      "text": "CZ's Early Career: Shockingly Normal"
+    },
+    {
+      "startTimestamp": "17:39",
+      "endTimestamp": "23:08",
+      "text": "First Company in Shanghai"
+    },
+    {
+      "startTimestamp": "23:08",
+      "endTimestamp": "30:11",
+      "text": "Discovering Bitcoin"
+    },
+    {
+      "startTimestamp": "30:11",
+      "endTimestamp": "41:27",
+      "text": "Going All-In on Crypto"
+    },
+    {
+      "startTimestamp": "41:27",
+      "endTimestamp": "01:03:57",
+      "text": "Founding Binance"
+    },
+    {
+      "startTimestamp": "01:03:57",
+      "endTimestamp": "01:09:46",
+      "text": "The FTX Story: SBF Relationship and Collapse"
+    },
+    {
+      "startTimestamp": "01:09:46",
+      "endTimestamp": "01:25:25",
+      "text": "Facing Biden's Anti-Crypto DOJ"
+    },
+    {
+      "startTimestamp": "01:25:25",
+      "endTimestamp": "01:40:10",
+      "text": "Inside Federal Prison"
+    },
+    {
+      "startTimestamp": "01:40:10",
+      "text": "Life After Binance and New Ventures Follow CZ: https://x.com/cz_binance Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

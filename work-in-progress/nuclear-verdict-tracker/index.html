@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nuclear Verdict Tracker | Robert Parrish</title>
+  <meta name="description" content="Protected dashboard for exploring publicly reported large jury verdicts by jurisdiction, case type, year, and damages breakdown." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/litigation-analytics.css">
+  <link rel="stylesheet" href="/src/css/nuclear-verdict-tracker.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/nuclear-verdict-tracker-utils.js" defer></script>
+  <script src="/src/js/nuclear-verdict-tracker.js" defer></script>
+</head>
+<body data-page="wip-nuclear-verdict-tracker" data-verdict-data-url="/work-in-progress/data/nuclear-verdicts-latest.json">
+  <div id="site-header"></div>
+  <main>
+    <section class="container page-shell nvt-shell">
+      <section class="la-hero card wip-stamped">
+        <div class="page-shell-head">
+          <div class="page-shell-copy">
+            <p class="page-kicker">Work in progress</p>
+            <h1 class="page-title">Nuclear Verdict Tracker</h1>
+            <p class="page-subtitle">Explore reported large jury verdicts by jurisdiction, case type, year, and damages breakdown.</p>
+          </div>
+          <div class="page-actions">
+            <a href="/work-in-progress/litigation-analytics/" class="btn ghost">All protected litigation tools</a>
+          </div>
+          <div class="page-meta" aria-hidden="true">
+            <span class="page-meta-chip">Protected</span>
+            <span class="page-meta-chip">Verdict filters</span>
+            <span class="page-meta-chip">Visual summaries</span>
+          </div>
+        </div>
+        <p class="la-hero-note">Use the filters to narrow the list, then review the summary metrics, verdict table, and visual summaries.</p>
+      </section>
+
+      <nav class="la-section-nav" aria-label="Work in progress litigation section">
+        <a href="/work-in-progress/" class="la-section-nav-link">Work In Progress</a>
+        <a href="/work-in-progress/litigation-analytics/" class="la-section-nav-link">Litigation Analytics</a>
+        <a href="/jpml-dashboard.html" class="la-section-nav-link">JPML Dashboard</a>
+        <a href="/work-in-progress/nuclear-verdict-tracker/" class="la-section-nav-link is-active" aria-current="page">Nuclear Verdict Tracker</a>
+      </nav>
+
+      <section class="nvt-filters card" aria-labelledby="nvt-filters-title">
+        <div class="nvt-section-head">
+          <div>
+            <p class="la-section-kicker">Filters</p>
+            <h2 id="nvt-filters-title" class="la-section-title">Refine the verdict list</h2>
+          </div>
+          <p class="la-section-copy">Filter by year, geography, case type, industry, damages profile, or a party name keyword.</p>
+        </div>
+
+        <div class="nvt-filter-grid">
+          <label class="nvt-field">
+            <span class="nvt-field-label">Year</span>
+            <select id="filter-year">
+              <option value="">All years</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">State</span>
+            <select id="filter-state">
+              <option value="">All states</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">Jurisdiction</span>
+            <select id="filter-jurisdiction">
+              <option value="">All jurisdictions</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">Case type</span>
+            <select id="filter-case-type">
+              <option value="">All case types</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">Industry</span>
+            <select id="filter-industry">
+              <option value="">All industries</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">Verdict size bucket</span>
+            <select id="filter-verdict-bucket">
+              <option value="">All buckets</option>
+            </select>
+          </label>
+
+          <label class="nvt-field">
+            <span class="nvt-field-label">Punitive damages</span>
+            <select id="filter-punitive">
+              <option value="">All verdicts</option>
+              <option value="yes">Punitive damages only</option>
+              <option value="no">No punitive damages</option>
+            </select>
+          </label>
+
+          <label class="nvt-field nvt-field-search">
+            <span class="nvt-field-label">Party name or keyword</span>
+            <input id="filter-search" type="search" placeholder="Search by caption, state, industry, or note">
+          </label>
+        </div>
+
+        <div class="nvt-filter-actions">
+          <button id="clear-filters" type="button" class="btn ghost">Clear filters</button>
+          <div id="nvt-status" class="nvt-status" aria-live="polite">Loading verdict data.</div>
+        </div>
+        <p class="nvt-data-note">This preview reads from a path-specific verdict snapshot so Cloudflare Access can protect the page and its dataset together.</p>
+      </section>
+
+      <section class="nvt-metrics" aria-label="Verdict summary metrics">
+        <article class="nvt-metric card">
+          <span class="nvt-metric-label">Total verdicts shown</span>
+          <strong id="metric-total" class="nvt-metric-value">0</strong>
+        </article>
+        <article class="nvt-metric card">
+          <span class="nvt-metric-label">Average verdict</span>
+          <strong id="metric-average" class="nvt-metric-value">$0</strong>
+        </article>
+        <article class="nvt-metric card">
+          <span class="nvt-metric-label">Median verdict</span>
+          <strong id="metric-median" class="nvt-metric-value">$0</strong>
+        </article>
+        <article class="nvt-metric card">
+          <span class="nvt-metric-label">Largest verdict</span>
+          <strong id="metric-largest" class="nvt-metric-value">$0</strong>
+        </article>
+        <article class="nvt-metric card">
+          <span class="nvt-metric-label">Verdicts with punitive damages</span>
+          <strong id="metric-punitive-count" class="nvt-metric-value">0</strong>
+        </article>
+      </section>
+
+      <section class="nvt-visual-grid" aria-label="Visual verdict summaries">
+        <section class="nvt-visual card" aria-labelledby="nvt-year-summary-title">
+          <div class="nvt-section-head">
+            <div>
+              <p class="la-section-kicker">Visual summary</p>
+              <h2 id="nvt-year-summary-title" class="la-section-title">Verdict count by year</h2>
+            </div>
+            <p class="la-section-copy">A quick read on how the filtered set is distributed over time.</p>
+          </div>
+          <div class="nvt-chart-shell">
+            <canvas id="year-summary-chart"></canvas>
+            <p id="year-summary-empty" class="nvt-chart-empty" hidden>No year summary available for the current filters.</p>
+          </div>
+        </section>
+
+        <section class="nvt-visual card" aria-labelledby="nvt-case-type-summary-title">
+          <div class="nvt-section-head">
+            <div>
+              <p class="la-section-kicker">Visual summary</p>
+              <h2 id="nvt-case-type-summary-title" class="la-section-title">Verdict count by case type</h2>
+            </div>
+            <p class="la-section-copy">Case categories represented in the current result set.</p>
+          </div>
+          <div class="nvt-chart-shell">
+            <canvas id="case-type-summary-chart"></canvas>
+            <p id="case-type-summary-empty" class="nvt-chart-empty" hidden>No case type summary available for the current filters.</p>
+          </div>
+        </section>
+
+        <section class="nvt-visual card" aria-labelledby="nvt-state-summary-title">
+          <div class="nvt-section-head">
+            <div>
+              <p class="la-section-kicker">Visual summary</p>
+              <h2 id="nvt-state-summary-title" class="la-section-title">Total verdict dollars by state</h2>
+            </div>
+            <p class="la-section-copy">States contributing the largest verdict totals in the filtered view.</p>
+          </div>
+          <div class="nvt-chart-shell">
+            <canvas id="state-summary-chart"></canvas>
+            <p id="state-summary-empty" class="nvt-chart-empty" hidden>No state summary available for the current filters.</p>
+          </div>
+        </section>
+
+        <section class="nvt-visual card" aria-labelledby="nvt-punitive-summary-title">
+          <div class="nvt-section-head">
+            <div>
+              <p class="la-section-kicker">Visual summary</p>
+              <h2 id="nvt-punitive-summary-title" class="la-section-title">Punitive vs non-punitive</h2>
+            </div>
+            <p class="la-section-copy">How the filtered verdicts split between punitive and non-punitive outcomes.</p>
+          </div>
+          <div class="nvt-chart-shell nvt-chart-shell-donut">
+            <canvas id="punitive-summary-chart"></canvas>
+            <p id="punitive-summary-empty" class="nvt-chart-empty" hidden>No punitive summary available for the current filters.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="nvt-table-card card" aria-labelledby="nvt-table-title">
+        <div class="nvt-section-head">
+          <div>
+            <p class="la-section-kicker">Verdict list</p>
+            <h2 id="nvt-table-title" class="la-section-title">Reported verdicts</h2>
+          </div>
+          <p class="la-section-copy">The table updates as filters change and shows a clean damages breakdown for each result.</p>
+        </div>
+
+        <div class="nvt-table-toolbar">
+          <div id="nvt-table-count" class="nvt-table-count" aria-live="polite">Showing 0 rows.</div>
+          <div id="nvt-table-sort-label" class="nvt-table-sort-label">Sorted by year, newest first.</div>
+        </div>
+
+        <div class="nvt-table-wrap">
+          <table class="nvt-table">
+            <thead>
+              <tr>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="year">Year</button></th>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="state">State</button></th>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="jurisdiction">Jurisdiction</button></th>
+                <th>Case</th>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="caseType">Case type</button></th>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="industry">Industry</button></th>
+                <th><button type="button" class="nvt-sort-button" data-sort-key="totalVerdict">Total verdict</button></th>
+                <th>Compensatory</th>
+                <th>Punitive</th>
+                <th>Source</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="nvt-table-body"></tbody>
+          </table>
+        </div>
+
+        <div id="nvt-empty-state" class="nvt-empty-state" hidden></div>
+        <div class="nvt-table-footer">
+          <button id="nvt-load-more" type="button" class="btn ghost" hidden>Show more rows</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with HTML, CSS, and JavaScript.</div>
+  </footer>
+</body>
+</html>

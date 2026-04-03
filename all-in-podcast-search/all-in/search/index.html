@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>All-In Podcast Search | Robert Parrish</title>
+  <meta name="description" content="Search transcript moments across the All-In podcast archive from a dedicated static utility." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/all-in-podcast-search.css?v=20260402f">
+  <script src="/src/js/header.js" defer></script>
+  <script src="/src/js/all-in-podcast-shared.js?v=20260402f" defer></script>
+  <script src="/src/js/all-in-podcast-search.js?v=20260402f" defer></script>
+</head>
+<body data-page="all-in-podcast-search" data-page-parent="podcast-utility" data-aps-view="search">
+  <div id="site-header"></div>
+  <main>
+    <section class="container page-shell aps-shell">
+      <section class="aps-hero aps-page-header card">
+        <div class="page-shell-head">
+          <div class="page-shell-copy">
+            <p class="page-kicker">Podcast utility</p>
+            <h1 class="page-title">All-In Podcast Utility</h1>
+            <p class="page-subtitle">Search transcript moments across the archive without leaving a static site workflow.</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn ghost" href="/all-in-podcast-search/">All Podcast Utilities</a>
+          </div>
+        </div>
+        <nav class="aps-tab-bar aps-page-header-tabs" aria-label="All-In podcast views">
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/">Episodes</a>
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/search/" aria-current="page">Search</a>
+          <a class="aps-tab-btn" href="/all-in-podcast-search/all-in/visuals/">Visuals</a>
+        </nav>
+      </section>
+
+      <section class="aps-workspace card" aria-labelledby="aps-workspace-title">
+        <section id="aps-panel-search" class="aps-tab-panel">
+          <div class="aps-search-surface">
+            <div class="aps-search-head">
+              <div>
+                <p class="la-section-kicker">Search</p>
+                <h3 id="aps-workspace-title" class="la-section-title">Search all All-In podcast transcripts</h3>
+              </div>
+              <p class="aps-panel-copy">Search across indexed transcript chunks in a sortable archive grid so matches stay easy to scan.</p>
+            </div>
+
+            <label class="aps-search-label" for="aps-search-input">Search transcripts</label>
+            <div class="aps-search-row">
+              <input id="aps-search-input" class="aps-search-input" type="search" placeholder="Search all All-In podcast transcripts" autocomplete="off" spellcheck="false" />
+              <button id="aps-clear-search" class="btn ghost" type="button">Clear</button>
+            </div>
+            <div id="aps-search-status-bar" class="aps-search-status-bar" hidden aria-live="polite">
+              <div class="aps-search-status-track" aria-hidden="true">
+                <span class="aps-search-status-fill"></span>
+              </div>
+            </div>
+            <div class="aps-search-assist">
+              <p class="aps-search-note">Search by topic, person, company, phrase, or place name. Results keep timestamps, snippets, and episode context together.</p>
+              <p class="aps-search-shortcut">Press <kbd>/</kbd> to focus search.</p>
+            </div>
+          </div>
+
+          <div class="aps-search-results-shell">
+            <div class="aps-panel-head">
+              <div>
+                <p class="la-section-kicker">Search results</p>
+                <h3 class="la-section-title">Transcript matches</h3>
+              </div>
+              <div class="aps-panel-actions aps-results-actions">
+                <p id="aps-results-summary" class="aps-panel-copy">Enter a query to search transcript chunks.</p>
+                <button id="aps-reset-results-sort" class="btn ghost aps-results-reset-sort" type="button" hidden>Reset to relevance</button>
+              </div>
+            </div>
+            <div id="aps-results-empty" class="aps-empty-state">
+              <h3>Search the transcript archive</h3>
+              <p>Type a topic, phrase, or name to find matching transcript moments in a sortable archive grid.</p>
+            </div>
+            <div id="aps-results" class="aps-results" hidden></div>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with static HTML, CSS, JavaScript, local JSON, and Pagefind.</div>
+  </footer>
+</body>
+</html>

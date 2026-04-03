@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.526Z",
+  "episode": {
+    "id": "all-in-las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland",
+    "slug": "las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland",
+    "episodeNumber": null,
+    "title": "LA's Wildfire Disaster, Zuck Flips on Free Speech, Why Trump Wants Greenland",
+    "publishDate": "2025-01-11",
+    "description": "(0:00) The Besties welcome Cyan Banister! (9:16) Reacting to the LA wildfires: broken incentives, leadership failures, lessons learned (36:51) Insurance issues, rebuilding...",
+    "summary": "(0:00) The Besties welcome Cyan Banister! (9:16) Reacting to the LA wildfires: broken incentives, leadership failures, lessons learned (36:51) Insurance issues, rebuilding headwinds, reclaiming the government (59:44) Zuck goes full free speech, fires third-party fact-checkers, opts for Community Notes model (1:20:19) Nvidia goes consumer at CES: market cap...",
+    "durationSeconds": 6439,
+    "durationLabel": "01:47:19",
+    "guests": [
+      "Cyan Banister"
+    ],
+    "topicTags": [
+      "Meta",
+      "Nvidia",
+      "Politics",
+      "Markets"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E210.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/e/c/e/eece9ecdc214eb7a16c3140a3186d450/1x1_CLASSIC_E210.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland",
+    "dataFile": "/data/all-in-podcast-search/episodes/las-wildfire-disaster-zuck-flips-on-free-speech-why-trump-wants-greenland.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "09:16",
+      "text": "The Besties welcome Cyan Banister!"
+    },
+    {
+      "startTimestamp": "09:16",
+      "endTimestamp": "36:51",
+      "text": "Reacting to the LA wildfires: broken incentives, leadership failures, lessons learned"
+    },
+    {
+      "startTimestamp": "36:51",
+      "endTimestamp": "59:44",
+      "text": "Insurance issues, rebuilding headwinds, reclaiming the government"
+    },
+    {
+      "startTimestamp": "59:44",
+      "endTimestamp": "01:20:19",
+      "text": "Zuck goes full free speech, fires third-party fact-checkers, opts for Community Notes model"
+    },
+    {
+      "startTimestamp": "01:20:19",
+      "endTimestamp": "01:34:49",
+      "text": "Nvidia goes consumer at CES: market cap impact, most interesting vertical"
+    },
+    {
+      "startTimestamp": "01:34:49",
+      "endTimestamp": "01:40:05",
+      "text": "Why Trump wants Greenland"
+    },
+    {
+      "startTimestamp": "01:40:05",
+      "text": "Conspiracy Corner: Who built the pyramids? Follow the Besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Cyan Banister: https://x.com/cyantist Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://www.youtube.com/watch?v=_SQ_myzmV_Q https://www.cnrfc.noaa.gov/awipsProducts/RNORR4RSA.php https://x.com/JonVigliotti/status/1877020919475884110 https://x.com/FearedBuck/status/1877355797245514085 https://www.youtube.com/watch?v=vKJ5WeBc7Us https://x.com/CrazyyHub/status/1823574726738092402 https://www.latimes.com/visuals/photography/la-me-fw-archives-the-1961-bel-air-brush-fire-20170419-story.html https://www.rainmaker.com https://www.ksbw.com/article/california-fire-evacuation-maps/63382651 https://x.com/shaunmmaguire/status/1877366727547433382 https://x.com/WorldTimesWT/status/1876887200526111017 https://x.com/ericabbenante/status/1877207054105886836 https://x.com/laurapowellesq/status/1877143625588682940 https://x.com/jeremykauffman/status/1877128641802285064 https://x.com/deb8rr/status/1877539354802876576 https://x.com/Jason/status/1877183155821494513 https://about.fb.com/news/2025/01/meta-more-speech-fewer-mistakes https://www.americanrhetoric.com/speeches/PDFFiles/Mark-Zuckerberg-Letter-on-Govt-Censorship.pdf https://x.com/townhallcom/status/1876684277787873397 https://www.wsj.com/tech/ai/nvidia-ceo-pitches-robotics-cars-as-growth-areas-to-consumer-electronics-audience-68905f2d https://www.nvidia.com/en-us/project-digits https://polymarket.com/markets/creators/all-in"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.246Z",
+  "episode": {
+    "id": "all-in-all-ins-2026-predictions",
+    "slug": "all-ins-2026-predictions",
+    "episodeNumber": null,
+    "title": "All-In's 2026 Predictions",
+    "publishDate": "2026-01-10",
+    "description": "(0:00) California exodus, asset seizure tax, Besties to Austin? (12:27) Biggest Political Winner (17:45) Biggest Political Loser (32:15) Biggest Business Winner (40:51) Biggest...",
+    "summary": "(0:00) California exodus, asset seizure tax, Besties to Austin? (12:27) Biggest Political Winner (17:45) Biggest Political Loser (32:15) Biggest Business Winner (40:51) Biggest Business Loser (49:34) Biggest Business Deal (56:15) Most Contrarian Belief (1:03:05) Best Performing Asset (1:08:02) Worst Performing Asset (1:15:17) Most Anticipated Trend...",
+    "durationSeconds": 5471,
+    "durationLabel": "01:31:11",
+    "guests": [],
+    "topicTags": [],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/all-ins-2026-predictions",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/all-ins-2026-predictions",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E257_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/b/7/7/d/b77d6f745d9c71fed959afa2a1bf1c87/1x1_CLASSIC_E257.png",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-all-ins-2026-predictions",
+    "dataFile": "/data/all-in-podcast-search/episodes/all-ins-2026-predictions.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "12:27",
+      "text": "California exodus, asset seizure tax, Besties to Austin?"
+    },
+    {
+      "startTimestamp": "12:27",
+      "endTimestamp": "17:45",
+      "text": "Biggest Political Winner"
+    },
+    {
+      "startTimestamp": "17:45",
+      "endTimestamp": "32:15",
+      "text": "Biggest Political Loser"
+    },
+    {
+      "startTimestamp": "32:15",
+      "endTimestamp": "40:51",
+      "text": "Biggest Business Winner"
+    },
+    {
+      "startTimestamp": "40:51",
+      "endTimestamp": "49:34",
+      "text": "Biggest Business Loser"
+    },
+    {
+      "startTimestamp": "49:34",
+      "endTimestamp": "56:15",
+      "text": "Biggest Business Deal"
+    },
+    {
+      "startTimestamp": "56:15",
+      "endTimestamp": "01:03:05",
+      "text": "Most Contrarian Belief"
+    },
+    {
+      "startTimestamp": "01:03:05",
+      "endTimestamp": "01:08:02",
+      "text": "Best Performing Asset"
+    },
+    {
+      "startTimestamp": "01:08:02",
+      "endTimestamp": "01:15:17",
+      "text": "Worst Performing Asset"
+    },
+    {
+      "startTimestamp": "01:15:17",
+      "endTimestamp": "01:21:18",
+      "text": "Most Anticipated Trend"
+    },
+    {
+      "startTimestamp": "01:21:18",
+      "text": "Most Anticipated Media Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://x.com/reidhoffman/status/2009015043258552670 https://www.nytimes.com/2026/01/09/technology/google-founders-california-wealth-tax.html https://x.com/Daily_MailUS/status/2008903817341931618 https://fasterplease.substack.com/p/ai-and-the-radiologist-apocalypse https://www.tipranks.com/news/atlanta-fed-doubles-q4-gdp-estimate-to-5-4-as-trade-deficit-plunges https://www.wsj.com/business/autos/the-160-000-mechanic-job-that-ford-cant-fill-fe6fd121"
+    }
+  ]
+}

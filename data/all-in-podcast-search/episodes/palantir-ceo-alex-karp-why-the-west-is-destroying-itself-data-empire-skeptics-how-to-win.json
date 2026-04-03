@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.353Z",
+  "episode": {
+    "id": "all-in-palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win",
+    "slug": "palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win",
+    "episodeNumber": null,
+    "title": "Palantir CEO Alex Karp: Why the West is Destroying Itself, Data Empire, Skeptics, How to Win",
+    "publishDate": "2025-09-09",
+    "description": "(0:00) Introducing Palantir CEO Alex Karp (1:10) Understanding Palantir's fans and haters (8:40) Palantir's work at the border, data collection and surveillance, built-in...",
+    "summary": "(0:00) Introducing Palantir CEO Alex Karp (1:10) Understanding Palantir's fans and haters (8:40) Palantir's work at the border, data collection and surveillance, built-in protections (20:02) Israel/Palestine (22:23) Is the West committing suicide? (30:54) Antisemitism (31:52) China's strategy, dealing with cartels (36:46) Why modern Progressivism is not...",
+    "durationSeconds": 2414,
+    "durationLabel": "40:14",
+    "guests": [],
+    "topicTags": [
+      "China",
+      "Israel",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALEXKARP.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/b/2/8/fb283b5026fd0f94d959afa2a1bf1c87/ALL_IN_EVENT_PODCAST_GRAPHIC.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win",
+    "dataFile": "/data/all-in-podcast-search/episodes/palantir-ceo-alex-karp-why-the-west-is-destroying-itself-data-empire-skeptics-how-to-win.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:10",
+      "text": "Introducing Palantir CEO Alex Karp"
+    },
+    {
+      "startTimestamp": "01:10",
+      "endTimestamp": "08:40",
+      "text": "Understanding Palantir's fans and haters"
+    },
+    {
+      "startTimestamp": "08:40",
+      "endTimestamp": "20:02",
+      "text": "Palantir's work at the border, data collection and surveillance, built-in protections"
+    },
+    {
+      "startTimestamp": "20:02",
+      "endTimestamp": "22:23",
+      "text": "Israel/Palestine"
+    },
+    {
+      "startTimestamp": "22:23",
+      "endTimestamp": "30:54",
+      "text": "Is the West committing suicide?"
+    },
+    {
+      "startTimestamp": "30:54",
+      "endTimestamp": "31:52",
+      "text": "Antisemitism"
+    },
+    {
+      "startTimestamp": "31:52",
+      "endTimestamp": "36:46",
+      "text": "China's strategy, dealing with cartels"
+    },
+    {
+      "startTimestamp": "36:46",
+      "text": "Why modern Progressivism is not progressive"
+    }
+  ]
+}

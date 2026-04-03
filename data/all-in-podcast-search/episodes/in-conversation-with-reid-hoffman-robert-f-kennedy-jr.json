@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.600Z",
+  "episode": {
+    "id": "all-in-in-conversation-with-reid-hoffman-robert-f-kennedy-jr",
+    "slug": "in-conversation-with-reid-hoffman-robert-f-kennedy-jr",
+    "episodeNumber": null,
+    "title": "In conversation with Reid Hoffman &amp; Robert F. Kennedy Jr.",
+    "publishDate": "2024-08-30",
+    "description": "(0:00) Bestie intros: Buttons are back for fall (1:48) Reid Hoffman joins the show, reminiscing on PayPal stories with Sacks (7:52) State of AI: Nvidia, cluster buildouts,...",
+    "summary": "(0:00) Bestie intros: Buttons are back for fall (1:48) Reid Hoffman joins the show, reminiscing on PayPal stories with Sacks (7:52) State of AI: Nvidia, cluster buildouts, competition (19:51) OpenAI's corporate structure and thoughts on Elon's lawsuit (29:09) Inflection AI's deal structure with Microsoft, Lina Khan's impact on the tech industry (41:27)...",
+    "durationSeconds": 7904,
+    "durationLabel": "02:11:44",
+    "guests": [
+      "Reid Hoffman",
+      "Robert F. Kennedy Jr."
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Nvidia",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-reid-hoffman-robert-f-kennedy-jr",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-reid-hoffman-robert-f-kennedy-jr",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E194.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/a/a/c/6aac26341514604f27a2322813b393ee/1x1_CLASSIC_E194.png",
+    "chunkCount": 13,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-in-conversation-with-reid-hoffman-robert-f-kennedy-jr",
+    "dataFile": "/data/all-in-podcast-search/episodes/in-conversation-with-reid-hoffman-robert-f-kennedy-jr.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:48",
+      "text": "Bestie intros: Buttons are back for fall"
+    },
+    {
+      "startTimestamp": "01:48",
+      "endTimestamp": "07:52",
+      "text": "Reid Hoffman joins the show, reminiscing on PayPal stories with Sacks"
+    },
+    {
+      "startTimestamp": "07:52",
+      "endTimestamp": "19:51",
+      "text": "State of AI: Nvidia, cluster buildouts, competition"
+    },
+    {
+      "startTimestamp": "19:51",
+      "endTimestamp": "29:09",
+      "text": "OpenAI's corporate structure and thoughts on Elon's lawsuit"
+    },
+    {
+      "startTimestamp": "29:09",
+      "endTimestamp": "41:27",
+      "text": "Inflection AI's deal structure with Microsoft, Lina Khan's impact on the tech industry"
+    },
+    {
+      "startTimestamp": "41:27",
+      "endTimestamp": "52:02",
+      "text": "Reid's perspective on Kamala being hot swapped for Biden, funding groups that attempted to keep RFK Jr. off ballots"
+    },
+    {
+      "startTimestamp": "52:02",
+      "endTimestamp": "55:03",
+      "text": "Reid's thoughts on growing antisemitism"
+    },
+    {
+      "startTimestamp": "55:03",
+      "endTimestamp": "01:04:19",
+      "text": "Thoughts on Kamala's economic proposals: price caps, wealth tax, etc"
+    },
+    {
+      "startTimestamp": "01:04:19",
+      "endTimestamp": "01:19:03",
+      "text": "How Silicon Valley views both candidates, why Reid funded legal action against Trump"
+    },
+    {
+      "startTimestamp": "01:19:03",
+      "endTimestamp": "01:31:13",
+      "text": "Robert F. Kennedy Jr. joins the show and recaps his campaign and decision to back Trump"
+    },
+    {
+      "startTimestamp": "01:31:13",
+      "endTimestamp": "01:37:26",
+      "text": "Falling out with the Democratic Party"
+    },
+    {
+      "startTimestamp": "01:37:26",
+      "endTimestamp": "01:58:01",
+      "text": "Potential role in the Trump Administration, Make America Healthy Again agenda"
+    },
+    {
+      "startTimestamp": "01:58:01",
+      "text": "Sacks recaps RFK Jr's campaign, RFK Jr. on Trump's legacy Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow Reid Hoffman: https://x.com/reidhoffman Follow Robert F. Kennedy Jr.: https://x.com/RobertKennedyJr Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-second-quarter-fiscal-2025 https://podcasts.apple.com/us/podcast/gavin-baker-ai-semiconductors-and-the-robotic-frontier/id1154105909?i=1000666758592"
+    }
+  ]
+}

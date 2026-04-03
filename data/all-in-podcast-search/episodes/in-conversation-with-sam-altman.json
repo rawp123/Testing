@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.640Z",
+  "episode": {
+    "id": "all-in-in-conversation-with-sam-altman",
+    "slug": "in-conversation-with-sam-altman",
+    "episodeNumber": null,
+    "title": "In conversation with Sam Altman",
+    "publishDate": "2024-05-10",
+    "description": "(0:00) Welcoming Sam Altman to the show! (2:28) What's next for OpenAI: GPT-5, open-source, reasoning, what an AI-powered iPhone competitor could look like, and more (21:56) How...",
+    "summary": "(0:00) Welcoming Sam Altman to the show! (2:28) What's next for OpenAI: GPT-5, open-source, reasoning, what an AI-powered iPhone competitor could look like, and more (21:56) How advanced agents will change the way we interface with apps (33:01) Fair use, creator rights, why OpenAI has stayed away from the music industry (42:02) AI regulation, UBI in a...",
+    "durationSeconds": 6183,
+    "durationLabel": "01:43:03",
+    "guests": [
+      "Sam Altman"
+    ],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Media",
+      "Regulation"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-sam-altman",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/in-conversation-with-sam-altman",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E178_1.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/b/0/f/2/b0f211005b826c41e55e3c100dce7605/1x1_Thumbnail_v6_SAMALTMAN.png",
+    "chunkCount": 10,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-in-conversation-with-sam-altman",
+    "dataFile": "/data/all-in-podcast-search/episodes/in-conversation-with-sam-altman.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:28",
+      "text": "Welcoming Sam Altman to the show!"
+    },
+    {
+      "startTimestamp": "02:28",
+      "endTimestamp": "21:56",
+      "text": "What's next for OpenAI: GPT-5, open-source, reasoning, what an AI-powered iPhone competitor could look like, and more"
+    },
+    {
+      "startTimestamp": "21:56",
+      "endTimestamp": "33:01",
+      "text": "How advanced agents will change the way we interface with apps"
+    },
+    {
+      "startTimestamp": "33:01",
+      "endTimestamp": "42:02",
+      "text": "Fair use, creator rights, why OpenAI has stayed away from the music industry"
+    },
+    {
+      "startTimestamp": "42:02",
+      "endTimestamp": "52:23",
+      "text": "AI regulation, UBI in a post-AI world"
+    },
+    {
+      "startTimestamp": "52:23",
+      "endTimestamp": "01:05:33",
+      "text": "Sam breaks down how he was fired and re-hired, why he has no equity, dealmaking on behalf of OpenAI, and how he organizes the company"
+    },
+    {
+      "startTimestamp": "01:05:33",
+      "endTimestamp": "01:10:38",
+      "text": "Post-interview recap"
+    },
+    {
+      "startTimestamp": "01:10:38",
+      "endTimestamp": "01:19:06",
+      "text": "All-In Summit announcements, college protests"
+    },
+    {
+      "startTimestamp": "01:19:06",
+      "endTimestamp": "01:29:41",
+      "text": "Signs of innovation dying at Apple: iPad ad, Buffett sells 100M+ shares, what's next?"
+    },
+    {
+      "startTimestamp": "01:29:41",
+      "text": "Google unveils AlphaFold 3.0 Follow Sam: https://twitter.com/sama Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/EconomyApp/status/1622029832099082241 https://sacra.com/c/openai https://twitter.com/tim_cook/status/1787864325258162239 https://openai.com/index/introducing-the-model-spec https://twitter.com/SabriSun_Miller/status/1788298123434938738 https://www.archives.gov/founding-docs/bill-of-rights-transcript https://twitter.com/ClayTravis/status/1788312545754825091 https://www.inc.com/bill-murphy-jr/warren-buffett-just-sold-more-than-100-million-shares-of-apple-reason-why-is-eye-opening.html https://www.youtube.com/watch?v=snbTCWL6rxo https://www.digitimes.com/news/a20240506PD216/apple-ev-startup-genai.html https://www.theonion.com/fuck-everything-were-doing-five-blades-1819584036 https://blog.google/technology/ai/google-deepmind-isomorphic-alphafold-3-ai-model"
+    }
+  ]
+}

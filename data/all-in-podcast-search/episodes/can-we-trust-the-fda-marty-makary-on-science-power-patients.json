@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.242Z",
+  "episode": {
+    "id": "all-in-can-we-trust-the-fda-marty-makary-on-science-power-patients",
+    "slug": "can-we-trust-the-fda-marty-makary-on-science-power-patients",
+    "episodeNumber": null,
+    "title": "Supercharging a New FDA: Marty Makary on Science, Power &amp; Patients",
+    "publishDate": "2026-01-15",
+    "description": "(0:00) Friedberg intros FDA Commissioner Marty Makary (3:21) Inside the 42 major FDA reforms in 10 months (7:51) The China Race: Winning back biotech leadership (13:14)...",
+    "summary": "(0:00) Friedberg intros FDA Commissioner Marty Makary (3:21) Inside the 42 major FDA reforms in 10 months (7:51) The China Race: Winning back biotech leadership (13:14) Accelerating drug approvals safely, how to cut down on clinical trial timelines (33:13) Reshaping the failed Food Pyramid (41:29) GLP-1s and America's Obesity Epidemic (49:54) Rethinking...",
+    "durationSeconds": 5388,
+    "durationLabel": "01:29:48",
+    "guests": [
+      "FDA Commissioner Marty Makary",
+      "Marty Makary"
+    ],
+    "topicTags": [
+      "AI",
+      "Infrastructure",
+      "Energy",
+      "China",
+      "Healthcare"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/can-we-trust-the-fda-marty-makary-on-science-power-patients",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/can-we-trust-the-fda-marty-makary-on-science-power-patients",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/260112_Makary_INTV_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/5/f/3/6/5f36ac11d7f4dbe616c3140a3186d450/1_Pod_Makary.png",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-can-we-trust-the-fda-marty-makary-on-science-power-patients",
+    "dataFile": "/data/all-in-podcast-search/episodes/can-we-trust-the-fda-marty-makary-on-science-power-patients.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "03:21",
+      "text": "Friedberg intros FDA Commissioner Marty Makary"
+    },
+    {
+      "startTimestamp": "03:21",
+      "endTimestamp": "07:51",
+      "text": "Inside the 42 major FDA reforms in 10 months"
+    },
+    {
+      "startTimestamp": "07:51",
+      "endTimestamp": "13:14",
+      "text": "The China Race: Winning back biotech leadership"
+    },
+    {
+      "startTimestamp": "13:14",
+      "endTimestamp": "33:13",
+      "text": "Accelerating drug approvals safely, how to cut down on clinical trial timelines"
+    },
+    {
+      "startTimestamp": "33:13",
+      "endTimestamp": "41:29",
+      "text": "Reshaping the failed Food Pyramid"
+    },
+    {
+      "startTimestamp": "41:29",
+      "endTimestamp": "49:54",
+      "text": "GLP-1s and America's Obesity Epidemic"
+    },
+    {
+      "startTimestamp": "49:54",
+      "endTimestamp": "59:40",
+      "text": "Rethinking vaccines from first principles"
+    },
+    {
+      "startTimestamp": "59:40",
+      "endTimestamp": "01:18:57",
+      "text": "Lowering drug prices, the power of AI for healthcare"
+    },
+    {
+      "startTimestamp": "01:18:57",
+      "text": "What causes autism? Follow Marty Makary: https://x.com/DrMakaryFDA Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

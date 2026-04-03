@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.380Z",
+  "episode": {
+    "id": "all-in-winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller",
+    "slug": "winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller",
+    "episodeNumber": null,
+    "title": "Winning the AI Race Part 3: Jensen Huang, Lisa Su, James Litinsky, Chase Lochmiller",
+    "publishDate": "2025-07-23",
+    "description": "(0:00) James Litinsky, MP Materials (13:32) Lisa Su, AMD (29:45) Chase Lochmiller, Crusoe (43:26) Jensen Huang, Nvidia NYSE : https://www.nyse.com Visa: https://usa.visa.com",
+    "summary": "(0:00) James Litinsky, MP Materials (13:32) Lisa Su, AMD (29:45) Chase Lochmiller, Crusoe (43:26) Jensen Huang, Nvidia NYSE : https://www.nyse.com Visa: https://usa.visa.com",
+    "durationSeconds": 3879,
+    "durationLabel": "01:04:39",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Nvidia"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_AIDAY_SESSION3_Enabling_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/d/5/0/fd50c1be042a2b67d959afa2a1bf1c87/Winning_the_AI_Race_Pod-20250723-5xces1c3hu.png",
+    "chunkCount": 4,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller",
+    "dataFile": "/data/all-in-podcast-search/episodes/winning-the-ai-race-part-3-jensen-huang-lisa-su-james-litinsky-chase-lochmiller.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "13:32",
+      "text": "James Litinsky, MP Materials"
+    },
+    {
+      "startTimestamp": "13:32",
+      "endTimestamp": "29:45",
+      "text": "Lisa Su, AMD"
+    },
+    {
+      "startTimestamp": "29:45",
+      "endTimestamp": "43:26",
+      "text": "Chase Lochmiller, Crusoe"
+    },
+    {
+      "startTimestamp": "43:26",
+      "text": "Jensen Huang, Nvidia"
+    }
+  ]
+}

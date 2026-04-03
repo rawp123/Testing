@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.401Z",
+  "episode": {
+    "id": "all-in-jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview",
+    "slug": "jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview",
+    "episodeNumber": null,
+    "title": "Jared Isaacman: What went wrong at NASA | The All-In Interview",
+    "publishDate": "2025-06-04",
+    "description": "(0:00) David Friedberg welcomes Jared Isaacman (1:10) Jared's background: billion-dollar founder, pilot, commercial astronaut (7:15) Relationship with Elon Musk, road to becoming...",
+    "summary": "(0:00) David Friedberg welcomes Jared Isaacman (1:10) Jared's background: billion-dollar founder, pilot, commercial astronaut (7:15) Relationship with Elon Musk, road to becoming a commercial astronaut (16:37) Becoming Trump's nominee to lead NASA, the major issues at NASA and his plan to fix things (31:52) Breaking down NASA's proposed budget cuts, the...",
+    "durationSeconds": 3645,
+    "durationLabel": "01:00:45",
+    "guests": [
+      "Jared Isaacman"
+    ],
+    "topicTags": [
+      "Tesla",
+      "Politics",
+      "China",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_INTV_Isaacman_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/3/2/4/4324a07d765653dd16c3140a3186d450/1x1_Thumbnail_v6-20250604-zbk1pm3nej.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview",
+    "dataFile": "/data/all-in-podcast-search/episodes/jared-isaacman-what-went-wrong-at-nasa-the-all-in-interview.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:10",
+      "text": "David Friedberg welcomes Jared Isaacman"
+    },
+    {
+      "startTimestamp": "01:10",
+      "endTimestamp": "07:15",
+      "text": "Jared's background: billion-dollar founder, pilot, commercial astronaut"
+    },
+    {
+      "startTimestamp": "07:15",
+      "endTimestamp": "16:37",
+      "text": "Relationship with Elon Musk, road to becoming a commercial astronaut"
+    },
+    {
+      "startTimestamp": "16:37",
+      "endTimestamp": "31:52",
+      "text": "Becoming Trump's nominee to lead NASA, the major issues at NASA and his plan to fix things"
+    },
+    {
+      "startTimestamp": "31:52",
+      "endTimestamp": "48:31",
+      "text": "Breaking down NASA's proposed budget cuts, the space race against China, private vs public space industry"
+    },
+    {
+      "startTimestamp": "48:31",
+      "text": "The truth behind Jared's nomination being withdrawn by President Trump Follow Jared: https://x.com/rookisaacman Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://truthsocial.com/@realDonaldTrump/posts/114605559474286180 https://www.youtube.com/watch?v=3pv01sSq44w https://x.com/elonmusk/status/1439412791815950336 https://www.youtube.com/watch?v=MaJmUUtr2SI"
+    }
+  ]
+}

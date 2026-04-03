@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.340Z",
+  "episode": {
+    "id": "all-in-the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities",
+    "slug": "the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities",
+    "episodeNumber": null,
+    "title": "The College Crisis: Heads of Dartmouth &amp; Berkeley Debate the Decline of US Universities",
+    "publishDate": "2025-09-16",
+    "description": "(0:00) Introducing Dartmouth President Sian Beilock and Berkeley Chancellor Rich Lyons (1:14) The student loan burden (8:03) DEI at US universities (13:56) Administrative bloat...",
+    "summary": "(0:00) Introducing Dartmouth President Sian Beilock and Berkeley Chancellor Rich Lyons (1:14) The student loan burden (8:03) DEI at US universities (13:56) Administrative bloat (16:12) Trump vs the Ivy League, viewpoint diversity (21:56) Impact of K-12 education declining (25:13) Will AI learning kill higher education? (29:14) Rising unemployment among...",
+    "durationSeconds": 2228,
+    "durationLabel": "37:08",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_Lyons_Beilock_College_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/b/5/f/db5fe1e4dea28ec2d959afa2a1bf1c87/1_pod_college.png",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities",
+    "dataFile": "/data/all-in-podcast-search/episodes/the-college-crisis-heads-of-dartmouth-berkeley-debate-the-decline-of-us-universities.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:14",
+      "text": "Introducing Dartmouth President Sian Beilock and Berkeley Chancellor Rich Lyons"
+    },
+    {
+      "startTimestamp": "01:14",
+      "endTimestamp": "08:03",
+      "text": "The student loan burden"
+    },
+    {
+      "startTimestamp": "08:03",
+      "endTimestamp": "13:56",
+      "text": "DEI at US universities"
+    },
+    {
+      "startTimestamp": "13:56",
+      "endTimestamp": "16:12",
+      "text": "Administrative bloat"
+    },
+    {
+      "startTimestamp": "16:12",
+      "endTimestamp": "21:56",
+      "text": "Trump vs the Ivy League, viewpoint diversity"
+    },
+    {
+      "startTimestamp": "21:56",
+      "endTimestamp": "25:13",
+      "text": "Impact of K-12 education declining"
+    },
+    {
+      "startTimestamp": "25:13",
+      "endTimestamp": "29:14",
+      "text": "Will AI learning kill higher education?"
+    },
+    {
+      "startTimestamp": "29:14",
+      "endTimestamp": "31:35",
+      "text": "Rising unemployment among recent graduates"
+    },
+    {
+      "startTimestamp": "31:35",
+      "text": "Role of endowments"
+    }
+  ]
+}

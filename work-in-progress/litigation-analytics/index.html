@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Litigation Analytics | Robert Parrish</title>
+  <meta name="description" content="A protected set of dashboards for reviewing litigation activity, verdict trends, and related analytics." />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/litigation-analytics.css">
+  <script src="/src/js/header.js" defer></script>
+</head>
+<body data-page="wip-litigation-analytics">
+  <div id="site-header"></div>
+  <main>
+    <section class="container page-shell la-shell">
+      <section class="la-hero card wip-stamped">
+        <div class="page-shell-head">
+          <div class="page-shell-copy">
+            <p class="page-kicker">Work in progress</p>
+            <h1 class="page-title">Litigation dashboards</h1>
+            <p class="page-subtitle">This area holds the litigation analytics tools that are still being developed and reviewed.</p>
+          </div>
+          <div class="page-meta" aria-hidden="true">
+            <span class="page-meta-chip">Protected</span>
+            <span class="page-meta-chip">Dashboards</span>
+            <span class="page-meta-chip">Trackers</span>
+          </div>
+        </div>
+        <p class="la-hero-note">Grouping these pages under one path keeps the preview area easier to manage behind Cloudflare Access.</p>
+      </section>
+
+      <nav class="la-section-nav" aria-label="Work in progress litigation section">
+        <a href="/work-in-progress/" class="la-section-nav-link">Work In Progress</a>
+        <a href="/work-in-progress/litigation-analytics/" class="la-section-nav-link is-active" aria-current="page">Litigation Analytics</a>
+        <a href="/jpml-dashboard.html" class="la-section-nav-link">JPML Dashboard</a>
+        <a href="/work-in-progress/nuclear-verdict-tracker/" class="la-section-nav-link">Nuclear Verdict Tracker</a>
+      </nav>
+
+      <section class="la-section-head">
+        <div>
+          <p class="la-section-kicker">Available tools</p>
+          <h2 class="la-section-title">Dashboards in this section</h2>
+        </div>
+        <p class="la-section-copy">Open the public JPML dashboard or the protected nuclear verdict tracker from here.</p>
+      </section>
+
+      <section class="la-grid" aria-label="Litigation analytics dashboards">
+        <a href="/jpml-dashboard.html" class="la-card card">
+          <div class="la-card-top">
+            <p class="la-card-kicker">Dashboard</p>
+            <span class="la-card-arrow" aria-hidden="true">&rarr;</span>
+          </div>
+          <h2 class="la-card-title">JPML Dashboard</h2>
+          <p class="la-card-copy">Review federal multidistrict litigation activity, district movement, and broader filing trends.</p>
+          <div class="la-card-footer">
+            <span class="la-card-cta">Open Dashboard</span>
+          </div>
+        </a>
+
+        <a href="/work-in-progress/nuclear-verdict-tracker/" class="la-card card wip-stamped">
+          <div class="la-card-top">
+            <p class="la-card-kicker">Tracker</p>
+            <span class="la-card-arrow" aria-hidden="true">&rarr;</span>
+          </div>
+          <h2 class="la-card-title">Nuclear Verdict Tracker</h2>
+          <p class="la-card-copy">Explore reported large verdicts by jurisdiction, case type, industry, and damages mix.</p>
+          <div class="la-card-footer">
+            <span class="la-card-cta">Open Tracker</span>
+          </div>
+        </a>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer container">
+    <div>&copy; Robert Parrish. All rights reserved.</div>
+    <div class="muted small">Built with HTML, CSS, and JavaScript.</div>
+  </footer>
+</body>
+</html>

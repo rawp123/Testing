@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.449Z",
+  "episode": {
+    "id": "all-in-trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down",
+    "slug": "trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down",
+    "episodeNumber": null,
+    "title": "Trump's First 100 Days, Tariffs Impact Trade, AI Agents, Amazon Backs Down",
+    "publishDate": "2025-05-02",
+    "description": "(0:00) The Besties welcome Box's Aaron Levie and Flexport's Ryan Petersen! (4:05) Is Sacks back? (8:19) Reflecting on Trump's first 100 days (28:16) Global trade disruption, how...",
+    "summary": "(0:00) The Besties welcome Box's Aaron Levie and Flexport's Ryan Petersen! (4:05) Is Sacks back? (8:19) Reflecting on Trump's first 100 days (28:16) Global trade disruption, how businesses are dealing with tariffs (49:14) Amazon flip-flops on its tariff pricing feature, national security issues (1:04:13) AI agents, 1,000,000X'ing AI, and more",
+    "durationSeconds": 5706,
+    "durationLabel": "01:35:06",
+    "guests": [
+      "Aaron Levie",
+      "Ryan Petersen"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E226_2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/6/8/9/a689e3646fadf064d959afa2a1bf1c87/1x1_CLASSIC_E226.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down",
+    "dataFile": "/data/all-in-podcast-search/episodes/trumps-first-100-days-tariffs-impact-trade-ai-agents-amazon-backs-down.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:05",
+      "text": "The Besties welcome Box's Aaron Levie and Flexport's Ryan Petersen!"
+    },
+    {
+      "startTimestamp": "04:05",
+      "endTimestamp": "08:19",
+      "text": "Is Sacks back?"
+    },
+    {
+      "startTimestamp": "08:19",
+      "endTimestamp": "28:16",
+      "text": "Reflecting on Trump's first 100 days"
+    },
+    {
+      "startTimestamp": "28:16",
+      "endTimestamp": "49:14",
+      "text": "Global trade disruption, how businesses are dealing with tariffs"
+    },
+    {
+      "startTimestamp": "49:14",
+      "endTimestamp": "01:04:13",
+      "text": "Amazon flip-flops on its tariff pricing feature, national security issues"
+    },
+    {
+      "startTimestamp": "01:04:13",
+      "text": "AI agents, 1,000,000X'ing AI, and more Follow Aaron Levie: https://x.com/levie Follow Ryan Petersen: https://x.com/typesfast Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect Referenced in the show: https://en.wikipedia.org/wiki/OODA_loop https://www.nbcnews.com/politics/joe-biden/biden-warns-risk-nuclear-armageddon-highest-cuban-missile-crisis-rcna51146 https://www.nytimes.com/2025/03/30/world/europe/us-ukraine-military-war-takeaways.html https://x.com/Molson_Hart/status/1915248938753392642 https://x.com/SecScottBessent/status/1917697018551754802 https://www.nytimes.com/2025/04/29/us/politics/trump-amazon-tariffs-prices.html https://x.com/chamath/status/1908239828283777393 https://www.theinformation.com/articles/openai-plots-charging-20-000-a-month-for-phd-level-agents?rc=pxkrxo https://manus.im https://www.theinformation.com/briefings/benchmark-invests-chinese-startup-behind-manus-ai-agent?rc=pxkrxo https://polymarket.com/event/which-company-has-best-ai-model-end-of-2025?tid=1746130417369"
+    }
+  ]
+}

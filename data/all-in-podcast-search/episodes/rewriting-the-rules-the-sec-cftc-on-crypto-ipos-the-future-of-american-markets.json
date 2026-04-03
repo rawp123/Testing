@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.195Z",
+  "episode": {
+    "id": "all-in-rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets",
+    "slug": "rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets",
+    "episodeNumber": null,
+    "title": "Rewriting the Rules: The SEC &amp; CFTC on Crypto, IPOs &amp; the Future of American Markets",
+    "publishDate": "2026-03-11",
+    "description": "(0:00) Jason and Chamath welcome SEC's Paul Atkins and CFTC's Michael Selig (0:53) Atkins on how US markets have changed over his 40 year career (3:04) Top priorities across both...",
+    "summary": "(0:00) Jason and Chamath welcome SEC's Paul Atkins and CFTC's Michael Selig (0:53) Atkins on how US markets have changed over his 40 year career (3:04) Top priorities across both agencies: Fixing the IPO drought, crypto regulation, cutting unnecessary rules (8:16) AI trading bots, autonomous hedge funds, and investing with leverage (15:30) Ending the \"Turf...",
+    "durationSeconds": 3610,
+    "durationLabel": "01:00:10",
+    "guests": [
+      "Paul Atkins",
+      "Michael Selig"
+    ],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Politics",
+      "Markets",
+      "Defense"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-INTV_SEC_CFTC_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/2/b/1/1/2b11f96acce6acefd959afa2a1bf1c87/1_Pod_SEC_CTFC.png",
+    "chunkCount": 12,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets",
+    "dataFile": "/data/all-in-podcast-search/episodes/rewriting-the-rules-the-sec-cftc-on-crypto-ipos-the-future-of-american-markets.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:53",
+      "text": "Jason and Chamath welcome SEC's Paul Atkins and CFTC's Michael Selig"
+    },
+    {
+      "startTimestamp": "00:53",
+      "endTimestamp": "03:04",
+      "text": "Atkins on how US markets have changed over his 40 year career"
+    },
+    {
+      "startTimestamp": "03:04",
+      "endTimestamp": "08:16",
+      "text": "Top priorities across both agencies: Fixing the IPO drought, crypto regulation, cutting unnecessary rules"
+    },
+    {
+      "startTimestamp": "08:16",
+      "endTimestamp": "15:30",
+      "text": "AI trading bots, autonomous hedge funds, and investing with leverage"
+    },
+    {
+      "startTimestamp": "15:30",
+      "endTimestamp": "19:15",
+      "text": "Ending the \"Turf War\" between the SEC and CFTC, super app vision"
+    },
+    {
+      "startTimestamp": "19:15",
+      "endTimestamp": "26:56",
+      "text": "Prediction markets, insider trading, gray area"
+    },
+    {
+      "startTimestamp": "26:56",
+      "endTimestamp": "30:30",
+      "text": "Trump advocates for changing quarterly earnings to bi-annual"
+    },
+    {
+      "startTimestamp": "30:30",
+      "endTimestamp": "34:56",
+      "text": "Changing the accreditation rules a priority for 2026"
+    },
+    {
+      "startTimestamp": "34:56",
+      "endTimestamp": "40:36",
+      "text": "HFT firms that dominate the futures markets, swap reporting"
+    },
+    {
+      "startTimestamp": "40:36",
+      "endTimestamp": "46:18",
+      "text": "VC fund formation"
+    },
+    {
+      "startTimestamp": "46:18",
+      "endTimestamp": "52:54",
+      "text": "US markets vs the world, crypto classification"
+    },
+    {
+      "startTimestamp": "52:54",
+      "text": "Biggest risks: Market manipulation, crypto scams, and the Gen Z gambling crisis SEC Chair Paul Atkins: https://x.com/SECPaulSAtkins CFTC Chair Michael Selig: https://x.com/ChairmanSelig Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

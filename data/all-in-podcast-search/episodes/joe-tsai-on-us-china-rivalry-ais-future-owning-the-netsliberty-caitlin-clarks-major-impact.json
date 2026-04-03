@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.319Z",
+  "episode": {
+    "id": "all-in-joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact",
+    "slug": "joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact",
+    "episodeNumber": null,
+    "title": "Joe Tsai on US-China Rivalry, AI's Future, Owning the Nets/Liberty, Caitlin Clark's Major Impact",
+    "publishDate": "2025-10-08",
+    "description": "(0:00) Introducing Joe Tsai (0:49) Owning the Nets and Liberty, Caitlin Clark's impact on the WNBA, does the NBA need fixing? (6:07) Alibaba origins, China's pullback on...",
+    "summary": "(0:00) Introducing Joe Tsai (0:49) Owning the Nets and Liberty, Caitlin Clark's impact on the WNBA, does the NBA need fixing? (6:07) Alibaba origins, China's pullback on capitalism (10:10) US vs China rivalry: the AI race, are we destined for conflict, and what can the US learn from China? (19:46) AI application in large businesses (21:52) Managing...",
+    "durationSeconds": 1627,
+    "durationLabel": "27:07",
+    "guests": [
+      "Joe Tsai"
+    ],
+    "topicTags": [
+      "AI",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_JoeTsai_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/a/b/9/4ab94a45edd8b1a4d959afa2a1bf1c87/1_Pod_Tsai-20251008-pvbwjcf9k1.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact",
+    "dataFile": "/data/all-in-podcast-search/episodes/joe-tsai-on-us-china-rivalry-ais-future-owning-the-netsliberty-caitlin-clarks-major-impact.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:49",
+      "text": "Introducing Joe Tsai"
+    },
+    {
+      "startTimestamp": "00:49",
+      "endTimestamp": "06:07",
+      "text": "Owning the Nets and Liberty, Caitlin Clark's impact on the WNBA, does the NBA need fixing?"
+    },
+    {
+      "startTimestamp": "06:07",
+      "endTimestamp": "10:10",
+      "text": "Alibaba origins, China's pullback on capitalism"
+    },
+    {
+      "startTimestamp": "10:10",
+      "endTimestamp": "19:46",
+      "text": "US vs China rivalry: the AI race, are we destined for conflict, and what can the US learn from China?"
+    },
+    {
+      "startTimestamp": "19:46",
+      "endTimestamp": "21:52",
+      "text": "AI application in large businesses"
+    },
+    {
+      "startTimestamp": "21:52",
+      "endTimestamp": "23:17",
+      "text": "Managing corporate culture at Alibaba's scale, Nets predictions"
+    },
+    {
+      "startTimestamp": "23:17",
+      "text": "AI adoption, job anxiety, and AGI views in China"
+    }
+  ]
+}

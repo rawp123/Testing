@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.325Z",
+  "episode": {
+    "id": "all-in-rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix",
+    "slug": "rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix",
+    "episodeNumber": null,
+    "title": "Rick Caruso on California's Collapse: Broken Leadership, LA Wildfire Failures &amp; the Fix",
+    "publishDate": "2025-09-30",
+    "description": "(0:00) Introducing Rick Caruso (1:03) Reflecting on the disastrous LA Wildfires: Karen Bass failure, saving the Palisades Village, failure to rebuild (11:20) California's...",
+    "summary": "(0:00) Introducing Rick Caruso (1:03) Reflecting on the disastrous LA Wildfires: Karen Bass failure, saving the Palisades Village, failure to rebuild (11:20) California's incompetence, running for CA Governor vs LA Mayor (14:21) Attention to detail (17:04) State of California: What it should be, homelessness, National Guard, policing Solana - Solana is the...",
+    "durationSeconds": 1376,
+    "durationLabel": "22:56",
+    "guests": [
+      "Rick Caruso"
+    ],
+    "topicTags": [
+      "Crypto",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_RickCaruso_Ch2.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/9/c/f/69cfd0e4f35aab2716c3140a3186d450/1_Pod_RickCaruso.png",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix",
+    "dataFile": "/data/all-in-podcast-search/episodes/rick-caruso-on-californias-collapse-broken-leadership-la-wildfire-failures-the-fix.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:03",
+      "text": "Introducing Rick Caruso"
+    },
+    {
+      "startTimestamp": "01:03",
+      "endTimestamp": "11:20",
+      "text": "Reflecting on the disastrous LA Wildfires: Karen Bass failure, saving the Palisades Village, failure to rebuild"
+    },
+    {
+      "startTimestamp": "11:20",
+      "endTimestamp": "14:21",
+      "text": "California's incompetence, running for CA Governor vs LA Mayor"
+    },
+    {
+      "startTimestamp": "14:21",
+      "endTimestamp": "17:04",
+      "text": "Attention to detail"
+    },
+    {
+      "startTimestamp": "17:04",
+      "text": "State of California: What it should be, homelessness, National Guard, policing"
+    }
+  ]
+}

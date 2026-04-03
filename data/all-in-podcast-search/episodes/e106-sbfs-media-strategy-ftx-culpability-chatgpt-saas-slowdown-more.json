@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.882Z",
+  "episode": {
+    "id": "all-in-e106",
+    "slug": "e106-sbfs-media-strategy-ftx-culpability-chatgpt-saas-slowdown-more",
+    "episodeNumber": 106,
+    "title": "E106: SBF's media strategy, FTX culpability, ChatGPT, SaaS slowdown &amp; more",
+    "publishDate": "2022-12-03",
+    "description": "(0:00) Bestie hangover! (1:05) Analyzing SBF's media tour: his angle, media coverage, and more (21:09) FTX culpability: media, investors, regulators (53:41) Challenging media...",
+    "summary": "(0:00) Bestie hangover! (1:05) Analyzing SBF's media tour: his angle, media coverage, and more (21:09) FTX culpability: media, investors, regulators (53:41) Challenging media coverage of other countries, China's current situation, Xi Jinping's standing (1:10:04) What OpenAI's new ChatGPT tool means for the future (1:26:30) David Sacks on the slowdown in...",
+    "durationSeconds": 6119,
+    "durationLabel": "01:41:59",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Media",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e106-sbfs-media-strategy-ftx-culpability-chatgpt-saas-slowdown-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e106-sbfs-media-strategy-ftx-culpability-chatgpt-saas-slowdown-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E106.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e106",
+    "dataFile": "/data/all-in-podcast-search/episodes/e106-sbfs-media-strategy-ftx-culpability-chatgpt-saas-slowdown-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:05",
+      "text": "Bestie hangover!"
+    },
+    {
+      "startTimestamp": "01:05",
+      "endTimestamp": "21:09",
+      "text": "Analyzing SBF's media tour: his angle, media coverage, and more"
+    },
+    {
+      "startTimestamp": "21:09",
+      "endTimestamp": "53:41",
+      "text": "FTX culpability: media, investors, regulators"
+    },
+    {
+      "startTimestamp": "53:41",
+      "endTimestamp": "01:10:04",
+      "text": "Challenging media coverage of other countries, China's current situation, Xi Jinping's standing"
+    },
+    {
+      "startTimestamp": "01:10:04",
+      "endTimestamp": "01:26:30",
+      "text": "What OpenAI's new ChatGPT tool means for the future"
+    },
+    {
+      "startTimestamp": "01:26:30",
+      "text": "David Sacks on the slowdown in SaaS, use case endgame for generative AI Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.youtube.com/watch?v=KMZckrBPw38 https://www.coindesk.com/layer2/2022/11/30/ftxs-collapse-was-a-crime-not-an-accident https://www.wsj.com/articles/sequoia-capital-apologizes-to-limited-partners-for-ftx-investment-11669144914 https://www.nytimes.com/2022/11/27/opinion/ftx-sam-bankman-fried-fullenkamp.html https://www.nytimes.com/2022/11/14/technology/ftx-sam-bankman-fried-crypto-bankruptcy.html https://twitter.com/lizrhoffman/status/1595193884438568960 https://taibbi.substack.com/p/be-it-resolved-dont-trust-mainstream https://www.newcomer.co/p/taking-kid-gloves-to-all-in-my-reflections https://chat.openai.com/chat https://twitter.com/jdjkelly/status/1598021488795586561 https://twitter.com/pmarca/status/1598413401705021440 https://twitter.com/jdjkelly/status/1598021488795586561 https://twitter.com/DavidSacks/status/1598076726671642624 https://twitter.com/DavidSacks/status/1598363968547876864"
+    }
+  ]
+}

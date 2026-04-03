@@ -6,6 +6,7 @@
   <title>MDL Dashboard | Robert Parrish</title>
   <meta name="description" content="Dashboard for reviewing MDL activity, trends, and related docket data." />
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/css/litigation-analytics.css">
   <link rel="stylesheet" href="/src/css/jpml-dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="/src/js/header.js" defer></script>
@@ -15,12 +16,16 @@
   <main>
     <div class="page-container">
       <div class="container">
-        <section class="page-shell is-compact">
+        <section class="page-shell is-compact la-tool-shell">
+          <section class="la-hero la-tool-hero card">
           <div class="page-shell-head">
             <div class="page-shell-copy">
-              <p class="page-kicker">Project</p>
-              <h1 class="page-title">MDL Dashboard</h1>
+              <p class="page-kicker">Litigation analytics</p>
+              <h1 class="page-title">JPML Dashboard</h1>
               <p class="page-subtitle">Shows MDL activity, month-over-month changes, long-term trends, and related docket data.</p>
+            </div>
+            <div class="page-actions">
+              <a href="/litigation-analytics/" class="btn ghost">All litigation dashboards</a>
             </div>
             <div class="page-meta" aria-hidden="true">
               <span class="page-meta-chip">Monthly data</span>
@@ -28,6 +33,13 @@
               <span class="page-meta-chip">Source reports</span>
             </div>
           </div>
+          </section>
+
+          <nav class="la-section-nav" aria-label="Litigation analytics section">
+            <a href="/litigation-analytics/" class="la-section-nav-link">Overview</a>
+            <a href="/jpml-dashboard.html" class="la-section-nav-link is-active" aria-current="page">JPML Dashboard</a>
+            <a href="/nuclear-verdict-tracker/" class="la-section-nav-link">Nuclear Verdict Tracker</a>
+          </nav>
         </section>
         
         <div class="dashboard-tabs">

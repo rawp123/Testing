@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.480Z",
+  "episode": {
+    "id": "all-in-scott-bessent-all-in-in-dc",
+    "slug": "scott-bessent-all-in-in-dc",
+    "episodeNumber": null,
+    "title": "Scott Bessent | All-In DC",
+    "publishDate": "2025-03-19",
+    "description": "(0:00) Chamath and Friedberg describe their adventures in DC and welcome Treasury Secretary Scott Bessent! (2:12) Scott's background, what drew him to equities, the role of macro...",
+    "summary": "(0:00) Chamath and Friedberg describe their adventures in DC and welcome Treasury Secretary Scott Bessent! (2:12) Scott's background, what drew him to equities, the role of macro investors (7:22) The legendary trade that broke the Bank of England in 1992, and how it relates to Main Street vs Wall Street today (21:30) Scott explains the Trump...",
+    "durationSeconds": 4397,
+    "durationLabel": "01:13:17",
+    "guests": [
+      "Scott Bessent",
+      "Secretary Bessent"
+    ],
+    "topicTags": [
+      "Politics",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/scott-bessent-all-in-in-dc",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/scott-bessent-all-in-in-dc",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-DC-Bessent_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/0/e/f/f/0eff903be95de649d959afa2a1bf1c87/1x1_Thumbnail_BESSENT.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-scott-bessent-all-in-in-dc",
+    "dataFile": "/data/all-in-podcast-search/episodes/scott-bessent-all-in-in-dc.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:12",
+      "text": "Chamath and Friedberg describe their adventures in DC and welcome Treasury Secretary Scott Bessent!"
+    },
+    {
+      "startTimestamp": "02:12",
+      "endTimestamp": "07:22",
+      "text": "Scott's background, what drew him to equities, the role of macro investors"
+    },
+    {
+      "startTimestamp": "07:22",
+      "endTimestamp": "21:30",
+      "text": "The legendary trade that broke the Bank of England in 1992, and how it relates to Main Street vs Wall Street today"
+    },
+    {
+      "startTimestamp": "21:30",
+      "endTimestamp": "32:45",
+      "text": "Scott explains the Trump Administration's economic strategy"
+    },
+    {
+      "startTimestamp": "32:45",
+      "endTimestamp": "42:06",
+      "text": "How this administration plans to de-regulate the economy, Fed relationship, re-financing debt"
+    },
+    {
+      "startTimestamp": "42:06",
+      "endTimestamp": "50:51",
+      "text": "DOGE, DC grifts, shakeup at the IRS"
+    },
+    {
+      "startTimestamp": "50:51",
+      "endTimestamp": "01:00:02",
+      "text": "Re-engineering social security through the US SWF, how energy factors in"
+    },
+    {
+      "startTimestamp": "01:00:02",
+      "text": "Surprises, fixing affordability, thoughts on President Trump"
+    }
+  ]
+}

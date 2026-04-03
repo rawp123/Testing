@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.623Z",
+  "episode": {
+    "id": "all-in-biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections",
+    "slug": "biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections",
+    "episodeNumber": null,
+    "title": "Biden chaos, Soft landing secured? AI sentiment turns bearish, French elections",
+    "publishDate": "2024-07-12",
+    "description": "(0:00) Bestie intros! (4:29) Macro picture: Soft landing secured? Rate cut on the horizon? Plus: partisan economic perception (20:48) AI sentiment turns bearish due to massive...",
+    "summary": "(0:00) Bestie intros! (4:29) Macro picture: Soft landing secured? Rate cut on the horizon? Plus: partisan economic perception (20:48) AI sentiment turns bearish due to massive spend with little revenue (40:51) A16Z's 20K GPU cluster (46:41) Broad implications of France elections (1:06:10) Hot swap update: President Biden holds firm as backers flee, press...",
+    "durationSeconds": 5138,
+    "durationLabel": "01:25:38",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Nvidia",
+      "Politics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E187.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/d/4/c/dd4c39879ed2971be55e3c100dce7605/1x1_CLASSIC_E187.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections",
+    "dataFile": "/data/all-in-podcast-search/episodes/biden-chaos-soft-landing-secured-ai-sentiment-turns-bearish-french-elections.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:29",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "04:29",
+      "endTimestamp": "20:48",
+      "text": "Macro picture: Soft landing secured? Rate cut on the horizon? Plus: partisan economic perception"
+    },
+    {
+      "startTimestamp": "20:48",
+      "endTimestamp": "40:51",
+      "text": "AI sentiment turns bearish due to massive spend with little revenue"
+    },
+    {
+      "startTimestamp": "40:51",
+      "endTimestamp": "46:41",
+      "text": "A16Z's 20K GPU cluster"
+    },
+    {
+      "startTimestamp": "46:41",
+      "endTimestamp": "01:06:10",
+      "text": "Broad implications of France elections"
+    },
+    {
+      "startTimestamp": "01:06:10",
+      "text": "Hot swap update: President Biden holds firm as backers flee, press corps chaos, speed-run primary chances"
+    }
+  ]
+}

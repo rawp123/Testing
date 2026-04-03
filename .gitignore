@@ -2,3 +2,20 @@ node_modules/
 .env
 .DS_Store
 .codex
+
+# Local environments and caches
+.venv/
+.cache/
+__pycache__/
+
+# Python bytecode in repo scripts
+scripts/__pycache__/
+
+# Local podcast audio archives
+scripts/podcasts/all-in/raw/audio/*.mp3
+!scripts/podcasts/all-in/raw/audio/metadata.json
+scripts/podcasts/all-in/raw/audio-test-sample/*.mp3
+!scripts/podcasts/all-in/raw/audio-test-sample/metadata.json
+
+# Generated transcript run reports
+scripts/podcasts/all-in/raw/transcripts/_reports/*.json

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.625Z",
+  "episode": {
+    "id": "all-in-the-jonathan-haidt-interview",
+    "slug": "the-jonathan-haidt-interview",
+    "episodeNumber": null,
+    "title": "Jonathan Haidt | The All-In Interview",
+    "publishDate": "2024-07-10",
+    "description": "(0:00) New format: The All-In Interview! (0:59) Jonathan Haidt joins Jason and Friedberg: broader themes of his work, gamification and supercharged social media (12:39)...",
+    "summary": "(0:00) New format: The All-In Interview! (0:59) Jonathan Haidt joins Jason and Friedberg: broader themes of his work, gamification and supercharged social media (12:39) Understanding how humans are wired from an evolutionary biology perspective (27:22) Haidt's proposals to help younger generations (33:12) Linking themes and trends in Haidt's books with...",
+    "durationSeconds": 4438,
+    "durationLabel": "01:13:58",
+    "guests": [],
+    "topicTags": [
+      "Media"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/the-jonathan-haidt-interview",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/the-jonathan-haidt-interview",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-INTV_JonHaidt_V3.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/3/b/c/d3bcfe8af8c2760427a2322813b393ee/1x1_Thumbnail_v6_JHAIDT.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-the-jonathan-haidt-interview",
+    "dataFile": "/data/all-in-podcast-search/episodes/the-jonathan-haidt-interview.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:59",
+      "text": "New format: The All-In Interview!"
+    },
+    {
+      "startTimestamp": "00:59",
+      "endTimestamp": "12:39",
+      "text": "Jonathan Haidt joins Jason and Friedberg: broader themes of his work, gamification and supercharged social media"
+    },
+    {
+      "startTimestamp": "12:39",
+      "endTimestamp": "27:22",
+      "text": "Understanding how humans are wired from an evolutionary biology perspective"
+    },
+    {
+      "startTimestamp": "27:22",
+      "endTimestamp": "33:12",
+      "text": "Haidt's proposals to help younger generations"
+    },
+    {
+      "startTimestamp": "33:12",
+      "endTimestamp": "48:17",
+      "text": "Linking themes and trends in Haidt's books with recent college protests"
+    },
+    {
+      "startTimestamp": "48:17",
+      "endTimestamp": "56:55",
+      "text": "Explaining traditional liberalism and conservatism"
+    },
+    {
+      "startTimestamp": "56:55",
+      "text": "Lightning Round: Parenting tips, Gen Z employees Jonathan's website: https://jonathanhaidt.com Buy The Anxious Generation: https://www.anxiousgeneration.com/book Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.anxiousgeneration.com/take-action https://www.azquotes.com/quote/1385350 https://www.azquotes.com/quote/926752 https://www.thecoddling.com/chapter-1-antifragility https://www.anxiousgeneration.com https://www.afterbabel.com https://letgrow.org"
+    }
+  ]
+}

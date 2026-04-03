@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.735Z",
+  "episode": {
+    "id": "all-in-e145",
+    "slug": "e145-presidential-candidate-chris-christie-in-conversation-with-the-besties",
+    "episodeNumber": 145,
+    "title": "E145: Presidential Candidate Chris Christie in conversation with the Besties",
+    "publishDate": "2023-09-08",
+    "description": "(0:00) Besties welcome former NJ Governor and Republican Presidential Candidate Chris Christie! (2:14) US debt crisis, cutting entitlements (14:03) Level-setting on foreign policy...",
+    "summary": "(0:00) Besties welcome former NJ Governor and Republican Presidential Candidate Chris Christie! (2:14) US debt crisis, cutting entitlements (14:03) Level-setting on foreign policy (25:28) Ukraine / Russia: culpability, where to go from here (36:47) US defense budget, optimizing spend, zero-based budgeting, influence peddling (50:01) Immigration policy, how...",
+    "durationSeconds": 7695,
+    "durationLabel": "02:08:15",
+    "guests": [
+      "NJ Governor",
+      "Presidential Candidate Chris Christie",
+      "Chris Christie"
+    ],
+    "topicTags": [
+      "Politics",
+      "Defense",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e145-presidential-candidate-chris-christie-in-conversation-with-the-besties",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e145-presidential-candidate-chris-christie-in-conversation-with-the-besties",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E145_.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e145",
+    "dataFile": "/data/all-in-podcast-search/episodes/e145-presidential-candidate-chris-christie-in-conversation-with-the-besties.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:14",
+      "text": "Besties welcome former NJ Governor and Republican Presidential Candidate Chris Christie!"
+    },
+    {
+      "startTimestamp": "02:14",
+      "endTimestamp": "14:03",
+      "text": "US debt crisis, cutting entitlements"
+    },
+    {
+      "startTimestamp": "14:03",
+      "endTimestamp": "25:28",
+      "text": "Level-setting on foreign policy"
+    },
+    {
+      "startTimestamp": "25:28",
+      "endTimestamp": "36:47",
+      "text": "Ukraine / Russia: culpability, where to go from here"
+    },
+    {
+      "startTimestamp": "36:47",
+      "endTimestamp": "50:01",
+      "text": "US defense budget, optimizing spend, zero-based budgeting, influence peddling"
+    },
+    {
+      "startTimestamp": "50:01",
+      "endTimestamp": "01:02:24",
+      "text": "Immigration policy, how each party co-opts the issue"
+    },
+    {
+      "startTimestamp": "01:02:24",
+      "endTimestamp": "01:15:57",
+      "text": "Fentanyl crisis in SF, LA, and NYC, incarceration and criminal justice reform, political activism in law enforcement"
+    },
+    {
+      "startTimestamp": "01:15:57",
+      "endTimestamp": "01:17:41",
+      "text": "Why Chris Christie is running for president"
+    },
+    {
+      "startTimestamp": "01:17:41",
+      "endTimestamp": "01:23:16",
+      "text": "Thoughts on prosecuting Trump, January 6th, and more"
+    },
+    {
+      "startTimestamp": "01:23:16",
+      "endTimestamp": "01:48:34",
+      "text": "Chris Christie addresses his past controversies"
+    },
+    {
+      "startTimestamp": "01:48:34",
+      "text": "Post-interview debrief Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow Chris Christie: https://twitter.com/GovChristie Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://fred.stlouisfed.org/series/GFDEBTN https://fred.stlouisfed.org/series/SMPOPNETMUSA https://www.cbp.gov/newsroom/stats/southwest-land-border-encounters https://www.washingtonpost.com/immigration/2023/08/31/border-families-record-crossings-biden"
+    }
+  ]
+}

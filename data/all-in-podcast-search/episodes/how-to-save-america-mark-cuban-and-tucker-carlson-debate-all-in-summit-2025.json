@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.357Z",
+  "episode": {
+    "id": "all-in-how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025",
+    "slug": "how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025",
+    "episodeNumber": null,
+    "title": "How to Save America: Mark Cuban and Tucker Carlson Debate | All-In Summit 2025",
+    "publishDate": "2025-09-09",
+    "description": "(0:00) Introducing Mark Cuban, sadness over Luka Doncic (2:38) America's broken healthcare system (15:16) State of the two-party system (19:24) Introducing Tucker Carlson (20:01)...",
+    "summary": "(0:00) Introducing Mark Cuban, sadness over Luka Doncic (2:38) America's broken healthcare system (15:16) State of the two-party system (19:24) Introducing Tucker Carlson (20:01) The fine line between listening and pandering, is Mamdani the Trump of the Left? (24:27) How to make Americans believe in America again (34:12) AI job displacement (39:29)...",
+    "durationSeconds": 3583,
+    "durationLabel": "59:43",
+    "guests": [
+      "Mark Cuban",
+      "Tucker Carlson"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Ukraine",
+      "Healthcare"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_TUCKER_MARK_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/d/6/c/6/d6c66aff08fe986c16c3140a3186d450/5.png",
+    "chunkCount": 9,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025",
+    "dataFile": "/data/all-in-podcast-search/episodes/how-to-save-america-mark-cuban-and-tucker-carlson-debate-all-in-summit-2025.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:38",
+      "text": "Introducing Mark Cuban, sadness over Luka Doncic"
+    },
+    {
+      "startTimestamp": "02:38",
+      "endTimestamp": "15:16",
+      "text": "America's broken healthcare system"
+    },
+    {
+      "startTimestamp": "15:16",
+      "endTimestamp": "19:24",
+      "text": "State of the two-party system"
+    },
+    {
+      "startTimestamp": "19:24",
+      "endTimestamp": "20:01",
+      "text": "Introducing Tucker Carlson"
+    },
+    {
+      "startTimestamp": "20:01",
+      "endTimestamp": "24:27",
+      "text": "The fine line between listening and pandering, is Mamdani the Trump of the Left?"
+    },
+    {
+      "startTimestamp": "24:27",
+      "endTimestamp": "34:12",
+      "text": "How to make Americans believe in America again"
+    },
+    {
+      "startTimestamp": "34:12",
+      "endTimestamp": "39:29",
+      "text": "AI job displacement"
+    },
+    {
+      "startTimestamp": "39:29",
+      "endTimestamp": "52:54",
+      "text": "Lightning round with Tucker: Epstein, Putin, why the West is killing itself, the SSRI epidemic, Iryna Zarutska murder"
+    },
+    {
+      "startTimestamp": "52:54",
+      "text": "Antisemitism and Israel"
+    }
+  ]
+}

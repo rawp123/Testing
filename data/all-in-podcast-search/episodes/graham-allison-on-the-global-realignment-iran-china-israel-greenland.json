@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.198Z",
+  "episode": {
+    "id": "all-in-graham-allison-on-the-global-realignment-iran-china-israel-greenland",
+    "slug": "graham-allison-on-the-global-realignment-iran-china-israel-greenland",
+    "episodeNumber": null,
+    "title": "Graham Allison on the Global Realignment: Iran, China, Israel, Greenland",
+    "publishDate": "2026-03-09",
+    "description": "(0:00) The Besties welcome legendary Harvard professor Graham Allison (1:14) Iran Conflict: Strategy, Netanyahu's influence, Trump's motivation, redefining Middle East security...",
+    "summary": "(0:00) The Besties welcome legendary Harvard professor Graham Allison (1:14) Iran Conflict: Strategy, Netanyahu's influence, Trump's motivation, redefining Middle East security (11:44) Iran endgame scenarios: Democracy, extremism, second-order effects (21:07) Israel: Is Netanyahu destroying Israel's democracy? (24:28) China: Taiwan invasion, trade, and...",
+    "durationSeconds": 3806,
+    "durationLabel": "01:03:26",
+    "guests": [
+      "Graham Allison"
+    ],
+    "topicTags": [
+      "Politics",
+      "Energy",
+      "China",
+      "Iran",
+      "Israel"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/graham-allison-on-the-global-realignment-iran-china-israel-greenland",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/graham-allison-on-the-global-realignment-iran-china-israel-greenland",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-GrahamAllison_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/9/0/1/7/9017fe4546f1ad9116c3140a3186d450/1_Pod_GrahamAllison.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-graham-allison-on-the-global-realignment-iran-china-israel-greenland",
+    "dataFile": "/data/all-in-podcast-search/episodes/graham-allison-on-the-global-realignment-iran-china-israel-greenland.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:14",
+      "text": "The Besties welcome legendary Harvard professor Graham Allison"
+    },
+    {
+      "startTimestamp": "01:14",
+      "endTimestamp": "11:44",
+      "text": "Iran Conflict: Strategy, Netanyahu's influence, Trump's motivation, redefining Middle East security"
+    },
+    {
+      "startTimestamp": "11:44",
+      "endTimestamp": "21:07",
+      "text": "Iran endgame scenarios: Democracy, extremism, second-order effects"
+    },
+    {
+      "startTimestamp": "21:07",
+      "endTimestamp": "24:28",
+      "text": "Israel: Is Netanyahu destroying Israel's democracy?"
+    },
+    {
+      "startTimestamp": "24:28",
+      "endTimestamp": "39:50",
+      "text": "China: Taiwan invasion, trade, and Trump's April meeting"
+    },
+    {
+      "startTimestamp": "39:50",
+      "endTimestamp": "48:58",
+      "text": "Greenland: Importance, deal scenarios, EU socialism angle"
+    },
+    {
+      "startTimestamp": "48:58",
+      "endTimestamp": "56:20",
+      "text": "Nuclear proliferation: 80-80-9 framework explained"
+    },
+    {
+      "startTimestamp": "56:20",
+      "text": "Rising socialism in America: wealth inequality and political risk"
+    }
+  ]
+}

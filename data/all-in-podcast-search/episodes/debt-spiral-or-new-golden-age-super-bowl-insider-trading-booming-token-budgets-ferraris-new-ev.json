@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.214Z",
+  "episode": {
+    "id": "all-in-debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev",
+    "slug": "debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev",
+    "episodeNumber": null,
+    "title": "Debt Spiral or NEW Golden Age? Super Bowl Insider Trading, Booming Token Budgets, Ferrari's New EV",
+    "publishDate": "2026-02-13",
+    "description": "(0:00) Bestie intros (0:23) AI updates: On-prem comeback, token budgets surpass salaries (19:19) Prediction markets: Super Bowl insider trading, how to police? (28:44) All-In...",
+    "summary": "(0:00) Bestie intros (0:23) AI updates: On-prem comeback, token budgets surpass salaries (19:19) Prediction markets: Super Bowl insider trading, how to police? (28:44) All-In Liquidity: The ultimate investor conference (32:48) CBO report: Death spiral, growth opportunity, or golden age? (48:06) State of the economy and US jobs (1:03:22) Ferrari's fully...",
+    "durationSeconds": 4390,
+    "durationLabel": "01:13:10",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Crypto"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E261_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/e/0/f/7/e0f7b247ad95a656d959afa2a1bf1c87/1_Pod_E261.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev",
+    "dataFile": "/data/all-in-podcast-search/episodes/debt-spiral-or-new-golden-age-super-bowl-insider-trading-booming-token-budgets-ferraris-new-ev.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:23",
+      "text": "Bestie intros"
+    },
+    {
+      "startTimestamp": "00:23",
+      "endTimestamp": "19:19",
+      "text": "AI updates: On-prem comeback, token budgets surpass salaries"
+    },
+    {
+      "startTimestamp": "19:19",
+      "endTimestamp": "28:44",
+      "text": "Prediction markets: Super Bowl insider trading, how to police?"
+    },
+    {
+      "startTimestamp": "28:44",
+      "endTimestamp": "32:48",
+      "text": "All-In Liquidity: The ultimate investor conference"
+    },
+    {
+      "startTimestamp": "32:48",
+      "endTimestamp": "48:06",
+      "text": "CBO report: Death spiral, growth opportunity, or golden age?"
+    },
+    {
+      "startTimestamp": "48:06",
+      "endTimestamp": "01:03:22",
+      "text": "State of the economy and US jobs"
+    },
+    {
+      "startTimestamp": "01:03:22",
+      "text": "Ferrari's fully electric car goes viral"
+    }
+  ]
+}

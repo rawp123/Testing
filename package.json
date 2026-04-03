@@ -4,13 +4,42 @@
   "private": true,
   "scripts": {
     "start": "node jpml-server.js",
-    "start:dev": "nodemon jpml-server.js"
+    "start:dev": "NODE_ENV=development node jpml-server.js",
+    "scrape:nuclear-verdicts": "tsx scripts/runScrapers.ts",
+    "typecheck:scrapers": "tsc --noEmit",
+    "download:all-in-podcast-audio-rss": "/bin/bash scripts/downloadAllInPodcastAudioFromRss.sh",
+    "download:all-in-podcast-audio-rss:test": "/bin/bash scripts/downloadAllInPodcastAudioFromRss.sh --limit 5",
+    "download:all-in-podcast-audio-rss:full": "/bin/bash scripts/downloadAllInPodcastAudioFromRss.sh",
+    "fetch:all-in-podcast-archive": "/bin/bash scripts/fetchAllInPodcastArchive.sh",
+    "fetch:all-in-podcast-youtube-transcripts": "node scripts/fetchAllInPodcastYouTubeTranscripts.mjs",
+    "transcribe:all-in-podcast-assemblyai": "/bin/bash scripts/transcribeAllInPodcastAssemblyAI.sh",
+    "transcribe:all-in-podcast-audio": "/bin/bash scripts/transcribeAllInPodcastAudio.sh",
+    "build:all-in-podcast-data": "node scripts/buildAllInPodcastSearch.mjs",
+    "build:all-in-missing-transcripts-manifest": "node scripts/generateAllInMissingTranscriptsManifest.mjs",
+    "build:all-in-podcast-pagefind": "npx -y pagefind --site . --glob \"all-in-podcast-search/pagefind-source/**/*.html\" --output-path all-in-podcast-search/pagefind --force-language en",
+    "build:all-in-podcast-search": "npm run build:all-in-podcast-data && npm run build:all-in-podcast-pagefind",
+    "refresh:all-in-podcast-search": "npm run fetch:all-in-podcast-archive && npm run build:all-in-podcast-search",
+    "refresh:all-in-podcast-search-with-youtube": "npm run fetch:all-in-podcast-archive && npm run fetch:all-in-podcast-youtube-transcripts && npm run build:all-in-podcast-search",
+    "refresh:all-in-podcast-full-transcripts": "/bin/bash scripts/refreshAllInPodcastStaticSearch.sh",
+    "refresh:all-in-podcast-full-transcripts-with-audio": "ALL_IN_DOWNLOAD_AUDIO=1 /bin/bash scripts/refreshAllInPodcastStaticSearch.sh",
+    "refresh:all-in-podcast-full-transcripts-with-assemblyai": "ALL_IN_ENABLE_ASSEMBLYAI=1 /bin/bash scripts/refreshAllInPodcastStaticSearch.sh",
+    "refresh:all-in-podcast-full-transcripts-with-audio-and-assemblyai": "ALL_IN_DOWNLOAD_AUDIO=1 ALL_IN_ENABLE_ASSEMBLYAI=1 /bin/bash scripts/refreshAllInPodcastStaticSearch.sh",
+    "refresh:all-in-podcast-full-transcripts-with-asr": "ALL_IN_ENABLE_ASR=1 /bin/bash scripts/refreshAllInPodcastStaticSearch.sh",
+    "refresh:all-in-podcast-full-transcripts-with-audio-and-asr": "ALL_IN_DOWNLOAD_AUDIO=1 ALL_IN_ENABLE_ASR=1 /bin/bash scripts/refreshAllInPodcastStaticSearch.sh"
   },
   "dependencies": {
+    "axios": "^1.14.0",
     "chart.js": "^4.5.1",
-    "express": "^4.18.2"
+    "cheerio": "^1.2.0",
+    "express": "^4.18.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
   },
   "engines": {
     "node": "20.x"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "pagefind": "^1.4.0"
   }
 }

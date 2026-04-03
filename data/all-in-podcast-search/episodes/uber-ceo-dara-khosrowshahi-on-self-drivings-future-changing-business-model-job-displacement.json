@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.338Z",
+  "episode": {
+    "id": "all-in-uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement",
+    "slug": "uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement",
+    "episodeNumber": null,
+    "title": "Uber CEO Dara Khosrowshahi on self-driving's future, changing business model, job displacement",
+    "publishDate": "2025-09-17",
+    "description": "(0:00) Introducing Uber CEO Dara Khosrowshahi (0:59) Uber's self-driving business: partnerships, market size, LiDAR vs computer vision, safety, distribution (8:14) How...",
+    "summary": "(0:00) Introducing Uber CEO Dara Khosrowshahi (0:59) Uber's self-driving business: partnerships, market size, LiDAR vs computer vision, safety, distribution (8:14) How self-driving impacts Uber's business model over time (13:30) Other forms of transportation Uber could provide (16:09) $20B stock buyback plan vs. investing in R&D and acquisitions, future of...",
+    "durationSeconds": 1538,
+    "durationLabel": "25:38",
+    "guests": [
+      "Dara Khosrowshahi"
+    ],
+    "topicTags": [
+      "Tesla",
+      "Markets",
+      "Autonomy",
+      "Robotics",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_Dara_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/f/2/6/6f2695ee2aabbb4cd959afa2a1bf1c87/1_Pod_Dara.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement",
+    "dataFile": "/data/all-in-podcast-search/episodes/uber-ceo-dara-khosrowshahi-on-self-drivings-future-changing-business-model-job-displacement.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:59",
+      "text": "Introducing Uber CEO Dara Khosrowshahi"
+    },
+    {
+      "startTimestamp": "00:59",
+      "endTimestamp": "08:14",
+      "text": "Uber's self-driving business: partnerships, market size, LiDAR vs computer vision, safety, distribution"
+    },
+    {
+      "startTimestamp": "08:14",
+      "endTimestamp": "13:30",
+      "text": "How self-driving impacts Uber's business model over time"
+    },
+    {
+      "startTimestamp": "13:30",
+      "endTimestamp": "16:09",
+      "text": "Other forms of transportation Uber could provide"
+    },
+    {
+      "startTimestamp": "16:09",
+      "endTimestamp": "21:03",
+      "text": "$20B stock buyback plan vs. investing in R&D and acquisitions, future of food"
+    },
+    {
+      "startTimestamp": "21:03",
+      "endTimestamp": "22:31",
+      "text": "Dara's pitch to Elon for bringing Tesla Robotaxis into Uber's network"
+    },
+    {
+      "startTimestamp": "22:31",
+      "text": "How Uber thinks about driver job displacement from self-driving"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.329Z",
+  "episode": {
+    "id": "all-in-inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing",
+    "slug": "inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing",
+    "episodeNumber": null,
+    "title": "Inside the GLP-1 Gold Rush: Eli Lilly CEO on New Breakthroughs, Addiction &amp; Mental Health, Pricing",
+    "publishDate": "2025-09-29",
+    "description": "(0:00) Introducing Eli Lilly CEO Dave Ricks (1:43) How Eli Lilly discovered the GLP-1 impact on weight loss, counterfeit products from China (7:08) GLP-1 pricing and capital...",
+    "summary": "(0:00) Introducing Eli Lilly CEO Dave Ricks (1:43) How Eli Lilly discovered the GLP-1 impact on weight loss, counterfeit products from China (7:08) GLP-1 pricing and capital allocation after a breakout pharma product (12:56) Why Biotech VC has plummeted, \"patent hacking\" in China (15:32) Dave's health regimen: good sleep, movement, healthy diet, social...",
+    "durationSeconds": 1840,
+    "durationLabel": "30:40",
+    "guests": [
+      "Eli Lilly CEO"
+    ],
+    "topicTags": [
+      "AI",
+      "Venture capital",
+      "Media",
+      "China",
+      "Founders"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_DaveRicks_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/a/f/1/1/af11b9e2695618c3d959afa2a1bf1c87/1_Pod_DaveRicks.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing",
+    "dataFile": "/data/all-in-podcast-search/episodes/inside-the-glp-1-gold-rush-eli-lilly-ceo-on-new-breakthroughs-addiction-mental-health-pricing.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:43",
+      "text": "Introducing Eli Lilly CEO Dave Ricks"
+    },
+    {
+      "startTimestamp": "01:43",
+      "endTimestamp": "07:08",
+      "text": "How Eli Lilly discovered the GLP-1 impact on weight loss, counterfeit products from China"
+    },
+    {
+      "startTimestamp": "07:08",
+      "endTimestamp": "12:56",
+      "text": "GLP-1 pricing and capital allocation after a breakout pharma product"
+    },
+    {
+      "startTimestamp": "12:56",
+      "endTimestamp": "15:32",
+      "text": "Why Biotech VC has plummeted, \"patent hacking\" in China"
+    },
+    {
+      "startTimestamp": "15:32",
+      "endTimestamp": "18:32",
+      "text": "Dave's health regimen: good sleep, movement, healthy diet, social relationships, reading"
+    },
+    {
+      "startTimestamp": "18:32",
+      "endTimestamp": "21:16",
+      "text": "Unexpected impacts of GLP-1s, helping with addictions, potential mental health use cases"
+    },
+    {
+      "startTimestamp": "21:16",
+      "endTimestamp": "25:27",
+      "text": "Thoughts on RFK Jr, Big Pharma's influence on the media, how AI empowers patients"
+    },
+    {
+      "startTimestamp": "25:27",
+      "text": "Impact of proposed NIH cuts, explaining the \"PBM boogeyman\", next major pharma breakthrough"
+    }
+  ]
+}

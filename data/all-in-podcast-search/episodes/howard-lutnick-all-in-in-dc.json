@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.478Z",
+  "episode": {
+    "id": "all-in-howard-lutnick-all-in-in-dc",
+    "slug": "howard-lutnick-all-in-in-dc",
+    "episodeNumber": null,
+    "title": "Howard Lutnick | All-In DC",
+    "publishDate": "2025-03-20",
+    "description": "(0:00) Chamath and Friedberg welcome Commerce Secretary Howard Lutnick! (1:10) Howard describes his 30+ year relationship with President Trump and his road from business to...",
+    "summary": "(0:00) Chamath and Friedberg welcome Commerce Secretary Howard Lutnick! (1:10) Howard describes his 30+ year relationship with President Trump and his road from business to politics (14:44) Running Trump's transition team, DOGE origin story, what it's like working for Trump (38:01) Balancing the budget and fixing GDP (52:21) Tariff history and strategy,...",
+    "durationSeconds": 6277,
+    "durationLabel": "01:44:37",
+    "guests": [
+      "Howard Lutnick",
+      "Secretary Lutnick"
+    ],
+    "topicTags": [
+      "AI",
+      "Politics",
+      "Tariffs"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/howard-lutnick-all-in-in-dc",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/howard-lutnick-all-in-in-dc",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_DC_Lutnick_CH.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/f/b/d/3/fbd3e27563a784dd16c3140a3186d450/1x1_Thumbnail_LUTNICK.png",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-howard-lutnick-all-in-in-dc",
+    "dataFile": "/data/all-in-podcast-search/episodes/howard-lutnick-all-in-in-dc.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "01:10",
+      "text": "Chamath and Friedberg welcome Commerce Secretary Howard Lutnick!"
+    },
+    {
+      "startTimestamp": "01:10",
+      "endTimestamp": "14:44",
+      "text": "Howard describes his 30+ year relationship with President Trump and his road from business to politics"
+    },
+    {
+      "startTimestamp": "14:44",
+      "endTimestamp": "38:01",
+      "text": "Running Trump's transition team, DOGE origin story, what it's like working for Trump"
+    },
+    {
+      "startTimestamp": "38:01",
+      "endTimestamp": "52:21",
+      "text": "Balancing the budget and fixing GDP"
+    },
+    {
+      "startTimestamp": "52:21",
+      "endTimestamp": "01:10:34",
+      "text": "Tariff history and strategy, global trade"
+    },
+    {
+      "startTimestamp": "01:10:34",
+      "endTimestamp": "01:22:49",
+      "text": "Trump Cards, building better government software, AI thoughts"
+    },
+    {
+      "startTimestamp": "01:22:49",
+      "endTimestamp": "01:37:16",
+      "text": "Sovereign Wealth Fund strategy"
+    },
+    {
+      "startTimestamp": "01:37:16",
+      "text": "How his family reacted to his new role"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.789Z",
+  "episode": {
+    "id": "all-in-e127",
+    "slug": "e127-all-in-us-presidential-candidate-confidential-with-robert-f-kennedy-jr",
+    "episodeNumber": 127,
+    "title": "E127: Presidential Candidate Robert F. Kennedy Jr. in conversation with the Besties",
+    "publishDate": "2023-05-05",
+    "description": "(0:00) Bestie intros! (0:49) Jason and Sacks intro Robert F. Kennedy Jr. (3:46) Foreign policy: Ukraine / Russia (17:17) Foreign policy: Taiwan / China (18:57) Government...",
+    "summary": "(0:00) Bestie intros! (0:49) Jason and Sacks intro Robert F. Kennedy Jr. (3:46) Foreign policy: Ukraine / Russia (17:17) Foreign policy: Taiwan / China (18:57) Government spending: Fiscal responsibility, where to cut budget, debt ceiling (33:22) US Govt Intelligence Agencies: \"Deep State,\" increasing accountability, \"agency capture\" (46:04) COVID:...",
+    "durationSeconds": 7307,
+    "durationLabel": "02:01:47",
+    "guests": [
+      "Robert F",
+      "Robert F. Kennedy Jr"
+    ],
+    "topicTags": [
+      "China",
+      "Ukraine"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e127-all-in-us-presidential-candidate-confidential-with-robert-f-kennedy-jr",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e127-all-in-us-presidential-candidate-confidential-with-robert-f-kennedy-jr",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E127.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 14,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e127",
+    "dataFile": "/data/all-in-podcast-search/episodes/e127-all-in-us-presidential-candidate-confidential-with-robert-f-kennedy-jr.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:49",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "00:49",
+      "endTimestamp": "03:46",
+      "text": "Jason and Sacks intro Robert F. Kennedy Jr"
+    },
+    {
+      "startTimestamp": "03:46",
+      "endTimestamp": "17:17",
+      "text": "Foreign policy: Ukraine / Russia"
+    },
+    {
+      "startTimestamp": "17:17",
+      "endTimestamp": "18:57",
+      "text": "Foreign policy: Taiwan / China"
+    },
+    {
+      "startTimestamp": "18:57",
+      "endTimestamp": "33:22",
+      "text": "Government spending: Fiscal responsibility, where to cut budget, debt ceiling"
+    },
+    {
+      "startTimestamp": "33:22",
+      "endTimestamp": "46:04",
+      "text": "US Govt Intelligence Agencies: \"Deep State,\" increasing accountability, \"agency capture\""
+    },
+    {
+      "startTimestamp": "46:04",
+      "endTimestamp": "55:10",
+      "text": "COVID: mishandling, more \"agency capture,\" vaccine policy"
+    },
+    {
+      "startTimestamp": "55:10",
+      "endTimestamp": "01:05:54",
+      "text": "Broader thoughts on vaccines in general"
+    },
+    {
+      "startTimestamp": "01:05:54",
+      "endTimestamp": "01:15:29",
+      "text": "Energy policy: thoughts on nuclear"
+    },
+    {
+      "startTimestamp": "01:15:29",
+      "endTimestamp": "01:23:09",
+      "text": "Culture wars: trans issues, CRT in schools, public vs charter schools"
+    },
+    {
+      "startTimestamp": "01:23:09",
+      "endTimestamp": "01:30:07",
+      "text": "Media: declining trust, misaligned incentives, conflict of interest with large advertisers"
+    },
+    {
+      "startTimestamp": "01:30:07",
+      "endTimestamp": "01:40:37",
+      "text": "Mainstream media coverage, ABC News debacle, evolving with new information, money in politics"
+    },
+    {
+      "startTimestamp": "01:40:37",
+      "endTimestamp": "01:57:30",
+      "text": "The Besties do a post-interview debrief"
+    },
+    {
+      "startTimestamp": "01:57:30",
+      "text": "Announcing All-In Summit 2023! Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow Robert F. Kennedy Jr: https://twitter.com/RobertKennedyJr Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect"
+    }
+  ]
+}

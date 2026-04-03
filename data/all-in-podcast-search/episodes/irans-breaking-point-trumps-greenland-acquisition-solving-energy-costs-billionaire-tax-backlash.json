@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.237Z",
+  "episode": {
+    "id": "all-in-irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash",
+    "slug": "irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash",
+    "episodeNumber": null,
+    "title": "Iran's Breaking Point, Trump's Greenland Acquisition, and Solving Energy Costs",
+    "publishDate": "2026-01-17",
+    "description": "(0:00) Bestie intros! (4:18) Iran's breaking point: regime change coming? (14:28) Solving energy prices: Microsoft first hyperscaler to \"pay its own way\" and subsidize residential...",
+    "summary": "(0:00) Bestie intros! (4:18) Iran's breaking point: regime change coming? (14:28) Solving energy prices: Microsoft first hyperscaler to \"pay its own way\" and subsidize residential electric costs (31:18) OpenAI's compute deal with Cerebras, the renaissance in decode silicon (35:09) Billionaire backlash in California: Wealth Tax exodus (56:13) Greenland...",
+    "durationSeconds": 4245,
+    "durationLabel": "01:10:45",
+    "guests": [
+      "Video Credit"
+    ],
+    "topicTags": [
+      "OpenAI",
+      "Politics",
+      "Datacenters",
+      "Energy",
+      "Iran"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E258_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/3/8/7/f/387f480b460ebe3916c3140a3186d450/1_Pod_E258.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash",
+    "dataFile": "/data/all-in-podcast-search/episodes/irans-breaking-point-trumps-greenland-acquisition-solving-energy-costs-billionaire-tax-backlash.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "04:18",
+      "text": "Bestie intros!"
+    },
+    {
+      "startTimestamp": "04:18",
+      "endTimestamp": "14:28",
+      "text": "Iran's breaking point: regime change coming?"
+    },
+    {
+      "startTimestamp": "14:28",
+      "endTimestamp": "31:18",
+      "text": "Solving energy prices: Microsoft first hyperscaler to \"pay its own way\" and subsidize residential electric costs"
+    },
+    {
+      "startTimestamp": "31:18",
+      "endTimestamp": "35:09",
+      "text": "OpenAI's compute deal with Cerebras, the renaissance in decode silicon"
+    },
+    {
+      "startTimestamp": "35:09",
+      "endTimestamp": "56:13",
+      "text": "Billionaire backlash in California: Wealth Tax exodus"
+    },
+    {
+      "startTimestamp": "56:13",
+      "text": "Greenland acquisition: Why it's crucial Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit https://x.com/TheZachEffect Referenced in the show: https://polymarket.com/event/khamenei-out-as-supreme-leader-of-iran-by-january-31 https://polymarket.com/event/will-the-iranian-regime-fall-by-the-end-of-2026 https://home.treasury.gov/news/press-releases/sb0364 https://truthsocial.com/@realDonaldTrump/posts/115884759090137876 https://www.ft.com/content/3f392c9b-c07d-42f5-b000-0a7347ad1ec0 https://www.wsj.com/tech/ai/openai-forges-multibillion-dollar-computing-partnership-with-cerebras-746a20e4 https://www.theinformation.com/briefings/openai-signs-compute-deal-worth-least-10-billion-chipmaker-cerebras?rc=f8fu8f https://x.com/chamath/status/2011486582386106387 https://x.com/friedberg/status/2011703965143220457 https://x.com/chamath/status/2011197387830935777 https://polymarket.com/event/will-trump-acquire-greenland-before-2027 https://x.com/chamath/status/2011197387830935777"
+    }
+  ]
+}

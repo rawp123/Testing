@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.586Z",
+  "episode": {
+    "id": "all-in-jd-vance-all-in-summit-2024",
+    "slug": "jd-vance-all-in-summit-2024",
+    "episodeNumber": null,
+    "title": "JD Vance | All-In Summit 2024",
+    "publishDate": "2024-10-15",
+    "description": "(0:00) Announcement from Friedberg (0:18) Besties intro JD Vance! (3:33) America's innovation problem (5:04) Thoughts on Trump (8:53) Would JD Vance have certified the election in...",
+    "summary": "(0:00) Announcement from Friedberg (0:18) Besties intro JD Vance! (3:33) America's innovation problem (5:04) Thoughts on Trump (8:53) Would JD Vance have certified the election in 2020? (12:02) Increasing government efficiency, shrinking the deficit, Vance's role as VP, thoughts on EOs (19:35) Political realignment: Dick Cheney endorses Kamala Harris,...",
+    "durationSeconds": 2784,
+    "durationLabel": "46:24",
+    "guests": [
+      "JD Vance"
+    ],
+    "topicTags": [
+      "Politics",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/jd-vance-all-in-summit-2024",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/jd-vance-all-in-summit-2024",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS24_JDVance_RSS_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/d/4/6/6d4651b5204b4c4b27a2322813b393ee/1x1_Thumbnail_JDVance.png",
+    "chunkCount": 11,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-jd-vance-all-in-summit-2024",
+    "dataFile": "/data/all-in-podcast-search/episodes/jd-vance-all-in-summit-2024.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:18",
+      "text": "Announcement from Friedberg"
+    },
+    {
+      "startTimestamp": "00:18",
+      "endTimestamp": "03:33",
+      "text": "Besties intro JD Vance!"
+    },
+    {
+      "startTimestamp": "03:33",
+      "endTimestamp": "05:04",
+      "text": "America's innovation problem"
+    },
+    {
+      "startTimestamp": "05:04",
+      "endTimestamp": "08:53",
+      "text": "Thoughts on Trump"
+    },
+    {
+      "startTimestamp": "08:53",
+      "endTimestamp": "12:02",
+      "text": "Would JD Vance have certified the election in 2020?"
+    },
+    {
+      "startTimestamp": "12:02",
+      "endTimestamp": "19:35",
+      "text": "Increasing government efficiency, shrinking the deficit, Vance's role as VP, thoughts on EOs"
+    },
+    {
+      "startTimestamp": "19:35",
+      "endTimestamp": "23:58",
+      "text": "Political realignment: Dick Cheney endorses Kamala Harris, winners and losers of the last 30 years"
+    },
+    {
+      "startTimestamp": "23:58",
+      "endTimestamp": "25:55",
+      "text": "Thoughts on Lina Khan clamping down on tech M&A and her impact on the startup ecosystem"
+    },
+    {
+      "startTimestamp": "25:55",
+      "endTimestamp": "32:16",
+      "text": "Fixing the Southern Border"
+    },
+    {
+      "startTimestamp": "32:16",
+      "endTimestamp": "36:51",
+      "text": "How to practically approach deportations, who's coming in through the Southern Border?"
+    },
+    {
+      "startTimestamp": "36:51",
+      "text": "Relationship with China Follow JD Vance: https://x.com/JDVance Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}

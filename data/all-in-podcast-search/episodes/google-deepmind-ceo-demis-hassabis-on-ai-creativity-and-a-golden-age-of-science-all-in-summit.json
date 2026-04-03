@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.346Z",
+  "episode": {
+    "id": "all-in-google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit",
+    "slug": "google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit",
+    "episodeNumber": null,
+    "title": "Google DeepMind CEO Demis Hassabis on AI, Creativity, and a Golden Age of Science | All-In Summit",
+    "publishDate": "2025-09-12",
+    "description": "(0:00) Introducing Sir Demis Hassabis, reflecting on his Nobel Prize win (2:39) What is Google DeepMind? How does it interact with Google and Alphabet? (4:01) Genie 3 world model...",
+    "summary": "(0:00) Introducing Sir Demis Hassabis, reflecting on his Nobel Prize win (2:39) What is Google DeepMind? How does it interact with Google and Alphabet? (4:01) Genie 3 world model (9:21) State of robotics models, form factors, and more (14:42) AI science breakthroughs, measuring AGI (20:49) Nano-Banana and the future of creative tools, democratization of...",
+    "durationSeconds": 1908,
+    "durationLabel": "31:48",
+    "guests": [
+      "DeepMind CEO Demis Hassabis"
+    ],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Politics",
+      "Datacenters",
+      "Robotics"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/AIS25_DEMIS_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/8/8/3/9/8839cde80e57f87d16c3140a3186d450/demis_hassabis.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit",
+    "dataFile": "/data/all-in-podcast-search/episodes/google-deepmind-ceo-demis-hassabis-on-ai-creativity-and-a-golden-age-of-science-all-in-summit.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:39",
+      "text": "Introducing Sir Demis Hassabis, reflecting on his Nobel Prize win"
+    },
+    {
+      "startTimestamp": "02:39",
+      "endTimestamp": "04:01",
+      "text": "What is Google DeepMind? How does it interact with Google and Alphabet?"
+    },
+    {
+      "startTimestamp": "04:01",
+      "endTimestamp": "09:21",
+      "text": "Genie 3 world model"
+    },
+    {
+      "startTimestamp": "09:21",
+      "endTimestamp": "14:42",
+      "text": "State of robotics models, form factors, and more"
+    },
+    {
+      "startTimestamp": "14:42",
+      "endTimestamp": "20:49",
+      "text": "AI science breakthroughs, measuring AGI"
+    },
+    {
+      "startTimestamp": "20:49",
+      "endTimestamp": "24:44",
+      "text": "Nano-Banana and the future of creative tools, democratization of creativity"
+    },
+    {
+      "startTimestamp": "24:44",
+      "text": "Isomorphic Labs, probabilistic vs deterministic, scaling compute, a golden age of science"
+    }
+  ]
+}

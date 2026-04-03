@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.795Z",
+  "episode": {
+    "id": "all-in-e125",
+    "slug": "e125-spacex-launch-fox-news-settlement-zombie-corn-exodus-to-ai-late-stage-implosion",
+    "episodeNumber": 125,
+    "title": "E125: SpaceX launch, Fox News settlement, \"Zombie-corn\" exodus to AI, late-stage implosion",
+    "publishDate": "2023-04-21",
+    "description": "(0:00) Antonio Gracias and Gavin Baker join to discuss SpaceX's Starship launch (28:58) Fox News settles with Dominion Voting Systems, will pay $787M (40:38) AI update: Reddit to...",
+    "summary": "(0:00) Antonio Gracias and Gavin Baker join to discuss SpaceX's Starship launch (28:58) Fox News settles with Dominion Voting Systems, will pay $787M (40:38) AI update: Reddit to start charging for training data, how the next startup bubble will materialize, navigating the AI \"dust storm\" (53:49) Why AI is challenging/exciting to invest in right now,...",
+    "durationSeconds": 5952,
+    "durationLabel": "01:39:12",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Crypto",
+      "Politics",
+      "Venture capital"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e125-spacex-launch-fox-news-settlement-zombie-corn-exodus-to-ai-late-stage-implosion",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e125-spacex-launch-fox-news-settlement-zombie-corn-exodus-to-ai-late-stage-implosion",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E125_1.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e125",
+    "dataFile": "/data/all-in-podcast-search/episodes/e125-spacex-launch-fox-news-settlement-zombie-corn-exodus-to-ai-late-stage-implosion.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "28:58",
+      "text": "Antonio Gracias and Gavin Baker join to discuss SpaceX's Starship launch"
+    },
+    {
+      "startTimestamp": "28:58",
+      "endTimestamp": "40:38",
+      "text": "Fox News settles with Dominion Voting Systems, will pay $787M"
+    },
+    {
+      "startTimestamp": "40:38",
+      "endTimestamp": "53:49",
+      "text": "AI update: Reddit to start charging for training data, how the next startup bubble will materialize, navigating the AI \"dust storm\""
+    },
+    {
+      "startTimestamp": "53:49",
+      "endTimestamp": "01:21:26",
+      "text": "Why AI is challenging/exciting to invest in right now, late-stage implosion, pay-to-play rounds"
+    },
+    {
+      "startTimestamp": "01:21:26",
+      "text": "Is crypto dead in America? Plus DeSantis vs Trump polling update and wrap Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/GavinSBaker/status/1649107858267439108 https://www.bbc.com/news/science-environment-65294084 https://twitter.com/thePrimalSpace/status/1649051677377560578 https://www.wsj.com/articles/spacex-starship-elon-musk-second-launch-attempt-bf932aaf https://twitter.com/elonmusk/status/1533408313894912001 https://www.reuters.com/technology/fcc-votes-approve-spacex-satellite-plan-official-2021-04-27 https://www.axios.com/2023/04/18/fox-news-settles-dominion-lawsuit https://investor.foxcorporation.com/static-files/3b2bdb74-8ebe-4173-9f0f-ac18831ff094 https://www.theatlantic.com/business/archive/2015/03/finland-home-of-the-103000-speeding-ticket/387484 https://twitter.com/KanekoaTheGreat/status/1648462770936115202 https://www.nytimes.com/2023/04/18/technology/reddit-ai-openai-google.html https://www.cnbc.com/2023/04/20/alphabet-merges-ai-focused-groups-deepmind-and-google-research.html https://twitter.com/chamath/status/1647010187377774596 https://en.wikipedia.org/wiki/Dal%C3%ADland- https://www.nytimes.com/2023/04/20/business/buzzfeed-news-shut-down.html https://www.vox.com/technology/2023/4/18/23688627/meta-layoffs-mark-zuckerberg-facebook-instagram-whatsapp https://news.crunchbase.com/venture/series-c-funding-decline-q1-2023 https://www.theinformation.com/articles/tiger-global-managements-12-7-billion-venture-fund-records-20-loss https://en.wikipedia.org/wiki/Greater_fool_theory https://www.wired.com/story/stack-overflow-will-charge-ai-giants-for-training-data https://www.coindesk.com/business/2023/04/18/coinbase-could-move-away-from-us-if-no-regulatory-clarity-ceo-brian-armstrong https://news.yahoo.com/poll-trumps-big-post-indictment-bounce-is-fading-fast-183753992.html https://www.washingtonpost.com/politics/2023/04/20/desantis-trump-new-hampshire-poll"
+    }
+  ]
+}

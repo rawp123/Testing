@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.667Z",
+  "episode": {
+    "id": "all-in-e167",
+    "slug": "e167-nvidia-smashes-earnings-again-googles-woke-ai-disaster-groqs-lpu-breakthrough-more",
+    "episodeNumber": 167,
+    "title": "E167: Nvidia smashes earnings (again), Google's Woke AI disaster, Groq's LPU breakthrough &amp; more",
+    "publishDate": "2024-02-23",
+    "description": "(0:00) Bestie intros: Banana boat! (2:34) Nvidia smashes expectations again: understanding its terminal value and bull/bear cases in the context of the history of the internet...",
+    "summary": "(0:00) Bestie intros: Banana boat! (2:34) Nvidia smashes expectations again: understanding its terminal value and bull/bear cases in the context of the history of the internet (27:26) Groq's big week, training vs. inference, LPUs vs. GPUs, how to succeed in deep tech (49:37) Google's AI disaster: Is Google too woke to function as search gets disrupted by...",
+    "durationSeconds": 4827,
+    "durationLabel": "01:20:27",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Google",
+      "Nvidia",
+      "Markets",
+      "Search"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e167-nvidia-smashes-earnings-again-googles-woke-ai-disaster-groqs-lpu-breakthrough-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e167-nvidia-smashes-earnings-again-googles-woke-ai-disaster-groqs-lpu-breakthrough-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E167.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 5,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e167",
+    "dataFile": "/data/all-in-podcast-search/episodes/e167-nvidia-smashes-earnings-again-googles-woke-ai-disaster-groqs-lpu-breakthrough-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "02:34",
+      "text": "Bestie intros: Banana boat!"
+    },
+    {
+      "startTimestamp": "02:34",
+      "endTimestamp": "27:26",
+      "text": "Nvidia smashes expectations again: understanding its terminal value and bull/bear cases in the context of the history of the internet"
+    },
+    {
+      "startTimestamp": "27:26",
+      "endTimestamp": "49:37",
+      "text": "Groq's big week, training vs. inference, LPUs vs. GPUs, how to succeed in deep tech"
+    },
+    {
+      "startTimestamp": "49:37",
+      "endTimestamp": "01:17:17",
+      "text": "Google's AI disaster: Is Google too woke to function as search gets disrupted by AI?"
+    },
+    {
+      "startTimestamp": "01:17:17",
+      "text": "War Corner with Sacks Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.google.com/finance/quote/NVDA:NASDAQ https://twitter.com/KobeissiLetter/status/1760680756689748478 https://investor.nvidia.com/news/press-release-details/2024/NVIDIA-Announces-Financial-Results-for-Fourth-Quarter-and-Fiscal-2024 https://www.statista.com/statistics/1120484/nvidia-quarterly-revenue-by-specialized-market https://www.google.com/finance/quote/SPY:NYSEARCA?comparison=NASDAQ%3AQQQ&window=5D https://www.marketwatch.com/story/wall-street-keeps-likening-nvidia-to-dot-com-era-cisco-is-the-comparison-justified-eed307c1 https://twitter.com/JayScambler/status/1759372542530261154 https://twitter.com/chamath/status/1760343973632291212 https://x.ai https://twitter.com/TheTranscript_/status/1760436281438314545 https://artificialanalysis.ai https://www.contraline.com/product https://www.cafexapp.com/commercial https://blog.google/technology/ai/google-gemini-ai https://blog.google/products/gemini/bard-gemini-advanced-app https://workspace.google.com/blog/product-announcements/gemini-for-google-workspace https://twitter.com/benthompson/status/1760452419627233610 https://twitter.com/Patworx/status/1760189582870536408 https://twitter.com/micsolana/status/1760163801893339565 https://ai.google/responsibility/principles https://en.wikipedia.org/wiki/Reinforcement_learning_from_human_feedback https://twitter.com/Jason/status/1760780139476992062 https://twitter.com/paulg/status/1760416051181793361 https://twitter.com/chamath/status/1760729719094563019 https://twitter.com/Jason/status/1760780139476992062"
+    }
+  ]
+}

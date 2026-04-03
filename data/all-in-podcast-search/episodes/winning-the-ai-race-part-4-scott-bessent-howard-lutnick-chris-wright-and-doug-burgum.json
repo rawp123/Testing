@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.378Z",
+  "episode": {
+    "id": "all-in-winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum",
+    "slug": "winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum",
+    "episodeNumber": null,
+    "title": "Winning the AI Race Part 4: Scott Bessent, Howard Lutnick, Chris Wright, and Doug Burgum",
+    "publishDate": "2025-07-23",
+    "description": "(0:00) Scott Bessent, Treasury Secretary (17:44) Doug Burgum, Secretary of the Interior and Chris Wright, Energy Secretary (35:11) Howard Lutnick, Commerce Secretary NYSE :...",
+    "summary": "(0:00) Scott Bessent, Treasury Secretary (17:44) Doug Burgum, Secretary of the Interior and Chris Wright, Energy Secretary (35:11) Howard Lutnick, Commerce Secretary NYSE : https://www.nyse.com Visa: https://usa.visa.com",
+    "durationSeconds": 2970,
+    "durationLabel": "49:30",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "Energy"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN_AIDAY_SESSION4_Government_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/4/d/6/e/4d6ec33652a00097d959afa2a1bf1c87/Winning_the_AI_Race_Pod-20250723-sc83e2gxzm.png",
+    "chunkCount": 3,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum",
+    "dataFile": "/data/all-in-podcast-search/episodes/winning-the-ai-race-part-4-scott-bessent-howard-lutnick-chris-wright-and-doug-burgum.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "17:44",
+      "text": "Scott Bessent, Treasury Secretary"
+    },
+    {
+      "startTimestamp": "17:44",
+      "endTimestamp": "35:11",
+      "text": "Doug Burgum, Secretary of the Interior and Chris Wright, Energy Secretary"
+    },
+    {
+      "startTimestamp": "35:11",
+      "text": "Howard Lutnick, Commerce Secretary"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.947Z",
+  "episode": {
+    "id": "all-in-e60",
+    "slug": "e60-the-2021-bestie-awards-plus-jack-dorsey-starts-the-web3-wars",
+    "episodeNumber": 60,
+    "title": "E60: The 2021 Bestie Awards PLUS Jack Dorsey starts the Web3 Wars",
+    "publishDate": "2021-12-23",
+    "description": "(0:00) Catching up on the Web3 wars and Jack Dorsey sounding off (5:10) Biggest Winner - Politics (9:43) Biggest Loser - Politics (14:37) Biggest Political Surprise (22:24)...",
+    "summary": "(0:00) Catching up on the Web3 wars and Jack Dorsey sounding off (5:10) Biggest Winner - Politics (9:43) Biggest Loser - Politics (14:37) Biggest Political Surprise (22:24) Biggest Winner - Business (26:03) Biggest Loser - Business (30:54) Biggest Business Surprise (35:27) Best Science Breakthrough (42:56) Biggest Flash in the Pan (47:08) Best CEO (52:43)...",
+    "durationSeconds": 6480,
+    "durationLabel": "01:48:00",
+    "guests": [],
+    "topicTags": [],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e60-the-2021-bestie-awards-plus-jack-dorsey-starts-the-web3-wars",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e60-the-2021-bestie-awards-plus-jack-dorsey-starts-the-web3-wars",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E60.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 21,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e60",
+    "dataFile": "/data/all-in-podcast-search/episodes/e60-the-2021-bestie-awards-plus-jack-dorsey-starts-the-web3-wars.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "05:10",
+      "text": "Catching up on the Web3 wars and Jack Dorsey sounding off"
+    },
+    {
+      "startTimestamp": "05:10",
+      "endTimestamp": "09:43",
+      "text": "Biggest Winner - Politics"
+    },
+    {
+      "startTimestamp": "09:43",
+      "endTimestamp": "14:37",
+      "text": "Biggest Loser - Politics"
+    },
+    {
+      "startTimestamp": "14:37",
+      "endTimestamp": "22:24",
+      "text": "Biggest Political Surprise"
+    },
+    {
+      "startTimestamp": "22:24",
+      "endTimestamp": "26:03",
+      "text": "Biggest Winner - Business"
+    },
+    {
+      "startTimestamp": "26:03",
+      "endTimestamp": "30:54",
+      "text": "Biggest Loser - Business"
+    },
+    {
+      "startTimestamp": "30:54",
+      "endTimestamp": "35:27",
+      "text": "Biggest Business Surprise"
+    },
+    {
+      "startTimestamp": "35:27",
+      "endTimestamp": "42:56",
+      "text": "Best Science Breakthrough"
+    },
+    {
+      "startTimestamp": "42:56",
+      "endTimestamp": "47:08",
+      "text": "Biggest Flash in the Pan"
+    },
+    {
+      "startTimestamp": "47:08",
+      "endTimestamp": "52:43",
+      "text": "Best CEO"
+    },
+    {
+      "startTimestamp": "52:43",
+      "endTimestamp": "57:12",
+      "text": "Best Investor"
+    },
+    {
+      "startTimestamp": "57:12",
+      "endTimestamp": "01:02:47",
+      "text": "Best Turnaround"
+    },
+    {
+      "startTimestamp": "01:02:47",
+      "endTimestamp": "01:07:31",
+      "text": "Worth Human Being"
+    },
+    {
+      "startTimestamp": "01:07:31",
+      "endTimestamp": "01:10:02",
+      "text": "Best Meme"
+    },
+    {
+      "startTimestamp": "01:10:02",
+      "endTimestamp": "01:14:47",
+      "text": "Most Loathsome Company"
+    },
+    {
+      "startTimestamp": "01:14:47",
+      "endTimestamp": "01:20:22",
+      "text": "Best New Tech"
+    },
+    {
+      "startTimestamp": "01:20:22",
+      "endTimestamp": "01:22:17",
+      "text": "Best Trend"
+    },
+    {
+      "startTimestamp": "01:22:17",
+      "endTimestamp": "01:26:02",
+      "text": "Worst Trend"
+    },
+    {
+      "startTimestamp": "01:26:02",
+      "endTimestamp": "01:34:15",
+      "text": "Favorite Media"
+    },
+    {
+      "startTimestamp": "01:34:15",
+      "endTimestamp": "01:39:07",
+      "text": "The Rudy Giuliani Award for Self-Immolation"
+    },
+    {
+      "startTimestamp": "01:39:07",
+      "text": "The Besties spread holiday cheer with each other Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/jack https://twitter.com/Jason/status/1473321415285751811 https://twitter.com/cdixon/status/1473150192400486401 https://twitter.com/jack/status/1473155226194616325 https://twitter.com/elonmusk/status/1472754632325795843 https://www.theinformation.com/articles/coinbase-enters-the-metaverse-an-exodus-from-meta-s-novi-unit?rc=g3wfdp https://dune.xyz/rchen8/opensea https://phys.org/news/2021-09-chinese-scientists-starch-synthesis-carbon.html https://www.bbc.com/news/science-environment-55564448 https://www.amazon.com/Gray-Lady-Winked-Misreporting-Fabrications/dp/1736703315 https://www.wsj.com/articles/washington-post-grasps-for-new-direction-as-trump-era-boom-fades-11639695007 https://twitter.com/GavinSBaker/status/1473326791293128706 https://scitechdaily.com/fusion-breakthrough-at-the-brink-of-fusion-ignition-at-national-ignition-facility https://www.amazon.com/Grinding-It-Out-audiobook/dp/B07H4WXR4N https://www.amazon.com/Changing-World-Order-Nations-Succeed/dp/1982160276 https://www.amazon.com/San-Fransicko-Progressives-Ruin-Cities/dp/0063093626 https://www.amazon.com/Wanting-Power-Mimetic-Desire-Everyday/dp/1250262488"
+    }
+  ]
+}

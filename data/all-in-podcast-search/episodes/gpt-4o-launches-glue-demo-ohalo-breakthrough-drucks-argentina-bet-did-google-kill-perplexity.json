@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.639Z",
+  "episode": {
+    "id": "all-in-gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity",
+    "slug": "gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity",
+    "episodeNumber": null,
+    "title": "GPT-4o launches, Glue demo, Ohalo breakthrough, Druck's Argentina bet, did Google kill Perplexity?",
+    "publishDate": "2024-05-17",
+    "description": "(0:00) Bestie Intros: Recapping Phil Hellmuth's birthday weekend (7:38) OpenAI launches GPT-4o: better, faster, cheaper (29:40) Sacks demos Glue: How AI unlocked his Slack killer...",
+    "summary": "(0:00) Bestie Intros: Recapping Phil Hellmuth's birthday weekend (7:38) OpenAI launches GPT-4o: better, faster, cheaper (29:40) Sacks demos Glue: How AI unlocked his Slack killer (40:12) Friedberg walks through his major breakthrough at Ohalo (1:01:35) Stanley Druckenmiller bets on Argentina and Javier Milei: strategy, roadmap for the US (1:13:54) Jason's...",
+    "durationSeconds": 6074,
+    "durationLabel": "01:41:14",
+    "guests": [],
+    "topicTags": [
+      "AI",
+      "OpenAI",
+      "Google",
+      "Search"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E179.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/6/e/c/7/6ec7aa06b1a01fffe55e3c100dce7605/1x1_CLASSIC_E179.png",
+    "chunkCount": 7,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity",
+    "dataFile": "/data/all-in-podcast-search/episodes/gpt-4o-launches-glue-demo-ohalo-breakthrough-drucks-argentina-bet-did-google-kill-perplexity.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "07:38",
+      "text": "Bestie Intros: Recapping Phil Hellmuth's birthday weekend"
+    },
+    {
+      "startTimestamp": "07:38",
+      "endTimestamp": "29:40",
+      "text": "OpenAI launches GPT-4o: better, faster, cheaper"
+    },
+    {
+      "startTimestamp": "29:40",
+      "endTimestamp": "40:12",
+      "text": "Sacks demos Glue: How AI unlocked his Slack killer"
+    },
+    {
+      "startTimestamp": "40:12",
+      "endTimestamp": "01:01:35",
+      "text": "Friedberg walks through his major breakthrough at Ohalo"
+    },
+    {
+      "startTimestamp": "01:01:35",
+      "endTimestamp": "01:13:54",
+      "text": "Stanley Druckenmiller bets on Argentina and Javier Milei: strategy, roadmap for the US"
+    },
+    {
+      "startTimestamp": "01:13:54",
+      "endTimestamp": "01:22:21",
+      "text": "Jason's bet on Athena, how AI will change company building"
+    },
+    {
+      "startTimestamp": "01:22:21",
+      "text": "Google launches AI summaries in search Follow the besties: https://twitter.com/chamath https://twitter.com/Jason https://twitter.com/DavidSacks https://twitter.com/friedberg Follow on X: https://twitter.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@all_in_tok Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://www.pokernews.com/news/2024/05/phil-hellmuth-60th-birthday-bash-las-vegas-45984.htm https://x.com/OpenAI/status/1790130703721521305 https://x.com/OpenAI/status/1790089513387143469 https://crfm.stanford.edu/helm/mmlu/v1.3.0/# https://www.businessinsider.com/inflection-implosion-chatgpt-stall-ai-consumer-chatbot-problem-2024-3 https://www.opencompute.org https://glue.ai https://ragie.ai https://ohalo.com https://www.cnbc.com/2024/05/07/cnbc-exclusive-cnbc-transcript-billionaire-investor-stanley-druckenmiller-speaks-with-cnbcs-squawk-box-today.html https://www.forbes.com/sites/theapothecary/2024/03/23/summers-inflation-reached-18-in-2022-using-the-governments-previous-formula https://twitter.com/DavidSacks/status/1378034932006592512 https://www.athenawow.com/jcal https://calacanis.substack.com/p/startup-productivity-in-the-age-of https://blog.google/products/search/generative-ai-google-search-may-2024 https://www.youtube.com/watch?v=XEzRZ35urlk https://finance.yahoo.com/quote/GOOG https://startuptalky.com/apple-failed-products"
+    }
+  ]
+}

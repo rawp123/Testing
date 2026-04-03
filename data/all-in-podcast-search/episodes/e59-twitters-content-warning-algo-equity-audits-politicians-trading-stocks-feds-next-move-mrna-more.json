@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.949Z",
+  "episode": {
+    "id": "all-in-e59",
+    "slug": "e59-twitters-content-warning-algo-equity-audits-politicians-trading-stocks-feds-next-move-mrna-more",
+    "episodeNumber": 59,
+    "title": "E59: Twitter's content warning algo, equity audits, politicians trading stocks, Fed's next move, mRNA &amp; more",
+    "publishDate": "2021-12-17",
+    "description": "(0:00) Bestie Intro: Sweater update, NYC stories (8:30) Sacks got flagged on Twitter, theorizing on Twitter's content warning algorithm (14:37) \"Racial equity audits\" with...",
+    "summary": "(0:00) Bestie Intro: Sweater update, NYC stories (8:30) Sacks got flagged on Twitter, theorizing on Twitter's content warning algorithm (14:37) \"Racial equity audits\" with product-level consequences might be coming to Big Tech (27:37) Elizabeth Warren vs. Elon on Twitter, birth of \"Senator Karen,\" understanding where the Fed can go from here (42:56) Omicron...",
+    "durationSeconds": 5307,
+    "durationLabel": "01:28:27",
+    "guests": [],
+    "topicTags": [
+      "Markets"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/e59-twitters-content-warning-algo-equity-audits-politicians-trading-stocks-feds-next-move-mrna-more",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/e59-twitters-content-warning-algo-equity-audits-politicians-trading-stocks-feds-next-move-mrna-more",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/ALLIN-E59.mp3?dest-id=1928300",
+    "imageUrl": "",
+    "chunkCount": 8,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-e59",
+    "dataFile": "/data/all-in-podcast-search/episodes/e59-twitters-content-warning-algo-equity-audits-politicians-trading-stocks-feds-next-move-mrna-more.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "08:30",
+      "text": "Bestie Intro: Sweater update, NYC stories"
+    },
+    {
+      "startTimestamp": "08:30",
+      "endTimestamp": "14:37",
+      "text": "Sacks got flagged on Twitter, theorizing on Twitter's content warning algorithm"
+    },
+    {
+      "startTimestamp": "14:37",
+      "endTimestamp": "27:37",
+      "text": "\"Racial equity audits\" with product-level consequences might be coming to Big Tech"
+    },
+    {
+      "startTimestamp": "27:37",
+      "endTimestamp": "42:56",
+      "text": "Elizabeth Warren vs. Elon on Twitter, birth of \"Senator Karen,\" understanding where the Fed can go from here"
+    },
+    {
+      "startTimestamp": "42:56",
+      "endTimestamp": "53:02",
+      "text": "Omicron spreading rapidly in NYC, but deaths are still relatively flat, anticipating the quality of life split for blue/red states going forward"
+    },
+    {
+      "startTimestamp": "53:02",
+      "endTimestamp": "01:08:57",
+      "text": "Jeremy Strong's New Yorker profile and backlash, politicians trading stocks"
+    },
+    {
+      "startTimestamp": "01:08:57",
+      "endTimestamp": "01:15:39",
+      "text": "Future of mRNA technology"
+    },
+    {
+      "startTimestamp": "01:15:39",
+      "text": "SF Mayor London Breed's speech on increasing law enforcement: is she the right person to turn the ship around? Follow the besties: https://twitter.com/chamath https://linktr.ee/calacanis https://twitter.com/DavidSacks https://twitter.com/friedberg Follow the pod: https://twitter.com/theallinpod https://linktr.ee/allinpodcast Intro Music Credit: https://rb.gy/tppkzl https://twitter.com/yung_spielburg Intro Video Credit: https://twitter.com/TheZachEffect Referenced in the show: https://twitter.com/DavidSacks/status/1470799225566859268 https://freebeacon.com/democrats/democrats-push-racial-equity-audits-to-cement-control-of-tech-companies https://bariweiss.substack.com/p/get-ready-for-the-no-buy-list https://mobile.twitter.com/SenWarren/status/1470415896053227522 https://mobile.twitter.com/SenSanders/status/1471512117257846784 https://fred.stlouisfed.org/series/WALCL https://twitter.com/mangan150/status/1470827691527999494 https://twitter.com/peterpham/status/1471514774546509829 https://www.newyorker.com/magazine/2021/12/13/on-succession-jeremy-strong-doesnt-get-the-joke https://www.etalk.ca/celebrity/jessica-chastain-and-more-celebs-unnecessarily-run-to-jeremy-strong-defence-after-new-yorker-profile.html https://www.wsj.com/articles/stephen-curry-warriors-shooting-11637027582 https://www.businessinsider.com/congress-stock-act-violations-senate-house-trading-2021-9#sen-dianne-feinstein-a-democrat-from-california-1 https://www.investopedia.com/regional-fed-presidents-step-aside-amid-trading-backlash-5203208 https://www.wsj.com/articles/131-federal-judges-broke-the-law-by-hearing-cases-where-they-had-a-financial-interest-11632834421 https://twitter.com/bgmasters/status/1471183791121055747 https://www.npr.org/2021/09/21/1039313011/tiktokers-are-trading-stocks-by-watching-what-members-of-congress-do https://newsnetwork.mayoclinic.org/discussion/mayo-clinic-research-finds-immune-system-responds-to-mrna-treatment-for-cancer https://twitter.com/robkhenderson"
+    }
+  ]
+}

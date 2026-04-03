@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-04-03T03:33:36.296Z",
+  "episode": {
+    "id": "all-in-nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum",
+    "slug": "nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum",
+    "episodeNumber": null,
+    "title": "Nobel Prize in Physics Winner: John Martinis on the State of Quantum",
+    "publishDate": "2025-10-27",
+    "description": "(0:00) David Friedberg intros John Martinis, the 2025 recipient of the Nobel Prize in Physics (0:43) John's history, how he got into physics (4:54) Explainer on quantum mechanics...",
+    "summary": "(0:00) David Friedberg intros John Martinis, the 2025 recipient of the Nobel Prize in Physics (0:43) John's history, how he got into physics (4:54) Explainer on quantum mechanics (22:57) Quantum tunneling and the 1985 paper that led to this Nobel Prize (30:37) Understanding qubits, the state of quantum computing, and the impact of AI (40:56) US vs China in...",
+    "durationSeconds": 2999,
+    "durationLabel": "49:59",
+    "guests": [
+      "John Martinis"
+    ],
+    "topicTags": [
+      "AI",
+      "China"
+    ],
+    "youtubeId": "",
+    "officialPageUrl": "https://allinchamathjason.libsyn.com/nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum",
+    "fullEpisodeUrl": "https://allinchamathjason.libsyn.com/nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum",
+    "audioUrl": "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/secure/allinchamathjason/251010_Martinis_INTV_Ch.mp3?dest-id=1928300",
+    "imageUrl": "https://static.libsyn.com/p/assets/c/d/c/b/cdcbce896980b879d959afa2a1bf1c87/1_Pod_Martinis.png",
+    "chunkCount": 6,
+    "speakerLabelCount": 0,
+    "transcriptSourceType": "rss-description-outline",
+    "transcriptAvailable": true,
+    "detailPath": "/all-in-podcast-search/all-in/episode/?id=all-in-nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum",
+    "dataFile": "/data/all-in-podcast-search/episodes/nobel-prize-in-physics-winner-john-martinis-on-the-state-of-quantum.json"
+  },
+  "chunks": [
+    {
+      "startTimestamp": "00:00",
+      "endTimestamp": "00:43",
+      "text": "David Friedberg intros John Martinis, the 2025 recipient of the Nobel Prize in Physics"
+    },
+    {
+      "startTimestamp": "00:43",
+      "endTimestamp": "04:54",
+      "text": "John's history, how he got into physics"
+    },
+    {
+      "startTimestamp": "04:54",
+      "endTimestamp": "22:57",
+      "text": "Explainer on quantum mechanics"
+    },
+    {
+      "startTimestamp": "22:57",
+      "endTimestamp": "30:37",
+      "text": "Quantum tunneling and the 1985 paper that led to this Nobel Prize"
+    },
+    {
+      "startTimestamp": "30:37",
+      "endTimestamp": "40:56",
+      "text": "Understanding qubits, the state of quantum computing, and the impact of AI"
+    },
+    {
+      "startTimestamp": "40:56",
+      "text": "US vs China in quantum, reactions to winning the Nobel Prize Learn more about the 2025 Nobel Prize in Physics: https://www.nobelprize.org/prizes/physics/2025/summary Follow the besties: https://x.com/chamath https://x.com/Jason https://x.com/DavidSacks https://x.com/friedberg Follow on X: https://x.com/theallinpod Follow on Instagram: https://www.instagram.com/theallinpod Follow on TikTok: https://www.tiktok.com/@theallinpod Follow on LinkedIn: https://www.linkedin.com/company/allinpod Intro Music Credit: https://rb.gy/tppkzl https://x.com/yung_spielburg Intro Video Credit: https://x.com/TheZachEffect"
+    }
+  ]
+}
