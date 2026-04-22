@@ -2636,6 +2636,7 @@ function renderExecutiveSummary(summary, endData) {
 
   // Derived counts
   const activeMDLCount  = allMDLArr.filter(m => m.pending > 0).length;
+  const totalMDLCount   = allMDLArr.length;
   const activeDistCount = allDistArr.filter(d => d.pending > 0).length;
   const nationalTotal   = allDistArr.reduce((s, d) => s + (d.total || 0), 0);
 
@@ -2683,7 +2684,7 @@ function renderExecutiveSummary(summary, endData) {
         <div class="es-metric-tile">
           <div class="es-metric-label">Active MDLs</div>
           <div class="es-metric-value">${activeMDLCount.toLocaleString()}</div>
-          <div class="es-metric-sub">with at least 1 pending case</div>
+          <div class="es-metric-sub">with at least 1 pending case &middot; ${totalMDLCount.toLocaleString()} total MDLs</div>
         </div>
         <div class="es-metric-tile">
           <div class="es-metric-label">Active Districts</div>
