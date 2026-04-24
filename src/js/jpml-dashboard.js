@@ -8,6 +8,8 @@ let startMonth = null;
 let endMonth = null;
 let shortToLongDistrictMap = {};
 let currentEndMonthData = [];
+let trendStartMonth = null;
+let trendEndMonth = null;
 
 // Sort state for tables
 const sortState = {
@@ -28,6 +30,11 @@ const metricState = {
   'district': 'absolute',  // district-metric radio buttons
   'mdl': 'absolute',       // mdl-metric radio buttons
   'trends': 'pending'      // trends-metric radio buttons
+};
+
+const TREND_EXCLUDED_MDLS = {
+  'MDL-2885': '3M Combat Arms Earplug',
+  'MDL-2738': 'J&J Talc'
 };
 
 // ---------------------------------------------------------------------------
@@ -194,14 +201,18 @@ async function loadMonths() {
     months = await res.json();
     const startSelect = document.getElementById('start-month-select');
     const endSelect = document.getElementById('end-month-select');
+    const trendStartSelect = document.getElementById('trends-start-month-select');
+    const trendEndSelect = document.getElementById('trends-end-month-select');
     
-    if (!startSelect || !endSelect) {
+    if (!startSelect || !endSelect || !trendStartSelect || !trendEndSelect) {
       console.error('Month select elements not found');
       return;
     }
     
     startSelect.innerHTML = '';
     endSelect.innerHTML = '';
+    trendStartSelect.innerHTML = '';
+    trendEndSelect.innerHTML = '';
     months.slice().reverse().forEach(m => {
       const opt1 = document.createElement('option');
       opt1.value = m;
@@ -211,12 +222,22 @@ async function loadMonths() {
       opt2.value = m;
       opt2.textContent = formatMonthYear(m);
       endSelect.appendChild(opt2);
+      const opt3 = document.createElement('option');
+      opt3.value = m;
+      opt3.textContent = formatMonthYear(m);
+      trendStartSelect.appendChild(opt3);
+      const opt4 = document.createElement('option');
+      opt4.value = m;
+      opt4.textContent = formatMonthYear(m);
+      trendEndSelect.appendChild(opt4);
     });
     
     // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const urlStart = urlParams.get('start');
     const urlEnd = urlParams.get('end');
+    const urlTrendStart = urlParams.get('trendsStart');
+    const urlTrendEnd = urlParams.get('trendsEnd');
     
     if (urlEnd && months.includes(urlEnd)) {
       endSelect.value = urlEnd;
@@ -229,9 +250,23 @@ async function loadMonths() {
     } else {
       startSelect.selectedIndex = 1 < months.length ? 1 : 0;
     }
+
+    if (urlTrendEnd && months.includes(urlTrendEnd)) {
+      trendEndSelect.value = urlTrendEnd;
+    } else {
+      trendEndSelect.selectedIndex = 0;
+    }
+
+    if (urlTrendStart && months.includes(urlTrendStart)) {
+      trendStartSelect.value = urlTrendStart;
+    } else {
+      trendStartSelect.selectedIndex = months.length - 1;
+    }
     
     startSelect.addEventListener('change', () => validateAndUpdate());
     endSelect.addEventListener('change', () => validateAndUpdate());
+    trendStartSelect.addEventListener('change', () => validateAndRenderTrends());
+    trendEndSelect.addEventListener('change', () => validateAndRenderTrends());
     
     return true;
   } catch (err) {
@@ -268,7 +303,46 @@ function updateURLParams() {
   const url = new URL(window.location);
   url.searchParams.set('start', startMonth);
   url.searchParams.set('end', endMonth);
+  if (trendStartMonth) {
+    url.searchParams.set('trendsStart', trendStartMonth);
+  }
+  if (trendEndMonth) {
+    url.searchParams.set('trendsEnd', trendEndMonth);
+  }
   window.history.replaceState({}, '', url);
+}
+
+function getSelectedTrendMonthRange() {
+  const trendStartSelect = document.getElementById('trends-start-month-select');
+  const trendEndSelect = document.getElementById('trends-end-month-select');
+  const fallbackStart = months[0] || null;
+  const fallbackEnd = months[months.length - 1] || null;
+
+  return {
+    start: trendStartSelect?.value || trendStartMonth || fallbackStart,
+    end: trendEndSelect?.value || trendEndMonth || fallbackEnd
+  };
+}
+
+async function validateAndRenderTrends() {
+  const trendStartSelect = document.getElementById('trends-start-month-select');
+  const trendEndSelect = document.getElementById('trends-end-month-select');
+
+  if (!trendStartSelect || !trendEndSelect || !trendStartSelect.value || !trendEndSelect.value) {
+    console.warn('Cannot validate trends range: month selects not ready');
+    return;
+  }
+
+  trendStartMonth = trendStartSelect.value;
+  trendEndMonth = trendEndSelect.value;
+
+  if (months.indexOf(trendEndMonth) < months.indexOf(trendStartMonth)) {
+    trendEndSelect.value = trendStartMonth;
+    trendEndMonth = trendStartMonth;
+  }
+
+  updateURLParams();
+  await renderTrendsOverview(metricState['trends'] || 'pending');
 }
 
 async function loadDataForMonth(month) {
@@ -1149,6 +1223,7 @@ async function handleExpandClick(btn) {
 
 // Global variable to store the trends overview chart instance
 let trendsOverviewChart = null;
+let trendsOverviewExportState = null;
 
 // ─── Forecasting helpers & state ─────────────────────────────────────────────────────────
 let fcAggChart = null;
@@ -2020,7 +2095,197 @@ async function renderSourceReports() {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
+function getTrendMetricValue(info, mode) {
+  return mode === 'all' ? info.total : info.pending;
+}
+
+function getSelectedTrendExcludedMdls() {
+  return new Set(
+    Array.from(document.querySelectorAll('.trends-exclude-mdl:checked'))
+      .map(input => input.value)
+      .filter(Boolean)
+  );
+}
+
+function updateTrendExcludeSummary() {
+  const trigger = document.getElementById('trends-exclude-trigger');
+  const summary = document.getElementById('trends-exclude-summary');
+  if (!summary) return;
+
+  const checked = Array.from(document.querySelectorAll('.trends-exclude-mdl:checked'));
+  if (checked.length === 0) {
+    summary.textContent = 'None selected';
+  } else if (checked.length === 1) {
+    summary.textContent = checked[0].dataset.label || '1 selected';
+  } else {
+    summary.textContent = `${checked.length} selected`;
+  }
+
+  trigger?.classList.toggle('has-selection', checked.length > 0);
+}
+
+function setTrendExcludeMenuOpen(isOpen) {
+  const trigger = document.getElementById('trends-exclude-trigger');
+  const menu = document.getElementById('trends-exclude-menu');
+  if (!trigger || !menu) return;
+
+  trigger.setAttribute('aria-expanded', String(isOpen));
+  menu.hidden = !isOpen;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function setTrendsExportStatus(message, isError = false) {
+  const status = document.getElementById('trends-export-status');
+  if (!status) return;
+
+  status.textContent = message || '';
+  status.classList.toggle('is-error', Boolean(message && isError));
+}
+
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function buildTrendsExportFilename(extension, mode) {
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  const metricLabel = mode === 'all' ? 'all-cases' : 'pending-cases';
+  return `jpml-trends-${metricLabel}-${dateStamp}.${extension}`;
+}
+
+function escapeCsvValue(value) {
+  const normalized = value === null || value === undefined ? '' : String(value);
+  return `"${normalized.replace(/"/g, '""')}"`;
+}
+
+function formatTrendCsvNumber(value) {
+  if (value === null || value === undefined || Number.isNaN(value)) return '';
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+
+function buildTrendDominantSummary(dominantMDLs, mode) {
+  const metricLabel = mode === 'all' ? 'cases' : 'pending claims';
+  return dominantMDLs.map((item) => {
+    const title = item.title ? ` ${item.title}` : '';
+    return `${item.mdl}${title} (${Math.round(item.count).toLocaleString()} ${metricLabel}; ${item.percentage.toFixed(1)}%)`;
+  }).join('; ');
+}
+
+function buildTrendsCsvContent(exportState) {
+  const header = [
+    'month',
+    'display_month',
+    'selected_metric',
+    'pending_cases',
+    'terminated_cases',
+    'total_cases',
+    'mdl_count',
+    'pending_claims_3mo_average',
+    'excluded_mdl_count',
+    'excluded_mdls',
+    'dominant_mdls'
+  ];
+
+  const rows = exportState.chartData.map((point, index) => ([
+    point.month,
+    formatMonthYear(point.month),
+    exportState.mode,
+    formatTrendCsvNumber(point.pending),
+    formatTrendCsvNumber(point.terminated),
+    formatTrendCsvNumber(point.total),
+    formatTrendCsvNumber(point.mdlCount),
+    formatTrendCsvNumber(exportState.pendingClaimMovingAverage[index]),
+    formatTrendCsvNumber(point.excludedCount),
+    point.excludedMDLs.join('; '),
+    buildTrendDominantSummary(point.dominantMDLs, exportState.mode)
+  ]).map(escapeCsvValue).join(','));
+
+  return [header.join(','), ...rows].join('\n');
+}
+
+function downloadTrendsCsv() {
+  if (!trendsOverviewExportState?.chartData?.length) {
+    throw new Error('Render the trends graph before exporting CSV.');
+  }
+
+  const content = buildTrendsCsvContent(trendsOverviewExportState);
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+  downloadBlob(buildTrendsExportFilename('csv', trendsOverviewExportState.mode), blob);
+}
+
+function downloadTrendsChartPng() {
+  if (!trendsOverviewChart?.canvas) {
+    throw new Error('Render the trends graph before exporting PNG.');
+  }
+
+  const sourceCanvas = trendsOverviewChart.canvas;
+  const padding = 24;
+  const exportWidth = sourceCanvas.width + (padding * 2);
+  const exportHeight = sourceCanvas.height + (padding * 2);
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = exportWidth;
+  exportCanvas.height = exportHeight;
+
+  const context = exportCanvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas export is not available in this browser.');
+  }
+
+  const card = sourceCanvas.closest('.dashboard-card');
+  const computed = window.getComputedStyle(card || document.body);
+  const isLightTheme = document.documentElement.classList.contains('light-theme');
+  const background = isLightTheme
+    ? '#ffffff'
+    : (computed.backgroundColor && computed.backgroundColor !== 'rgba(0, 0, 0, 0)'
+      ? computed.backgroundColor
+      : '#08111d');
+
+  context.fillStyle = background;
+  context.fillRect(0, 0, exportWidth, exportHeight);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(sourceCanvas, padding, padding);
+
+  if (isLightTheme) {
+    context.strokeStyle = '#d9e2ef';
+    context.lineWidth = 2;
+    context.strokeRect(1, 1, exportWidth - 2, exportHeight - 2);
+  }
+
+  return new Promise((resolve, reject) => {
+    exportCanvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('PNG export failed.'));
+        return;
+      }
+
+      downloadBlob(buildTrendsExportFilename('png', trendsOverviewExportState?.mode || 'pending'), blob);
+      resolve();
+    }, 'image/png');
+  });
+}
+
+function formatExcludedTrendMdl(mdl, info) {
+  const label = TREND_EXCLUDED_MDLS[mdl] || mdl;
+  if (!info?.title) return label;
+  return `${label} — ${info.title}`;
+}
+
+async function renderTrendsOverview(mode = 'pending', excludedMdls = getSelectedTrendExcludedMdls()) {
   const canvas = document.getElementById('trends-overview-chart');
   if (!canvas) {
     console.error('Trends overview canvas not found');
@@ -2032,9 +2297,30 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
     return;
   }
   
-  // ── Phase 1: load all months into memory (cached by loadDataForMonth) ───────
+  const { start: selectedStartMonth, end: selectedEndMonth } = getSelectedTrendMonthRange();
+  const startIndex = months.indexOf(selectedStartMonth);
+  const endIndex = months.indexOf(selectedEndMonth);
+  const visibleMonths = months.filter((month, index) => {
+    if (startIndex === -1 || endIndex === -1) return true;
+    return index >= startIndex && index <= endIndex;
+  });
+
+  if (visibleMonths.length === 0) {
+    console.warn('No months available for selected trends range');
+    return;
+  }
+
+  trendStartMonth = visibleMonths[0];
+  trendEndMonth = visibleMonths[visibleMonths.length - 1];
+
+  const trendStartSelect = document.getElementById('trends-start-month-select');
+  const trendEndSelect = document.getElementById('trends-end-month-select');
+  if (trendStartSelect && trendStartSelect.value !== trendStartMonth) trendStartSelect.value = trendStartMonth;
+  if (trendEndSelect && trendEndSelect.value !== trendEndMonth) trendEndSelect.value = trendEndMonth;
+
+  // ── Phase 1: load visible months into memory (cached by loadDataForMonth) ───────
   const allMonthCounts = [];   // parallel array to months[]
-  for (const month of months) {
+  for (const month of visibleMonths) {
     const data = await loadDataForMonth(month);
     const mdlCounts = {};
     for (const row of data) {
@@ -2051,45 +2337,19 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
     allMonthCounts.push(mdlCounts);
   }
 
-  // ── Phase 2: build a permanent exclusion set (iterative cascade) ────────
-  // Each round recomputes shares on the ALREADY-FILTERED total, so a large
-  // MDL that was hiding behind an even-larger one gets caught in the next
-  // round.  E.g.: 3M is ~60% raw → excluded round 1; J&J Talc then becomes
-  // ~32% of the remaining total → excluded round 2; repeat until stable.
-  const EXCLUDE_THRESHOLD = 0.25; // 25% of the filtered-month total
-  const permanentlyExcluded = new Set();
-  if (excludeDominant) {
-    let prevSize = -1;
-    while (permanentlyExcluded.size !== prevSize) {
-      prevSize = permanentlyExcluded.size;
-      for (const mdlCounts of allMonthCounts) {
-        // Denominator: sum only over MDLs NOT yet excluded
-        let refRaw = 0;
-        for (const [mdl, info] of Object.entries(mdlCounts)) {
-          if (permanentlyExcluded.has(mdl)) continue;
-          refRaw += mode === 'total' ? info.total : info.pending;
-        }
-        if (refRaw <= 0) continue;
-        for (const [mdl, info] of Object.entries(mdlCounts)) {
-          if (permanentlyExcluded.has(mdl)) continue;
-          const share = (mode === 'total' ? info.total : info.pending) / refRaw;
-          if (share > EXCLUDE_THRESHOLD) permanentlyExcluded.add(mdl);
-        }
-      }
-    }
-  }
+  const excludedSet = excludedMdls instanceof Set ? excludedMdls : new Set(excludedMdls || []);
 
-  // ── Phase 3: build chartData using permanently excluded set ──────────────
+  // ── Phase 2: build chartData using manually excluded MDLs ──────────────
   const chartData = [];
-  for (let mi = 0; mi < months.length; mi++) {
-    const month     = months[mi];
+  for (let mi = 0; mi < visibleMonths.length; mi++) {
+    const month     = visibleMonths[mi];
     const mdlCounts = allMonthCounts[mi];
 
     let totalPending = 0;
     let totalAll     = 0;
     let mdlCount     = 0;
     for (const [mdl, info] of Object.entries(mdlCounts)) {
-      if (permanentlyExcluded.has(mdl)) continue;
+      if (excludedSet.has(mdl)) continue;
       totalPending += info.pending;
       totalAll     += info.total;
       const hasCases = mode === 'all' ? info.total > 0 : info.pending > 0;
@@ -2100,10 +2360,10 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
 
     // Dominant MDLs for tooltip (>20% of the filtered total)
     const dominantMDLs = [];
-    const referenceTotal = mode === 'total' ? totalAll : totalPending;
+    const referenceTotal = mode === 'all' ? totalAll : totalPending;
     for (const [mdl, info] of Object.entries(mdlCounts)) {
-      if (permanentlyExcluded.has(mdl)) continue;
-      const count      = mode === 'total' ? info.total : info.pending;
+      if (excludedSet.has(mdl)) continue;
+      const count      = getTrendMetricValue(info, mode);
       const percentage = referenceTotal > 0 ? (count / referenceTotal) * 100 : 0;
       if (percentage > 20) {
         dominantMDLs.push({ mdl, title: info.title, count, percentage });
@@ -2118,34 +2378,36 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
       terminated: totalTerminated,
       mdlCount,
       dominantMDLs,
-      excludedCount: permanentlyExcluded.size,
-      excludedMDLs: [...permanentlyExcluded].map(mdl => {
-        const info = mdlCounts[mdl];
-        return info ? `${mdl} — ${info.title}` : mdl;
-      })
+      excludedCount: excludedSet.size,
+      excludedMDLs: [...excludedSet].map(mdl => formatExcludedTrendMdl(mdl, mdlCounts[mdl]))
     });
   }
-  
-  // Calculate 3-month moving average
-  const movingAverage = [];
+
+  // Calculate 3-month moving averages
+  const pendingClaimMovingAverage = [];
   const windowSize = 3;
   
   for (let i = 0; i < chartData.length; i++) {
     if (i < windowSize - 1) {
       // Not enough data for full window, use null
-      movingAverage.push(null);
+      pendingClaimMovingAverage.push(null);
     } else {
-      let sum = 0;
+      let pendingSum = 0;
       for (let j = 0; j < windowSize; j++) {
-        const value = mode === 'total' ? chartData[i - j].total : chartData[i - j].pending;
-        sum += value;
+        pendingSum += chartData[i - j].pending;
       }
-      movingAverage.push(sum / windowSize);
+      pendingClaimMovingAverage.push(pendingSum / windowSize);
     }
   }
   
   // Prepare Chart.js data
   const labels = chartData.map(d => formatMonthYear(d.month));
+  trendsOverviewExportState = {
+    mode,
+    chartData,
+    pendingClaimMovingAverage
+  };
+  setTrendsExportStatus('');
   
   // Destroy existing chart if it exists
   if (trendsOverviewChart) {
@@ -2175,11 +2437,27 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
     order: 0,
     pointStyle: 'circle'
   };
+  const pendingClaimMovingAverageDataset = {
+    type: 'line',
+    label: '3-Month Moving Average (Pending Cases)',
+    data: pendingClaimMovingAverage,
+    yAxisID: 'yClaims',
+    borderColor: 'rgba(255, 99, 132, 1)',
+    borderWidth: 3,
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    tension: 0.4,
+    order: 1,
+    spanGaps: true,
+    pointStyle: 'line'
+  };
   
   if (mode === 'all') {
     // Stacked bar chart
     stacked = true;
     datasets = [
+      mdlCountDataset,
+      pendingClaimMovingAverageDataset,
       {
         type: 'bar',
         label: 'Pending Cases',
@@ -2201,25 +2479,12 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         borderWidth: 1,
         stack: 'cases',
         order: 2
-      },
-      {
-        type: 'line',
-        label: '3-Month Moving Average',
-        data: movingAverage,
-        yAxisID: 'yClaims',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 3,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        tension: 0.4,
-        order: 1,
-        spanGaps: true,
-        pointStyle: 'line'
-      },
-      mdlCountDataset
+      }
     ];
   } else if (mode === 'pending') {
     datasets = [
+      mdlCountDataset,
+      pendingClaimMovingAverageDataset,
       {
         type: 'bar',
         label: 'Pending Cases',
@@ -2229,26 +2494,13 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
         order: 2
-      },
-      {
-        type: 'line',
-        label: '3-Month Moving Average',
-        data: movingAverage,
-        yAxisID: 'yClaims',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 3,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        tension: 0.4,
-        order: 1,
-        spanGaps: true,
-        pointStyle: 'line'
-      },
-      mdlCountDataset
+      }
     ];
   } else {
     // total mode
     datasets = [
+      mdlCountDataset,
+      pendingClaimMovingAverageDataset,
       {
         type: 'bar',
         label: 'Total Cases',
@@ -2258,22 +2510,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
         borderColor: 'rgba(153, 102, 255, 1)',
         borderWidth: 1,
         order: 2
-      },
-      {
-        type: 'line',
-        label: '3-Month Moving Average',
-        data: movingAverage,
-        yAxisID: 'yClaims',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 3,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        tension: 0.4,
-        order: 1,
-        spanGaps: true,
-        pointStyle: 'line'
-      },
-      mdlCountDataset
+      }
     ];
   }
   
@@ -2298,6 +2535,11 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
           display: true,
           position: 'top',
           labels: {
+            font: {
+              size: 14,
+              weight: '600'
+            },
+            padding: 18,
             usePointStyle: true,
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
@@ -2341,7 +2583,7 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
               const point = chartData[index];
               const lines = [];
               if (point.excludedCount > 0) {
-                lines.push(`\n(${point.excludedCount} dominant MDL${point.excludedCount > 1 ? 's' : ''} excluded from chart)`);
+                lines.push(`\n(${point.excludedCount} selected MDL${point.excludedCount > 1 ? 's' : ''} excluded from chart)`);
               }
               if (point.dominantMDLs.length > 0) {
                 lines.push('\nLargest MDLs in this bar:');
@@ -2365,11 +2607,18 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
           title: {
             display: true,
             text: claimsAxisLabel,
+            font: {
+              size: 16,
+              weight: '600'
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             }
           },
           ticks: {
+            font: {
+              size: 13
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             },
@@ -2389,12 +2638,19 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
           title: {
             display: true,
             text: mdlAxisLabel,
+            font: {
+              size: 16,
+              weight: '600'
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             }
           },
           ticks: {
             precision: 0,
+            font: {
+              size: 13
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             },
@@ -2411,6 +2667,10 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
           title: {
             display: true,
             text: 'Month',
+            font: {
+              size: 16,
+              weight: '600'
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             }
@@ -2418,6 +2678,9 @@ async function renderTrendsOverview(mode = 'pending', excludeDominant = false) {
           ticks: {
             maxRotation: 45,
             minRotation: 45,
+            font: {
+              size: 13
+            },
             color: function(context) {
               return document.documentElement.classList.contains('light-theme') ? '#333' : '#fff';
             }
@@ -3250,8 +3513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Render trends chart when trends-overview tab is selected
         if (tabName === 'trends-overview') {
-          const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
-          await renderTrendsOverview(metricState['trends'], excl);
+          await renderTrendsOverview(metricState['trends']);
         }
         if (tabName === 'forecasting') {
           await renderForecastingTab();
@@ -3302,14 +3564,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDashboard();
       } else if (e.target.name === 'trends-metric') {
         metricState['trends'] = e.target.value;
-        const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
-        await renderTrendsOverview(e.target.value, excl);
+        await renderTrendsOverview(e.target.value);
       }
     }
-    // Exclude-dominant checkbox
-    if (e.target.id === 'trends-exclude-dominant') {
-      const excl = e.target.checked;
-      await renderTrendsOverview(metricState['trends'] || 'pending', excl);
+    // Trends manual MDL exclusion checkboxes
+    if (e.target.classList?.contains('trends-exclude-mdl')) {
+      updateTrendExcludeSummary();
+      await renderTrendsOverview(metricState['trends'] || 'pending');
+    }
+  });
+
+  document.body.addEventListener('click', (e) => {
+    const trigger = e.target.closest('#trends-exclude-trigger');
+    if (trigger) {
+      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+      setTrendExcludeMenuOpen(!isOpen);
+      return;
+    }
+
+    if (!e.target.closest('.trends-exclude-dropdown')) {
+      setTrendExcludeMenuOpen(false);
+    }
+  });
+
+  document.body.addEventListener('click', async (e) => {
+    const exportButton = e.target.closest('.trends-export-button');
+    if (!exportButton) return;
+
+    try {
+      setTrendsExportStatus('Preparing export...');
+      if (exportButton.id === 'trends-export-png') {
+        await downloadTrendsChartPng();
+        setTrendsExportStatus('PNG downloaded.');
+      } else if (exportButton.id === 'trends-export-csv') {
+        downloadTrendsCsv();
+        setTrendsExportStatus('CSV downloaded.');
+      }
+    } catch (error) {
+      console.error(error);
+      setTrendsExportStatus(error.message || 'Export failed.', true);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      setTrendExcludeMenuOpen(false);
     }
   });
   
@@ -3362,13 +3661,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateDashboard();
       const trendsTab = document.getElementById('trends-overview-tab');
       if (trendsTab && trendsTab.classList.contains('active')) {
-        const excl = document.getElementById('trends-exclude-dominant')?.checked ?? false;
-        await renderTrendsOverview(metricState['trends'], excl);
+        await renderTrendsOverview(metricState['trends']);
       }
     }, 50);
   };
   
   // Initial rendering
+  updateTrendExcludeSummary();
   await validateAndUpdate();
   
   } catch (err) {

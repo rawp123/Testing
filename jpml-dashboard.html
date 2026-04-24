@@ -304,7 +304,7 @@
           <div class="dashboard-card" style="max-width: 100%; margin-bottom: var(--spacing-lg);">
             <h2>Case Volume Over Time</h2>
             <p style="margin-bottom: var(--spacing-md); color: var(--color-text-secondary);">
-              Monthly claims counts with a 3-month moving average, plus monthly MDL count on a secondary Y axis. Dominant MDLs (>20% of month's total) shown in tooltip.
+              Monthly claims counts and MDL counts with a 3-month moving average for pending claims.
             </p>
             <div class="metric-filter-section" style="margin-bottom: var(--spacing-md);">
               <label class="metric-filter-label">Show:</label>
@@ -318,10 +318,36 @@
                   <span class="toggle-text">All Cases</span>
                 </label>
               </div>
-              <label class="trends-exclude-label" title="Remove any MDL whose share of that month&#39;s total exceeds 40%, so outlier MDLs don&#39;t dominate the chart.">
-                <input type="checkbox" id="trends-exclude-dominant">
-                <span class="trends-exclude-text">Exclude MDLs &gt;40% of month</span>
-              </label>
+              <div class="trends-exclude-dropdown" aria-label="Exclude outlier MDLs">
+                <button class="trends-exclude-trigger" id="trends-exclude-trigger" type="button" aria-expanded="false" aria-controls="trends-exclude-menu">
+                  <span>Exclude MDLs</span>
+                  <span class="trends-exclude-summary" id="trends-exclude-summary">None selected</span>
+                  <span class="trends-exclude-caret" aria-hidden="true"></span>
+                </button>
+                <div class="trends-exclude-menu" id="trends-exclude-menu" hidden>
+                  <label class="trends-exclude-option" title="Remove 3M Combat Arms Earplug from the trend chart.">
+                    <input type="checkbox" class="trends-exclude-mdl" value="MDL-2885" data-label="Earplugs">
+                    <span class="trends-exclude-text">Earplugs</span>
+                  </label>
+                  <label class="trends-exclude-option" title="Remove Johnson &amp; Johnson Talcum Powder from the trend chart.">
+                    <input type="checkbox" class="trends-exclude-mdl" value="MDL-2738" data-label="J&amp;J Talc">
+                    <span class="trends-exclude-text">J&amp;J Talc</span>
+                  </label>
+                </div>
+              </div>
+              <div class="trends-range-controls" aria-label="Trends graph month range">
+                <label for="trends-start-month-select">Start:</label>
+                <select id="trends-start-month-select"></select>
+                <label for="trends-end-month-select">End:</label>
+                <select id="trends-end-month-select"></select>
+              </div>
+              <div class="trends-export-block">
+                <div class="trends-export-actions" aria-label="Export trends graph">
+                  <button class="trends-export-button" id="trends-export-png" type="button">Export PNG</button>
+                  <button class="trends-export-button" id="trends-export-csv" type="button">Export CSV</button>
+                </div>
+                <span class="trends-export-status" id="trends-export-status" aria-live="polite"></span>
+              </div>
             </div>
             <div class="chart-container" style="position: relative; height: 500px; margin: var(--spacing-lg) 0;">
               <canvas id="trends-overview-chart"></canvas>
