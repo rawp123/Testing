@@ -1,30 +1,18 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 
 const rootDir = __dirname;
 const port = Number.parseInt(process.env.PORT || '3000', 10);
 const isProduction = process.env.NODE_ENV === 'production';
 const dashboardRoute = '/jpml-dashboard.html';
+const pageRegistryPath = path.join(rootDir, 'src', 'config', 'site-pages.json');
 
 const staticMounts = [
   { route: '/', directory: 'src' },
   { route: '/data', directory: 'data' },
   { route: '/', directory: '.' }
 ];
-
-const allowedExactPaths = new Set([
-  dashboardRoute,
-  '/style.css',
-  '/src/css/litigation-analytics.css',
-  '/src/css/jpml-dashboard.css',
-  '/src/js/header.js',
-  '/src/js/jpml-dashboard.js',
-  '/src/partials/header.html',
-  '/data/courtlistener.json',
-  '/data/districts.json',
-  '/data/mdl/index.json',
-  '/data/pdfs/index.json'
-]);
 
 function createStaticOptions() {
   if (isProduction) {
@@ -51,40 +39,63 @@ function registerStaticMounts(server) {
   });
 }
 
-function isAllowedDashboardPath(pathname) {
-  if (allowedExactPaths.has(pathname)) {
-    return true;
+function loadPageRegistry() {
+  try {
+    return JSON.parse(fs.readFileSync(pageRegistryPath, 'utf8'));
+  } catch (error) {
+    console.warn(`Could not load page registry at ${pageRegistryPath}: ${error.message}`);
+    return {
+      pages: []
+    };
   }
-
-  if (pathname.startsWith('/data/mdl/') && pathname.endsWith('.json')) {
-    return true;
-  }
-
-  if (pathname.startsWith('/data/pdfs/') && pathname.endsWith('.pdf')) {
-    return true;
-  }
-
-  return false;
 }
 
-function restrictToDashboard(server) {
+function normalizePathname(pathname) {
+  if (!pathname || pathname === '/') {
+    return '/';
+  }
+
+  const indexNormalizedPathname = pathname.replace(/\/index\.html$/, '/');
+  if (indexNormalizedPathname.endsWith('/') || path.extname(indexNormalizedPathname)) {
+    return indexNormalizedPathname;
+  }
+
+  return `${indexNormalizedPathname}/`;
+}
+
+function matchesOfflinePage(pathname, page) {
+  const normalizedPathname = normalizePathname(pathname);
+  const paths = page.paths || [];
+  const pathPrefixes = page.pathPrefixes || [];
+
+  if (paths.some((pagePath) => normalizePathname(pagePath) === normalizedPathname || pagePath === pathname)) {
+    return true;
+  }
+
+  return pathPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(prefix));
+}
+
+function registerPageAvailability(server) {
+  const registry = loadPageRegistry();
+  const offlinePages = (registry.pages || []).filter((page) => page.status === 'offline');
+
+  if (!offlinePages.length) {
+    return;
+  }
+
   server.use((request, response, next) => {
     if (!['GET', 'HEAD'].includes(request.method)) {
-      response.status(404).send('Not found');
-      return;
-    }
-
-    if (request.path === '/' || request.path === '/jpml-dashboard' || request.path === '/jpml-dashboard/') {
-      response.redirect(302, dashboardRoute);
-      return;
-    }
-
-    if (isAllowedDashboardPath(request.path)) {
       next();
       return;
     }
 
-    response.status(404).send('Not found');
+    const offlinePage = offlinePages.find((page) => matchesOfflinePage(request.path, page));
+    if (!offlinePage) {
+      next();
+      return;
+    }
+
+    response.status(404).send(`${offlinePage.label || 'This page'} is offline.`);
   });
 }
 
@@ -94,7 +105,16 @@ function startServer() {
   server.disable('x-powered-by');
   server.use(express.json());
 
-  restrictToDashboard(server);
+  registerPageAvailability(server);
+
+  server.get(['/', '/index.html'], (request, response) => {
+    response.redirect(302, dashboardRoute);
+  });
+
+  server.get(['/jpml-dashboard', '/jpml-dashboard/'], (request, response) => {
+    response.redirect(302, dashboardRoute);
+  });
+
   registerStaticMounts(server);
 
   server.listen(port, () => {

@@ -1,0 +1,127 @@
+{
+  "pages": [
+    {
+      "id": "home",
+      "label": "Home",
+      "href": "/",
+      "status": "online",
+      "paths": ["/", "/index.html"],
+      "nav": false
+    },
+    {
+      "id": "dashboard",
+      "label": "JPML Dashboard",
+      "href": "/jpml-dashboard.html",
+      "status": "online",
+      "paths": ["/jpml-dashboard.html", "/jpml-dashboard", "/jpml-dashboard/"],
+      "pathPrefixes": ["/data/mdl/", "/data/pdfs/"]
+    },
+    {
+      "id": "podcast-utility",
+      "label": "All-In Search",
+      "href": "/all-in-podcast-search/",
+      "status": "online",
+      "paths": ["/all-in-podcast-search/", "/all-in-podcast-search/index.html"],
+      "pathPrefixes": ["/all-in-podcast-search/", "/data/all-in-podcast-search/"]
+    },
+    {
+      "id": "wip-nuclear-verdict-tracker",
+      "label": "Nuclear Verdict Tracker",
+      "href": "/work-in-progress/nuclear-verdict-tracker/",
+      "status": "online",
+      "parent": "work-in-progress",
+      "paths": ["/work-in-progress/nuclear-verdict-tracker/", "/work-in-progress/nuclear-verdict-tracker/index.html"],
+      "pathPrefixes": ["/work-in-progress/data/nuclear-verdicts"]
+    },
+    {
+      "id": "wip-silly-word-builder",
+      "label": "Silly Word Builder",
+      "href": "/work-in-progress/silly-word-builder/",
+      "status": "online",
+      "parent": "work-in-progress",
+      "paths": ["/work-in-progress/silly-word-builder/", "/work-in-progress/silly-word-builder/index.html"]
+    },
+    {
+      "id": "db-diagram",
+      "label": "Database Diagram Builder",
+      "href": "/db-diagram/",
+      "status": "online",
+      "paths": ["/db-diagram/", "/db-diagram/index.html"]
+    },
+    {
+      "id": "game-lab",
+      "label": "Game Lab",
+      "href": "/games/",
+      "status": "online",
+      "paths": ["/games/", "/games/index.html"]
+    },
+    {
+      "id": "game",
+      "label": "Happy Math",
+      "href": "/games/happy-math/",
+      "status": "online",
+      "parent": "game-lab",
+      "paths": ["/games/happy-math/", "/games/happy-math/index.html"]
+    },
+    {
+      "id": "find-the-ball",
+      "label": "Find the Ball",
+      "href": "/games/find-the-ball/",
+      "status": "online",
+      "parent": "game-lab",
+      "paths": ["/games/find-the-ball/", "/games/find-the-ball/index.html"]
+    },
+    {
+      "id": "math-meteor-shower",
+      "label": "Math Meteor Shower",
+      "href": "/games/math-meteor-shower/",
+      "status": "online",
+      "parent": "game-lab",
+      "paths": ["/games/math-meteor-shower/", "/games/math-meteor-shower/index.html"]
+    },
+    {
+      "id": "contact",
+      "label": "Contact",
+      "href": "/contact/",
+      "status": "online",
+      "paths": ["/contact/", "/contact/index.html"]
+    },
+    {
+      "id": "thankyou",
+      "label": "Thank You",
+      "href": "/thank-you/",
+      "status": "online",
+      "paths": ["/thank-you/", "/thank-you/index.html"],
+      "nav": false
+    },
+    {
+      "id": "wip-litigation-analytics",
+      "label": "Litigation Analytics",
+      "href": "/work-in-progress/litigation-analytics/",
+      "status": "online",
+      "parent": "work-in-progress",
+      "paths": ["/work-in-progress/litigation-analytics/", "/work-in-progress/litigation-analytics/index.html"],
+      "nav": false
+    }
+  ],
+  "navigation": [
+    { "page": "dashboard" },
+    { "page": "podcast-utility" },
+    {
+      "group": "work-in-progress",
+      "label": "Work In Progress",
+      "pages": ["wip-nuclear-verdict-tracker", "wip-silly-word-builder"]
+    },
+    {
+      "group": "tools",
+      "label": "Tools",
+      "pages": ["db-diagram"]
+    },
+    {
+      "group": "games",
+      "label": "Games",
+      "pages": ["game-lab", "game", "find-the-ball", "math-meteor-shower"]
+    },
+    { "page": "contact" }
+  ]
+}
