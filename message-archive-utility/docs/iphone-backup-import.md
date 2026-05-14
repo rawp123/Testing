@@ -1,6 +1,6 @@
 # iPhone Backup Import
 
-Real iPhone backup extraction is not implemented in this scaffold.
+Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Attachment extraction is not implemented.
 
 The intended future path is to support local, encrypted or unencrypted iPhone backups created by Finder or Apple Devices. Any backup files should remain outside this repository in an ignored folder such as `backups/` or a private path elsewhere on the machine.
 
@@ -123,9 +123,42 @@ The response includes `inspected: true`, `parsed: false`, and `message_contents_
 
 This is still metadata-only. It does not select `message.text`, `attributedBody`, `payload_data`, attachment payload data, or any message body content. It does not import messages into the app database, extract attachments, print message contents, or scan outside the provided copied database path and project import directory.
 
+## Message Import
+
+After a copied database has passed validation, messages can be imported into the app’s normalized archive database:
+
+```text
+POST /import/iphone-backup/import-messages
+```
+
+Request body:
+
+```json
+{
+  "copied_sms_db_path": "/path/to/project/data/imports/iphone/sms_import_20260101T120000Z.db"
+}
+```
+
+The copied database path must stay inside the project’s ignored `data/imports/iphone/` directory. The importer opens the copied `sms.db` read-only and reads:
+
+- `handle` for contact handles
+- `chat` for conversations
+- `chat_message_join` for message-to-chat mapping
+- `message.ROWID`, `message.handle_id`, `message.date`, `message.text`, `message.is_from_me`, and `message.service`
+
+Imported rows are mapped into:
+
+- `contacts`
+- `conversations`
+- `conversation_participants`
+- `messages`
+
+The original iPhone message `ROWID` is stored as `messages.source_message_id`. Direction is derived from `is_from_me`, service is preserved when present, and iPhone timestamps are converted to ISO datetimes when possible.
+
+This first importer includes message body text from `message.text`. It does not read `attributedBody`, `payload_data`, attachment payload data, or attachment contents. It does not extract attachments or write to the normalized `attachments` tables. The endpoint response returns counts only and does not include message text.
+
 Future work should document:
 
 - How to locate a local backup.
 - How to read the backup manifest safely.
-- How to map message records into the normalized schema.
 - How to handle attachments without copying private files into Git.

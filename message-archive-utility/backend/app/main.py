@@ -11,6 +11,7 @@ from app.importers.iphone_backup import (
     SmsDbNotFoundError,
     UnsafeBackupPathError,
     copy_sms_db_from_backup,
+    import_copied_sms_db_messages,
     inspect_copied_sms_db_metadata,
     locate_sms_db_dry_run,
     validate_copied_sms_db,
@@ -141,6 +142,25 @@ def iphone_backup_inspect_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except UnsafeBackupPathError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(status_code=400, detail="Copied sms.db could not be read.") from error
+
+
+@app.post("/import/iphone-backup/import-messages")
+def iphone_backup_import_messages(request: IPhoneSmsDbValidationRequest) -> dict:
+    try:
+        with get_connection() as conn:
+            return import_copied_sms_db_messages(
+                request.copied_sms_db_path,
+                PROJECT_DIR,
+                conn,
+            )
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except UnsafeBackupPathError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except sqlite3.DatabaseError as error:
         raise HTTPException(status_code=400, detail="Copied sms.db could not be read.") from error

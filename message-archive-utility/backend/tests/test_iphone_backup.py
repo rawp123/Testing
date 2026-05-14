@@ -1,4 +1,5 @@
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -7,6 +8,7 @@ from app.importers.iphone_backup import (
     SmsDbNotFoundError,
     UnsafeBackupPathError,
     copy_sms_db_from_backup,
+    import_copied_sms_db_messages,
     inspect_copied_sms_db_metadata,
     locate_sms_db_dry_run,
     validate_copied_sms_db,
@@ -208,6 +210,107 @@ def test_inspection_rejects_paths_outside_import_folder(tmp_path):
         inspect_copied_sms_db_metadata(str(outside_db), project_dir)
 
 
+def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(copied_sms_db)
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    assert result == {
+        "attachments_imported": 0,
+        "contacts_imported": 3,
+        "conversations_imported": 1,
+        "conversation_participants_imported": 2,
+        "messages_imported": 2,
+    }
+    assert "hello from fake iphone" not in str(result)
+
+    contacts = archive_conn.execute(
+        "SELECT handle, display_name, handle_type FROM contacts ORDER BY handle"
+    ).fetchall()
+    assert [dict(row) for row in contacts] == [
+        {
+            "handle": "+15550001111",
+            "display_name": "+15550001111",
+            "handle_type": "iphone",
+        },
+        {
+            "handle": "+15550002222",
+            "display_name": "+15550002222",
+            "handle_type": "iphone",
+        },
+        {
+            "handle": "iphone:self",
+            "display_name": "Me",
+            "handle_type": "iphone_self",
+        },
+    ]
+
+    conversation = archive_conn.execute(
+        "SELECT source_thread_id, title FROM conversations"
+    ).fetchone()
+    assert dict(conversation) == {
+        "source_thread_id": "iphone-chat:1",
+        "title": "Fake chat",
+    }
+
+    messages = archive_conn.execute(
+        """
+        SELECT source_message_id, direction, sent_at, body, service
+        FROM messages
+        ORDER BY source_message_id
+        """
+    ).fetchall()
+    assert [dict(row) for row in messages] == [
+        {
+            "source_message_id": "1",
+            "direction": "incoming",
+            "sent_at": "2001-01-01T00:00:00+00:00",
+            "body": "hello from fake iphone",
+            "service": "iMessage",
+        },
+        {
+            "source_message_id": "2",
+            "direction": "outgoing",
+            "sent_at": "2001-01-01T00:00:05+00:00",
+            "body": "fake reply from me",
+            "service": "SMS",
+        },
+    ]
+    assert archive_conn.execute("SELECT COUNT(*) FROM attachments").fetchone()[0] == 0
+    assert archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0] == 0
+
+
+def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(copied_sms_db)
+    archive_conn = create_archive_connection()
+
+    first_result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+    second_result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    assert first_result["messages_imported"] == 2
+    assert second_result["messages_imported"] == 0
+    assert second_result["contacts_imported"] == 0
+    assert second_result["conversations_imported"] == 0
+    assert archive_conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 2
+
+
+def test_message_import_rejects_paths_outside_import_folder(tmp_path):
+    project_dir = tmp_path / "project"
+    outside_db = tmp_path / "outside.db"
+    create_fake_sms_import_db(outside_db)
+    archive_conn = create_archive_connection()
+
+    with pytest.raises(UnsafeBackupPathError):
+        import_copied_sms_db_messages(str(outside_db), project_dir, archive_conn)
+
+
 def create_fake_manifest(path, include_sms):
     conn = sqlite3.connect(path)
     try:
@@ -273,6 +376,74 @@ def create_fake_sms_metadata_db(path):
         conn.commit()
     finally:
         conn.close()
+
+
+def create_fake_sms_import_db(path):
+    conn = sqlite3.connect(path)
+    try:
+        conn.executescript(
+            """
+            CREATE TABLE handle (
+              id TEXT,
+              service TEXT
+            );
+            CREATE TABLE chat (
+              chat_identifier TEXT,
+              display_name TEXT,
+              service_name TEXT
+            );
+            CREATE TABLE chat_message_join (
+              chat_id INTEGER,
+              message_id INTEGER
+            );
+            CREATE TABLE message (
+              handle_id INTEGER,
+              date INTEGER,
+              text TEXT,
+              is_from_me INTEGER,
+              service TEXT,
+              attributedBody BLOB,
+              payload_data BLOB
+            );
+            CREATE TABLE attachment (
+              id INTEGER PRIMARY KEY,
+              filename TEXT,
+              payload_data BLOB
+            );
+            CREATE TABLE message_attachment_join (
+              message_id INTEGER,
+              attachment_id INTEGER
+            );
+            INSERT INTO handle (ROWID, id, service)
+            VALUES
+              (1, '+15550001111', 'iMessage'),
+              (2, '+15550002222', 'SMS');
+            INSERT INTO chat (ROWID, chat_identifier, display_name, service_name)
+            VALUES (1, 'chat.fake', 'Fake chat', 'iMessage');
+            INSERT INTO message (ROWID, handle_id, date, text, is_from_me, service, attributedBody, payload_data)
+            VALUES
+              (1, 1, 0, 'hello from fake iphone', 0, 'iMessage', x'00', x'01'),
+              (2, 2, 5000000000, 'fake reply from me', 1, 'SMS', x'02', x'03');
+            INSERT INTO chat_message_join (chat_id, message_id)
+            VALUES (1, 1), (1, 2);
+            INSERT INTO attachment (id, filename, payload_data)
+            VALUES (1, 'not-imported.jpg', x'04');
+            INSERT INTO message_attachment_join (message_id, attachment_id)
+            VALUES (1, 1);
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def create_archive_connection():
+    schema_path = Path(__file__).resolve().parents[1] / "app" / "db" / "schema.sql"
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript(schema_path.read_text())
+    return conn
 
 
 def create_fake_sms_db(path, tables):
