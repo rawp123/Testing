@@ -61,6 +61,37 @@ The destination folder is ignored by Git. The endpoint will not overwrite an exi
 
 This is still not an importer. It does not parse `sms.db`, read message rows, extract attachments, store message content, or commit copied databases.
 
+## Schema Validation
+
+Copied databases can be checked with a schema-only validation endpoint:
+
+```text
+POST /import/iphone-backup/validate-sms-db
+```
+
+Request body:
+
+```json
+{
+  "copied_sms_db_path": "/path/to/project/data/imports/iphone/sms_import_20260101T120000Z.db"
+}
+```
+
+The copied database path must be inside the project’s ignored `data/imports/iphone/` directory.
+
+The validator opens the SQLite database read-only and checks only `sqlite_master` for these table names:
+
+- `message`
+- `handle`
+- `chat`
+- `chat_message_join`
+- `attachment`
+- `message_attachment_join`
+
+The response includes `valid`, `present_tables`, `missing_tables`, `parsed: false`, and `message_contents_read: false`.
+
+It does not query message text/body columns, import messages, or store message contents.
+
 Future work should document:
 
 - How to locate a local backup.

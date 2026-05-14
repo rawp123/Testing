@@ -3,9 +3,12 @@ import sqlite3
 import pytest
 
 from app.importers.iphone_backup import (
+    EXPECTED_SMS_TABLES,
     SmsDbNotFoundError,
+    UnsafeBackupPathError,
     copy_sms_db_from_backup,
     locate_sms_db_dry_run,
+    validate_copied_sms_db,
 )
 
 
@@ -107,6 +110,52 @@ def test_copy_does_not_overwrite_existing_import_file(tmp_path):
     assert destination.read_bytes() == b"existing fake import"
 
 
+def test_validates_fake_sms_schema_without_reading_message_contents(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_db(copied_sms_db, EXPECTED_SMS_TABLES)
+
+    result = validate_copied_sms_db(str(copied_sms_db), project_dir)
+
+    assert result == {
+        "valid": True,
+        "present_tables": sorted(EXPECTED_SMS_TABLES),
+        "missing_tables": [],
+        "parsed": False,
+        "message_contents_read": False,
+    }
+
+
+def test_validation_reports_missing_fake_sms_tables(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_db(copied_sms_db, {"message", "handle"})
+
+    result = validate_copied_sms_db(str(copied_sms_db), project_dir)
+
+    assert result["valid"] is False
+    assert result["present_tables"] == ["handle", "message"]
+    assert result["missing_tables"] == [
+        "attachment",
+        "chat",
+        "chat_message_join",
+        "message_attachment_join",
+    ]
+    assert result["parsed"] is False
+    assert result["message_contents_read"] is False
+
+
+def test_validation_rejects_paths_outside_import_folder(tmp_path):
+    project_dir = tmp_path / "project"
+    outside_db = tmp_path / "outside.db"
+    create_fake_sms_db(outside_db, EXPECTED_SMS_TABLES)
+
+    with pytest.raises(UnsafeBackupPathError):
+        validate_copied_sms_db(str(outside_db), project_dir)
+
+
 def create_fake_manifest(path, include_sms):
     conn = sqlite3.connect(path)
     try:
@@ -127,6 +176,16 @@ def create_fake_manifest(path, include_sms):
                 """,
                 (FAKE_FILE_ID,),
             )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def create_fake_sms_db(path, tables):
+    conn = sqlite3.connect(path)
+    try:
+        for table_name in tables:
+            conn.execute(f'CREATE TABLE "{table_name}" (id INTEGER PRIMARY KEY)')
         conn.commit()
     finally:
         conn.close()

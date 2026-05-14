@@ -6,6 +6,14 @@ import sqlite3
 
 SMS_DOMAIN = "HomeDomain"
 SMS_RELATIVE_PATH = "Library/SMS/sms.db"
+EXPECTED_SMS_TABLES = {
+    "message",
+    "handle",
+    "chat",
+    "chat_message_join",
+    "attachment",
+    "message_attachment_join",
+}
 
 
 class SmsDbNotFoundError(FileNotFoundError):
@@ -86,6 +94,41 @@ def copy_sms_db_from_backup(
         "source_path": str(source_path),
         "destination_path": str(destination_path),
     }
+
+
+def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path) -> dict:
+    import_root = (project_dir / "data" / "imports" / "iphone").resolve()
+    sms_db_path = Path(copied_sms_db_path).expanduser().resolve(strict=True)
+    if not sms_db_path.is_relative_to(import_root):
+        raise UnsafeBackupPathError("Copied sms.db path must stay inside data/imports/iphone.")
+    if not sms_db_path.is_file():
+        raise FileNotFoundError("Copied sms.db file was not found.")
+
+    present_tables = get_sqlite_table_names(sms_db_path)
+    missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
+
+    return {
+        "valid": len(missing_tables) == 0,
+        "present_tables": sorted(EXPECTED_SMS_TABLES.intersection(present_tables)),
+        "missing_tables": missing_tables,
+        "parsed": False,
+        "message_contents_read": False,
+    }
+
+
+def get_sqlite_table_names(database_path: Path) -> set[str]:
+    conn = sqlite3.connect(f"{database_path.as_uri()}?mode=ro", uri=True)
+    try:
+        rows = conn.execute(
+            """
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+    return {row[0] for row in rows}
 
 
 def query_sms_manifest_row(manifest_path: Path) -> sqlite3.Row | None:
