@@ -525,7 +525,13 @@ body.dashboard-page .container {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
+}
+
+.trends-range-field {
+  display: grid;
+  gap: 6px;
+  min-width: 190px;
 }
 
 .trends-range-controls label {
@@ -543,6 +549,7 @@ body.dashboard-page .container {
   font: inherit;
   font-size: var(--font-size-sm);
   min-height: 36px;
+  width: 100%;
   padding: 7px 12px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
@@ -615,6 +622,10 @@ body.dashboard-page .container {
   .trends-range-controls {
     justify-content: center;
     width: 100%;
+  }
+
+  .trends-range-field {
+    min-width: min(220px, 100%);
   }
 
   .trends-export-block {

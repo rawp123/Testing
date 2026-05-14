@@ -21,6 +21,7 @@
       "label": "All-In Search",
       "href": "/all-in-podcast-search/",
       "status": "online",
+      "parent": "work-in-progress",
       "paths": ["/all-in-podcast-search/", "/all-in-podcast-search/index.html"],
       "pathPrefixes": ["/all-in-podcast-search/", "/data/all-in-podcast-search/"]
     },
@@ -106,21 +107,10 @@
   ],
   "navigation": [
     { "page": "dashboard" },
-    { "page": "podcast-utility" },
     {
       "group": "work-in-progress",
       "label": "Work In Progress",
-      "pages": ["wip-nuclear-verdict-tracker", "wip-silly-word-builder"]
-    },
-    {
-      "group": "tools",
-      "label": "Tools",
-      "pages": ["db-diagram"]
-    },
-    {
-      "group": "games",
-      "label": "Games",
-      "pages": ["game-lab", "game", "find-the-ball", "math-meteor-shower"]
+      "pages": ["podcast-utility", "wip-nuclear-verdict-tracker", "wip-silly-word-builder"]
     },
     { "page": "contact" }
   ]

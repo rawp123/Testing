@@ -9,7 +9,7 @@
     pages: [
       { id: 'home', label: 'Home', href: '/', status: 'online', nav: false },
       { id: 'dashboard', label: 'JPML Dashboard', href: '/jpml-dashboard.html', status: 'online' },
-      { id: 'podcast-utility', label: 'All-In Search', href: '/all-in-podcast-search/', status: 'online' },
+      { id: 'podcast-utility', label: 'All-In Search', href: '/all-in-podcast-search/', status: 'online', parent: 'work-in-progress' },
       { id: 'wip-nuclear-verdict-tracker', label: 'Nuclear Verdict Tracker', href: '/work-in-progress/nuclear-verdict-tracker/', status: 'online', parent: 'work-in-progress' },
       { id: 'wip-silly-word-builder', label: 'Silly Word Builder', href: '/work-in-progress/silly-word-builder/', status: 'online', parent: 'work-in-progress' },
       { id: 'db-diagram', label: 'Database Diagram Builder', href: '/db-diagram/', status: 'online' },
@@ -21,10 +21,7 @@
     ],
     navigation: [
       { page: 'dashboard' },
-      { page: 'podcast-utility' },
-      { group: 'work-in-progress', label: 'Work In Progress', pages: ['wip-nuclear-verdict-tracker', 'wip-silly-word-builder'] },
-      { group: 'tools', label: 'Tools', pages: ['db-diagram'] },
-      { group: 'games', label: 'Games', pages: ['game-lab', 'game', 'find-the-ball', 'math-meteor-shower'] },
+      { group: 'work-in-progress', label: 'Work In Progress', pages: ['podcast-utility', 'wip-nuclear-verdict-tracker', 'wip-silly-word-builder'] },
       { page: 'contact' }
     ]
   };
