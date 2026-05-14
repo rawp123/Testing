@@ -92,6 +92,37 @@ The response includes `valid`, `present_tables`, `missing_tables`, `parsed: fals
 
 It does not query message text/body columns, import messages, or store message contents.
 
+## Metadata Inspection
+
+After a copied database passes schema validation, it can be inspected for safe metadata counts:
+
+```text
+POST /import/iphone-backup/inspect-sms-db
+```
+
+Request body:
+
+```json
+{
+  "copied_sms_db_path": "/path/to/project/data/imports/iphone/sms_import_20260101T120000Z.db"
+}
+```
+
+The copied database path must stay inside the project’s ignored `data/imports/iphone/` directory. The inspector opens SQLite read-only and returns row counts for:
+
+- `message`
+- `handle`
+- `chat`
+- `chat_message_join`
+- `attachment`
+- `message_attachment_join`
+
+It also returns `min_message_date` and `max_message_date` from the `message.date` column when that column is available.
+
+The response includes `inspected: true`, `parsed: false`, and `message_contents_read: false`.
+
+This is still metadata-only. It does not select `message.text`, `attributedBody`, `payload_data`, attachment payload data, or any message body content. It does not import messages into the app database, extract attachments, print message contents, or scan outside the provided copied database path and project import directory.
+
 Future work should document:
 
 - How to locate a local backup.

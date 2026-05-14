@@ -14,6 +14,7 @@ EXPECTED_SMS_TABLES = {
     "attachment",
     "message_attachment_join",
 }
+SMS_METADATA_TABLES = sorted(EXPECTED_SMS_TABLES)
 
 
 class SmsDbNotFoundError(FileNotFoundError):
@@ -97,13 +98,7 @@ def copy_sms_db_from_backup(
 
 
 def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path) -> dict:
-    import_root = (project_dir / "data" / "imports" / "iphone").resolve()
-    sms_db_path = Path(copied_sms_db_path).expanduser().resolve(strict=True)
-    if not sms_db_path.is_relative_to(import_root):
-        raise UnsafeBackupPathError("Copied sms.db path must stay inside data/imports/iphone.")
-    if not sms_db_path.is_file():
-        raise FileNotFoundError("Copied sms.db file was not found.")
-
+    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
     present_tables = get_sqlite_table_names(sms_db_path)
     missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
 
@@ -114,6 +109,46 @@ def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path) -> dict:
         "parsed": False,
         "message_contents_read": False,
     }
+
+
+def inspect_copied_sms_db_metadata(copied_sms_db_path: str, project_dir: Path) -> dict:
+    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
+    present_tables = get_sqlite_table_names(sms_db_path)
+    missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
+    if missing_tables:
+        return {
+            "inspected": False,
+            "valid": False,
+            "missing_tables": missing_tables,
+            "row_counts": {},
+            "min_message_date": None,
+            "max_message_date": None,
+            "parsed": False,
+            "message_contents_read": False,
+        }
+
+    row_counts = get_sms_metadata_row_counts(sms_db_path)
+    min_message_date, max_message_date = get_message_date_range(sms_db_path)
+
+    return {
+        "inspected": True,
+        "valid": True,
+        "row_counts": row_counts,
+        "min_message_date": min_message_date,
+        "max_message_date": max_message_date,
+        "parsed": False,
+        "message_contents_read": False,
+    }
+
+
+def resolve_copied_sms_db_path(copied_sms_db_path: str, project_dir: Path) -> Path:
+    import_root = (project_dir / "data" / "imports" / "iphone").resolve()
+    sms_db_path = Path(copied_sms_db_path).expanduser().resolve(strict=True)
+    if not sms_db_path.is_relative_to(import_root):
+        raise UnsafeBackupPathError("Copied sms.db path must stay inside data/imports/iphone.")
+    if not sms_db_path.is_file():
+        raise FileNotFoundError("Copied sms.db file was not found.")
+    return sms_db_path
 
 
 def get_sqlite_table_names(database_path: Path) -> set[str]:
@@ -129,6 +164,33 @@ def get_sqlite_table_names(database_path: Path) -> set[str]:
     finally:
         conn.close()
     return {row[0] for row in rows}
+
+
+def get_sms_metadata_row_counts(database_path: Path) -> dict[str, int]:
+    conn = sqlite3.connect(f"{database_path.as_uri()}?mode=ro", uri=True)
+    try:
+        return {
+            table_name: conn.execute(f'SELECT COUNT(*) FROM "{table_name}"').fetchone()[0]
+            for table_name in SMS_METADATA_TABLES
+        }
+    finally:
+        conn.close()
+
+
+def get_message_date_range(database_path: Path) -> tuple[int | None, int | None]:
+    conn = sqlite3.connect(f"{database_path.as_uri()}?mode=ro", uri=True)
+    try:
+        message_columns = {
+            row[1]
+            for row in conn.execute('PRAGMA table_info("message")').fetchall()
+        }
+        if "date" not in message_columns:
+            return None, None
+
+        row = conn.execute('SELECT MIN("date"), MAX("date") FROM "message"').fetchone()
+        return row[0], row[1]
+    finally:
+        conn.close()
 
 
 def query_sms_manifest_row(manifest_path: Path) -> sqlite3.Row | None:

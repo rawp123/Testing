@@ -24,8 +24,10 @@ uvicorn app.main:app --reload
 - `POST /import/iphone-backup/dry-run`
 - `POST /import/iphone-backup/copy-sms-db`
 - `POST /import/iphone-backup/validate-sms-db`
+- `POST /import/iphone-backup/inspect-sms-db`
 
 The sample importer is limited to the fake fixture at `tests/fixtures/sample_messages.csv`.
 The iPhone backup endpoint is a dry-run locator only. It reads `Manifest.db` metadata and does not copy or parse `sms.db`.
 The iPhone copy endpoint copies only the resolved backup file into ignored `data/imports/iphone/` and still does not parse messages.
 The schema validation endpoint checks copied SQLite table names only. It does not read message contents.
+The metadata inspection endpoint reports safe row counts and the `message.date` range only. It does not select message body, attributed body, payload, or attachment contents, and it does not import messages.
