@@ -4,8 +4,10 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
+from app.importers.iphone_backup import locate_sms_db_dry_run
 from app.services.export_csv import export_messages_csv
 from app.services.search import search_messages
 
@@ -28,6 +30,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class IPhoneBackupDryRunRequest(BaseModel):
+    backup_folder_path: str
 
 
 def get_db_path() -> Path:
@@ -71,6 +77,20 @@ def import_dummy_csv() -> dict:
 @app.post("/dev/import-sample")
 def import_sample() -> dict:
     return import_dummy_csv()
+
+
+@app.post("/import/iphone-backup/dry-run")
+def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
+    try:
+        return locate_sms_db_dry_run(request.backup_folder_path)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except NotADirectoryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except PermissionError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(status_code=400, detail="Manifest.db could not be read.") from error
 
 
 @app.get("/conversations")

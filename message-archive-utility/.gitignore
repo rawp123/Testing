@@ -23,5 +23,7 @@ Status.plist
 node_modules/
 dist/
 __pycache__/
+.pytest_cache/
+.pytest-tmp/
 .venv/
 .DS_Store
