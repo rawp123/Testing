@@ -7,7 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
-from app.importers.iphone_backup import locate_sms_db_dry_run
+from app.importers.iphone_backup import (
+    SmsDbNotFoundError,
+    UnsafeBackupPathError,
+    copy_sms_db_from_backup,
+    locate_sms_db_dry_run,
+)
 from app.services.export_csv import export_messages_csv
 from app.services.search import search_messages
 
@@ -89,6 +94,24 @@ def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except PermissionError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(status_code=400, detail="Manifest.db could not be read.") from error
+
+
+@app.post("/import/iphone-backup/copy-sms-db")
+def iphone_backup_copy_sms_db(request: IPhoneBackupDryRunRequest) -> dict:
+    try:
+        return copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR)
+    except SmsDbNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except NotADirectoryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except UnsafeBackupPathError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except FileExistsError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
     except sqlite3.DatabaseError as error:
         raise HTTPException(status_code=400, detail="Manifest.db could not be read.") from error
 

@@ -29,6 +29,38 @@ It returns whether the SMS database entry was found, the manifest metadata, and 
 
 It does not copy `sms.db`, parse `sms.db`, read messages, store message contents, scan outside the provided backup folder, or create import data.
 
+## Controlled Copy Step
+
+After the dry run locates the SMS database entry, the backend can copy only that resolved backup file:
+
+```text
+POST /import/iphone-backup/copy-sms-db
+```
+
+Request body:
+
+```json
+{
+  "backup_folder_path": "/path/to/local/iphone-backup"
+}
+```
+
+The copy step reuses the dry-run locator, verifies that the resolved source path stays inside the provided backup folder, and writes the copy under:
+
+```text
+data/imports/iphone/
+```
+
+Copied files use timestamped names such as:
+
+```text
+data/imports/iphone/sms_import_20260101T120000Z.db
+```
+
+The destination folder is ignored by Git. The endpoint will not overwrite an existing import file.
+
+This is still not an importer. It does not parse `sms.db`, read message rows, extract attachments, store message content, or commit copied databases.
+
 Future work should document:
 
 - How to locate a local backup.

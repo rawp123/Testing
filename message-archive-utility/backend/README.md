@@ -22,6 +22,8 @@ uvicorn app.main:app --reload
 - `GET /search?q=hello`
 - `GET /export/messages.csv`
 - `POST /import/iphone-backup/dry-run`
+- `POST /import/iphone-backup/copy-sms-db`
 
 The sample importer is limited to the fake fixture at `tests/fixtures/sample_messages.csv`.
 The iPhone backup endpoint is a dry-run locator only. It reads `Manifest.db` metadata and does not copy or parse `sms.db`.
+The iPhone copy endpoint copies only the resolved backup file into ignored `data/imports/iphone/` and still does not parse messages.
