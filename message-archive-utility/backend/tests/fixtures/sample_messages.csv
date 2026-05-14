@@ -1,0 +1,5 @@
+conversation_source_id,conversation_title,source_message_id,sender_name,sender_handle,direction,sent_at,body,service
+sample-thread-1,Weekend plans,sample-msg-1,Jordan Sample,+15550101001,incoming,2026-01-04T16:20:00Z,Want to meet for coffee on Saturday?,sample
+sample-thread-1,Weekend plans,sample-msg-2,Local User,me,outgoing,2026-01-04T16:23:00Z,Saturday morning works. Let us pick a quiet place.,sample
+sample-thread-2,Project notes,sample-msg-3,Riley Example,+15550101002,incoming,2026-01-05T09:10:00Z,I added the draft notes to the shared folder.,sample
+sample-thread-2,Project notes,sample-msg-4,Local User,me,outgoing,2026-01-05T09:14:00Z,Thanks. I will review them after lunch.,sample

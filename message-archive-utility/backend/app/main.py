@@ -1,0 +1,184 @@
+from pathlib import Path
+import os
+import sqlite3
+
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.importers.dummy_csv import import_sample_csv
+from app.services.export_csv import export_messages_csv
+from app.services.search import search_messages
+
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+PROJECT_DIR = BACKEND_DIR.parent
+SCHEMA_PATH = BACKEND_DIR / "app" / "db" / "schema.sql"
+SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
+DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
+
+app = FastAPI(title="Message Archive Utility", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def get_db_path() -> Path:
+    configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DB_PATH", DEFAULT_DB_PATH))
+    if not configured_path.is_absolute():
+        configured_path = PROJECT_DIR / configured_path
+    return configured_path
+
+
+def get_connection() -> sqlite3.Connection:
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+
+def initialize_database() -> None:
+    with get_connection() as conn:
+        conn.executescript(SCHEMA_PATH.read_text())
+
+
+@app.on_event("startup")
+def startup() -> None:
+    initialize_database()
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok", "storage": "local"}
+
+
+@app.post("/import/dummy-csv")
+def import_dummy_csv() -> dict:
+    with get_connection() as conn:
+        imported = import_sample_csv(conn, SAMPLE_CSV_PATH)
+    return {"imported_messages": imported, "source": "fake_sample_csv"}
+
+
+@app.post("/dev/import-sample")
+def import_sample() -> dict:
+    return import_dummy_csv()
+
+
+@app.get("/conversations")
+def list_conversations() -> dict:
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT
+              conversations.id,
+              conversations.title,
+              conversations.updated_at,
+              MAX(messages.sent_at) AS last_message_at,
+              COUNT(DISTINCT messages.id) AS message_count,
+              GROUP_CONCAT(DISTINCT contacts.display_name) AS participants
+            FROM conversations
+            LEFT JOIN messages ON messages.conversation_id = conversations.id
+            LEFT JOIN conversation_participants
+              ON conversation_participants.conversation_id = conversations.id
+            LEFT JOIN contacts ON contacts.id = conversation_participants.contact_id
+            GROUP BY conversations.id
+            ORDER BY COALESCE(last_message_at, conversations.updated_at) DESC
+            """
+        ).fetchall()
+
+    return {
+        "conversations": [
+            {
+                "id": row["id"],
+                "title": row["title"] or "Untitled conversation",
+                "last_message_at": row["last_message_at"],
+                "message_count": row["message_count"],
+                "participants": split_participants(row["participants"]),
+                "tags": [],
+            }
+            for row in rows
+        ]
+    }
+
+
+@app.get("/conversations/{conversation_id}/messages")
+def list_conversation_messages(conversation_id: int) -> dict:
+    with get_connection() as conn:
+        conversation = conn.execute(
+            """
+            SELECT
+              conversations.id,
+              conversations.title,
+              GROUP_CONCAT(DISTINCT contacts.display_name) AS participants
+            FROM conversations
+            LEFT JOIN conversation_participants
+              ON conversation_participants.conversation_id = conversations.id
+            LEFT JOIN contacts ON contacts.id = conversation_participants.contact_id
+            WHERE conversations.id = ?
+            GROUP BY conversations.id
+            """,
+            (conversation_id,),
+        ).fetchone()
+        if conversation is None:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        messages = conn.execute(
+            """
+            SELECT
+              messages.id,
+              messages.sent_at,
+              messages.direction,
+              messages.body,
+              messages.service,
+              contacts.display_name AS sender_name,
+              contacts.handle AS sender_handle
+            FROM messages
+            LEFT JOIN contacts ON contacts.id = messages.sender_contact_id
+            WHERE messages.conversation_id = ?
+            ORDER BY messages.sent_at ASC
+            """,
+            (conversation_id,),
+        ).fetchall()
+
+    return {
+        "conversation": {
+            "id": conversation["id"],
+            "title": conversation["title"] or "Untitled conversation",
+            "participants": split_participants(conversation["participants"]),
+            "tags": [],
+        },
+        "messages": [dict(message) for message in messages],
+    }
+
+
+@app.get("/search")
+def search(q: str = "", limit: int = 50) -> dict:
+    with get_connection() as conn:
+        results = search_messages(conn, q=q, limit=limit)
+    return {"query": q, "results": results}
+
+
+@app.get("/export/messages.csv")
+def export_csv() -> Response:
+    with get_connection() as conn:
+        csv_text = export_messages_csv(conn)
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=messages.csv"},
+    )
+
+
+def split_participants(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [name for name in value.split(",") if name]
