@@ -39,12 +39,29 @@ export default function ConversationView({ conversation, isLoading }) {
               <strong>{message.sender_name}</strong>
               <time>{formatTimestamp(message.sent_at)}</time>
             </div>
-            <p>{message.body}</p>
+            {message.body ? <p>{message.body}</p> : <p className="empty-message-body">No text body</p>}
+            {message.attachments?.length > 0 && (
+              <ul className="attachment-list" aria-label="Attachments">
+                {message.attachments.map((attachment) => (
+                  <li key={attachment.id}>
+                    <span>{attachment.original_filename || attachment.mime_type || "Attachment"}</span>
+                    {attachment.byte_size ? <small>{formatBytes(attachment.byte_size)}</small> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
           </article>
         ))}
       </div>
     </section>
   );
+}
+
+function formatBytes(value) {
+  return new Intl.NumberFormat("en", {
+    maximumFractionDigits: 1,
+    notation: Number(value) >= 1_000_000 ? "compact" : "standard",
+  }).format(value);
 }
 
 function formatTimestamp(value) {

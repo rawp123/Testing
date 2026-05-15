@@ -14,6 +14,7 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
     { label: "Conversations", value: formatNumber(conversations.total) },
     { label: "Contacts", value: formatNumber(contacts.total) },
     { label: "Attachments", value: formatNumber(attachments.total) },
+    { label: "Attachment links", value: formatNumber(attachments.linked_messages) },
     { label: "Latest", value: formatDate(messages.latest_sent_at) },
   ];
 

@@ -221,7 +221,8 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
     result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
 
     assert result == {
-        "attachments_imported": 0,
+        "attachments_imported": 1,
+        "message_attachment_links_imported": 1,
         "contacts_imported": 3,
         "conversations_imported": 1,
         "conversation_participants_imported": 2,
@@ -281,8 +282,26 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
             "service": "SMS",
         },
     ]
-    assert archive_conn.execute("SELECT COUNT(*) FROM attachments").fetchone()[0] == 0
-    assert archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0] == 0
+    attachment = archive_conn.execute(
+        """
+        SELECT original_filename, mime_type, local_path, byte_size
+        FROM attachments
+        """
+    ).fetchone()
+    assert dict(attachment) == {
+        "original_filename": "not-imported.jpg",
+        "mime_type": None,
+        "local_path": "iphone-attachment:1:not-imported.jpg",
+        "byte_size": None,
+    }
+    linked_source_message = archive_conn.execute(
+        """
+        SELECT messages.source_message_id
+        FROM message_attachments
+        JOIN messages ON messages.id = message_attachments.message_id
+        """
+    ).fetchone()
+    assert linked_source_message["source_message_id"] == "1"
 
 
 def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
@@ -297,9 +316,13 @@ def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
 
     assert first_result["messages_imported"] == 2
     assert second_result["messages_imported"] == 0
+    assert second_result["attachments_imported"] == 0
+    assert second_result["message_attachment_links_imported"] == 0
     assert second_result["contacts_imported"] == 0
     assert second_result["conversations_imported"] == 0
     assert archive_conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 2
+    assert archive_conn.execute("SELECT COUNT(*) FROM attachments").fetchone()[0] == 1
+    assert archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0] == 1
 
 
 def test_extracts_message_text_from_attributed_body_when_text_is_empty():

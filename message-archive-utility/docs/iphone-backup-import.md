@@ -1,6 +1,6 @@
 # iPhone Backup Import
 
-Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Message text is imported from `message.text` with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty. Attachment extraction is not implemented.
+Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Message text is imported from `message.text` with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty. Attachment metadata is imported and linked to messages, but attachment files are not copied or extracted.
 
 The intended future path is to support local, encrypted or unencrypted iPhone backups created by Finder or Apple Devices. Any backup files should remain outside this repository in an ignored folder such as `backups/` or a private path elsewhere on the machine.
 
@@ -145,6 +145,8 @@ The copied database path must stay inside the project’s ignored `data/imports/
 - `chat` for conversations
 - `chat_message_join` for message-to-chat mapping
 - `message.ROWID`, `message.handle_id`, `message.date`, `message.text`, `message.attributedBody`, `message.payload_data`, `message.is_from_me`, and `message.service`
+- `attachment.ROWID`, `attachment.filename`, `attachment.transfer_name`, `attachment.mime_type`, `attachment.uti`, and size columns when available
+- `message_attachment_join` for message-to-attachment mapping
 
 Imported rows are mapped into:
 
@@ -152,12 +154,14 @@ Imported rows are mapped into:
 - `conversations`
 - `conversation_participants`
 - `messages`
+- `attachments`
+- `message_attachments`
 
 The original iPhone message `ROWID` is stored as `messages.source_message_id`. Direction is derived from `is_from_me`, service is preserved when present, and iPhone timestamps are converted to ISO datetimes when possible.
 
 Message body text comes from `message.text` first. If `message.text` is empty, the importer attempts to extract readable text from `message.attributedBody` and then `message.payload_data`. Re-running the importer is idempotent for already-imported rows, but it will update existing archive rows whose body is still blank if a fallback body can now be recovered.
 
-It does not extract attachment files, attachment payload data, or write to the normalized `attachments` tables. The endpoint response returns counts only and does not include message text.
+Attachment import stores metadata only: original filename, mime type or UTI, byte size when available, and a source reference to the iPhone attachment row/path. It does not copy attachment files or read attachment payload data. The endpoint response returns counts only and does not include message text or attachment contents.
 
 ## Smoke-Test Result
 
@@ -174,4 +178,4 @@ Future work should document:
 
 - How to locate a local backup.
 - How to read the backup manifest safely.
-- How to handle attachments without copying private files into Git.
+- How to copy selected attachment files into private ignored storage.

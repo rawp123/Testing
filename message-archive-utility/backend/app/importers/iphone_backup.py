@@ -161,6 +161,8 @@ def import_copied_sms_db_messages(
         chat_rows = fetch_chat_rows(sms_conn)
         message_chat_ids = fetch_message_chat_ids(sms_conn)
         message_rows = fetch_message_rows(sms_conn)
+        attachment_rows = fetch_attachment_rows(sms_conn)
+        message_attachment_rows = fetch_message_attachment_rows(sms_conn)
     finally:
         sms_conn.close()
 
@@ -247,9 +249,29 @@ def import_copied_sms_db_messages(
         )
         messages_imported += imported
 
+    attachment_ids_by_rowid = {}
+    attachments_imported = 0
+    for attachment in attachment_rows:
+        attachment_id, inserted = upsert_iphone_attachment_metadata(archive_conn, attachment)
+        attachment_ids_by_rowid[attachment["rowid"]] = attachment_id
+        attachments_imported += inserted
+
+    message_attachment_links_imported = 0
+    for row in message_attachment_rows:
+        message_id = get_archive_message_id(archive_conn, row["message_id"])
+        attachment_id = attachment_ids_by_rowid.get(row["attachment_id"])
+        if message_id is None or attachment_id is None:
+            continue
+        message_attachment_links_imported += insert_message_attachment_link(
+            archive_conn,
+            message_id=message_id,
+            attachment_id=attachment_id,
+        )
+
     archive_conn.commit()
     return {
-        "attachments_imported": 0,
+        "attachments_imported": attachments_imported,
+        "message_attachment_links_imported": message_attachment_links_imported,
         "contacts_imported": contacts_imported,
         "conversations_imported": conversations_imported,
         "conversation_participants_imported": participants_imported,
@@ -367,6 +389,60 @@ def fetch_message_rows(conn: sqlite3.Connection) -> list[dict]:
         }
         for row in rows
     ]
+
+
+def fetch_attachment_rows(conn: sqlite3.Connection) -> list[dict]:
+    columns = get_table_columns(conn, "attachment")
+    filename_expr = first_available_column_expr(columns, ["filename"], "NULL")
+    transfer_name_expr = first_available_column_expr(columns, ["transfer_name"], "NULL")
+    mime_type_expr = first_available_column_expr(columns, ["mime_type", "uti"], "NULL")
+    byte_size_expr = first_available_column_expr(columns, ["total_bytes", "byte_size", "file_size"], "NULL")
+    rows = conn.execute(
+        f"""
+        SELECT
+          ROWID AS rowid,
+          {filename_expr} AS filename,
+          {transfer_name_expr} AS transfer_name,
+          {mime_type_expr} AS mime_type,
+          {byte_size_expr} AS byte_size
+        FROM "attachment"
+        ORDER BY ROWID
+        """
+    ).fetchall()
+    return [
+        {
+            "rowid": row["rowid"],
+            "filename": row["filename"],
+            "transfer_name": row["transfer_name"],
+            "mime_type": row["mime_type"],
+            "byte_size": row["byte_size"],
+        }
+        for row in rows
+    ]
+
+
+def fetch_message_attachment_rows(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute(
+        """
+        SELECT message_id, attachment_id
+        FROM "message_attachment_join"
+        ORDER BY message_id, attachment_id
+        """
+    ).fetchall()
+    return [
+        {
+            "message_id": row["message_id"],
+            "attachment_id": row["attachment_id"],
+        }
+        for row in rows
+    ]
+
+
+def first_available_column_expr(columns: set[str], names: list[str], fallback: str) -> str:
+    for name in names:
+        if name in columns:
+            return f'"{name}"'
+    return fallback
 
 
 def extract_message_body_text(text, attributed_body, payload_data) -> str:
@@ -592,6 +668,79 @@ def insert_iphone_message(
             """,
             (message["text"], str(message["rowid"])),
         )
+    return cursor.rowcount
+
+
+def upsert_iphone_attachment_metadata(
+    conn: sqlite3.Connection,
+    attachment: dict,
+) -> tuple[int, int]:
+    source_ref = build_iphone_attachment_source_ref(attachment)
+    original_filename = attachment["transfer_name"] or basename_or_none(attachment["filename"])
+    cursor = conn.execute(
+        """
+        INSERT INTO attachments (original_filename, mime_type, local_path, byte_size)
+        SELECT ?, ?, ?, ?
+        WHERE NOT EXISTS (
+          SELECT 1 FROM attachments WHERE local_path = ?
+        )
+        """,
+        (
+            original_filename,
+            attachment["mime_type"],
+            source_ref,
+            normalize_byte_size(attachment["byte_size"]),
+            source_ref,
+        ),
+    )
+    row = conn.execute(
+        "SELECT id FROM attachments WHERE local_path = ?",
+        (source_ref,),
+    ).fetchone()
+    return int(row["id"]), cursor.rowcount
+
+
+def build_iphone_attachment_source_ref(attachment: dict) -> str:
+    filename = attachment["filename"] or ""
+    return f"iphone-attachment:{attachment['rowid']}:{filename}"
+
+
+def basename_or_none(value) -> str | None:
+    if not value:
+        return None
+    return Path(str(value)).name
+
+
+def normalize_byte_size(value) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def get_archive_message_id(conn: sqlite3.Connection, source_message_id) -> int | None:
+    row = conn.execute(
+        "SELECT id FROM messages WHERE source_message_id = ?",
+        (str(source_message_id),),
+    ).fetchone()
+    return int(row["id"]) if row else None
+
+
+def insert_message_attachment_link(
+    conn: sqlite3.Connection,
+    *,
+    message_id: int,
+    attachment_id: int,
+) -> int:
+    cursor = conn.execute(
+        """
+        INSERT OR IGNORE INTO message_attachments (message_id, attachment_id)
+        VALUES (?, ?)
+        """,
+        (message_id, attachment_id),
+    )
     return cursor.rowcount
 
 

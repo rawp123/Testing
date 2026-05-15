@@ -253,6 +253,33 @@ def list_conversation_messages(conversation_id: int) -> dict:
             """,
             (conversation_id,),
         ).fetchall()
+        attachment_rows = conn.execute(
+            """
+            SELECT
+              message_attachments.message_id,
+              attachments.id,
+              attachments.original_filename,
+              attachments.mime_type,
+              attachments.byte_size
+            FROM message_attachments
+            JOIN attachments ON attachments.id = message_attachments.attachment_id
+            JOIN messages ON messages.id = message_attachments.message_id
+            WHERE messages.conversation_id = ?
+            ORDER BY message_attachments.message_id, attachments.id
+            """,
+            (conversation_id,),
+        ).fetchall()
+
+    attachments_by_message_id: dict[int, list[dict]] = {}
+    for attachment in attachment_rows:
+        attachments_by_message_id.setdefault(attachment["message_id"], []).append(
+            {
+                "id": attachment["id"],
+                "original_filename": attachment["original_filename"],
+                "mime_type": attachment["mime_type"],
+                "byte_size": attachment["byte_size"],
+            }
+        )
 
     return {
         "conversation": {
@@ -261,7 +288,13 @@ def list_conversation_messages(conversation_id: int) -> dict:
             "participants": split_participants(conversation["participants"]),
             "tags": [],
         },
-        "messages": [dict(message) for message in messages],
+        "messages": [
+            {
+                **dict(message),
+                "attachments": attachments_by_message_id.get(message["id"], []),
+            }
+            for message in messages
+        ],
     }
 
 
