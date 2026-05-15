@@ -85,6 +85,12 @@ def health() -> dict:
     return {"status": "ok", "storage": "local"}
 
 
+@app.get("/archive/stats")
+def archive_stats() -> dict:
+    with get_connection() as conn:
+        return build_archive_stats(conn)
+
+
 @app.post("/import/dummy-csv")
 def import_dummy_csv() -> dict:
     with get_connection() as conn:
@@ -281,3 +287,44 @@ def split_participants(value: str | None) -> list[str]:
     if not value:
         return []
     return [name for name in value.split(",") if name]
+
+
+def build_archive_stats(conn: sqlite3.Connection) -> dict:
+    message_stats = conn.execute(
+        """
+        SELECT
+          COUNT(*) AS total_messages,
+          SUM(CASE WHEN body = '' THEN 1 ELSE 0 END) AS blank_messages,
+          MIN(NULLIF(sent_at, 'unavailable')) AS earliest_message_at,
+          MAX(NULLIF(sent_at, 'unavailable')) AS latest_message_at
+        FROM messages
+        """
+    ).fetchone()
+    conversation_count = conn.execute("SELECT COUNT(*) FROM conversations").fetchone()[0]
+    contact_count = conn.execute("SELECT COUNT(*) FROM contacts").fetchone()[0]
+    attachment_count = conn.execute("SELECT COUNT(*) FROM attachments").fetchone()[0]
+    attachment_link_count = conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0]
+
+    total_messages = int(message_stats["total_messages"] or 0)
+    blank_messages = int(message_stats["blank_messages"] or 0)
+    blank_percent = round((blank_messages / total_messages) * 100, 2) if total_messages else 0
+
+    return {
+        "messages": {
+            "total": total_messages,
+            "blank": blank_messages,
+            "blank_percent": blank_percent,
+            "earliest_sent_at": message_stats["earliest_message_at"],
+            "latest_sent_at": message_stats["latest_message_at"],
+        },
+        "conversations": {
+            "total": int(conversation_count or 0),
+        },
+        "contacts": {
+            "total": int(contact_count or 0),
+        },
+        "attachments": {
+            "total": int(attachment_count or 0),
+            "linked_messages": int(attachment_link_count or 0),
+        },
+    }

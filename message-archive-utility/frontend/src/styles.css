@@ -109,7 +109,8 @@ button:disabled {
   flex-wrap: wrap;
 }
 
-.import-panel {
+.import-panel,
+.stats-panel {
   border: 1px solid #ded8ce;
   border-radius: 8px;
   background: #fbfaf7;
@@ -135,6 +136,16 @@ button:disabled {
 }
 
 .privacy-badge {
+  padding: 7px 10px;
+}
+
+.stats-status {
+  border: 1px solid #d4ccc0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 700;
   padding: 7px 10px;
 }
 
@@ -366,31 +377,44 @@ button:disabled {
   line-height: 1.5;
 }
 
-.result-grid {
+.result-grid,
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin: 16px 0 0;
 }
 
-.result-grid div {
+.stats-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.result-grid div,
+.stats-grid div {
   border: 1px solid #ded8ce;
   border-radius: 8px;
   background: #ffffff;
   padding: 10px 12px;
 }
 
-.result-grid dt {
+.result-grid dt,
+.stats-grid dt {
   color: #716a60;
   font-size: 12px;
   text-transform: capitalize;
 }
 
-.result-grid dd {
+.result-grid dd,
+.stats-grid dd {
   margin: 4px 0 0;
   color: #151615;
   font-weight: 800;
   overflow-wrap: anywhere;
+}
+
+.stats-grid dd {
+  font-size: 18px;
 }
 
 @keyframes spin {
@@ -418,7 +442,8 @@ button:disabled {
   }
 
   .import-grid,
-  .result-grid {
+  .result-grid,
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 

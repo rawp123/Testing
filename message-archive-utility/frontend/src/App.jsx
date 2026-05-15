@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ArchiveStatsPanel from "./components/ArchiveStatsPanel.jsx";
 import ConversationList from "./components/ConversationList.jsx";
 import ConversationView from "./components/ConversationView.jsx";
 import Filters from "./components/Filters.jsx";
@@ -13,8 +14,10 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [archiveStats, setArchiveStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
+  const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function loadConversations({ keepSelection = true } = {}) {
@@ -39,6 +42,7 @@ export default function App() {
 
   useEffect(() => {
     loadConversations();
+    loadArchiveStats();
   }, []);
 
   useEffect(() => {
@@ -144,8 +148,9 @@ export default function App() {
       <section className="workspace" aria-label="Message archive workspace">
         <IPhoneImportPanel
           request={request}
-          onArchiveChanged={() => loadConversations({ keepSelection: false })}
+          onArchiveChanged={refreshArchive}
         />
+        <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
         <ConversationView
           conversation={selectedConversation}
           isLoading={isConversationLoading}
@@ -159,11 +164,30 @@ export default function App() {
     setError("");
     try {
       await request("/import/dummy-csv", { method: "POST" });
-      await loadConversations({ keepSelection: false });
+      await refreshArchive();
     } catch (requestError) {
       setError(requestError.message);
       setIsLoading(false);
     }
+  }
+
+  async function loadArchiveStats() {
+    setIsStatsLoading(true);
+    try {
+      const data = await request("/archive/stats");
+      setArchiveStats(data);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setIsStatsLoading(false);
+    }
+  }
+
+  async function refreshArchive() {
+    await Promise.all([
+      loadConversations({ keepSelection: false }),
+      loadArchiveStats(),
+    ]);
   }
 }
 
