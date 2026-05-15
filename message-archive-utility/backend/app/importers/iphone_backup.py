@@ -333,6 +333,8 @@ def fetch_message_rows(conn: sqlite3.Connection) -> list[dict]:
     handle_expr = '"handle_id"' if "handle_id" in columns else "NULL"
     date_expr = '"date"' if "date" in columns else "NULL"
     text_expr = '"text"' if "text" in columns else "NULL"
+    attributed_body_expr = '"attributedBody"' if "attributedBody" in columns else "NULL"
+    payload_data_expr = '"payload_data"' if "payload_data" in columns else "NULL"
     is_from_me_expr = '"is_from_me"' if "is_from_me" in columns else "0"
     service_expr = '"service"' if "service" in columns else "NULL"
     rows = conn.execute(
@@ -342,6 +344,8 @@ def fetch_message_rows(conn: sqlite3.Connection) -> list[dict]:
           {handle_expr} AS handle_id,
           {date_expr} AS date,
           {text_expr} AS text,
+          {attributed_body_expr} AS attributed_body,
+          {payload_data_expr} AS payload_data,
           {is_from_me_expr} AS is_from_me,
           {service_expr} AS service
         FROM "message"
@@ -353,12 +357,87 @@ def fetch_message_rows(conn: sqlite3.Connection) -> list[dict]:
             "rowid": row["rowid"],
             "handle_id": row["handle_id"],
             "date": row["date"],
-            "text": row["text"] or "",
+            "text": extract_message_body_text(
+                row["text"],
+                row["attributed_body"],
+                row["payload_data"],
+            ),
             "is_from_me": bool(row["is_from_me"]),
             "service": row["service"],
         }
         for row in rows
     ]
+
+
+def extract_message_body_text(text, attributed_body, payload_data) -> str:
+    if text:
+        return str(text)
+
+    for candidate in (attributed_body, payload_data):
+        extracted = extract_readable_text_from_blob(candidate)
+        if extracted:
+            return extracted
+
+    return ""
+
+
+def extract_readable_text_from_blob(blob) -> str:
+    if blob is None:
+        return ""
+    if isinstance(blob, memoryview):
+        blob = blob.tobytes()
+    if isinstance(blob, str):
+        return blob.strip()
+    if not isinstance(blob, bytes):
+        return ""
+
+    candidates = []
+    for encoding in ("utf-8", "utf-16-be", "utf-16-le"):
+        try:
+            decoded = blob.decode(encoding, errors="ignore")
+        except LookupError:
+            continue
+        cleaned = normalize_extracted_blob_text(decoded)
+        if cleaned:
+            candidates.append(cleaned)
+
+    if not candidates:
+        return ""
+    return max(candidates, key=lambda value: (len(value), printable_score(value)))
+
+
+def normalize_extracted_blob_text(value: str) -> str:
+    runs = []
+    current = []
+    for char in value:
+        if char in "\r\n\t" or char.isprintable():
+            current.append(char)
+            continue
+        if current:
+            runs.append("".join(current))
+            current = []
+    if current:
+        runs.append("".join(current))
+
+    cleaned_runs = []
+    for run in runs:
+        cleaned = " ".join(run.split()).strip()
+        if len(cleaned) < 2:
+            continue
+        if printable_score(cleaned) < 0.72:
+            continue
+        cleaned_runs.append(cleaned)
+
+    if not cleaned_runs:
+        return ""
+    return max(cleaned_runs, key=len)
+
+
+def printable_score(value: str) -> float:
+    if not value:
+        return 0.0
+    useful = sum(char.isalnum() or char.isspace() or char in ".,!?;:'\"()[]{}@#$%&*-_+=/\\|" for char in value)
+    return useful / len(value)
 
 
 def get_table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
@@ -503,6 +582,16 @@ def insert_iphone_message(
             message["service"],
         ),
     )
+    if cursor.rowcount == 0 and message["text"]:
+        cursor = conn.execute(
+            """
+            UPDATE messages
+            SET body = ?
+            WHERE source_message_id = ?
+              AND body = ''
+            """,
+            (message["text"], str(message["rowid"])),
+        )
     return cursor.rowcount
 
 

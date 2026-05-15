@@ -13,13 +13,15 @@ This project is designed so private message data stays on your computer. Real ph
 
 The repository should be safe to make public even if you keep it private while developing.
 
-## Planned Import Paths
+## Import Paths
 
 1. iPhone local backup import
 2. iMazing CSV import
 3. Android XML import
 
-The first scaffold includes only a fake-data CSV importer. Real iPhone extraction is intentionally not implemented yet.
+The current implementation includes a fake-data CSV importer and a partial real iPhone local-backup importer. The iPhone importer can locate and copy `sms.db` from a local backup, validate and inspect the copied database, and import contacts, conversations, participants, and message text into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
+
+Attachment extraction is not implemented yet.
 
 ## Backend Setup
 
@@ -31,9 +33,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The backend uses FastAPI and SQLite. By default it creates a local database path from `MESSAGE_ARCHIVE_DB_PATH`; keep that path outside Git if you use real data later.
+The backend uses FastAPI and SQLite. By default it creates a local database path from `MESSAGE_ARCHIVE_DB_PATH`; keep that path outside Git if you use real data.
 
-The runnable scaffold imports only the fake CSV fixture through `POST /import/dummy-csv`.
+The fake CSV fixture is available through `POST /import/dummy-csv`. The iPhone backup flow is documented in `docs/iphone-backup-import.md`.
 
 ## Frontend Setup
 
@@ -43,7 +45,7 @@ npm install
 npm run dev
 ```
 
-The frontend is a small React app with fake sample conversations for the first version.
+The frontend is a small React app for browsing the local archive, loading fake sample data, and running the iPhone backup import flow against the local backend.
 
 ## Private Data Warning
 

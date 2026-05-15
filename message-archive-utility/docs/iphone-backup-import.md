@@ -1,6 +1,6 @@
 # iPhone Backup Import
 
-Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Attachment extraction is not implemented.
+Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Message text is imported from `message.text` with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty. Attachment extraction is not implemented.
 
 The intended future path is to support local, encrypted or unencrypted iPhone backups created by Finder or Apple Devices. Any backup files should remain outside this repository in an ignored folder such as `backups/` or a private path elsewhere on the machine.
 
@@ -144,7 +144,7 @@ The copied database path must stay inside the project’s ignored `data/imports/
 - `handle` for contact handles
 - `chat` for conversations
 - `chat_message_join` for message-to-chat mapping
-- `message.ROWID`, `message.handle_id`, `message.date`, `message.text`, `message.is_from_me`, and `message.service`
+- `message.ROWID`, `message.handle_id`, `message.date`, `message.text`, `message.attributedBody`, `message.payload_data`, `message.is_from_me`, and `message.service`
 
 Imported rows are mapped into:
 
@@ -155,7 +155,20 @@ Imported rows are mapped into:
 
 The original iPhone message `ROWID` is stored as `messages.source_message_id`. Direction is derived from `is_from_me`, service is preserved when present, and iPhone timestamps are converted to ISO datetimes when possible.
 
-This first importer includes message body text from `message.text`. It does not read `attributedBody`, `payload_data`, attachment payload data, or attachment contents. It does not extract attachments or write to the normalized `attachments` tables. The endpoint response returns counts only and does not include message text.
+Message body text comes from `message.text` first. If `message.text` is empty, the importer attempts to extract readable text from `message.attributedBody` and then `message.payload_data`. Re-running the importer is idempotent for already-imported rows, but it will update existing archive rows whose body is still blank if a fallback body can now be recovered.
+
+It does not extract attachment files, attachment payload data, or write to the normalized `attachments` tables. The endpoint response returns counts only and does not include message text.
+
+## Smoke-Test Result
+
+A local private iPhone backup smoke test on May 15, 2026 imported:
+
+- `172,591` total messages
+- `2,159` message bodies recovered by the attributed-body fallback on re-import
+- `291` remaining blank bodies after fallback extraction
+- `1,182` conversations
+
+The remaining blank bodies had no `attributedBody` or `payload_data` values in the sampled source database. Some remaining blanks are likely attachment-only or non-text rows. These numbers are a real-data implementation check, not a committed fixture; no private message database or message content should be added to Git.
 
 Future work should document:
 

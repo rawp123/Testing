@@ -2,7 +2,7 @@
 
 FastAPI backend for the local-first message archive utility.
 
-This scaffold uses SQLite and fake sample data only. Real phone backup extraction is not implemented yet.
+This backend uses SQLite for a local-first message archive. It supports fake sample data and a partial real iPhone local-backup import flow.
 
 ## Run
 
@@ -28,8 +28,8 @@ uvicorn app.main:app --reload
 - `POST /import/iphone-backup/import-messages`
 
 The sample importer is limited to the fake fixture at `tests/fixtures/sample_messages.csv`.
-The iPhone backup endpoint is a dry-run locator only. It reads `Manifest.db` metadata and does not copy or parse `sms.db`.
-The iPhone copy endpoint copies only the resolved backup file into ignored `data/imports/iphone/` and still does not parse messages.
+The iPhone dry-run endpoint reads `Manifest.db` metadata and locates the backup file for `Library/SMS/sms.db`.
+The iPhone copy endpoint copies only the resolved backup file into ignored `data/imports/iphone/`.
 The schema validation endpoint checks copied SQLite table names only. It does not read message contents.
 The metadata inspection endpoint reports safe row counts and the `message.date` range only. It does not select message body, attributed body, payload, or attachment contents, and it does not import messages.
-The message import endpoint maps handles, chats, chat-message joins, and `message.text` into the normalized archive database. It does not read attributed body, payload, or attachment contents, and it returns counts only.
+The message import endpoint maps handles, chats, chat-message joins, and message text into the normalized archive database. It reads `message.text` first and falls back to readable `attributedBody`/`payload_data` content when `message.text` is empty. It does not extract attachment files or attachment payload data, and it returns counts only.

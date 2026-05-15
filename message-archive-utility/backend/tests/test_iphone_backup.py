@@ -8,6 +8,7 @@ from app.importers.iphone_backup import (
     SmsDbNotFoundError,
     UnsafeBackupPathError,
     copy_sms_db_from_backup,
+    extract_message_body_text,
     import_copied_sms_db_messages,
     inspect_copied_sms_db_metadata,
     locate_sms_db_dry_run,
@@ -301,6 +302,62 @@ def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
     assert archive_conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 2
 
 
+def test_extracts_message_text_from_attributed_body_when_text_is_empty():
+    body = extract_message_body_text(
+        None,
+        b"\x00\x01NSObject\x00Recovered attributed body text\x00\x02",
+        None,
+    )
+
+    assert body == "Recovered attributed body text"
+
+
+def test_reimport_updates_existing_blank_body_from_attributed_body(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_attributed_body_db(copied_sms_db)
+    archive_conn = create_archive_connection()
+    archive_conn.execute(
+        """
+        INSERT INTO conversations (source_thread_id, title)
+        VALUES ('iphone-chat:1', 'Existing chat')
+        """
+    )
+    archive_conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', '+15550001111', 'iphone')
+        """
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    contact_id = archive_conn.execute("SELECT id FROM contacts").fetchone()["id"]
+    archive_conn.execute(
+        """
+        INSERT INTO messages (
+          conversation_id,
+          sender_contact_id,
+          source_message_id,
+          sent_at,
+          direction,
+          body,
+          service
+        )
+        VALUES (?, ?, '1', '2001-01-01T00:00:00+00:00', 'incoming', '', 'iMessage')
+        """,
+        (conversation_id, contact_id),
+    )
+    archive_conn.commit()
+
+    result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    assert result["messages_imported"] == 1
+    body = archive_conn.execute(
+        "SELECT body FROM messages WHERE source_message_id = '1'"
+    ).fetchone()["body"]
+    assert body == "Recovered attributed body text"
+
+
 def test_message_import_rejects_paths_outside_import_folder(tmp_path):
     project_dir = tmp_path / "project"
     outside_db = tmp_path / "outside.db"
@@ -429,6 +486,66 @@ def create_fake_sms_import_db(path):
             INSERT INTO attachment (id, filename, payload_data)
             VALUES (1, 'not-imported.jpg', x'04');
             INSERT INTO message_attachment_join (message_id, attachment_id)
+            VALUES (1, 1);
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def create_fake_sms_attributed_body_db(path):
+    conn = sqlite3.connect(path)
+    try:
+        conn.executescript(
+            """
+            CREATE TABLE handle (
+              id TEXT,
+              service TEXT
+            );
+            CREATE TABLE chat (
+              chat_identifier TEXT,
+              display_name TEXT,
+              service_name TEXT
+            );
+            CREATE TABLE chat_message_join (
+              chat_id INTEGER,
+              message_id INTEGER
+            );
+            CREATE TABLE message (
+              handle_id INTEGER,
+              date INTEGER,
+              text TEXT,
+              is_from_me INTEGER,
+              service TEXT,
+              attributedBody BLOB,
+              payload_data BLOB
+            );
+            CREATE TABLE attachment (
+              id INTEGER PRIMARY KEY,
+              filename TEXT,
+              payload_data BLOB
+            );
+            CREATE TABLE message_attachment_join (
+              message_id INTEGER,
+              attachment_id INTEGER
+            );
+            INSERT INTO handle (ROWID, id, service)
+            VALUES (1, '+15550001111', 'iMessage');
+            INSERT INTO chat (ROWID, chat_identifier, display_name, service_name)
+            VALUES (1, 'chat.fake', 'Fake chat', 'iMessage');
+            INSERT INTO message (ROWID, handle_id, date, text, is_from_me, service, attributedBody, payload_data)
+            VALUES (
+              1,
+              1,
+              0,
+              NULL,
+              0,
+              'iMessage',
+              x'00014E534F626A656374005265636F7665726564206174747269627574656420626F647920746578740002',
+              NULL
+            );
+            INSERT INTO chat_message_join (chat_id, message_id)
             VALUES (1, 1);
             """
         )
