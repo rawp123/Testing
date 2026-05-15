@@ -203,8 +203,12 @@ def list_conversations() -> dict:
     return {
         "conversations": [
             {
+                "source_title": row["title"],
                 "id": row["id"],
-                "title": row["title"] or "Untitled conversation",
+                "title": build_conversation_display_title(
+                    row["title"],
+                    split_participants(row["participants"]),
+                ),
                 "last_message_at": row["last_message_at"],
                 "message_count": row["message_count"],
                 "participants": split_participants(row["participants"]),
@@ -284,7 +288,11 @@ def list_conversation_messages(conversation_id: int) -> dict:
     return {
         "conversation": {
             "id": conversation["id"],
-            "title": conversation["title"] or "Untitled conversation",
+            "source_title": conversation["title"],
+            "title": build_conversation_display_title(
+                conversation["title"],
+                split_participants(conversation["participants"]),
+            ),
             "participants": split_participants(conversation["participants"]),
             "tags": [],
         },
@@ -319,7 +327,48 @@ def export_csv() -> Response:
 def split_participants(value: str | None) -> list[str]:
     if not value:
         return []
-    return [name for name in value.split(",") if name]
+    return [name.strip() for name in value.split(",") if name.strip()]
+
+
+def build_conversation_display_title(
+    source_title: str | None,
+    participants: list[str],
+) -> str:
+    if source_title and not is_generated_conversation_title(source_title):
+        return source_title
+
+    participant_title = format_participant_title(participants)
+    if participant_title:
+        return participant_title
+
+    return source_title or "Untitled conversation"
+
+
+def is_generated_conversation_title(value: str) -> bool:
+    normalized = value.strip().lower()
+    if not normalized:
+        return True
+    return (
+        normalized.startswith("chat")
+        or normalized.startswith("iphone chat ")
+        or normalized == "iphone messages without chat"
+    )
+
+
+def format_participant_title(participants: list[str]) -> str:
+    meaningful_participants = [
+        participant
+        for participant in participants
+        if participant and participant != "Me" and not participant.startswith("iphone:unknown-handle:")
+    ]
+    if not meaningful_participants:
+        meaningful_participants = [participant for participant in participants if participant]
+
+    if len(meaningful_participants) <= 3:
+        return ", ".join(meaningful_participants)
+
+    visible_participants = ", ".join(meaningful_participants[:3])
+    return f"{visible_participants} +{len(meaningful_participants) - 3} more"
 
 
 def build_archive_stats(conn: sqlite3.Connection) -> dict:
