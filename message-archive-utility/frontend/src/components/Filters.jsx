@@ -1,3 +1,4 @@
+import React from "react";
 import { Calendar, Image, Tag, Users } from "lucide-react";
 
 const filters = [

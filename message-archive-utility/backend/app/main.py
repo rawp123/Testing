@@ -4,6 +4,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
@@ -72,6 +73,11 @@ def initialize_database() -> None:
 @app.on_event("startup")
 def startup() -> None:
     initialize_database()
+
+
+@app.api_route("/", methods=["GET", "HEAD"])
+def root() -> RedirectResponse:
+    return RedirectResponse("http://localhost:5173", status_code=307)
 
 
 @app.get("/health")

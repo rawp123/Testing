@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ConversationList from "./components/ConversationList.jsx";
 import ConversationView from "./components/ConversationView.jsx";
 import Filters from "./components/Filters.jsx";
+import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -16,31 +17,28 @@ export default function App() {
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let isCurrent = true;
-
-    async function loadInitialData() {
-      setIsLoading(true);
-      setError("");
-      try {
-        await request("/import/dummy-csv", { method: "POST" });
-        const data = await request("/conversations");
-        if (!isCurrent) return;
-
-        const loadedConversations = data.conversations || [];
-        setConversations(loadedConversations);
-        setSelectedId((currentId) => currentId || loadedConversations[0]?.id || null);
-      } catch (requestError) {
-        if (isCurrent) setError(requestError.message);
-      } finally {
-        if (isCurrent) setIsLoading(false);
-      }
+  async function loadConversations({ keepSelection = true } = {}) {
+    setIsLoading(true);
+    setError("");
+    try {
+      const data = await request("/conversations");
+      const loadedConversations = data.conversations || [];
+      setConversations(loadedConversations);
+      setSelectedId((currentId) => {
+        if (keepSelection && loadedConversations.some((conversation) => conversation.id === currentId)) {
+          return currentId;
+        }
+        return loadedConversations[0]?.id || null;
+      });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    loadInitialData();
-    return () => {
-      isCurrent = false;
-    };
+  useEffect(() => {
+    loadConversations();
   }, []);
 
   useEffect(() => {
@@ -117,8 +115,16 @@ export default function App() {
     <main className="app-shell">
       <section className="sidebar" aria-label="Conversation browser">
         <div className="brand-block">
-          <p className="eyebrow">Local archive</p>
+          <p className="eyebrow">Local iPhone archive</p>
           <h1>Messages</h1>
+        </div>
+        <div className="sidebar-actions">
+          <button className="secondary-button" type="button" onClick={() => loadConversations()}>
+            Refresh
+          </button>
+          <button className="secondary-button" type="button" onClick={loadSampleArchive}>
+            Load sample
+          </button>
         </div>
         <SearchBar value={query} onChange={setQuery} />
         <Filters />
@@ -127,7 +133,7 @@ export default function App() {
             {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
           </p>
         )}
-        {isLoading && <p className="empty-state">Loading fake sample archive...</p>}
+        {isLoading && <p className="empty-state">Loading archive...</p>}
         {error && <p className="error-state">{error}</p>}
         <ConversationList
           conversations={visibleConversations}
@@ -135,18 +141,53 @@ export default function App() {
           onSelect={setSelectedId}
         />
       </section>
-      <ConversationView
-        conversation={selectedConversation}
-        isLoading={isConversationLoading}
-      />
+      <section className="workspace" aria-label="Message archive workspace">
+        <IPhoneImportPanel
+          request={request}
+          onArchiveChanged={() => loadConversations({ keepSelection: false })}
+        />
+        <ConversationView
+          conversation={selectedConversation}
+          isLoading={isConversationLoading}
+        />
+      </section>
     </main>
   );
+
+  async function loadSampleArchive() {
+    setIsLoading(true);
+    setError("");
+    try {
+      await request("/import/dummy-csv", { method: "POST" });
+      await loadConversations({ keepSelection: false });
+    } catch (requestError) {
+      setError(requestError.message);
+      setIsLoading(false);
+    }
+  }
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...options.headers,
+    },
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
   if (!response.ok) {
-    throw new Error(`Backend request failed: ${response.status}`);
+    const detail = typeof data === "object" && data !== null ? data.detail : data;
+    if (response.status === 404 && detail === "Not Found") {
+      throw new Error("The backend route was not found. Make sure the frontend is open on port 5173 and the API is running on port 8000.");
+    }
+    throw new Error(detail || `Backend request failed: ${response.status}`);
   }
-  return response.json();
+
+  return data;
 }

@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function ConversationView({ conversation, isLoading }) {
   if (isLoading) {
     return (
@@ -10,7 +12,7 @@ export default function ConversationView({ conversation, isLoading }) {
   if (!conversation) {
     return (
       <section className="conversation-view">
-        <p className="empty-state">Select a conversation to view the fake sample timeline.</p>
+        <p className="empty-state">Import messages or select a conversation to view the timeline.</p>
       </section>
     );
   }

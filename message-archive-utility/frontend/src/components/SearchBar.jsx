@@ -1,3 +1,4 @@
+import React from "react";
 import { Search } from "lucide-react";
 
 export default function SearchBar({ value, onChange }) {
@@ -6,7 +7,7 @@ export default function SearchBar({ value, onChange }) {
       <Search aria-hidden="true" size={18} />
       <input
         type="search"
-        placeholder="Search fake sample messages"
+        placeholder="Search messages"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />

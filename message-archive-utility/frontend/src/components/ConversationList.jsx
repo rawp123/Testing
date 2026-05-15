@@ -1,6 +1,8 @@
+import React from "react";
+
 export default function ConversationList({ conversations, selectedId, onSelect }) {
   if (conversations.length === 0) {
-    return <p className="empty-state">No fake sample conversations match this search.</p>;
+    return <p className="empty-state">No conversations are in the archive yet.</p>;
   }
 
   return (

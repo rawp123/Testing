@@ -2,7 +2,7 @@
 
 React frontend for the local-first message archive utility.
 
-The first version uses fake sample data in `src/App.jsx`. It provides a conversation list, message timeline, search bar, and placeholder filters for dates, participants, attachments, and tags.
+The app browses conversations from the local backend, supports search, can load the fake sample archive on demand, and includes the local iPhone backup import flow. The development server proxies `/api` requests to the FastAPI backend on port `8000`.
 
 ## Run
 
