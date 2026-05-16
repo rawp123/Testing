@@ -19,9 +19,9 @@ The repository should be safe to make public even if you keep it private while d
 2. iMazing CSV import
 3. Android XML import
 
-The current implementation includes a fake-data CSV importer and a partial real iPhone local-backup importer. The iPhone importer can locate and copy `sms.db` from a local backup, validate and inspect the copied database, and import contacts, conversations, participants, message text, and attachment metadata into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
+The current implementation includes a fake-data CSV importer and a partial real iPhone local-backup importer. The iPhone importer can locate and copy `sms.db` from a local backup, validate and inspect the copied database, and import contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
 
-Attachment files are not copied or extracted yet.
+Linked attachment files are copied only when the backup folder is supplied during import. Copied files stay in ignored private storage under `data/attachments/iphone/`.
 
 ## Backend Setup
 

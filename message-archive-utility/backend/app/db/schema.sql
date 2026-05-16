@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE TABLE IF NOT EXISTS attachments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_ref TEXT,
   original_filename TEXT,
   mime_type TEXT,
   local_path TEXT,

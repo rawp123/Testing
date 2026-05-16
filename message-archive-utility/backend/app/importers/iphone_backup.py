@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
 from pathlib import Path
+import re
 import shutil
 import sqlite3
+
+from app.services.contact_display import format_contact_display_name
 
 
 SMS_DOMAIN = "HomeDomain"
@@ -147,6 +150,7 @@ def import_copied_sms_db_messages(
     copied_sms_db_path: str,
     project_dir: Path,
     archive_conn: sqlite3.Connection,
+    backup_folder_path: str | None = None,
 ) -> dict:
     sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
     present_tables = get_sqlite_table_names(sms_db_path)
@@ -172,7 +176,7 @@ def import_copied_sms_db_messages(
         contact_id, inserted = upsert_iphone_contact(
             archive_conn,
             handle=handle["handle"],
-            display_name=handle["handle"],
+            display_name=format_contact_display_name(handle["handle"]),
             handle_type="iphone",
         )
         contact_ids_by_handle_rowid[handle["rowid"]] = contact_id
@@ -231,7 +235,7 @@ def import_copied_sms_db_messages(
                 sender_contact_id, inserted = upsert_iphone_contact(
                     archive_conn,
                     handle=fallback_handle,
-                    display_name=fallback_handle,
+                    display_name=format_contact_display_name(fallback_handle),
                     handle_type="iphone_unknown",
                 )
                 contacts_imported += inserted
@@ -251,8 +255,28 @@ def import_copied_sms_db_messages(
 
     attachment_ids_by_rowid = {}
     attachments_imported = 0
+    attachment_files_copied = 0
+    linked_attachment_rowids = {
+        row["attachment_id"]
+        for row in message_attachment_rows
+    }
+    backup_folder = resolve_backup_folder(backup_folder_path) if backup_folder_path else None
     for attachment in attachment_rows:
-        attachment_id, inserted = upsert_iphone_attachment_metadata(archive_conn, attachment)
+        local_path = None
+        if backup_folder and attachment["rowid"] in linked_attachment_rowids:
+            copy_result = copy_iphone_attachment_file(
+                attachment=attachment,
+                backup_folder=backup_folder,
+                project_dir=project_dir,
+                import_stem=sms_db_path.stem,
+            )
+            local_path = copy_result["local_path"]
+            attachment_files_copied += copy_result["copied"]
+        attachment_id, inserted = upsert_iphone_attachment_metadata(
+            archive_conn,
+            attachment,
+            local_path=local_path,
+        )
         attachment_ids_by_rowid[attachment["rowid"]] = attachment_id
         attachments_imported += inserted
 
@@ -271,6 +295,7 @@ def import_copied_sms_db_messages(
     archive_conn.commit()
     return {
         "attachments_imported": attachments_imported,
+        "attachment_files_copied": attachment_files_copied,
         "message_attachment_links_imported": message_attachment_links_imported,
         "contacts_imported": contacts_imported,
         "conversations_imported": conversations_imported,
@@ -287,6 +312,16 @@ def resolve_copied_sms_db_path(copied_sms_db_path: str, project_dir: Path) -> Pa
     if not sms_db_path.is_file():
         raise FileNotFoundError("Copied sms.db file was not found.")
     return sms_db_path
+
+
+def resolve_backup_folder(backup_folder_path: str) -> Path:
+    backup_folder = Path(backup_folder_path).expanduser().resolve(strict=True)
+    if not backup_folder.is_dir():
+        raise NotADirectoryError("Backup path must be a folder.")
+    manifest_path = backup_folder / "Manifest.db"
+    if not manifest_path.exists():
+        raise FileNotFoundError("Manifest.db was not found in the backup folder.")
+    return backup_folder
 
 
 def fetch_handle_rows(conn: sqlite3.Connection) -> list[dict]:
@@ -671,33 +706,142 @@ def insert_iphone_message(
     return cursor.rowcount
 
 
+def copy_iphone_attachment_file(
+    *,
+    attachment: dict,
+    backup_folder: Path,
+    project_dir: Path,
+    import_stem: str,
+) -> dict:
+    source_path = resolve_iphone_attachment_backup_path(attachment, backup_folder)
+    if source_path is None:
+        return {"copied": 0, "local_path": None}
+
+    destination_root = (project_dir / "data" / "attachments" / "iphone" / import_stem).resolve()
+    destination_root.mkdir(parents=True, exist_ok=True)
+
+    destination_name = build_attachment_destination_name(attachment)
+    destination_path = (destination_root / destination_name).resolve()
+    if not destination_path.is_relative_to(destination_root):
+        raise UnsafeBackupPathError("Attachment destination path must stay inside data/attachments/iphone.")
+
+    copied = 0
+    if not destination_path.exists():
+        shutil.copy2(source_path, destination_path)
+        copied = 1
+
+    return {
+        "copied": copied,
+        "local_path": str(destination_path.relative_to(project_dir)),
+    }
+
+
+def resolve_iphone_attachment_backup_path(attachment: dict, backup_folder: Path) -> Path | None:
+    manifest_relative_paths = build_attachment_manifest_relative_path_candidates(attachment["filename"])
+    if not manifest_relative_paths:
+        return None
+
+    manifest_row = query_manifest_file_row(backup_folder / "Manifest.db", manifest_relative_paths)
+    if manifest_row is None:
+        return None
+
+    file_id = manifest_row["fileID"]
+    source_path = (backup_folder / file_id[:2] / file_id).resolve()
+    if not source_path.is_relative_to(backup_folder):
+        raise UnsafeBackupPathError("Resolved attachment path must stay inside the backup folder.")
+    if not source_path.is_file():
+        return None
+    return source_path
+
+
+def build_attachment_manifest_relative_path_candidates(filename) -> list[str]:
+    if not filename:
+        return []
+
+    value = str(filename).strip().replace("\\", "/")
+    prefixes = (
+        "~/",
+        "/private/var/mobile/",
+        "/var/mobile/",
+    )
+    for prefix in prefixes:
+        if value.startswith(prefix):
+            value = value[len(prefix):]
+            break
+
+    marker = "Library/SMS/Attachments/"
+    if marker in value:
+        value = value[value.index(marker):]
+    elif value.startswith("Attachments/"):
+        value = f"Library/SMS/{value}"
+    elif not value.startswith("Library/SMS/"):
+        return []
+
+    return [value]
+
+
+def build_attachment_destination_name(attachment: dict) -> str:
+    original_filename = attachment["transfer_name"] or basename_or_none(attachment["filename"]) or "attachment"
+    safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", original_filename).strip("._")
+    if not safe_name:
+        safe_name = "attachment"
+    return f"{attachment['rowid']}-{safe_name}"
+
+
 def upsert_iphone_attachment_metadata(
     conn: sqlite3.Connection,
     attachment: dict,
+    *,
+    local_path: str | None = None,
 ) -> tuple[int, int]:
     source_ref = build_iphone_attachment_source_ref(attachment)
     original_filename = attachment["transfer_name"] or basename_or_none(attachment["filename"])
-    cursor = conn.execute(
-        """
-        INSERT INTO attachments (original_filename, mime_type, local_path, byte_size)
-        SELECT ?, ?, ?, ?
-        WHERE NOT EXISTS (
-          SELECT 1 FROM attachments WHERE local_path = ?
-        )
-        """,
-        (
-            original_filename,
-            attachment["mime_type"],
-            source_ref,
-            normalize_byte_size(attachment["byte_size"]),
-            source_ref,
-        ),
-    )
-    row = conn.execute(
-        "SELECT id FROM attachments WHERE local_path = ?",
+    existing_row = conn.execute(
+        "SELECT id FROM attachments WHERE source_ref = ?",
         (source_ref,),
     ).fetchone()
-    return int(row["id"]), cursor.rowcount
+    normalized_byte_size = normalize_byte_size(attachment["byte_size"])
+    if existing_row:
+        conn.execute(
+            """
+            UPDATE attachments
+            SET
+              original_filename = COALESCE(?, original_filename),
+              mime_type = COALESCE(?, mime_type),
+              local_path = COALESCE(?, local_path),
+              byte_size = COALESCE(?, byte_size)
+            WHERE source_ref = ?
+            """,
+            (
+                original_filename,
+                attachment["mime_type"],
+                local_path,
+                normalized_byte_size,
+                source_ref,
+            ),
+        )
+        return int(existing_row["id"]), 0
+
+    cursor = conn.execute(
+        """
+        INSERT INTO attachments (
+          source_ref,
+          original_filename,
+          mime_type,
+          local_path,
+          byte_size
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            source_ref,
+            original_filename,
+            attachment["mime_type"],
+            local_path,
+            normalized_byte_size,
+        ),
+    )
+    return int(cursor.lastrowid), cursor.rowcount
 
 
 def build_iphone_attachment_source_ref(attachment: dict) -> str:
@@ -772,6 +916,28 @@ def query_sms_manifest_row(manifest_path: Path) -> sqlite3.Row | None:
             LIMIT 1
             """,
             (SMS_DOMAIN, SMS_RELATIVE_PATH),
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def query_manifest_file_row(manifest_path: Path, relative_paths: list[str]) -> sqlite3.Row | None:
+    if not relative_paths:
+        return None
+
+    conn = sqlite3.connect(f"{manifest_path.as_uri()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        placeholders = ", ".join("?" for _ in relative_paths)
+        return conn.execute(
+            f"""
+            SELECT fileID, domain, relativePath
+            FROM Files
+            WHERE domain = ?
+              AND relativePath IN ({placeholders})
+            LIMIT 1
+            """,
+            (SMS_DOMAIN, *relative_paths),
         ).fetchone()
     finally:
         conn.close()

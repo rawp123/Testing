@@ -1,5 +1,7 @@
 import React from "react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+
 export default function ConversationView({ conversation, isLoading }) {
   if (isLoading) {
     return (
@@ -43,9 +45,33 @@ export default function ConversationView({ conversation, isLoading }) {
             {message.attachments?.length > 0 && (
               <ul className="attachment-list" aria-label="Attachments">
                 {message.attachments.map((attachment) => (
-                  <li key={attachment.id}>
-                    <span>{attachment.original_filename || attachment.mime_type || "Attachment"}</span>
-                    {attachment.byte_size ? <small>{formatBytes(attachment.byte_size)}</small> : null}
+                  <li
+                    className={attachment.available && attachment.is_image ? "has-preview" : ""}
+                    key={attachment.id}
+                  >
+                    {attachment.available && attachment.is_image ? (
+                      <img
+                        src={buildAttachmentUrl(attachment)}
+                        alt={attachment.original_filename || "Message attachment"}
+                        loading="lazy"
+                      />
+                    ) : null}
+                    <div className="attachment-details">
+                      <span>{attachment.original_filename || attachment.mime_type || "Attachment"}</span>
+                      <small>
+                        {[
+                          attachment.mime_type,
+                          attachment.byte_size ? formatBytes(attachment.byte_size) : null,
+                          attachment.available ? null : "Metadata only",
+                        ].filter(Boolean).join(" · ")}
+                      </small>
+                    </div>
+                    {attachment.available ? (
+                      <div className="attachment-actions">
+                        <a href={buildAttachmentUrl(attachment)} target="_blank" rel="noreferrer">Open</a>
+                        <a href={buildAttachmentUrl(attachment, true)}>Download</a>
+                      </div>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -55,6 +81,12 @@ export default function ConversationView({ conversation, isLoading }) {
       </div>
     </section>
   );
+}
+
+function buildAttachmentUrl(attachment, download = false) {
+  if (!attachment.url) return "";
+  const separator = attachment.url.includes("?") ? "&" : "?";
+  return `${API_BASE_URL}${attachment.url}${download ? `${separator}download=1` : ""}`;
 }
 
 function formatBytes(value) {

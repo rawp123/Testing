@@ -4,7 +4,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
@@ -18,6 +18,11 @@ from app.importers.iphone_backup import (
     validate_copied_sms_db,
 )
 from app.services.export_csv import export_messages_csv
+from app.services.contact_display import (
+    UNKNOWN_CONTACT_LABEL,
+    clean_participant_names,
+    format_contact_display_name,
+)
 from app.services.search import search_messages
 
 
@@ -49,6 +54,10 @@ class IPhoneSmsDbValidationRequest(BaseModel):
     copied_sms_db_path: str
 
 
+class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
+    backup_folder_path: str | None = None
+
+
 def get_db_path() -> Path:
     configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DB_PATH", DEFAULT_DB_PATH))
     if not configured_path.is_absolute():
@@ -68,6 +77,31 @@ def get_connection() -> sqlite3.Connection:
 def initialize_database() -> None:
     with get_connection() as conn:
         conn.executescript(SCHEMA_PATH.read_text())
+        migrate_database(conn)
+
+
+def migrate_database(conn: sqlite3.Connection) -> None:
+    attachment_columns = {
+        row["name"]
+        for row in conn.execute('PRAGMA table_info("attachments")').fetchall()
+    }
+    if "source_ref" not in attachment_columns:
+        conn.execute("ALTER TABLE attachments ADD COLUMN source_ref TEXT")
+        conn.execute(
+            """
+            UPDATE attachments
+            SET source_ref = local_path
+            WHERE source_ref IS NULL
+              AND local_path LIKE 'iphone-attachment:%'
+            """
+        )
+    conn.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_attachments_source_ref
+          ON attachments(source_ref)
+          WHERE source_ref IS NOT NULL
+        """
+    )
 
 
 @app.on_event("startup")
@@ -160,16 +194,19 @@ def iphone_backup_inspect_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
 
 
 @app.post("/import/iphone-backup/import-messages")
-def iphone_backup_import_messages(request: IPhoneSmsDbValidationRequest) -> dict:
+def iphone_backup_import_messages(request: IPhoneMessageImportRequest) -> dict:
     try:
         with get_connection() as conn:
             return import_copied_sms_db_messages(
                 request.copied_sms_db_path,
                 PROJECT_DIR,
                 conn,
+                backup_folder_path=request.backup_folder_path,
             )
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
+    except NotADirectoryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
     except UnsafeBackupPathError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except ValueError as error:
@@ -207,11 +244,11 @@ def list_conversations() -> dict:
                 "id": row["id"],
                 "title": build_conversation_display_title(
                     row["title"],
-                    split_participants(row["participants"]),
+                    clean_participant_names(split_participants(row["participants"])),
                 ),
                 "last_message_at": row["last_message_at"],
                 "message_count": row["message_count"],
-                "participants": split_participants(row["participants"]),
+                "participants": clean_participant_names(split_participants(row["participants"])),
                 "tags": [],
             }
             for row in rows
@@ -264,6 +301,7 @@ def list_conversation_messages(conversation_id: int) -> dict:
               attachments.id,
               attachments.original_filename,
               attachments.mime_type,
+              attachments.local_path,
               attachments.byte_size
             FROM message_attachments
             JOIN attachments ON attachments.id = message_attachments.attachment_id
@@ -282,6 +320,9 @@ def list_conversation_messages(conversation_id: int) -> dict:
                 "original_filename": attachment["original_filename"],
                 "mime_type": attachment["mime_type"],
                 "byte_size": attachment["byte_size"],
+                "available": bool(attachment["local_path"]),
+                "url": f"/attachments/{attachment['id']}" if attachment["local_path"] else None,
+                "is_image": is_image_mime_type(attachment["mime_type"]),
             }
         )
 
@@ -291,14 +332,14 @@ def list_conversation_messages(conversation_id: int) -> dict:
             "source_title": conversation["title"],
             "title": build_conversation_display_title(
                 conversation["title"],
-                split_participants(conversation["participants"]),
+                clean_participant_names(split_participants(conversation["participants"])),
             ),
-            "participants": split_participants(conversation["participants"]),
+            "participants": clean_participant_names(split_participants(conversation["participants"])),
             "tags": [],
         },
         "messages": [
             {
-                **dict(message),
+                **format_message_row(message),
                 "attachments": attachments_by_message_id.get(message["id"], []),
             }
             for message in messages
@@ -324,10 +365,61 @@ def export_csv() -> Response:
     )
 
 
+@app.get("/attachments/{attachment_id}")
+def get_attachment_file(attachment_id: int, download: bool = False) -> FileResponse:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT original_filename, mime_type, local_path
+            FROM attachments
+            WHERE id = ?
+            """,
+            (attachment_id,),
+        ).fetchone()
+
+    if row is None or not row["local_path"]:
+        raise HTTPException(status_code=404, detail="Attachment file is not available.")
+
+    file_path = resolve_private_attachment_path(row["local_path"])
+    content_disposition_type = "attachment" if download else "inline"
+    return FileResponse(
+        file_path,
+        media_type=row["mime_type"] or "application/octet-stream",
+        filename=row["original_filename"] or file_path.name,
+        content_disposition_type=content_disposition_type,
+    )
+
+
 def split_participants(value: str | None) -> list[str]:
     if not value:
         return []
     return [name.strip() for name in value.split(",") if name.strip()]
+
+
+def is_image_mime_type(value: str | None) -> bool:
+    return bool(value and value.lower().startswith("image/"))
+
+
+def resolve_private_attachment_path(local_path: str) -> Path:
+    attachment_root = (PROJECT_DIR / "data" / "attachments").resolve()
+    path = Path(local_path)
+    if path.is_absolute():
+        resolved_path = path.resolve(strict=False)
+    else:
+        resolved_path = (PROJECT_DIR / path).resolve(strict=False)
+    if not resolved_path.is_relative_to(attachment_root):
+        raise HTTPException(status_code=400, detail="Attachment path is outside private storage.")
+    if not resolved_path.is_file():
+        raise HTTPException(status_code=404, detail="Attachment file is not available.")
+    return resolved_path
+
+
+def format_message_row(message: sqlite3.Row) -> dict:
+    formatted_message = dict(message)
+    formatted_message["sender_name"] = format_contact_display_name(
+        formatted_message["sender_name"] or formatted_message["sender_handle"]
+    )
+    return formatted_message
 
 
 def build_conversation_display_title(
@@ -359,10 +451,10 @@ def format_participant_title(participants: list[str]) -> str:
     meaningful_participants = [
         participant
         for participant in participants
-        if participant and participant != "Me" and not participant.startswith("iphone:unknown-handle:")
+        if participant and participant not in {"Me", UNKNOWN_CONTACT_LABEL}
     ]
     if not meaningful_participants:
-        meaningful_participants = [participant for participant in participants if participant]
+        meaningful_participants = [participant for participant in participants if participant and participant != "Me"]
 
     if len(meaningful_participants) <= 3:
         return ", ".join(meaningful_participants)

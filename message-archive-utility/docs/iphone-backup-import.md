@@ -1,6 +1,6 @@
 # iPhone Backup Import
 
-Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Message text is imported from `message.text` with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty. Attachment metadata is imported and linked to messages, but attachment files are not copied or extracted.
+Real iPhone backup extraction is partially implemented. The backend can locate and copy `sms.db`, inspect metadata, and import messages/conversations from a copied `sms.db`. Message text is imported from `message.text` with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty. Attachment metadata is imported and linked to messages. When the backup folder is supplied during import, linked attachment files are resolved through `Manifest.db` and copied into ignored private storage.
 
 The intended future path is to support local, encrypted or unencrypted iPhone backups created by Finder or Apple Devices. Any backup files should remain outside this repository in an ignored folder such as `backups/` or a private path elsewhere on the machine.
 
@@ -59,7 +59,7 @@ data/imports/iphone/sms_import_20260101T120000Z.db
 
 The destination folder is ignored by Git. The endpoint will not overwrite an existing import file.
 
-This is still not an importer. It does not parse `sms.db`, read message rows, extract attachments, store message content, or commit copied databases.
+This is still not an importer. It does not parse `sms.db`, read message rows, copy attachment files, store message content, or commit copied databases.
 
 ## Schema Validation
 
@@ -73,7 +73,8 @@ Request body:
 
 ```json
 {
-  "copied_sms_db_path": "/path/to/project/data/imports/iphone/sms_import_20260101T120000Z.db"
+  "copied_sms_db_path": "/path/to/project/data/imports/iphone/sms_import_20260101T120000Z.db",
+  "backup_folder_path": "/path/to/local/iphone-backup"
 }
 ```
 
@@ -161,7 +162,15 @@ The original iPhone message `ROWID` is stored as `messages.source_message_id`. D
 
 Message body text comes from `message.text` first. If `message.text` is empty, the importer attempts to extract readable text from `message.attributedBody` and then `message.payload_data`. Re-running the importer is idempotent for already-imported rows, but it will update existing archive rows whose body is still blank if a fallback body can now be recovered.
 
-Attachment import stores metadata only: original filename, mime type or UTI, byte size when available, and a source reference to the iPhone attachment row/path. It does not copy attachment files or read attachment payload data. The endpoint response returns counts only and does not include message text or attachment contents.
+Attachment import stores original filename, mime type or UTI, byte size when available, and a source reference to the iPhone attachment row/path. If `backup_folder_path` is provided, the importer normalizes each linked attachment path, looks it up in the backup `Manifest.db`, copies only the resolved backup file into:
+
+```text
+data/attachments/iphone/
+```
+
+Copied attachment files are linked to their archive attachment rows and can be opened through `GET /attachments/{attachment_id}`. Image attachments are previewed in the frontend. Other copied files show open and download links.
+
+If `backup_folder_path` is omitted or an attachment cannot be resolved in the manifest, the app keeps metadata only. The importer does not read attachment payload data from `sms.db`. The endpoint response returns counts only and does not include message text or attachment contents.
 
 ## Smoke-Test Result
 
@@ -178,4 +187,4 @@ Future work should document:
 
 - How to locate a local backup.
 - How to read the backup manifest safely.
-- How to copy selected attachment files into private ignored storage.
+- How to choose attachment copy limits for very large archives.
