@@ -23,6 +23,24 @@ The current implementation includes a fake-data CSV importer and a partial real 
 
 Linked attachment files are copied only when the backup folder is supplied during import. Copied files stay in ignored private storage under `data/attachments/iphone/`.
 
+## One-Command Development
+
+From the repository root:
+
+```bash
+npm run dev:message-archive
+```
+
+This starts the FastAPI backend and Vite frontend together. Press `Ctrl+C` once to stop both.
+
+The command assumes the backend virtual environment and frontend dependencies are already installed. For first-time setup, use the backend and frontend setup steps below.
+
+Optional ports:
+
+```bash
+BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev:message-archive
+```
+
 ## Backend Setup
 
 ```bash

@@ -6,6 +6,14 @@ This backend uses SQLite for a local-first message archive. It supports fake sam
 
 ## Run
 
+From the repository root, you can start the backend and frontend together:
+
+```bash
+npm run dev:message-archive
+```
+
+To run only the backend:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate

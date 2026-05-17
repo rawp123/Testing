@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node jpml-server.js",
     "start:dev": "NODE_ENV=development node jpml-server.js",
+    "dev:message-archive": "/bin/bash message-archive-utility/scripts/dev.sh",
     "scrape:nuclear-verdicts": "tsx scripts/runScrapers.ts",
     "typecheck:scrapers": "tsc --noEmit",
     "download:all-in-podcast-audio-rss": "/bin/bash scripts/downloadAllInPodcastAudioFromRss.sh",
