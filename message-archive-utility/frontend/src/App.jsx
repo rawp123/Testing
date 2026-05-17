@@ -15,6 +15,7 @@ export default function App() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [archiveStats, setArchiveStats] = useState(null);
+  const [conversationSort, setConversationSort] = useState("lastMessageDesc");
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
@@ -103,10 +104,15 @@ export default function App() {
   }, [query]);
 
   const visibleConversations = useMemo(() => {
-    if (!query.trim()) return conversations;
     const matchingIds = new Set(searchResults.map((result) => result.conversation_id));
-    return conversations.filter((conversation) => matchingIds.has(conversation.id));
-  }, [conversations, query, searchResults]);
+    const filteredConversations = query.trim()
+      ? conversations.filter((conversation) => matchingIds.has(conversation.id))
+      : conversations;
+
+    return sortConversations(filteredConversations, conversationSort);
+  }, [conversations, conversationSort, query, searchResults]);
+
+  const visibleConversationCount = visibleConversations.length;
 
   useEffect(() => {
     if (visibleConversations.length === 0) return;
@@ -132,6 +138,23 @@ export default function App() {
         </div>
         <SearchBar value={query} onChange={setQuery} />
         <Filters />
+        <div className="list-toolbar">
+          <p>
+            {visibleConversationCount} conversation{visibleConversationCount === 1 ? "" : "s"}
+          </p>
+          <label>
+            <span>Sort</span>
+            <select
+              value={conversationSort}
+              onChange={(event) => setConversationSort(event.target.value)}
+              aria-label="Sort conversations"
+            >
+              <option value="lastMessageDesc">Newest first</option>
+              <option value="lastMessageAsc">Oldest first</option>
+              <option value="titleAsc">Title</option>
+            </select>
+          </label>
+        </div>
         {query.trim() && (
           <p className="result-summary">
             {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
@@ -189,6 +212,31 @@ export default function App() {
       loadArchiveStats(),
     ]);
   }
+}
+
+function sortConversations(conversations, sortKey) {
+  return [...conversations].sort((left, right) => {
+    if (sortKey === "titleAsc") {
+      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+    }
+
+    const leftTime = getConversationTimestamp(left);
+    const rightTime = getConversationTimestamp(right);
+    const dateComparison = leftTime - rightTime;
+
+    if (dateComparison === 0) {
+      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+    }
+
+    return sortKey === "lastMessageAsc" ? dateComparison : -dateComparison;
+  });
+}
+
+function getConversationTimestamp(conversation) {
+  const value = conversation.last_message_at || conversation.updated_at;
+  if (!value) return 0;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
 async function request(path, options = {}) {

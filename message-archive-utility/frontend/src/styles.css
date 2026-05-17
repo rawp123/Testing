@@ -15,7 +15,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -292,6 +293,45 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.list-toolbar p {
+  margin: 0;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.list-toolbar select {
+  min-height: 34px;
+  max-width: 150px;
+  border: 1px solid #d9d2c6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2c2b29;
+  padding: 0 9px;
+  outline: 0;
+}
+
+.list-toolbar select:focus {
+  border-color: #45625d;
+  box-shadow: 0 0 0 3px rgba(69, 98, 93, 0.14);
 }
 
 .filter-button,
@@ -588,6 +628,11 @@ button:disabled {
 
   .panel-badges {
     justify-content: flex-start;
+  }
+
+  .list-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .message {
