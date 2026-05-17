@@ -104,11 +104,7 @@ function MessageBubble({ message }) {
               <div className="attachment-details">
                 <span>{attachment.original_filename || attachment.mime_type || "Attachment"}</span>
                 <small>
-                  {[
-                    attachment.mime_type,
-                    attachment.byte_size ? formatBytes(attachment.byte_size) : null,
-                    attachment.available ? null : "Metadata only",
-                  ].filter(Boolean).join(" · ")}
+                  {formatAttachmentMeta(attachment)}
                 </small>
               </div>
               {attachment.available ? (
@@ -136,6 +132,23 @@ function formatBytes(value) {
     maximumFractionDigits: 1,
     notation: Number(value) >= 1_000_000 ? "compact" : "standard",
   }).format(value);
+}
+
+function formatAttachmentMeta(attachment) {
+  return [
+    formatMimeType(attachment.mime_type),
+    attachment.byte_size ? formatBytes(attachment.byte_size) : null,
+    attachment.available ? null : "File not copied",
+  ].filter(Boolean).join(" · ");
+}
+
+function formatMimeType(value) {
+  if (!value) return null;
+  if (value.startsWith("image/")) return "Image";
+  if (value === "application/pdf") return "PDF";
+  if (value.startsWith("video/")) return "Video";
+  if (value.startsWith("audio/")) return "Audio";
+  return value;
 }
 
 function formatTime(value) {
