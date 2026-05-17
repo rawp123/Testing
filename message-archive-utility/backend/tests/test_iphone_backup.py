@@ -329,6 +329,32 @@ def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
     assert archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0] == 1
 
 
+def test_import_uses_chat_handle_join_for_conversation_participants(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(copied_sms_db)
+    add_fake_chat_handle_join(copied_sms_db)
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    assert result["conversation_participants_imported"] == 3
+    participants = archive_conn.execute(
+        """
+        SELECT contacts.display_name
+        FROM conversation_participants
+        JOIN contacts ON contacts.id = conversation_participants.contact_id
+        ORDER BY contacts.handle
+        """
+    ).fetchall()
+    assert [row["display_name"] for row in participants] == [
+        "(555) 000-1111",
+        "(555) 000-2222",
+        "Me",
+    ]
+
+
 def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -809,6 +835,24 @@ def add_fake_unlinked_attachment(
             VALUES (?, ?, ?, ?, NULL, x'05')
             """,
             (rowid, filename, transfer_name, mime_type),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def add_fake_chat_handle_join(path):
+    conn = sqlite3.connect(path)
+    try:
+        conn.executescript(
+            """
+            CREATE TABLE chat_handle_join (
+              chat_id INTEGER,
+              handle_id INTEGER
+            );
+            INSERT INTO chat_handle_join (chat_id, handle_id)
+            VALUES (1, 1), (1, 2);
+            """
         )
         conn.commit()
     finally:

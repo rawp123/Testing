@@ -163,6 +163,7 @@ def import_copied_sms_db_messages(
     try:
         handle_rows = fetch_handle_rows(sms_conn)
         chat_rows = fetch_chat_rows(sms_conn)
+        chat_handle_ids = fetch_chat_handle_ids(sms_conn)
         message_chat_ids = fetch_message_chat_ids(sms_conn)
         message_rows = fetch_message_rows(sms_conn)
         attachment_rows = fetch_attachment_rows(sms_conn)
@@ -204,6 +205,20 @@ def import_copied_sms_db_messages(
     orphan_conversation_id = None
     messages_imported = 0
     participants_imported = 0
+    for chat_rowid, handle_rowids in chat_handle_ids.items():
+        conversation_id = conversation_ids_by_chat_rowid.get(chat_rowid)
+        if conversation_id is None:
+            continue
+        for handle_rowid in handle_rowids:
+            contact_id = contact_ids_by_handle_rowid.get(handle_rowid)
+            if contact_id is None:
+                continue
+            participants_imported += insert_conversation_participant(
+                archive_conn,
+                conversation_id,
+                contact_id,
+            )
+
     for message in message_rows:
         chat_ids = message_chat_ids.get(message["rowid"], [])
         if not chat_ids:
@@ -383,6 +398,30 @@ def fetch_message_chat_ids(conn: sqlite3.Connection) -> dict[int, list[int]]:
     for row in rows:
         message_chat_ids.setdefault(row["message_id"], []).append(row["chat_id"])
     return message_chat_ids
+
+
+def fetch_chat_handle_ids(conn: sqlite3.Connection) -> dict[int, list[int]]:
+    table_row = conn.execute(
+        """
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table' AND name = 'chat_handle_join'
+        """
+    ).fetchone()
+    if table_row is None:
+        return {}
+
+    rows = conn.execute(
+        """
+        SELECT chat_id, handle_id
+        FROM "chat_handle_join"
+        ORDER BY chat_id, handle_id
+        """
+    ).fetchall()
+    chat_handle_ids: dict[int, list[int]] = {}
+    for row in rows:
+        chat_handle_ids.setdefault(row["chat_id"], []).append(row["handle_id"])
+    return chat_handle_ids
 
 
 def fetch_message_rows(conn: sqlite3.Connection) -> list[dict]:
