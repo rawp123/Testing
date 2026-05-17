@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import ArchiveStatsPanel from "./components/ArchiveStatsPanel.jsx";
 import ConversationList from "./components/ConversationList.jsx";
 import ConversationView from "./components/ConversationView.jsx";
-import Filters from "./components/Filters.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 
@@ -137,7 +136,6 @@ export default function App() {
           </button>
         </div>
         <SearchBar value={query} onChange={setQuery} />
-        <Filters />
         <div className="list-toolbar">
           <p>
             {visibleConversationCount} conversation{visibleConversationCount === 1 ? "" : "s"}
