@@ -62,4 +62,16 @@ printf 'Starting frontend on http://localhost:%s\n' "$FRONTEND_PORT"
 ) &
 FRONTEND_PID="$!"
 
-wait -n "$BACKEND_PID" "$FRONTEND_PID"
+while true; do
+  if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+    wait "$BACKEND_PID"
+    exit $?
+  fi
+
+  if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+    wait "$FRONTEND_PID"
+    exit $?
+  fi
+
+  sleep 1
+done
