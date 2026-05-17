@@ -233,7 +233,8 @@ def list_conversations() -> dict:
               ON conversation_participants.conversation_id = conversations.id
             LEFT JOIN contacts ON contacts.id = conversation_participants.contact_id
             GROUP BY conversations.id
-            ORDER BY COALESCE(last_message_at, conversations.updated_at) DESC
+            HAVING COUNT(DISTINCT messages.id) > 0
+            ORDER BY last_message_at DESC
             """
         ).fetchall()
 

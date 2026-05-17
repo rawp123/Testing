@@ -233,7 +233,7 @@ function sortConversations(conversations, sortKey) {
 }
 
 function getConversationTimestamp(conversation) {
-  const value = conversation.last_message_at || conversation.updated_at;
+  const value = conversation.last_message_at;
   if (!value) return 0;
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;

@@ -35,7 +35,9 @@ export default function ConversationView({ conversation, isLoading }) {
       </header>
 
       <div className="timeline">
-        {conversation.messages.map((message) => (
+        {conversation.messages.length === 0 ? (
+          <p className="empty-state">No messages were found in this conversation.</p>
+        ) : conversation.messages.map((message) => (
           <article className={`message ${message.direction}`} key={message.id}>
             <div className="message-meta">
               <strong>{message.sender_name}</strong>
