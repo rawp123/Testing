@@ -120,58 +120,74 @@ export default function App() {
     }
   }, [selectedId, visibleConversations]);
 
+  const hasArchiveData = conversations.length > 0 || (archiveStats?.messages?.total || 0) > 0;
+  const isSearching = query.trim().length > 0;
+
   return (
     <main className="app-shell">
       <section className="sidebar" aria-label="Conversation browser">
-        <div className="brand-block">
-          <p className="eyebrow">Local iPhone archive</p>
-          <h1>Messages</h1>
+        <div className="sidebar-top">
+          <div className="brand-block">
+            <p className="eyebrow">Local archive</p>
+            <h1>Messages</h1>
+            <div className="trust-row" aria-label="Privacy safeguards">
+              <span>Local only</span>
+              <span>Private storage</span>
+              <span>No cloud sync</span>
+            </div>
+          </div>
+          <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
+          <div className="sidebar-actions">
+            <button className="secondary-button" type="button" onClick={() => loadConversations()}>
+              Refresh
+            </button>
+            <button className="ghost-button" type="button" onClick={loadSampleArchive}>
+              Load sample
+            </button>
+          </div>
+          <SearchBar value={query} onChange={setQuery} />
+          <div className="list-toolbar">
+            <p>
+              {visibleConversationCount} conversation{visibleConversationCount === 1 ? "" : "s"}
+            </p>
+            <label>
+              <span>Sort</span>
+              <select
+                value={conversationSort}
+                onChange={(event) => setConversationSort(event.target.value)}
+                aria-label="Sort conversations"
+              >
+                <option value="lastMessageDesc">Newest first</option>
+                <option value="lastMessageAsc">Oldest first</option>
+                <option value="titleAsc">Title</option>
+              </select>
+            </label>
+          </div>
+          {isSearching && (
+            <p className="result-summary">
+              {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
+            </p>
+          )}
+          {error && <p className="error-state">{error}</p>}
         </div>
-        <div className="sidebar-actions">
-          <button className="secondary-button" type="button" onClick={() => loadConversations()}>
-            Refresh
-          </button>
-          <button className="secondary-button" type="button" onClick={loadSampleArchive}>
-            Load sample
-          </button>
-        </div>
-        <SearchBar value={query} onChange={setQuery} />
-        <div className="list-toolbar">
-          <p>
-            {visibleConversationCount} conversation{visibleConversationCount === 1 ? "" : "s"}
-          </p>
-          <label>
-            <span>Sort</span>
-            <select
-              value={conversationSort}
-              onChange={(event) => setConversationSort(event.target.value)}
-              aria-label="Sort conversations"
-            >
-              <option value="lastMessageDesc">Newest first</option>
-              <option value="lastMessageAsc">Oldest first</option>
-              <option value="titleAsc">Title</option>
-            </select>
-          </label>
-        </div>
-        {query.trim() && (
-          <p className="result-summary">
-            {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
-          </p>
-        )}
-        {isLoading && <p className="empty-state">Loading archive...</p>}
-        {error && <p className="error-state">{error}</p>}
         <ConversationList
           conversations={visibleConversations}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          isLoading={isLoading}
+          isSearching={isSearching}
+          hasArchiveData={hasArchiveData}
         />
       </section>
       <section className="workspace" aria-label="Message archive workspace">
-        <IPhoneImportPanel
-          request={request}
-          onArchiveChanged={refreshArchive}
-        />
-        <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
+        <div className={`archive-management ${hasArchiveData ? "is-compact" : ""}`}>
+          <IPhoneImportPanel
+            request={request}
+            onArchiveChanged={refreshArchive}
+            hasArchiveData={hasArchiveData}
+          />
+          <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
+        </div>
         <ConversationView
           conversation={selectedConversation}
           isLoading={isConversationLoading}
@@ -235,6 +251,37 @@ function getConversationTimestamp(conversation) {
   if (!value) return 0;
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function SidebarArchiveSummary({ stats, isLoading }) {
+  const messages = stats?.messages?.total || 0;
+  const conversations = stats?.conversations?.total || 0;
+  const latest = stats?.messages?.latest_sent_at;
+
+  return (
+    <section className="sidebar-summary" aria-label="Archive summary">
+      <div>
+        <span>Messages</span>
+        <strong>{formatSidebarNumber(messages)}</strong>
+      </div>
+      <div>
+        <span>Threads</span>
+        <strong>{formatSidebarNumber(conversations)}</strong>
+      </div>
+      <p>{isLoading ? "Updating archive summary..." : `Latest ${formatSidebarDate(latest)}`}</p>
+    </section>
+  );
+}
+
+function formatSidebarNumber(value) {
+  return new Intl.NumberFormat().format(value || 0);
+}
+
+function formatSidebarDate(value) {
+  if (!value) return "No messages yet";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
 
 async function request(path, options = {}) {

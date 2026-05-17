@@ -10,12 +10,16 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
 
   const items = [
     { label: "Messages", value: formatNumber(messages.total) },
-    { label: "Blank bodies", value: `${formatNumber(messages.blank)} (${formatPercent(messages.blank_percent)})` },
     { label: "Conversations", value: formatNumber(conversations.total) },
     { label: "Contacts", value: formatNumber(contacts.total) },
     { label: "Attachments", value: formatNumber(attachments.total) },
     { label: "Attachment links", value: formatNumber(attachments.linked_messages) },
-    { label: "Latest", value: formatDate(messages.latest_sent_at) },
+    {
+      label: "Blank bodies",
+      value: formatNumber(messages.blank),
+      detail: formatPercent(messages.blank_percent),
+    },
+    { label: "Latest message date", value: formatDate(messages.latest_sent_at) },
   ];
 
   return (
@@ -32,6 +36,7 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
           <div key={item.label}>
             <dt>{item.label}</dt>
             <dd>{item.value}</dd>
+            {item.detail && <small>{item.detail}</small>}
           </div>
         ))}
       </dl>

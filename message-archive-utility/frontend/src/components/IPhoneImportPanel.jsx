@@ -77,7 +77,7 @@ const RESULT_LABELS = {
 const DEFAULT_BACKUP_FOLDER_PATH =
   "/Users/robertparrish/Library/Application Support/MobileSync/Backup/00008120-00094D24146BC01E";
 
-export default function IPhoneImportPanel({ request, onArchiveChanged }) {
+export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiveData = false }) {
   const [backupFolderPath, setBackupFolderPath] = useState(DEFAULT_BACKUP_FOLDER_PATH);
   const [copiedSmsDbPath, setCopiedSmsDbPath] = useState("");
   const [activeStep, setActiveStep] = useState("");
@@ -227,8 +227,46 @@ export default function IPhoneImportPanel({ request, onArchiveChanged }) {
     onArchiveChanged();
   }
 
+  const stepActions = {
+    locate: {
+      label: "Locate",
+      onClick: locateBackup,
+      disabled: !canUseBackupPath || isBusy,
+      title: !canUseBackupPath ? STEP_DEFS[0].requirement : undefined,
+      variant: "primary-button",
+    },
+    copy: {
+      label: "Copy",
+      onClick: copySmsDb,
+      disabled: !canUseBackupPath || isBusy,
+      title: !canUseBackupPath ? STEP_DEFS[1].requirement : undefined,
+      variant: "primary-button",
+    },
+    validate: {
+      label: "Validate",
+      onClick: validateSmsDb,
+      disabled: !canUseCopiedPath || isBusy,
+      title: !canUseCopiedPath ? STEP_DEFS[2].requirement : undefined,
+      variant: "secondary-button",
+    },
+    inspect: {
+      label: "Inspect",
+      onClick: inspectSmsDb,
+      disabled: !canUseCopiedPath || isBusy,
+      title: !canUseCopiedPath ? STEP_DEFS[3].requirement : undefined,
+      variant: "secondary-button",
+    },
+    import: {
+      label: "Import",
+      onClick: importMessages,
+      disabled: !canUseCopiedPath || isBusy,
+      title: !canUseCopiedPath ? STEP_DEFS[4].requirement : undefined,
+      variant: "primary-button",
+    },
+  };
+
   return (
-    <section className="import-panel" aria-label="iPhone backup import">
+    <section className={`import-panel ${hasArchiveData ? "is-compact" : ""}`} aria-label="iPhone backup import">
       <header className="panel-header">
         <div>
           <p className="eyebrow">Import</p>
@@ -272,76 +310,49 @@ export default function IPhoneImportPanel({ request, onArchiveChanged }) {
         </label>
       </div>
 
+      <p className="privacy-note">
+        Data stays on this device. The app copies only the message database into local private storage.
+      </p>
+
       <ol className="step-list" aria-label="iPhone import steps">
         {STEP_DEFS.map(({ key, label, detail, icon: Icon }) => {
           const isComplete = completedSteps.has(key);
           const isActive = activeStep === key;
           const isReady = !isComplete && !isActive && STEP_ORDER.indexOf(key) <= highestCompletedIndex + 1;
+          const action = stepActions[key];
           return (
             <li
               className={`step-card ${isComplete ? "is-complete" : ""} ${isActive ? "is-active" : ""} ${isReady ? "is-ready" : ""}`}
               key={key}
             >
-              <span className="step-icon">
-                {isActive ? <Loader2 className="spin" size={17} aria-hidden="true" /> : <Icon size={17} aria-hidden="true" />}
-              </span>
-              <span>
-                <strong>{label}</strong>
-                <small>{detail}</small>
-              </span>
-              {isComplete && <CheckCircle2 className="step-complete-icon" size={17} aria-label="Complete" />}
+              <div className="step-copy">
+                <span className="step-icon">
+                  {isActive ? <Loader2 className="spin" size={17} aria-hidden="true" /> : <Icon size={17} aria-hidden="true" />}
+                </span>
+                <span>
+                  <strong>{label}</strong>
+                  <small>{detail}</small>
+                </span>
+              </div>
+              <div className="step-status-row">
+                <span className="step-status">
+                  {isActive ? "Running" : isComplete ? "Complete" : isReady ? "Ready" : "Waiting"}
+                </span>
+                <button
+                  className={action.variant}
+                  type="button"
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  title={action.title}
+                >
+                  {action.label}
+                </button>
+                {isComplete && <CheckCircle2 className="step-complete-icon" size={17} aria-label="Complete" />}
+              </div>
             </li>
           );
         })}
       </ol>
-
-      <div className="button-row">
-        <button
-          className="primary-button"
-          type="button"
-          onClick={locateBackup}
-          disabled={!canUseBackupPath || isBusy}
-          title={!canUseBackupPath ? STEP_DEFS[0].requirement : undefined}
-        >
-          Locate
-        </button>
-        <button
-          className="primary-button"
-          type="button"
-          onClick={copySmsDb}
-          disabled={!canUseBackupPath || isBusy}
-          title={!canUseBackupPath ? STEP_DEFS[1].requirement : undefined}
-        >
-          Copy sms.db
-        </button>
-        <button
-          className="secondary-button"
-          type="button"
-          onClick={validateSmsDb}
-          disabled={!canUseCopiedPath || isBusy}
-          title={!canUseCopiedPath ? STEP_DEFS[2].requirement : undefined}
-        >
-          Validate
-        </button>
-        <button
-          className="secondary-button"
-          type="button"
-          onClick={inspectSmsDb}
-          disabled={!canUseCopiedPath || isBusy}
-          title={!canUseCopiedPath ? STEP_DEFS[3].requirement : undefined}
-        >
-          Inspect
-        </button>
-        <button
-          className="primary-button"
-          type="button"
-          onClick={importMessages}
-          disabled={!canUseCopiedPath || isBusy}
-          title={!canUseCopiedPath ? STEP_DEFS[4].requirement : undefined}
-        >
-          Import messages
-        </button>
-      </div>
 
       {status && <p className="success-state">{status}</p>}
       {error && <p className="error-state">{error}</p>}
