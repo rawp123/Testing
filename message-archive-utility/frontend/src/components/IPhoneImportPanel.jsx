@@ -74,8 +74,11 @@ const RESULT_LABELS = {
   valid: "Valid",
 };
 
+const DEFAULT_BACKUP_FOLDER_PATH =
+  "/Users/robertparrish/Library/Application Support/MobileSync/Backup/00008120-00094D24146BC01E";
+
 export default function IPhoneImportPanel({ request, onArchiveChanged }) {
-  const [backupFolderPath, setBackupFolderPath] = useState("");
+  const [backupFolderPath, setBackupFolderPath] = useState(DEFAULT_BACKUP_FOLDER_PATH);
   const [copiedSmsDbPath, setCopiedSmsDbPath] = useState("");
   const [activeStep, setActiveStep] = useState("");
   const [status, setStatus] = useState("");
