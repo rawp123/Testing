@@ -250,7 +250,6 @@ def list_conversations() -> dict:
                 "last_message_at": row["last_message_at"],
                 "message_count": row["message_count"],
                 "participants": clean_participant_names(split_participants(row["participants"])),
-                "tags": [],
             }
             for row in rows
         ]
@@ -336,7 +335,6 @@ def list_conversation_messages(conversation_id: int) -> dict:
                 clean_participant_names(split_participants(conversation["participants"])),
             ),
             "participants": clean_participant_names(split_participants(conversation["participants"])),
-            "tags": [],
         },
         "messages": [
             {

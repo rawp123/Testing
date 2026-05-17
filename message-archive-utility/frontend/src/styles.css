@@ -289,12 +289,6 @@ button:disabled {
   color: #31524d;
 }
 
-.filters {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
 .list-toolbar {
   display: flex;
   align-items: center;
@@ -334,21 +328,12 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(69, 98, 93, 0.14);
 }
 
-.filter-button,
 .conversation-row {
   border: 1px solid #d9d2c6;
   border-radius: 8px;
   background: #ffffff;
   color: #2c2b29;
   cursor: pointer;
-}
-
-.filter-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 38px;
 }
 
 .conversation-list {
@@ -424,22 +409,6 @@ button:disabled {
 
 .conversation-header p {
   margin: 8px 0 0;
-}
-
-.tag-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag {
-  border: 1px solid #d4ccc0;
-  border-radius: 999px;
-  background: #ffffff;
-  padding: 5px 10px;
-  color: #45625d;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .timeline {

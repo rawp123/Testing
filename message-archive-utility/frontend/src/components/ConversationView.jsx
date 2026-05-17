@@ -27,11 +27,6 @@ export default function ConversationView({ conversation, isLoading }) {
           <h2>{conversation.title}</h2>
           <p>{conversation.participants.join(", ")}</p>
         </div>
-        <div className="tag-stack">
-          {conversation.tags.map((tag) => (
-            <span className="tag" key={tag}>{tag}</span>
-          ))}
-        </div>
       </header>
 
       <div className="timeline">
