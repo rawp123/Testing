@@ -9,9 +9,11 @@ from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
 from app.importers.iphone_backup import (
+    EXPECTED_SMS_FILE_ID,
     SmsDbNotFoundError,
     UnsafeBackupPathError,
     copy_sms_db_from_backup,
+    find_sms_db_by_schema_scan,
     import_copied_sms_db_messages,
     inspect_copied_sms_db_metadata,
     locate_sms_db_dry_run,
@@ -31,6 +33,7 @@ PROJECT_DIR = BACKEND_DIR.parent
 SCHEMA_PATH = BACKEND_DIR / "app" / "db" / "schema.sql"
 SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
+IPHONE_IMPORT_DIR = PROJECT_DIR / "data" / "imports" / "iphone"
 
 app = FastAPI(title="Message Archive Utility", version="0.1.0")
 
@@ -56,6 +59,146 @@ class IPhoneSmsDbValidationRequest(BaseModel):
 
 class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
     backup_folder_path: str | None = None
+
+
+def find_iphone_backup_candidates() -> list[dict]:
+    search_roots = [
+        {
+            "path": PROJECT_DIR / "data",
+            "source": "App data",
+        },
+        {
+            "path": Path.home() / "Library" / "Application Support" / "MobileSync" / "Backup",
+            "source": "MobileSync",
+        },
+    ]
+    candidates = []
+    seen_paths = set()
+
+    for search_root in search_roots:
+        root_path = search_root["path"].expanduser()
+        if not root_path.is_dir():
+            continue
+        for manifest_path in sorted(root_path.glob("*/Manifest.db")):
+            backup_folder = manifest_path.parent.resolve()
+            if backup_folder in seen_paths:
+                continue
+            seen_paths.add(backup_folder)
+            candidates.append(build_backup_candidate(backup_folder, search_root["source"]))
+
+    return candidates
+
+
+def find_copied_sms_db_candidates() -> list[dict]:
+    IPHONE_IMPORT_DIR.mkdir(parents=True, exist_ok=True)
+    candidates = []
+    for sms_db_path in sorted(IPHONE_IMPORT_DIR.glob("*.db")):
+        if not sms_db_path.is_file():
+            continue
+        candidates.append(build_copied_sms_db_candidate(sms_db_path.resolve()))
+    return candidates
+
+
+def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
+    size_bytes = sms_db_path.stat().st_size
+    valid = False
+    detail = "Ready to validate."
+    present_tables = []
+    missing_tables = []
+
+    if size_bytes == 0:
+        detail = "This file is empty."
+    else:
+        try:
+            validation = validate_copied_sms_db(str(sms_db_path), PROJECT_DIR)
+            valid = validation["valid"]
+            present_tables = validation["present_tables"]
+            missing_tables = validation["missing_tables"]
+            detail = (
+                "Looks like an iPhone sms.db."
+                if valid
+                else "This SQLite file is missing expected iPhone message tables."
+            )
+        except sqlite3.DatabaseError:
+            detail = "This file could not be read as a SQLite database."
+        except (FileNotFoundError, UnsafeBackupPathError, OSError) as error:
+            detail = str(error)
+
+    return {
+        "path": str(sms_db_path),
+        "name": sms_db_path.name,
+        "size_bytes": size_bytes,
+        "valid": valid,
+        "present_tables": present_tables,
+        "missing_tables": missing_tables,
+        "detail": detail,
+    }
+
+
+def build_backup_candidate(backup_folder: Path, source: str) -> dict:
+    manifest_path = backup_folder / "Manifest.db"
+    readable = False
+    sms_db_copyable = expected_sms_db_file_is_present(backup_folder, allow_schema_scan=False)
+    detail = "Manifest.db was found."
+    try:
+        with sqlite3.connect(f"file:{manifest_path}?mode=ro", uri=True) as conn:
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()
+        readable = True
+    except sqlite3.DatabaseError:
+        detail = describe_unreadable_backup(backup_folder, allow_schema_scan=False)
+    except OSError:
+        detail = "Manifest.db was found but could not be opened."
+
+    return {
+        "path": str(backup_folder),
+        "name": backup_folder.name,
+        "source": source,
+        "manifest_readable": readable,
+        "sms_db_copyable": sms_db_copyable,
+        "detail": detail,
+    }
+
+
+def expected_sms_db_file_is_present(backup_folder: Path, *, allow_schema_scan: bool = True) -> bool:
+    expected_sms_path = backup_folder / EXPECTED_SMS_FILE_ID[:2] / EXPECTED_SMS_FILE_ID
+    if expected_sms_path.is_file() and expected_sms_path.stat().st_size > 0:
+        return True
+    if not allow_schema_scan:
+        return False
+    return find_sms_db_by_schema_scan(backup_folder) is not None
+
+
+def describe_unreadable_backup(backup_folder: Path, *, allow_schema_scan: bool = True) -> str:
+    manifest_path = backup_folder / "Manifest.db"
+    if expected_sms_db_file_is_present(backup_folder, allow_schema_scan=allow_schema_scan):
+        return (
+            "Manifest.db could not be read, but sms.db is available to copy directly. "
+            "Attachment files may import as metadata only."
+        )
+
+    sms_file_status = "The expected sms.db backup file is missing or empty."
+
+    try:
+        header = manifest_path.read_bytes()[:100]
+    except OSError:
+        return f"Manifest.db could not be opened. {sms_file_status}"
+
+    if header.startswith(b"SQLite format 3\x00") and len(header) >= 32:
+        page_size = int.from_bytes(header[16:18], "big")
+        if page_size == 1:
+            page_size = 65536
+        page_count = int.from_bytes(header[28:32], "big")
+        expected_size = page_size * page_count
+        actual_size = manifest_path.stat().st_size
+        if expected_size > actual_size:
+            return (
+                "Manifest.db appears incomplete or truncated "
+                f"({actual_size:,} bytes on disk, SQLite header expects {expected_size:,}). "
+                f"{sms_file_status} Copy the complete backup folder again; the hashed "
+                "payload files and metadata must be fully present before sms.db can be located."
+            )
+
+    return f"Manifest.db could not be read as a SQLite database. {sms_file_status}"
 
 
 def get_db_path() -> Path:
@@ -148,7 +291,36 @@ def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
     except PermissionError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except sqlite3.DatabaseError as error:
-        raise HTTPException(status_code=400, detail="Manifest.db could not be read.") from error
+        backup_folder = Path(request.backup_folder_path).expanduser()
+        detail = describe_unreadable_backup(backup_folder)
+        raise HTTPException(status_code=400, detail=detail) from error
+
+
+@app.get("/import/iphone-backup/candidates")
+def iphone_backup_candidates() -> dict:
+    candidates = find_iphone_backup_candidates()
+    usable_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate["manifest_readable"] or candidate["sms_db_copyable"]
+    ]
+    return {
+        "candidates": candidates,
+        "default_path": usable_candidates[0]["path"] if usable_candidates else "",
+    }
+
+
+@app.get("/import/iphone-backup/copied-sms-db-candidates")
+def iphone_copied_sms_db_candidates() -> dict:
+    candidates = find_copied_sms_db_candidates()
+    valid_candidates = [
+        candidate for candidate in candidates if candidate["valid"]
+    ]
+    return {
+        "candidates": candidates,
+        "import_dir": str(IPHONE_IMPORT_DIR),
+        "default_path": valid_candidates[0]["path"] if valid_candidates else "",
+    }
 
 
 @app.post("/import/iphone-backup/copy-sms-db")

@@ -33,6 +33,8 @@ def test_locates_sms_db_from_fake_manifest(tmp_path):
         "relativePath": "Library/SMS/sms.db",
         "fileID": FAKE_FILE_ID,
         "expected_backup_file_path": str(backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID),
+        "manifest_readable": True,
+        "locator": "manifest",
     }
 
 
@@ -48,7 +50,80 @@ def test_returns_not_found_when_fake_manifest_has_no_sms_row(tmp_path):
         "domain": "HomeDomain",
         "relativePath": "Library/SMS/sms.db",
         "fileID": None,
-        "expected_backup_file_path": None,
+        "expected_backup_file_path": str(backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID),
+        "manifest_readable": True,
+        "locator": "manifest",
+    }
+
+
+def test_locates_sms_db_by_known_file_id_when_manifest_is_unreadable(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+
+    result = locate_sms_db_dry_run(str(backup_folder))
+
+    assert result == {
+        "sms_db_found": True,
+        "domain": "HomeDomain",
+        "relativePath": "Library/SMS/sms.db",
+        "fileID": FAKE_FILE_ID,
+        "expected_backup_file_path": str(source_path),
+        "manifest_readable": False,
+        "locator": "known_sms_db_file",
+    }
+
+
+def test_locates_sms_db_by_schema_scan_when_manifest_is_unreadable(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
+    source_path = backup_folder / "aa" / "aabbccddeeff0011223344556677889900aabbcc"
+    source_path.parent.mkdir()
+    create_fake_sms_db(source_path, EXPECTED_SMS_TABLES)
+
+    result = locate_sms_db_dry_run(str(backup_folder))
+
+    assert result["sms_db_found"] is True
+    assert result["manifest_readable"] is False
+    assert result["locator"] == "schema_scan"
+    assert result["expected_backup_file_path"] == str(source_path)
+
+
+def test_locates_sms_db_by_schema_scan_when_manifest_file_is_missing(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / "aa" / "aabbccddeeff0011223344556677889900aabbcc"
+    source_path.parent.mkdir()
+    create_fake_sms_db(source_path, EXPECTED_SMS_TABLES)
+
+    result = locate_sms_db_dry_run(str(backup_folder))
+
+    assert result["sms_db_found"] is True
+    assert result["manifest_readable"] is True
+    assert result["locator"] == "schema_scan"
+    assert result["expected_backup_file_path"] == str(source_path)
+
+
+def test_unreadable_manifest_without_known_sms_db_returns_not_found(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
+
+    result = locate_sms_db_dry_run(str(backup_folder))
+
+    assert result == {
+        "sms_db_found": False,
+        "domain": "HomeDomain",
+        "relativePath": "Library/SMS/sms.db",
+        "fileID": None,
+        "expected_backup_file_path": str(backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID),
+        "manifest_readable": False,
+        "locator": "known_sms_db_file",
     }
 
 
@@ -79,9 +154,56 @@ def test_copies_fake_backup_file_to_ignored_import_folder(tmp_path):
     assert result["copied"] is True
     assert result["parsed"] is False
     assert result["fileID"] == FAKE_FILE_ID
+    assert result["manifest_readable"] is True
+    assert result["locator"] == "manifest"
     assert result["source_path"] == str(source_path)
     assert result["destination_path"] == str(destination)
     assert destination.read_bytes() == b"fake sms database bytes, no message content"
+
+
+def test_copies_known_sms_db_file_when_manifest_is_unreadable(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+    project_dir = tmp_path / "project"
+
+    result = copy_sms_db_from_backup(
+        str(backup_folder),
+        project_dir,
+        timestamp="20260101T120000Z",
+    )
+
+    destination = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    assert result["copied"] is True
+    assert result["manifest_readable"] is False
+    assert result["locator"] == "known_sms_db_file"
+    assert result["source_path"] == str(source_path)
+    assert destination.read_bytes() == b"fake sms database bytes"
+
+
+def test_copies_schema_scanned_sms_db_when_manifest_file_is_missing(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / "aa" / "aabbccddeeff0011223344556677889900aabbcc"
+    source_path.parent.mkdir()
+    create_fake_sms_db(source_path, EXPECTED_SMS_TABLES)
+    project_dir = tmp_path / "project"
+
+    result = copy_sms_db_from_backup(
+        str(backup_folder),
+        project_dir,
+        timestamp="20260101T120000Z",
+    )
+
+    destination = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    assert result["copied"] is True
+    assert result["locator"] == "schema_scan"
+    assert result["source_path"] == str(source_path)
+    assert destination.is_file()
 
 
 def test_copy_fails_when_manifest_has_no_sms_row(tmp_path):
@@ -488,6 +610,35 @@ def test_missing_attachment_source_keeps_metadata_only(tmp_path):
     )
 
     attachment = archive_conn.execute("SELECT local_path FROM attachments").fetchone()
+    assert result["attachments_imported"] == 1
+    assert result["attachment_files_copied"] == 0
+    assert attachment["local_path"] is None
+
+
+def test_unreadable_manifest_does_not_block_message_import(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+    )
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+
+    attachment = archive_conn.execute("SELECT local_path FROM attachments").fetchone()
+    assert result["messages_imported"] == 2
     assert result["attachments_imported"] == 1
     assert result["attachment_files_copied"] == 0
     assert attachment["local_path"] is None

@@ -63,25 +63,33 @@ export default function ConversationView({ conversation, isLoading }) {
 
 function renderMessagesWithDateDividers(messages) {
   let previousDateKey = "";
+  let previousSender = "";
+  let previousDirection = "";
   return messages.flatMap((message) => {
     const dateKey = getDateKey(message.sent_at);
     const items = [];
     if (dateKey && dateKey !== previousDateKey) {
       previousDateKey = dateKey;
+      previousSender = "";
+      previousDirection = "";
       items.push(
         <div className="date-divider" key={`date-${dateKey}`}>
           <span>{formatDateDivider(message.sent_at)}</span>
         </div>,
       );
     }
-    items.push(<MessageBubble message={message} key={message.id} />);
+    const startsGroup =
+      message.sender_name !== previousSender || message.direction !== previousDirection;
+    previousSender = message.sender_name;
+    previousDirection = message.direction;
+    items.push(<MessageBubble message={message} startsGroup={startsGroup} key={message.id} />);
     return items;
   });
 }
 
-function MessageBubble({ message }) {
+function MessageBubble({ message, startsGroup }) {
   return (
-    <article className={`message ${message.direction}`}>
+    <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
       <div className="message-meta">
         <strong>{message.sender_name}</strong>
         <time>{formatTime(message.sent_at)}</time>

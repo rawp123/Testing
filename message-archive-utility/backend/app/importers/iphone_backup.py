@@ -9,6 +9,7 @@ from app.services.contact_display import format_contact_display_name
 
 SMS_DOMAIN = "HomeDomain"
 SMS_RELATIVE_PATH = "Library/SMS/sms.db"
+EXPECTED_SMS_FILE_ID = "3d0d7e5fb2ce288813306e4d4636395e047a3d28"
 EXPECTED_SMS_TABLES = {
     "message",
     "handle",
@@ -43,24 +44,118 @@ def locate_sms_db_dry_run(backup_folder_path: str) -> dict:
     if not resolved_manifest.is_relative_to(backup_folder):
         raise PermissionError("Manifest.db must be inside the provided backup folder.")
 
-    row = query_sms_manifest_row(resolved_manifest)
+    try:
+        row = query_sms_manifest_row(resolved_manifest)
+    except sqlite3.DatabaseError:
+        return locate_sms_db_without_manifest(backup_folder, manifest_readable=False)
+
     if row is None:
+        fallback_result = locate_sms_db_without_manifest(backup_folder, manifest_readable=True)
+        if fallback_result["sms_db_found"]:
+            return fallback_result
         return {
             "sms_db_found": False,
             "domain": SMS_DOMAIN,
             "relativePath": SMS_RELATIVE_PATH,
             "fileID": None,
-            "expected_backup_file_path": None,
+            "expected_backup_file_path": str(
+                backup_folder / EXPECTED_SMS_FILE_ID[:2] / EXPECTED_SMS_FILE_ID
+            ),
+            "manifest_readable": True,
+            "locator": "manifest",
         }
 
     file_id = row["fileID"]
+    expected_backup_file_path = backup_folder / file_id[:2] / file_id
+    if not backup_file_is_present(expected_backup_file_path):
+        fallback_result = locate_sms_db_without_manifest(backup_folder, manifest_readable=True)
+        if fallback_result["sms_db_found"]:
+            return fallback_result
+
     return {
         "sms_db_found": True,
         "domain": row["domain"],
         "relativePath": row["relativePath"],
         "fileID": file_id,
-        "expected_backup_file_path": str(backup_folder / file_id[:2] / file_id),
+        "expected_backup_file_path": str(expected_backup_file_path),
+        "manifest_readable": True,
+        "locator": "manifest",
     }
+
+
+def locate_sms_db_without_manifest(backup_folder: Path, *, manifest_readable: bool) -> dict:
+    known_file_result = locate_sms_db_by_known_file_id(
+        backup_folder,
+        manifest_readable=manifest_readable,
+    )
+    if known_file_result["sms_db_found"]:
+        return known_file_result
+
+    scanned_path = find_sms_db_by_schema_scan(backup_folder)
+    if scanned_path is not None:
+        file_id = scanned_path.name
+        return {
+            "sms_db_found": True,
+            "domain": SMS_DOMAIN,
+            "relativePath": SMS_RELATIVE_PATH,
+            "fileID": file_id,
+            "expected_backup_file_path": str(scanned_path),
+            "manifest_readable": manifest_readable,
+            "locator": "schema_scan",
+        }
+
+    return known_file_result
+
+
+def locate_sms_db_by_known_file_id(backup_folder: Path, *, manifest_readable: bool) -> dict:
+    expected_backup_file_path = backup_folder / EXPECTED_SMS_FILE_ID[:2] / EXPECTED_SMS_FILE_ID
+    sms_db_found = backup_file_is_present(expected_backup_file_path)
+    return {
+        "sms_db_found": sms_db_found,
+        "domain": SMS_DOMAIN,
+        "relativePath": SMS_RELATIVE_PATH,
+        "fileID": EXPECTED_SMS_FILE_ID if sms_db_found else None,
+        "expected_backup_file_path": str(expected_backup_file_path),
+        "manifest_readable": manifest_readable,
+        "locator": "known_sms_db_file",
+    }
+
+
+def backup_file_is_present(path: Path) -> bool:
+    return path.is_file() and path.stat().st_size > 0
+
+
+def find_sms_db_by_schema_scan(backup_folder: Path) -> Path | None:
+    for candidate_path in iter_backup_payload_files(backup_folder):
+        if not sqlite_header_is_present(candidate_path):
+            continue
+        try:
+            present_tables = get_sqlite_table_names(candidate_path)
+        except sqlite3.DatabaseError:
+            continue
+        if EXPECTED_SMS_TABLES.issubset(present_tables):
+            return candidate_path
+    return None
+
+
+def iter_backup_payload_files(backup_folder: Path):
+    for path in sorted(backup_folder.rglob("*")):
+        if not path.is_file() or path.name in {"Manifest.db", "Manifest.db-shm", "Manifest.db-wal"}:
+            continue
+        try:
+            resolved_path = path.resolve(strict=True)
+        except OSError:
+            continue
+        if resolved_path.is_relative_to(backup_folder):
+            yield resolved_path
+
+
+def sqlite_header_is_present(path: Path) -> bool:
+    try:
+        with path.open("rb") as file:
+            return file.read(16) == b"SQLite format 3\x00"
+    except OSError:
+        return False
 
 
 def copy_sms_db_from_backup(
@@ -70,7 +165,10 @@ def copy_sms_db_from_backup(
 ) -> dict:
     locator_result = locate_sms_db_dry_run(backup_folder_path)
     if not locator_result["sms_db_found"]:
-        raise SmsDbNotFoundError("sms.db was not found in the backup manifest.")
+        raise SmsDbNotFoundError(
+            "sms.db was not found in the backup. Make sure the backup folder contains "
+            "the hashed payload files, not just Manifest.db."
+        )
 
     backup_folder = Path(backup_folder_path).expanduser().resolve(strict=True)
     source_path = Path(locator_result["expected_backup_file_path"]).resolve(strict=True)
@@ -97,6 +195,8 @@ def copy_sms_db_from_backup(
         "domain": locator_result["domain"],
         "relativePath": locator_result["relativePath"],
         "fileID": locator_result["fileID"],
+        "manifest_readable": locator_result["manifest_readable"],
+        "locator": locator_result["locator"],
         "source_path": str(source_path),
         "destination_path": str(destination_path),
     }
@@ -780,7 +880,10 @@ def resolve_iphone_attachment_backup_path(attachment: dict, backup_folder: Path)
     if not manifest_relative_paths:
         return None
 
-    manifest_row = query_manifest_file_row(backup_folder / "Manifest.db", manifest_relative_paths)
+    try:
+        manifest_row = query_manifest_file_row(backup_folder / "Manifest.db", manifest_relative_paths)
+    except sqlite3.DatabaseError:
+        return None
     if manifest_row is None:
         return None
 

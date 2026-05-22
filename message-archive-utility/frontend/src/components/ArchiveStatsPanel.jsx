@@ -23,7 +23,7 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
   ];
 
   return (
-    <section className="stats-panel" aria-label="Archive quality report">
+    <section className="stats-panel stats-strip" aria-label="Archive quality report">
       <header className="panel-header">
         <div>
           <p className="eyebrow">Quality report</p>

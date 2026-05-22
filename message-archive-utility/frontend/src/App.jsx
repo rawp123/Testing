@@ -185,6 +185,8 @@ export default function App() {
             request={request}
             onArchiveChanged={refreshArchive}
             hasArchiveData={hasArchiveData}
+            archiveStats={archiveStats}
+            isArchiveStatsLoading={isStatsLoading}
           />
           <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
         </div>

@@ -9,7 +9,7 @@ import {
   SearchCheck,
   ShieldCheck,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const STEP_DEFS = [
   {
@@ -75,23 +75,77 @@ const RESULT_LABELS = {
 };
 
 const DEFAULT_BACKUP_FOLDER_PATH =
-  "/Users/robertparrish/Library/Application Support/MobileSync/Backup/00008120-00094D24146BC01E";
+  "";
 
-export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiveData = false }) {
+export default function IPhoneImportPanel({
+  request,
+  onArchiveChanged,
+  hasArchiveData = false,
+  archiveStats = null,
+  isArchiveStatsLoading = false,
+}) {
   const [backupFolderPath, setBackupFolderPath] = useState(DEFAULT_BACKUP_FOLDER_PATH);
   const [copiedSmsDbPath, setCopiedSmsDbPath] = useState("");
   const [activeStep, setActiveStep] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [backupCandidates, setBackupCandidates] = useState([]);
+  const [backupCandidateStatus, setBackupCandidateStatus] = useState("");
+  const [copiedSmsDbCandidates, setCopiedSmsDbCandidates] = useState([]);
+  const [copiedSmsDbImportDir, setCopiedSmsDbImportDir] = useState("");
+  const [copiedSmsDbStatus, setCopiedSmsDbStatus] = useState("");
   const [completedSteps, setCompletedSteps] = useState(new Set());
+  const [isImportToolsOpen, setIsImportToolsOpen] = useState(!hasArchiveData);
 
   const canUseBackupPath = backupFolderPath.trim().length > 0;
   const canUseCopiedPath = copiedSmsDbPath.trim().length > 0;
   const isBusy = activeStep.length > 0;
+  const shouldShowImportTools = !hasArchiveData || isImportToolsOpen;
+  const selectedBackupCandidate = backupCandidates.find((candidate) => candidate.path === backupFolderPath);
+  const selectedCopiedSmsDbCandidate = copiedSmsDbCandidates.find((candidate) => candidate.path === copiedSmsDbPath);
+  const canCopySmsDb = canUseBackupPath && completedSteps.has("locate");
   const highestCompletedIndex = STEP_ORDER.reduce((highestIndex, key, index) => (
     completedSteps.has(key) ? index : highestIndex
   ), -1);
+
+  useEffect(() => {
+    setIsImportToolsOpen(!hasArchiveData);
+  }, [hasArchiveData]);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    async function loadBackupCandidates() {
+      try {
+        const data = await request("/import/iphone-backup/candidates");
+        if (!isCurrent) return;
+        const candidates = data.candidates || [];
+        setBackupCandidates(candidates);
+        if (!backupFolderPath.trim()) {
+          setBackupFolderPath(data.default_path || candidates[0]?.path || "");
+        }
+        if (candidates.length && !data.default_path) {
+          setBackupCandidateStatus("A backup folder was detected, but sms.db is not available to copy yet.");
+        }
+      } catch {
+        if (isCurrent) setBackupCandidateStatus("");
+      }
+    }
+
+    loadBackupCandidates();
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCurrent = true;
+    loadCopiedSmsDbCandidates({ isCurrent: () => isCurrent });
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   const summaryItems = useMemo(() => {
     if (!result) return [];
@@ -127,6 +181,7 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
 
   function updateBackupFolderPath(value) {
     setBackupFolderPath(value);
+    setBackupCandidateStatus("");
     setError("");
     setStatus("");
     setResult(null);
@@ -135,10 +190,32 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
 
   function updateCopiedSmsDbPath(value) {
     setCopiedSmsDbPath(value);
+    setCopiedSmsDbStatus("");
     setError("");
     setStatus("");
     setResult(null);
     setCompletedSteps((current) => removeSteps(current, ["validate", "inspect", "import"]));
+  }
+
+  async function loadCopiedSmsDbCandidates({ isCurrent = () => true } = {}) {
+    try {
+      const data = await request("/import/iphone-backup/copied-sms-db-candidates");
+      if (!isCurrent()) return;
+      const candidates = data.candidates || [];
+      setCopiedSmsDbCandidates(candidates);
+      setCopiedSmsDbImportDir(data.import_dir || "");
+      if (!copiedSmsDbPath.trim() && data.default_path) {
+        setCopiedSmsDbPath(data.default_path);
+        setCompletedSteps((current) => removeSteps(current, ["validate", "inspect", "import"]));
+      }
+      setCopiedSmsDbStatus(
+        candidates.length
+          ? `Found ${candidates.length} copied sms.db file${candidates.length === 1 ? "" : "s"}.`
+          : `Copy sms.db into ${data.import_dir}, then refresh files.`,
+      );
+    } catch {
+      if (isCurrent()) setCopiedSmsDbStatus("");
+    }
   }
 
   async function runStep(step, action) {
@@ -167,7 +244,20 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
     );
 
     if (!data) return;
-    setStatus(data.sms_db_found ? "Found sms.db in this backup." : "No sms.db entry was found in this backup.");
+    if (!data.sms_db_found) {
+      setCompletedSteps((current) => removeSteps(current, ["locate", "copy", "validate", "inspect", "import"]));
+      setStatus("");
+      setError(
+        selectedBackupCandidate?.detail ||
+          "sms.db was not found in this backup. Use a complete unencrypted Finder backup that includes the hashed payload files.",
+      );
+      return;
+    }
+    setStatus(
+      data.manifest_readable
+        ? "Found sms.db in this backup."
+        : "Manifest.db could not be read, but sms.db is available to copy directly.",
+    );
   }
 
   async function copySmsDb() {
@@ -180,7 +270,11 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
 
     if (!data) return;
     setCopiedSmsDbPath(data.destination_path || "");
-    setStatus("Copied sms.db into the app's private import folder.");
+    setStatus(
+      data.manifest_readable === false
+        ? "Copied sms.db directly from the backup into the app's private import folder."
+        : "Copied sms.db into the app's private import folder.",
+    );
   }
 
   async function validateSmsDb() {
@@ -238,8 +332,12 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
     copy: {
       label: "Copy",
       onClick: copySmsDb,
-      disabled: !canUseBackupPath || isBusy,
-      title: !canUseBackupPath ? STEP_DEFS[1].requirement : undefined,
+      disabled: !canCopySmsDb || isBusy,
+      title: !canUseBackupPath
+        ? STEP_DEFS[1].requirement
+        : !completedSteps.has("locate")
+          ? "Locate a copyable sms.db first."
+          : undefined,
       variant: "primary-button",
     },
     validate: {
@@ -267,106 +365,225 @@ export default function IPhoneImportPanel({ request, onArchiveChanged, hasArchiv
 
   return (
     <section className={`import-panel ${hasArchiveData ? "is-compact" : ""}`} aria-label="iPhone backup import">
-      <header className="panel-header">
-        <div>
-          <p className="eyebrow">Import</p>
-          <h2>iPhone backup</h2>
-        </div>
-        <div className="panel-badges" aria-label="Import safeguards">
-          <span className="privacy-badge">
-            <LockKeyhole size={16} aria-hidden="true" />
-            Private storage
-          </span>
-          <span className="privacy-badge">
-            <ShieldCheck size={16} aria-hidden="true" />
-            Local only
-          </span>
-        </div>
-      </header>
-
-      <div className="import-status-card">
-        <SearchCheck size={18} aria-hidden="true" />
-        <p>{nextAction}</p>
-      </div>
-
-      <div className="import-grid">
-        <label className="field">
-          <span>Backup folder path</span>
-          <input
-            value={backupFolderPath}
-            onChange={(event) => updateBackupFolderPath(event.target.value)}
-            placeholder="/Users/you/Library/Application Support/MobileSync/Backup/..."
-          />
-          <small>Finder backups usually live in MobileSync/Backup on the same machine.</small>
-        </label>
-        <label className="field">
-          <span>Copied sms.db path</span>
-          <input
-            value={copiedSmsDbPath}
-            onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
-            placeholder="Filled after copy, or paste an app import path"
-          />
-          <small>Generated after the copy step, or paste a file from data/imports/iphone.</small>
-        </label>
-      </div>
-
-      <p className="privacy-note">
-        Data stays on this device. The app copies only the message database into local private storage.
-      </p>
-
-      <ol className="step-list" aria-label="iPhone import steps">
-        {STEP_DEFS.map(({ key, label, detail, icon: Icon }) => {
-          const isComplete = completedSteps.has(key);
-          const isActive = activeStep === key;
-          const isReady = !isComplete && !isActive && STEP_ORDER.indexOf(key) <= highestCompletedIndex + 1;
-          const action = stepActions[key];
-          return (
-            <li
-              className={`step-card ${isComplete ? "is-complete" : ""} ${isActive ? "is-active" : ""} ${isReady ? "is-ready" : ""}`}
-              key={key}
-            >
-              <div className="step-copy">
-                <span className="step-icon">
-                  {isActive ? <Loader2 className="spin" size={17} aria-hidden="true" /> : <Icon size={17} aria-hidden="true" />}
-                </span>
-                <span>
-                  <strong>{label}</strong>
-                  <small>{detail}</small>
-                </span>
-              </div>
-              <div className="step-status-row">
-                <span className="step-status">
-                  {isActive ? "Running" : isComplete ? "Complete" : isReady ? "Ready" : "Waiting"}
-                </span>
-                <button
-                  className={action.variant}
-                  type="button"
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                  title={action.title}
-                >
-                  {action.label}
-                </button>
-                {isComplete && <CheckCircle2 className="step-complete-icon" size={17} aria-label="Complete" />}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-
-      {status && <p className="success-state">{status}</p>}
-      {error && <p className="error-state">{error}</p>}
-
-      {summaryItems.length > 0 && (
-        <dl className="result-grid">
-          {summaryItems.map((item) => (
-            <div key={item.label}>
-              <dt>{item.label}</dt>
-              <dd>{item.value}</dd>
-            </div>
-          ))}
-        </dl>
+      {hasArchiveData && (
+        <ArchiveLoadedCard
+          stats={archiveStats}
+          isLoading={isArchiveStatsLoading}
+          isImportToolsOpen={isImportToolsOpen}
+          onToggleImportTools={() => setIsImportToolsOpen((isOpen) => !isOpen)}
+        />
       )}
+
+      {shouldShowImportTools && (
+        <>
+          <header className="panel-header">
+            <div>
+              <p className="eyebrow">Import</p>
+              <h2>iPhone backup</h2>
+            </div>
+            <div className="panel-badges" aria-label="Import safeguards">
+              <span className="privacy-badge">
+                <LockKeyhole size={16} aria-hidden="true" />
+                Private storage
+              </span>
+              <span className="privacy-badge">
+                <ShieldCheck size={16} aria-hidden="true" />
+                Local only
+              </span>
+            </div>
+          </header>
+
+          <div className="import-status-card">
+            <SearchCheck size={18} aria-hidden="true" />
+            <p>{nextAction}</p>
+          </div>
+
+          <div className="import-grid">
+            <label className="field">
+              <span>Backup folder path</span>
+              {backupCandidates.length > 0 && (
+                <select
+                  value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
+                  onChange={(event) => updateBackupFolderPath(event.target.value)}
+                  aria-label="Detected backup folders"
+                >
+                  <option value="">Choose detected backup</option>
+                  {backupCandidates.map((candidate) => (
+                    <option key={candidate.path} value={candidate.path}>
+                      {candidate.name} - {formatBackupCandidateStatus(candidate)}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <input
+                value={backupFolderPath}
+                onChange={(event) => updateBackupFolderPath(event.target.value)}
+                placeholder="/Users/you/Library/Application Support/MobileSync/Backup/..."
+              />
+              <small>
+                Finder backups must be on the same machine as the backend. In this workspace, use a path under /workspaces/Testing.
+              </small>
+              {backupCandidateStatus && <small className="field-warning">{backupCandidateStatus}</small>}
+              {selectedBackupCandidate?.detail && (
+                <small className={backupCandidateDetailClassName(selectedBackupCandidate)}>
+                  {selectedBackupCandidate.detail}
+                </small>
+              )}
+            </label>
+            <label className="field">
+              <span className="field-heading">
+                Copied sms.db path
+                <button
+                  className="inline-text-button"
+                  type="button"
+                  onClick={() => loadCopiedSmsDbCandidates()}
+                  disabled={isBusy}
+                >
+                  Refresh files
+                </button>
+              </span>
+              {copiedSmsDbCandidates.length > 0 && (
+                <select
+                  value={copiedSmsDbCandidates.some((candidate) => candidate.path === copiedSmsDbPath) ? copiedSmsDbPath : ""}
+                  onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
+                  aria-label="Copied sms.db files"
+                >
+                  <option value="">Choose copied sms.db</option>
+                  {copiedSmsDbCandidates.map((candidate) => (
+                    <option key={candidate.path} value={candidate.path}>
+                      {candidate.name} - {candidate.valid ? "Ready" : "Needs review"}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <input
+                value={copiedSmsDbPath}
+                onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
+                placeholder="Filled after copy, or paste an app import path"
+              />
+              <small>
+                Copy the hashed sms.db file here as sms_import_manual.db: {copiedSmsDbImportDir || "data/imports/iphone"}.
+              </small>
+              {copiedSmsDbStatus && <small>{copiedSmsDbStatus}</small>}
+              {selectedCopiedSmsDbCandidate?.detail && (
+                <small className={selectedCopiedSmsDbCandidate.valid ? "" : "field-warning"}>
+                  {selectedCopiedSmsDbCandidate.detail}
+                </small>
+              )}
+            </label>
+          </div>
+
+          <p className="privacy-note">
+            Data stays on this device. The app copies only the message database into local private storage.
+          </p>
+
+          <ol className="step-list" aria-label="iPhone import steps">
+            {STEP_DEFS.map(({ key, label, detail, icon: Icon }) => {
+              const isComplete = completedSteps.has(key);
+              const isActive = activeStep === key;
+              const isReady = !isComplete && !isActive && STEP_ORDER.indexOf(key) <= highestCompletedIndex + 1;
+              const action = stepActions[key];
+              return (
+                <li
+                  className={`step-card ${isComplete ? "is-complete" : ""} ${isActive ? "is-active" : ""} ${isReady ? "is-ready" : ""}`}
+                  key={key}
+                >
+                  <div className="step-copy">
+                    <span className="step-icon">
+                      {isActive ? <Loader2 className="spin" size={17} aria-hidden="true" /> : <Icon size={17} aria-hidden="true" />}
+                    </span>
+                    <span>
+                      <strong>{label}</strong>
+                      <small>{detail}</small>
+                    </span>
+                  </div>
+                  <div className="step-status-row">
+                    <span className="step-status">
+                      {isActive ? "Running" : isComplete ? "Complete" : isReady ? "Ready" : "Waiting"}
+                    </span>
+                    <button
+                      className={action.variant}
+                      type="button"
+                      onClick={action.onClick}
+                      disabled={action.disabled}
+                      title={action.title}
+                    >
+                      {action.label}
+                    </button>
+                    {isComplete && <CheckCircle2 className="step-complete-icon" size={17} aria-label="Complete" />}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      )}
+
+      {shouldShowImportTools && (
+        <>
+          {status && <p className="success-state">{status}</p>}
+          {error && <p className="error-state">{error}</p>}
+
+          {summaryItems.length > 0 && (
+            <dl className="result-grid">
+              {summaryItems.map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onToggleImportTools }) {
+  const messages = stats?.messages || {};
+  const conversations = stats?.conversations || {};
+
+  const items = [
+    { label: "Messages", value: formatResultValue(messages.total || 0) },
+    { label: "Conversations", value: formatResultValue(conversations.total || 0) },
+    { label: "Latest", value: formatArchiveDate(messages.latest_sent_at) },
+  ];
+
+  return (
+    <section className="archive-loaded-card" aria-label="Loaded archive status">
+      <div className="archive-loaded-main">
+        <span className="archive-loaded-icon">
+          <CheckCircle2 size={18} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="archive-loaded-status">
+            {isLoading ? "Archive loaded, updating counts" : "Archive loaded"}
+          </p>
+          <p className="archive-loaded-note">Stored locally in private app storage on this device.</p>
+        </div>
+      </div>
+      <div className="archive-loaded-safeguards" aria-label="Archive safeguards">
+        <span className="privacy-badge">
+          <LockKeyhole size={14} aria-hidden="true" />
+          Private storage
+        </span>
+        <span className="privacy-badge">
+          <ShieldCheck size={14} aria-hidden="true" />
+          Local only
+        </span>
+      </div>
+      <dl className="archive-loaded-stats">
+        {items.map((item) => (
+          <div key={item.label}>
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <button className="secondary-button" type="button" onClick={onToggleImportTools}>
+        {isImportToolsOpen ? "Hide import tools" : "Manage import"}
+      </button>
     </section>
   );
 }
@@ -377,6 +594,16 @@ function removeSteps(currentSteps, stepKeys) {
   return nextSteps;
 }
 
+function formatBackupCandidateStatus(candidate) {
+  if (candidate.manifest_readable) return candidate.source;
+  if (candidate.sms_db_copyable) return "sms.db available";
+  return "Needs review";
+}
+
+function backupCandidateDetailClassName(candidate) {
+  return candidate.manifest_readable || candidate.sms_db_copyable ? "" : "field-warning";
+}
+
 function formatResultLabel(label) {
   return RESULT_LABELS[label] || label.replaceAll("_", " ");
 }
@@ -385,4 +612,11 @@ function formatResultValue(value) {
   if (typeof value === "number") return new Intl.NumberFormat().format(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   return String(value);
+}
+
+function formatArchiveDate(value) {
+  if (!value) return "No messages";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
