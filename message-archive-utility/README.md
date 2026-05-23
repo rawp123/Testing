@@ -41,6 +41,25 @@ Optional ports:
 BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev:message-archive
 ```
 
+## Desktop Development
+
+The desktop wrapper is still intentionally thin: it opens the existing React UI
+in an Electron window and starts the local FastAPI backend for development. It
+does not package the backend or rewrite importer logic.
+
+From the repository root:
+
+```bash
+npm run dev:message-archive:desktop
+```
+
+The desktop dev command starts or reuses the Vite frontend on `127.0.0.1:5173`.
+Electron starts the FastAPI backend on `127.0.0.1:8000`, waits for `/health`, and
+then loads the UI. If a healthy backend is already running on port `8000`,
+Electron reuses it. If another process owns that port, Electron shows an error.
+
+The browser-based dev flow still works with `npm run dev:message-archive`.
+
 ## Backend Setup
 
 ```bash
