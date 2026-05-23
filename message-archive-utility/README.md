@@ -21,7 +21,7 @@ The repository should be safe to make public even if you keep it private while d
 
 The current implementation includes a fake-data CSV importer and a partial real iPhone local-backup importer. The iPhone importer can locate and copy `sms.db` from a local backup, validate and inspect the copied database, and import contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
 
-Linked attachment files are copied only when the backup folder is supplied during import. Copied files stay in ignored private storage under `data/attachments/iphone/`.
+Linked attachment files are copied only when the backup folder is supplied during import. In browser development, copied files stay in ignored private storage under `data/attachments/iphone/`. In desktop development, copied files stay under the desktop app data folder described below.
 
 ## One-Command Development
 
@@ -57,6 +57,25 @@ The desktop dev command starts or reuses the Vite frontend on `127.0.0.1:5173`.
 Electron starts the FastAPI backend on `127.0.0.1:8000`, waits for `/health`, and
 then loads the UI. If a healthy backend is already running on port `8000`,
 Electron reuses it. If another process owns that port, Electron shows an error.
+
+When Electron starts the backend itself, private app data is stored outside the
+repository under the macOS application support folder:
+
+```text
+~/Library/Application Support/Message Archive Utility/
+```
+
+The desktop database path is:
+
+```text
+~/Library/Application Support/Message Archive Utility/message-archive.sqlite3
+```
+
+Copied iPhone `sms.db` files are stored under `imports/iphone/` inside that same
+folder, and copied attachments are stored under `attachments/iphone/`. Existing
+repo-local data is not moved or deleted automatically. If Electron reuses a
+backend that was already running, that backend keeps whatever data paths it was
+started with.
 
 The browser-based dev flow still works with `npm run dev:message-archive`.
 

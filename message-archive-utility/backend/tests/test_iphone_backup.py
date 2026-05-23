@@ -162,6 +162,40 @@ def test_copies_fake_backup_file_to_ignored_import_folder(tmp_path):
     assert destination.read_bytes() == b"fake sms database bytes, no message content"
 
 
+def test_copies_fake_backup_file_to_configured_data_dir(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+    project_dir = tmp_path / "project"
+    data_dir = tmp_path / "app-support"
+
+    result = copy_sms_db_from_backup(
+        str(backup_folder),
+        project_dir,
+        timestamp="20260101T120000Z",
+        data_dir=data_dir,
+    )
+
+    destination = data_dir / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    assert result["destination_path"] == str(destination)
+    assert destination.read_bytes() == b"fake sms database bytes"
+
+
+def test_validation_uses_configured_data_dir(tmp_path):
+    project_dir = tmp_path / "project"
+    data_dir = tmp_path / "app-support"
+    copied_sms_db = data_dir / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_db(copied_sms_db, EXPECTED_SMS_TABLES)
+
+    result = validate_copied_sms_db(str(copied_sms_db), project_dir, data_dir=data_dir)
+
+    assert result["valid"] is True
+
+
 def test_copies_known_sms_db_file_when_manifest_is_unreadable(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()

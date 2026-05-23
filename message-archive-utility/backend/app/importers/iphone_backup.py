@@ -170,6 +170,7 @@ def copy_sms_db_from_backup(
     backup_folder_path: str,
     project_dir: Path,
     timestamp: str | None = None,
+    data_dir: Path | None = None,
 ) -> dict:
     locator_result = locate_sms_db_dry_run(backup_folder_path)
     if not locator_result["sms_db_found"]:
@@ -185,13 +186,13 @@ def copy_sms_db_from_backup(
     if not source_path.is_file():
         raise FileNotFoundError("Resolved sms.db file was not found in the backup.")
 
-    destination_root = (project_dir / "data" / "imports" / "iphone").resolve()
+    destination_root = get_iphone_import_root(project_dir, data_dir)
     destination_root.mkdir(parents=True, exist_ok=True)
 
     safe_timestamp = timestamp or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     destination_path = (destination_root / f"sms_import_{safe_timestamp}.db").resolve()
     if not destination_path.is_relative_to(destination_root):
-        raise UnsafeBackupPathError("Destination path must stay inside data/imports/iphone.")
+        raise UnsafeBackupPathError("Destination path must stay inside the configured iPhone import folder.")
     if destination_path.exists():
         raise FileExistsError("Destination import file already exists.")
 
@@ -210,8 +211,8 @@ def copy_sms_db_from_backup(
     }
 
 
-def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path) -> dict:
-    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
+def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path, data_dir: Path | None = None) -> dict:
+    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir, data_dir)
     present_tables = get_sqlite_table_names(sms_db_path)
     missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
 
@@ -224,8 +225,8 @@ def validate_copied_sms_db(copied_sms_db_path: str, project_dir: Path) -> dict:
     }
 
 
-def inspect_copied_sms_db_metadata(copied_sms_db_path: str, project_dir: Path) -> dict:
-    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
+def inspect_copied_sms_db_metadata(copied_sms_db_path: str, project_dir: Path, data_dir: Path | None = None) -> dict:
+    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir, data_dir)
     present_tables = get_sqlite_table_names(sms_db_path)
     missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
     if missing_tables:
@@ -259,8 +260,9 @@ def import_copied_sms_db_messages(
     project_dir: Path,
     archive_conn: sqlite3.Connection,
     backup_folder_path: str | None = None,
+    data_dir: Path | None = None,
 ) -> dict:
-    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir)
+    sms_db_path = resolve_copied_sms_db_path(copied_sms_db_path, project_dir, data_dir)
     present_tables = get_sqlite_table_names(sms_db_path)
     missing_tables = sorted(EXPECTED_SMS_TABLES.difference(present_tables))
     if missing_tables:
@@ -406,6 +408,7 @@ def import_copied_sms_db_messages(
                 backup_folder=backup_folder,
                 project_dir=project_dir,
                 import_stem=sms_db_path.stem,
+                data_dir=data_dir,
             )
             local_path = copy_result["local_path"]
             attachment_files_copied += copy_result["copied"]
@@ -442,11 +445,11 @@ def import_copied_sms_db_messages(
     }
 
 
-def resolve_copied_sms_db_path(copied_sms_db_path: str, project_dir: Path) -> Path:
-    import_root = (project_dir / "data" / "imports" / "iphone").resolve()
+def resolve_copied_sms_db_path(copied_sms_db_path: str, project_dir: Path, data_dir: Path | None = None) -> Path:
+    import_root = get_iphone_import_root(project_dir, data_dir)
     sms_db_path = Path(copied_sms_db_path).expanduser().resolve(strict=True)
     if not sms_db_path.is_relative_to(import_root):
-        raise UnsafeBackupPathError("Copied sms.db path must stay inside data/imports/iphone.")
+        raise UnsafeBackupPathError("Copied sms.db path must stay inside the configured iPhone import folder.")
     if not sms_db_path.is_file():
         raise FileNotFoundError("Copied sms.db file was not found.")
     return sms_db_path
@@ -1034,18 +1037,20 @@ def copy_iphone_attachment_file(
     backup_folder: Path,
     project_dir: Path,
     import_stem: str,
+    data_dir: Path | None = None,
 ) -> dict:
     source_path = resolve_iphone_attachment_backup_path(attachment, backup_folder)
     if source_path is None:
         return {"copied": 0, "local_path": None}
 
-    destination_root = (project_dir / "data" / "attachments" / "iphone" / import_stem).resolve()
+    resolved_data_dir = resolve_data_dir(project_dir, data_dir)
+    destination_root = (resolved_data_dir / "attachments" / "iphone" / import_stem).resolve()
     destination_root.mkdir(parents=True, exist_ok=True)
 
     destination_name = build_attachment_destination_name(attachment)
     destination_path = (destination_root / destination_name).resolve()
     if not destination_path.is_relative_to(destination_root):
-        raise UnsafeBackupPathError("Attachment destination path must stay inside data/attachments/iphone.")
+        raise UnsafeBackupPathError("Attachment destination path must stay inside the configured attachments folder.")
 
     copied = 0
     if not destination_path.exists():
@@ -1054,8 +1059,25 @@ def copy_iphone_attachment_file(
 
     return {
         "copied": copied,
-        "local_path": str(destination_path.relative_to(project_dir)),
+        "local_path": build_stored_local_path(destination_path, project_dir),
     }
+
+
+def resolve_data_dir(project_dir: Path, data_dir: Path | None = None) -> Path:
+    if data_dir is None:
+        return (project_dir / "data").resolve()
+    return Path(data_dir).expanduser().resolve()
+
+
+def get_iphone_import_root(project_dir: Path, data_dir: Path | None = None) -> Path:
+    return (resolve_data_dir(project_dir, data_dir) / "imports" / "iphone").resolve()
+
+
+def build_stored_local_path(destination_path: Path, project_dir: Path) -> str:
+    resolved_project_dir = project_dir.resolve()
+    if destination_path.is_relative_to(resolved_project_dir):
+        return str(destination_path.relative_to(resolved_project_dir))
+    return str(destination_path)
 
 
 def resolve_iphone_attachment_backup_path(attachment: dict, backup_folder: Path) -> Path | None:

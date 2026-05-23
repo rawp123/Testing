@@ -15,6 +15,7 @@ const BACKEND_HEALTH_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}/health`;
 const BACKEND_READY_TIMEOUT_MS = 20000;
 const BACKEND_POLL_INTERVAL_MS = 350;
 const UVICORN_BIN = path.resolve(BACKEND_DIR, ".venv/bin/uvicorn");
+const DESKTOP_DATA_DIR_NAME = "Message Archive Utility";
 const ALLOWED_DEV_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
@@ -149,9 +150,12 @@ function startBackendProcess() {
     );
   }
 
+  const desktopDataDir = getDesktopDataDir();
   const env = {
     ...process.env,
-    MESSAGE_ARCHIVE_DB_PATH: process.env.MESSAGE_ARCHIVE_DB_PATH || "data/message-archive.sqlite3",
+    MESSAGE_ARCHIVE_DATA_DIR: process.env.MESSAGE_ARCHIVE_DATA_DIR || desktopDataDir,
+    MESSAGE_ARCHIVE_DB_PATH:
+      process.env.MESSAGE_ARCHIVE_DB_PATH || path.join(desktopDataDir, "message-archive.sqlite3"),
   };
 
   backendProcess = spawn(
@@ -191,6 +195,10 @@ function startBackendProcess() {
     console.error(`Could not start local backend: ${error.message}`);
     backendProcess = null;
   });
+}
+
+function getDesktopDataDir() {
+  return path.join(app.getPath("appData"), DESKTOP_DATA_DIR_NAME);
 }
 
 function logBackendLine(chunk) {

@@ -33,7 +33,6 @@ PROJECT_DIR = BACKEND_DIR.parent
 SCHEMA_PATH = BACKEND_DIR / "app" / "db" / "schema.sql"
 SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
-IPHONE_IMPORT_DIR = PROJECT_DIR / "data" / "imports" / "iphone"
 
 app = FastAPI(title="Message Archive Utility", version="0.1.0")
 
@@ -64,7 +63,7 @@ class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
 def find_iphone_backup_candidates() -> list[dict]:
     search_roots = [
         {
-            "path": PROJECT_DIR / "data",
+            "path": get_data_dir(),
             "source": "App data",
         },
         {
@@ -90,9 +89,10 @@ def find_iphone_backup_candidates() -> list[dict]:
 
 
 def find_copied_sms_db_candidates() -> list[dict]:
-    IPHONE_IMPORT_DIR.mkdir(parents=True, exist_ok=True)
+    iphone_import_dir = get_iphone_import_dir()
+    iphone_import_dir.mkdir(parents=True, exist_ok=True)
     candidates = []
-    for sms_db_path in sorted(IPHONE_IMPORT_DIR.glob("*.db")):
+    for sms_db_path in sorted(iphone_import_dir.glob("*.db")):
         if not sms_db_path.is_file():
             continue
         candidates.append(build_copied_sms_db_candidate(sms_db_path.resolve()))
@@ -110,7 +110,7 @@ def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
         detail = "This file is empty."
     else:
         try:
-            validation = validate_copied_sms_db(str(sms_db_path), PROJECT_DIR)
+            validation = validate_copied_sms_db(str(sms_db_path), PROJECT_DIR, data_dir=get_data_dir())
             valid = validation["valid"]
             present_tables = validation["present_tables"]
             missing_tables = validation["missing_tables"]
@@ -202,10 +202,21 @@ def describe_unreadable_backup(backup_folder: Path, *, allow_schema_scan: bool =
 
 
 def get_db_path() -> Path:
-    configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DB_PATH", DEFAULT_DB_PATH))
+    configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DB_PATH", get_data_dir() / DEFAULT_DB_PATH.name))
     if not configured_path.is_absolute():
         configured_path = PROJECT_DIR / configured_path
     return configured_path
+
+
+def get_data_dir() -> Path:
+    configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DATA_DIR", PROJECT_DIR / "data"))
+    if not configured_path.is_absolute():
+        configured_path = PROJECT_DIR / configured_path
+    return configured_path.resolve()
+
+
+def get_iphone_import_dir() -> Path:
+    return get_data_dir() / "imports" / "iphone"
 
 
 def get_connection() -> sqlite3.Connection:
@@ -318,7 +329,7 @@ def iphone_copied_sms_db_candidates() -> dict:
     ]
     return {
         "candidates": candidates,
-        "import_dir": str(IPHONE_IMPORT_DIR),
+        "import_dir": str(get_iphone_import_dir()),
         "default_path": valid_candidates[0]["path"] if valid_candidates else "",
     }
 
@@ -326,7 +337,7 @@ def iphone_copied_sms_db_candidates() -> dict:
 @app.post("/import/iphone-backup/copy-sms-db")
 def iphone_backup_copy_sms_db(request: IPhoneBackupDryRunRequest) -> dict:
     try:
-        return copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR)
+        return copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
     except SmsDbNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except FileNotFoundError as error:
@@ -344,7 +355,7 @@ def iphone_backup_copy_sms_db(request: IPhoneBackupDryRunRequest) -> dict:
 @app.post("/import/iphone-backup/validate-sms-db")
 def iphone_backup_validate_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
     try:
-        return validate_copied_sms_db(request.copied_sms_db_path, PROJECT_DIR)
+        return validate_copied_sms_db(request.copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except UnsafeBackupPathError as error:
@@ -356,7 +367,7 @@ def iphone_backup_validate_sms_db(request: IPhoneSmsDbValidationRequest) -> dict
 @app.post("/import/iphone-backup/inspect-sms-db")
 def iphone_backup_inspect_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
     try:
-        return inspect_copied_sms_db_metadata(request.copied_sms_db_path, PROJECT_DIR)
+        return inspect_copied_sms_db_metadata(request.copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except UnsafeBackupPathError as error:
@@ -374,6 +385,7 @@ def iphone_backup_import_messages(request: IPhoneMessageImportRequest) -> dict:
                 PROJECT_DIR,
                 conn,
                 backup_folder_path=request.backup_folder_path,
+                data_dir=get_data_dir(),
             )
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
@@ -572,7 +584,7 @@ def is_image_mime_type(value: str | None) -> bool:
 
 
 def resolve_private_attachment_path(local_path: str) -> Path:
-    attachment_root = (PROJECT_DIR / "data" / "attachments").resolve()
+    attachment_root = (get_data_dir() / "attachments").resolve()
     path = Path(local_path)
     if path.is_absolute():
         resolved_path = path.resolve(strict=False)
