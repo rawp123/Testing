@@ -18,6 +18,7 @@ from app.importers.iphone_backup import (
 
 FAKE_FILE_ID = "3d0d7e5fb2ce288813306e4d4636395e047a3d28"
 FAKE_ATTACHMENT_FILE_ID = "aabbccddeeff0011223344556677889900aabbcc"
+FAKE_ADDRESS_BOOK_FILE_ID = "31bb7ba8914766d4ba40d6dfb6113c8b614be442"
 
 
 def test_locates_sms_db_from_fake_manifest(tmp_path):
@@ -348,6 +349,7 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
         "attachment_files_copied": 0,
         "message_attachment_links_imported": 1,
         "contacts_imported": 3,
+        "contacts_named": 0,
         "conversations_imported": 1,
         "conversation_participants_imported": 2,
         "messages_imported": 2,
@@ -427,6 +429,48 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
         """
     ).fetchone()
     assert linked_source_message["source_message_id"] == "1"
+
+
+def test_import_uses_address_book_names_when_available(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ADDRESS_BOOK_FILE_ID,
+                "HomeDomain",
+                "Library/AddressBook/AddressBook.sqlitedb",
+            ),
+        ],
+    )
+    address_book_path = backup_folder / FAKE_ADDRESS_BOOK_FILE_ID[:2] / FAKE_ADDRESS_BOOK_FILE_ID
+    address_book_path.parent.mkdir()
+    create_fake_address_book_db(address_book_path)
+
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(copied_sms_db)
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+
+    assert result["contacts_named"] == 2
+    contacts = archive_conn.execute(
+        "SELECT handle, display_name FROM contacts ORDER BY handle"
+    ).fetchall()
+    assert [dict(row) for row in contacts] == [
+        {"handle": "+15550001111", "display_name": "Ada Lovelace"},
+        {"handle": "+15550002222", "display_name": "Grace Hopper"},
+        {"handle": "iphone:self", "display_name": "Me"},
+    ]
 
 
 def test_iphone_message_import_is_idempotent_for_existing_source_ids(tmp_path):
@@ -964,6 +1008,37 @@ def create_fake_sms_import_db(
             VALUES (1, ?, ?, ?, ?, x'04')
             """,
             (attachment_filename, transfer_name, mime_type, byte_size),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def create_fake_address_book_db(path):
+    conn = sqlite3.connect(path)
+    try:
+        conn.executescript(
+            """
+            CREATE TABLE ABPerson (
+              First TEXT,
+              Middle TEXT,
+              Last TEXT,
+              Organization TEXT
+            );
+            CREATE TABLE ABMultiValue (
+              record_id INTEGER,
+              property INTEGER,
+              value TEXT
+            );
+            INSERT INTO ABPerson (ROWID, First, Middle, Last, Organization)
+            VALUES
+              (1, 'Ada', NULL, 'Lovelace', NULL),
+              (2, 'Grace', NULL, 'Hopper', NULL);
+            INSERT INTO ABMultiValue (record_id, property, value)
+            VALUES
+              (1, 3, '+1 (555) 000-1111'),
+              (2, 3, '5550002222');
+            """
         )
         conn.commit()
     finally:

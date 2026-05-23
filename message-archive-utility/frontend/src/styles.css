@@ -752,6 +752,40 @@ a:focus-visible {
   color: #8a3220;
 }
 
+.error-state strong {
+  display: block;
+  color: #7a2b1c;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.import-recovery {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  color: #7a3a2c;
+}
+
+.import-recovery p,
+.import-recovery ol {
+  margin: 0;
+}
+
+.import-recovery ol {
+  padding-left: 19px;
+}
+
+.import-recovery li + li {
+  margin-top: 4px;
+}
+
+.import-recovery code {
+  color: #5c2418;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
 .result-grid,
 .stats-grid {
   display: grid;

@@ -10,6 +10,14 @@ from app.services.contact_display import format_contact_display_name
 SMS_DOMAIN = "HomeDomain"
 SMS_RELATIVE_PATH = "Library/SMS/sms.db"
 EXPECTED_SMS_FILE_ID = "3d0d7e5fb2ce288813306e4d4636395e047a3d28"
+ADDRESS_BOOK_RELATIVE_PATHS = [
+    "Library/AddressBook/AddressBook.sqlitedb",
+    "Library/AddressBook/AddressBook-v22.abcddb",
+]
+EXPECTED_ADDRESS_BOOK_FILE_IDS = {
+    "Library/AddressBook/AddressBook.sqlitedb": "31bb7ba8914766d4ba40d6dfb6113c8b614be442",
+    "Library/AddressBook/AddressBook-v22.abcddb": "6c205a17de08b35ab604103e533b1748c1285986",
+}
 EXPECTED_SMS_TABLES = {
     "message",
     "handle",
@@ -271,17 +279,28 @@ def import_copied_sms_db_messages(
     finally:
         sms_conn.close()
 
+    backup_folder = resolve_backup_folder(backup_folder_path) if backup_folder_path else None
+    contact_names_by_handle = (
+        read_contact_display_names_from_backup(backup_folder) if backup_folder else {}
+    )
+
     contact_ids_by_handle_rowid = {}
     contacts_imported = 0
+    contacts_named = 0
     for handle in handle_rows:
+        display_name = contact_names_by_handle.get(
+            normalize_contact_lookup_key(handle["handle"]),
+            format_contact_display_name(handle["handle"]),
+        )
         contact_id, inserted = upsert_iphone_contact(
             archive_conn,
             handle=handle["handle"],
-            display_name=format_contact_display_name(handle["handle"]),
+            display_name=display_name,
             handle_type="iphone",
         )
         contact_ids_by_handle_rowid[handle["rowid"]] = contact_id
         contacts_imported += inserted
+        contacts_named += int(display_name != format_contact_display_name(handle["handle"]))
 
     self_contact_id, self_inserted = upsert_iphone_contact(
         archive_conn,
@@ -347,10 +366,14 @@ def import_copied_sms_db_messages(
             sender_contact_id = contact_ids_by_handle_rowid.get(message["handle_id"])
             if sender_contact_id is None:
                 fallback_handle = f"iphone:unknown-handle:{message['handle_id'] or 'missing'}"
+                display_name = contact_names_by_handle.get(
+                    normalize_contact_lookup_key(fallback_handle),
+                    format_contact_display_name(fallback_handle),
+                )
                 sender_contact_id, inserted = upsert_iphone_contact(
                     archive_conn,
                     handle=fallback_handle,
-                    display_name=format_contact_display_name(fallback_handle),
+                    display_name=display_name,
                     handle_type="iphone_unknown",
                 )
                 contacts_imported += inserted
@@ -375,7 +398,6 @@ def import_copied_sms_db_messages(
         row["attachment_id"]
         for row in message_attachment_rows
     }
-    backup_folder = resolve_backup_folder(backup_folder_path) if backup_folder_path else None
     for attachment in attachment_rows:
         local_path = None
         if backup_folder and attachment["rowid"] in linked_attachment_rowids:
@@ -413,6 +435,7 @@ def import_copied_sms_db_messages(
         "attachment_files_copied": attachment_files_copied,
         "message_attachment_links_imported": message_attachment_links_imported,
         "contacts_imported": contacts_imported,
+        "contacts_named": contacts_named,
         "conversations_imported": conversations_imported,
         "conversation_participants_imported": participants_imported,
         "messages_imported": messages_imported,
@@ -619,6 +642,143 @@ def first_available_column_expr(columns: set[str], names: list[str], fallback: s
     return fallback
 
 
+def read_contact_display_names_from_backup(backup_folder: Path) -> dict[str, str]:
+    address_book_path = locate_address_book_db(backup_folder)
+    if address_book_path is None:
+        return {}
+
+    conn = sqlite3.connect(f"{address_book_path.as_uri()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        return fetch_address_book_contact_names(conn)
+    except sqlite3.DatabaseError:
+        return {}
+    finally:
+        conn.close()
+
+
+def locate_address_book_db(backup_folder: Path) -> Path | None:
+    manifest_path = backup_folder / "Manifest.db"
+    try:
+        manifest_row = query_manifest_file_row(manifest_path, ADDRESS_BOOK_RELATIVE_PATHS)
+    except sqlite3.DatabaseError:
+        manifest_row = None
+
+    if manifest_row is not None:
+        address_book_path = (backup_folder / manifest_row["fileID"][:2] / manifest_row["fileID"]).resolve()
+        if not address_book_path.is_relative_to(backup_folder):
+            raise UnsafeBackupPathError("Resolved AddressBook path must stay inside the backup folder.")
+        if backup_file_is_present(address_book_path):
+            return address_book_path
+
+    for file_id in EXPECTED_ADDRESS_BOOK_FILE_IDS.values():
+        address_book_path = (backup_folder / file_id[:2] / file_id).resolve()
+        if not address_book_path.is_relative_to(backup_folder):
+            continue
+        if backup_file_is_present(address_book_path):
+            return address_book_path
+
+    return None
+
+
+def fetch_address_book_contact_names(conn: sqlite3.Connection) -> dict[str, str]:
+    table_names = get_connection_table_names(conn)
+    if "ABPerson" not in table_names or "ABMultiValue" not in table_names:
+        return {}
+
+    people_by_rowid = fetch_address_book_people(conn)
+    value_rows = conn.execute(
+        """
+        SELECT record_id, value
+        FROM "ABMultiValue"
+        WHERE value IS NOT NULL
+        ORDER BY record_id
+        """
+    ).fetchall()
+
+    names_by_handle: dict[str, str] = {}
+    for row in value_rows:
+        display_name = people_by_rowid.get(row["record_id"])
+        if not display_name:
+            continue
+        lookup_key = normalize_contact_lookup_key(row["value"])
+        if lookup_key:
+            names_by_handle.setdefault(lookup_key, display_name)
+            for alias in build_contact_lookup_aliases(row["value"]):
+                names_by_handle.setdefault(alias, display_name)
+    return names_by_handle
+
+
+def fetch_address_book_people(conn: sqlite3.Connection) -> dict[int, str]:
+    columns = get_table_columns(conn, "ABPerson")
+    first_expr = first_available_column_expr(columns, ["First", "first"], "NULL")
+    middle_expr = first_available_column_expr(columns, ["Middle", "middle"], "NULL")
+    last_expr = first_available_column_expr(columns, ["Last", "last"], "NULL")
+    org_expr = first_available_column_expr(columns, ["Organization", "organization"], "NULL")
+    rows = conn.execute(
+        f"""
+        SELECT
+          ROWID AS rowid,
+          {first_expr} AS first_name,
+          {middle_expr} AS middle_name,
+          {last_expr} AS last_name,
+          {org_expr} AS organization
+        FROM "ABPerson"
+        ORDER BY ROWID
+        """
+    ).fetchall()
+
+    people_by_rowid = {}
+    for row in rows:
+        name_parts = [
+            row["first_name"],
+            row["middle_name"],
+            row["last_name"],
+        ]
+        display_name = " ".join(str(part).strip() for part in name_parts if part and str(part).strip())
+        if not display_name and row["organization"]:
+            display_name = str(row["organization"]).strip()
+        if display_name:
+            people_by_rowid[row["rowid"]] = display_name
+    return people_by_rowid
+
+
+def normalize_contact_lookup_key(value) -> str:
+    if value is None:
+        return ""
+    raw_value = str(value).strip()
+    if not raw_value:
+        return ""
+    if "@" in raw_value:
+        return raw_value.lower()
+    digits = re.sub(r"\D", "", raw_value)
+    return digits if len(digits) >= 5 else raw_value.lower()
+
+
+def build_contact_lookup_aliases(value) -> list[str]:
+    lookup_key = normalize_contact_lookup_key(value)
+    if not lookup_key:
+        return []
+    aliases = {lookup_key}
+    if lookup_key.isdigit():
+        if len(lookup_key) == 11 and lookup_key.startswith("1"):
+            aliases.add(lookup_key[1:])
+        if len(lookup_key) == 10:
+            aliases.add(f"1{lookup_key}")
+    return sorted(aliases)
+
+
+def get_connection_table_names(conn: sqlite3.Connection) -> set[str]:
+    rows = conn.execute(
+        """
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+        """
+    ).fetchall()
+    return {row["name"] if isinstance(row, sqlite3.Row) else row[0] for row in rows}
+
+
 def extract_message_body_text(text, attributed_body, payload_data) -> str:
     if text:
         return str(text)
@@ -753,8 +913,31 @@ def upsert_iphone_contact(
         """,
         (display_name, handle, handle_type),
     )
-    row = conn.execute("SELECT id FROM contacts WHERE handle = ?", (handle,)).fetchone()
+    row = conn.execute(
+        "SELECT id, handle, display_name FROM contacts WHERE handle = ?",
+        (handle,),
+    ).fetchone()
+    if cursor.rowcount == 0 and should_update_contact_display_name(row, display_name):
+        conn.execute(
+            """
+            UPDATE contacts
+            SET display_name = ?
+            WHERE handle = ?
+            """,
+            (display_name, handle),
+        )
     return int(row["id"]), cursor.rowcount
+
+
+def should_update_contact_display_name(row: sqlite3.Row, new_display_name: str) -> bool:
+    if not new_display_name or new_display_name == format_contact_display_name(row["handle"]):
+        return False
+    current_display_name = row["display_name"] or ""
+    return (
+        not current_display_name
+        or current_display_name == format_contact_display_name(row["handle"])
+        or current_display_name == "Unknown sender"
+    )
 
 
 def upsert_iphone_conversation(

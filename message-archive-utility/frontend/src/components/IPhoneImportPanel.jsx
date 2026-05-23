@@ -15,7 +15,7 @@ const STEP_DEFS = [
   {
     key: "locate",
     label: "Locate backup",
-    detail: "Finds the SMS database entry in Manifest.db.",
+    detail: "Finds the message database, even if the manifest is damaged.",
     icon: FolderSearch,
     requirement: "Add a backup folder path.",
   },
@@ -59,6 +59,7 @@ const RESULT_LABELS = {
   chat: "Chats",
   chat_message_join: "Chat links",
   contacts_imported: "Contacts",
+  contacts_named: "Named contacts",
   conversation_participants_imported: "Participants",
   conversations_imported: "Conversations",
   destination_path: "Copied path",
@@ -248,8 +249,7 @@ export default function IPhoneImportPanel({
       setCompletedSteps((current) => removeSteps(current, ["locate", "copy", "validate", "inspect", "import"]));
       setStatus("");
       setError(
-        selectedBackupCandidate?.detail ||
-          "sms.db was not found in this backup. Use a complete unencrypted Finder backup that includes the hashed payload files.",
+        "I could open the backup folder, but I could not find the message database file inside it.",
       );
       return;
     }
@@ -421,7 +421,7 @@ export default function IPhoneImportPanel({
                 placeholder="/Users/you/Library/Application Support/MobileSync/Backup/..."
               />
               <small>
-                Finder backups must be on the same machine as the backend. In this workspace, use a path under /workspaces/Testing.
+                Choose the folder named like 00008120-00094D24146BC01E. The app server must be running on the same computer that can see this folder.
               </small>
               {backupCandidateStatus && <small className="field-warning">{backupCandidateStatus}</small>}
               {selectedBackupCandidate?.detail && (
@@ -522,7 +522,15 @@ export default function IPhoneImportPanel({
       {shouldShowImportTools && (
         <>
           {status && <p className="success-state">{status}</p>}
-          {error && <p className="error-state">{error}</p>}
+          {error && (
+            <div className="error-state" role="alert">
+              <strong>{error}</strong>
+              <ImportRecoveryHelp
+                backupFolderPath={backupFolderPath}
+                selectedBackupCandidate={selectedBackupCandidate}
+              />
+            </div>
+          )}
 
           {summaryItems.length > 0 && (
             <dl className="result-grid">
@@ -538,6 +546,43 @@ export default function IPhoneImportPanel({
       )}
     </section>
   );
+}
+
+function ImportRecoveryHelp({ backupFolderPath, selectedBackupCandidate }) {
+  const detail = selectedBackupCandidate?.detail || "";
+  const expectedFilePath = buildExpectedSmsDbPath(backupFolderPath);
+
+  return (
+    <div className="import-recovery">
+      {detail && <p>{simplifyBackupDetail(detail)}</p>}
+      <ol>
+        <li>Confirm the path is the backup folder itself, not the Info window or a folder above it.</li>
+        <li>Make sure this app is running on the computer that can access that folder.</li>
+        <li>If the folder was copied from another drive, copy the whole backup folder again and wait for the copy to finish.</li>
+      </ol>
+      {expectedFilePath && (
+        <p>
+          Expected message file: <code>{expectedFilePath}</code>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function buildExpectedSmsDbPath(backupFolderPath) {
+  const trimmedPath = backupFolderPath.trim();
+  if (!trimmedPath) return "";
+  return `${trimmedPath.replace(/\/+$/, "")}/3d/3d0d7e5fb2ce288813306e4d4636395e047a3d28`;
+}
+
+function simplifyBackupDetail(detail) {
+  if (detail.includes("truncated")) {
+    return "The backup metadata file looks incomplete. The app will still try the direct message-file path, but Apple backups need both the metadata and hashed files to be fully copied.";
+  }
+  if (detail.includes("missing or empty")) {
+    return "The standard hashed message file is missing or empty in this folder.";
+  }
+  return detail;
 }
 
 function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onToggleImportTools }) {
