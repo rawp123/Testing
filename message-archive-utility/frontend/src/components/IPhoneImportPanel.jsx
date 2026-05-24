@@ -62,6 +62,7 @@ const RESULT_LABELS = {
   contacts_named: "Named contacts",
   conversation_participants_imported: "Participants",
   conversations_imported: "Conversations",
+  copied_sms_db_path: "Copied sms.db",
   destination_path: "Copied path",
   handle: "Handles",
   inspected: "Inspected",
@@ -76,7 +77,7 @@ const RESULT_LABELS = {
 };
 
 const DEFAULT_BACKUP_FOLDER_PATH =
-  "";
+  import.meta.env.VITE_DEFAULT_IPHONE_BACKUP_PATH || "";
 
 export default function IPhoneImportPanel({
   request,
@@ -105,7 +106,11 @@ export default function IPhoneImportPanel({
   const shouldShowImportTools = !hasArchiveData || isImportToolsOpen;
   const selectedBackupCandidate = backupCandidates.find((candidate) => candidate.path === backupFolderPath);
   const selectedCopiedSmsDbCandidate = copiedSmsDbCandidates.find((candidate) => candidate.path === copiedSmsDbPath);
+  const importableBackupCandidate = backupCandidates.find((candidate) => (
+    candidate.sms_db_copyable || candidate.manifest_readable
+  ));
   const canCopySmsDb = canUseBackupPath && completedSteps.has("locate");
+  const canRunQuickImport = (canUseBackupPath || importableBackupCandidate) && !isBusy;
   const highestCompletedIndex = STEP_ORDER.reduce((highestIndex, key, index) => (
     completedSteps.has(key) ? index : highestIndex
   ), -1);
@@ -150,6 +155,21 @@ export default function IPhoneImportPanel({
 
   const summaryItems = useMemo(() => {
     if (!result) return [];
+    if (result.imported) {
+      return [
+        "messages_imported",
+        "contacts_imported",
+        "conversations_imported",
+        "attachment_files_copied",
+        "copied_sms_db_path",
+        "backup_folder_path",
+      ]
+        .filter((label) => Object.prototype.hasOwnProperty.call(result, label))
+        .map((label) => ({
+          label: formatResultLabel(label),
+          value: formatResultValue(result[label]),
+        }));
+    }
     if (result.row_counts) {
       return Object.entries(result.row_counts).map(([label, value]) => ({
         label: formatResultLabel(label),
@@ -170,6 +190,7 @@ export default function IPhoneImportPanel({
       const step = STEP_DEFS.find((definition) => definition.key === activeStep);
       return step ? `${step.label} is running...` : "Working...";
     }
+    if (!canUseBackupPath && importableBackupCandidate) return "A backup was detected. Import it when you are ready.";
     if (!canUseBackupPath) return "Paste the local iPhone backup folder path to begin.";
     if (!completedSteps.has("locate")) return "Start by locating the SMS database entry.";
     if (!completedSteps.has("copy")) return "Copy sms.db into the app import folder.";
@@ -178,7 +199,7 @@ export default function IPhoneImportPanel({
     if (!completedSteps.has("inspect")) return "Inspect metadata before importing.";
     if (!completedSteps.has("import")) return "Import messages into the local archive.";
     return "Import complete. Browse the updated archive.";
-  }, [activeStep, canUseBackupPath, canUseCopiedPath, completedSteps, isBusy]);
+  }, [activeStep, canUseBackupPath, canUseCopiedPath, completedSteps, importableBackupCandidate, isBusy]);
 
   function updateBackupFolderPath(value) {
     setBackupFolderPath(value);
@@ -321,6 +342,29 @@ export default function IPhoneImportPanel({
     onArchiveChanged();
   }
 
+  async function importDetectedBackup() {
+    const body = backupFolderPath.trim()
+      ? { backup_folder_path: backupFolderPath.trim() }
+      : {};
+    const data = await runStep("auto-import", () =>
+      request("/import/iphone-backup/import-detected", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    );
+
+    if (!data) return;
+    setBackupFolderPath(data.backup_folder_path || backupFolderPath);
+    setCopiedSmsDbPath(data.copied_sms_db_path || data.destination_path || "");
+    setCompletedSteps(new Set(STEP_ORDER));
+    const copiedText = data.attachment_files_copied
+      ? ` Copied ${formatResultValue(data.attachment_files_copied)} attachment files.`
+      : "";
+    setStatus(`Imported ${formatResultValue(data.messages_imported || 0)} new messages from the detected backup.${copiedText}`);
+    await loadCopiedSmsDbCandidates();
+    onArchiveChanged();
+  }
+
   const stepActions = {
     locate: {
       label: "Locate",
@@ -396,6 +440,22 @@ export default function IPhoneImportPanel({
           <div className="import-status-card">
             <SearchCheck size={18} aria-hidden="true" />
             <p>{nextAction}</p>
+          </div>
+
+          <div className="quick-import-card">
+            <div>
+              <strong>Import detected backup</strong>
+              <span>Automatically locate, copy, validate, inspect, and import the best available local iPhone backup.</span>
+            </div>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={importDetectedBackup}
+              disabled={!canRunQuickImport}
+              title={canRunQuickImport ? undefined : "Add or detect an importable backup folder first."}
+            >
+              Import backup
+            </button>
           </div>
 
           <div className="import-grid">

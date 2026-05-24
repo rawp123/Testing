@@ -189,7 +189,7 @@ def copy_sms_db_from_backup(
     destination_root = get_iphone_import_root(project_dir, data_dir)
     destination_root.mkdir(parents=True, exist_ok=True)
 
-    safe_timestamp = timestamp or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    safe_timestamp = timestamp or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     destination_path = (destination_root / f"sms_import_{safe_timestamp}.db").resolve()
     if not destination_path.is_relative_to(destination_root):
         raise UnsafeBackupPathError("Destination path must stay inside the configured iPhone import folder.")

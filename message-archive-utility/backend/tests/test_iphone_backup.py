@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from app import main as app_main
 from app.importers.iphone_backup import (
     EXPECTED_SMS_TABLES,
     SmsDbNotFoundError,
@@ -463,6 +464,34 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
         """
     ).fetchone()
     assert linked_source_message["source_message_id"] == "1"
+
+
+def test_one_click_import_copies_validates_and_imports_detected_backup(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    create_fake_sms_import_db(source_path)
+
+    app_data_dir = tmp_path / "app-data"
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(app_data_dir))
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(app_data_dir / "archive.sqlite3"))
+    app_main.initialize_database()
+
+    result = app_main.import_iphone_backup_from_path(str(backup_folder))
+
+    assert result["imported"] is True
+    assert result["backup_folder_path"] == str(backup_folder)
+    assert result["valid"] is True
+    assert result["inspected"] is True
+    assert result["messages_imported"] == 2
+    assert result["contacts_imported"] == 3
+    assert Path(result["copied_sms_db_path"]).is_file()
+
+    with app_main.get_connection() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 2
+        assert conn.execute("SELECT COUNT(*) FROM contacts").fetchone()[0] == 3
 
 
 def test_import_uses_address_book_names_when_available(tmp_path):

@@ -41,6 +41,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "null",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -60,6 +61,10 @@ class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
     backup_folder_path: str | None = None
 
 
+class IPhoneDetectedImportRequest(BaseModel):
+    backup_folder_path: str | None = None
+
+
 def find_iphone_backup_candidates() -> list[dict]:
     search_roots = [
         {
@@ -74,18 +79,60 @@ def find_iphone_backup_candidates() -> list[dict]:
     candidates = []
     seen_paths = set()
 
+    for configured_path in get_configured_iphone_backup_paths():
+        add_backup_candidates_from_path(
+            configured_path,
+            "Configured path",
+            candidates,
+            seen_paths,
+        )
+
     for search_root in search_roots:
-        root_path = search_root["path"].expanduser()
-        if not root_path.is_dir():
-            continue
-        for manifest_path in sorted(root_path.glob("*/Manifest.db")):
-            backup_folder = manifest_path.parent.resolve()
-            if backup_folder in seen_paths:
-                continue
-            seen_paths.add(backup_folder)
-            candidates.append(build_backup_candidate(backup_folder, search_root["source"]))
+        add_backup_candidates_from_path(
+            search_root["path"],
+            search_root["source"],
+            candidates,
+            seen_paths,
+        )
 
     return candidates
+
+
+def get_configured_iphone_backup_paths() -> list[Path]:
+    configured_value = os.getenv("MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS", "")
+    configured_paths = []
+    seen_paths = set()
+    for raw_path in configured_value.split(os.pathsep):
+        raw_path = raw_path.strip()
+        if not raw_path:
+            continue
+        path = Path(raw_path).expanduser()
+        if path in seen_paths:
+            continue
+        seen_paths.add(path)
+        configured_paths.append(path)
+    return configured_paths
+
+
+def add_backup_candidates_from_path(
+    path: Path,
+    source: str,
+    candidates: list[dict],
+    seen_paths: set[Path],
+) -> None:
+    root_path = path.expanduser()
+    if not root_path.is_dir():
+        return
+
+    manifest_paths = [root_path / "Manifest.db"] if (root_path / "Manifest.db").is_file() else []
+    manifest_paths.extend(sorted(root_path.glob("*/Manifest.db")))
+
+    for manifest_path in manifest_paths:
+        backup_folder = manifest_path.parent.resolve()
+        if backup_folder in seen_paths:
+            continue
+        seen_paths.add(backup_folder)
+        candidates.append(build_backup_candidate(backup_folder, source))
 
 
 def find_copied_sms_db_candidates() -> list[dict]:
@@ -97,6 +144,16 @@ def find_copied_sms_db_candidates() -> list[dict]:
             continue
         candidates.append(build_copied_sms_db_candidate(sms_db_path.resolve()))
     return candidates
+
+
+def choose_importable_backup_candidate(candidates: list[dict]) -> dict | None:
+    for candidate in candidates:
+        if candidate["sms_db_copyable"]:
+            return candidate
+    for candidate in candidates:
+        if candidate["manifest_readable"]:
+            return candidate
+    return None
 
 
 def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
@@ -270,7 +327,48 @@ def root() -> RedirectResponse:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "storage": "local"}
+    return {
+        "status": "ok",
+        "app": "message-archive-utility",
+        "storage": "local",
+        "desktop_mode": os.getenv("MESSAGE_ARCHIVE_DESKTOP_MODE") == "1",
+        "data_dir": str(get_data_dir()),
+        "db_path": str(get_db_path()),
+    }
+
+
+def import_iphone_backup_from_path(backup_folder_path: str) -> dict:
+    copy_result = copy_sms_db_from_backup(backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
+    copied_sms_db_path = copy_result["destination_path"]
+    validation = validate_copied_sms_db(copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
+    if not validation["valid"]:
+        raise ValueError(
+            "Copied sms.db is missing required tables: "
+            f"{validation['missing_tables']}"
+        )
+    inspection = inspect_copied_sms_db_metadata(copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
+    with get_connection() as conn:
+        import_result = import_copied_sms_db_messages(
+            copied_sms_db_path,
+            PROJECT_DIR,
+            conn,
+            backup_folder_path=backup_folder_path,
+            data_dir=get_data_dir(),
+        )
+
+    return {
+        "imported": True,
+        "backup_folder_path": backup_folder_path,
+        "copied_sms_db_path": copied_sms_db_path,
+        "manifest_readable": copy_result["manifest_readable"],
+        "locator": copy_result["locator"],
+        "source_path": copy_result["source_path"],
+        "destination_path": copied_sms_db_path,
+        "valid": validation["valid"],
+        "inspected": inspection["inspected"],
+        "row_counts": inspection["row_counts"],
+        **import_result,
+    }
 
 
 @app.get("/archive/stats")
@@ -319,6 +417,39 @@ def iphone_backup_candidates() -> dict:
         "candidates": candidates,
         "default_path": usable_candidates[0]["path"] if usable_candidates else "",
     }
+
+
+@app.post("/import/iphone-backup/import-detected")
+def iphone_backup_import_detected(request: IPhoneDetectedImportRequest) -> dict:
+    backup_folder_path = request.backup_folder_path.strip() if request.backup_folder_path else ""
+    if not backup_folder_path:
+        candidate = choose_importable_backup_candidate(find_iphone_backup_candidates())
+        if candidate is None:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    "No importable iPhone backup was detected. Connect this app to a complete "
+                    "local iPhone backup folder and try again."
+                ),
+            )
+        backup_folder_path = candidate["path"]
+
+    try:
+        return import_iphone_backup_from_path(backup_folder_path)
+    except SmsDbNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except NotADirectoryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except UnsafeBackupPathError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except FileExistsError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except sqlite3.DatabaseError as error:
+        raise HTTPException(status_code=400, detail="Copied sms.db could not be read.") from error
 
 
 @app.get("/import/iphone-backup/copied-sms-db-candidates")
@@ -538,13 +669,21 @@ def search(q: str = "", limit: int = 50) -> dict:
 
 
 @app.get("/export/messages.csv")
-def export_csv() -> Response:
+def export_csv(conversation_id: int | None = None) -> Response:
     with get_connection() as conn:
-        csv_text = export_messages_csv(conn)
+        if conversation_id is not None:
+            conversation = conn.execute(
+                "SELECT id FROM conversations WHERE id = ?",
+                (conversation_id,),
+            ).fetchone()
+            if conversation is None:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+        csv_text = export_messages_csv(conn, conversation_id=conversation_id)
+    filename = f"conversation-{conversation_id}-messages.csv" if conversation_id else "messages.csv"
     return Response(
         content=csv_text,
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=messages.csv"},
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
