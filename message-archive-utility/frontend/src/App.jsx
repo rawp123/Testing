@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ArchiveStatsPanel from "./components/ArchiveStatsPanel.jsx";
 import ConversationList from "./components/ConversationList.jsx";
 import ConversationView from "./components/ConversationView.jsx";
+import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 
@@ -194,6 +195,11 @@ export default function App() {
           conversation={selectedConversation}
           isLoading={isConversationLoading}
         />
+        <ExportPanel
+          apiBaseUrl={API_BASE_URL}
+          conversation={selectedConversation}
+          hasArchiveData={hasArchiveData}
+        />
       </section>
     </main>
   );
@@ -303,7 +309,7 @@ async function request(path, options = {}) {
   if (!response.ok) {
     const detail = typeof data === "object" && data !== null ? data.detail : data;
     if (response.status === 404 && detail === "Not Found") {
-      throw new Error("The backend route was not found. Make sure the frontend is open on port 5173 and the API is running on port 8000.");
+      throw new Error("The backend route was not found. Make sure the frontend and local API are both running.");
     }
     throw new Error(detail || `Backend request failed: ${response.status}`);
   }

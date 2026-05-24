@@ -3,7 +3,7 @@ import io
 import sqlite3
 
 
-def export_messages_csv(conn: sqlite3.Connection) -> str:
+def export_messages_csv(conn: sqlite3.Connection, conversation_id: int | None = None) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
         output,
@@ -19,8 +19,14 @@ def export_messages_csv(conn: sqlite3.Connection) -> str:
     )
     writer.writeheader()
 
+    where_clause = ""
+    params = ()
+    if conversation_id is not None:
+        where_clause = "WHERE conversations.id = ?"
+        params = (conversation_id,)
+
     rows = conn.execute(
-        """
+        f"""
         SELECT
           messages.sent_at,
           conversations.title AS conversation_title,
@@ -32,8 +38,10 @@ def export_messages_csv(conn: sqlite3.Connection) -> str:
         FROM messages
         JOIN conversations ON conversations.id = messages.conversation_id
         LEFT JOIN contacts ON contacts.id = messages.sender_contact_id
+        {where_clause}
         ORDER BY messages.sent_at ASC
-        """
+        """,
+        params,
     ).fetchall()
     for row in rows:
         writer.writerow(dict(row))
