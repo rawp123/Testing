@@ -114,6 +114,28 @@ desktop storage. The launcher also handles the reduced PATH macOS uses for apps
 opened from Finder, so Node installed through Homebrew or a login shell can still
 be found.
 
+### Desktop Troubleshooting
+
+The desktop app should be tested on the target Mac whenever possible, because
+that is the environment that has the local iPhone MobileSync backups and the
+normal macOS GUI runtime.
+
+In Linux dev containers or other headless environments, Electron may fail to
+launch if native GUI libraries are missing. For example, an error such as
+`libatk-1.0.so.0: cannot open shared object file` means the container is missing
+a system library that Electron needs to create a window. That is an environment
+dependency issue, not evidence that the message import, export, or frontend build
+logic is broken.
+
+The desktop frontend build can succeed even when Electron cannot launch inside
+the container. The next validation step is to run the same build/start commands
+on the Mac host:
+
+```bash
+npm run build:message-archive:desktop
+npm run start:message-archive:desktop
+```
+
 ## Backend Setup
 
 ```bash
