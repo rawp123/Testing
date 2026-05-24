@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+BACKEND_PORT="${MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT:-8765}"
 FRONTEND_URL="http://127.0.0.1:${FRONTEND_PORT}"
 FRONTEND_PID=""
 
@@ -38,11 +39,14 @@ else
   printf 'Starting frontend on %s\n' "$FRONTEND_URL"
   (
     cd "$FRONTEND_DIR"
-    VITE_API_PROXY_TARGET="http://127.0.0.1:8000" \
+    VITE_API_PROXY_TARGET="http://127.0.0.1:${BACKEND_PORT}" \
       npm run dev -- --port "$FRONTEND_PORT"
   ) &
   FRONTEND_PID="$!"
   wait_for_frontend
 fi
 
-ELECTRON_START_URL="$FRONTEND_URL" npm --prefix "$ROOT_DIR/desktop" run dev
+MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT="$BACKEND_PORT" \
+  MESSAGE_ARCHIVE_BACKEND_RELOAD=1 \
+  ELECTRON_START_URL="$FRONTEND_URL" \
+  npm --prefix "$ROOT_DIR/desktop" run dev

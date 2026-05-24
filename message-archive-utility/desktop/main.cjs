@@ -10,12 +10,13 @@ const FRONTEND_DIST_INDEX = path.resolve(__dirname, "../frontend/dist/index.html
 const PROJECT_DIR = path.resolve(__dirname, "..");
 const BACKEND_DIR = path.resolve(PROJECT_DIR, "backend");
 const BACKEND_HOST = "127.0.0.1";
-const BACKEND_PORT = 8000;
+const BACKEND_PORT = Number(process.env.MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT || 8765);
 const BACKEND_HEALTH_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}/health`;
 const BACKEND_READY_TIMEOUT_MS = 20000;
 const BACKEND_POLL_INTERVAL_MS = 350;
 const UVICORN_BIN = path.resolve(BACKEND_DIR, ".venv/bin/uvicorn");
 const DESKTOP_DATA_DIR_NAME = "Message Archive Utility";
+const USE_BACKEND_RELOAD = process.env.MESSAGE_ARCHIVE_BACKEND_RELOAD === "1";
 const ALLOWED_DEV_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
@@ -91,9 +92,19 @@ function createWindow() {
 function requestBackendHealth() {
   return new Promise((resolve) => {
     const request = http.get(BACKEND_HEALTH_URL, { timeout: 1200 }, (response) => {
-      response.resume();
+      let bodyText = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => {
+        bodyText += chunk;
+      });
       response.on("end", () => {
-        resolve({ ok: response.statusCode === 200, statusCode: response.statusCode });
+        let body = null;
+        try {
+          body = bodyText ? JSON.parse(bodyText) : null;
+        } catch {
+          body = null;
+        }
+        resolve({ ok: response.statusCode === 200, statusCode: response.statusCode, body });
       });
     });
 
@@ -124,13 +135,18 @@ async function waitForBackendHealth() {
 async function ensureBackendReady() {
   const initialHealth = await requestBackendHealth();
   if (initialHealth.ok) {
-    console.log("Using existing local backend at http://127.0.0.1:8000.");
+    if (!initialHealth.body?.desktop_mode) {
+      throw new Error(
+        `Port ${BACKEND_PORT} is responding, but it is not running in Message Archive desktop mode.`,
+      );
+    }
+    console.log(`Using existing local desktop backend at http://${BACKEND_HOST}:${BACKEND_PORT}.`);
     return;
   }
 
   if (initialHealth.statusCode) {
     throw new Error(
-      `Port 8000 is responding, but it is not the Message Archive backend. Health status: ${initialHealth.statusCode}.`,
+      `Port ${BACKEND_PORT} is responding, but it is not the Message Archive backend. Health status: ${initialHealth.statusCode}.`,
     );
   }
 
@@ -140,7 +156,7 @@ async function ensureBackendReady() {
 
   startBackendProcess();
   await waitForBackendHealth();
-  console.log("Started local backend at http://127.0.0.1:8000.");
+  console.log(`Started local desktop backend at http://${BACKEND_HOST}:${BACKEND_PORT}.`);
 }
 
 function startBackendProcess() {
@@ -154,6 +170,7 @@ function startBackendProcess() {
   const env = {
     ...process.env,
     MESSAGE_ARCHIVE_DATA_DIR: process.env.MESSAGE_ARCHIVE_DATA_DIR || desktopDataDir,
+    MESSAGE_ARCHIVE_DESKTOP_MODE: "1",
     MESSAGE_ARCHIVE_DB_PATH:
       process.env.MESSAGE_ARCHIVE_DB_PATH || path.join(desktopDataDir, "message-archive.sqlite3"),
   };
@@ -162,12 +179,12 @@ function startBackendProcess() {
     UVICORN_BIN,
     [
       "app.main:app",
-      "--reload",
       "--host",
       BACKEND_HOST,
       "--port",
       String(BACKEND_PORT),
       "--no-access-log",
+      ...(USE_BACKEND_RELOAD ? ["--reload"] : []),
     ],
     {
       cwd: BACKEND_DIR,
@@ -239,7 +256,7 @@ app.whenReady().then(async () => {
   } catch (error) {
     dialog.showErrorBox(
       "Message Archive backend unavailable",
-      `${error.message}\n\nClose the process using port 8000, or start the FastAPI backend manually and try again.`,
+      `${error.message}\n\nClose the process using port ${BACKEND_PORT}, or start the FastAPI backend manually in desktop mode and try again.`,
     );
     app.quit();
     return;

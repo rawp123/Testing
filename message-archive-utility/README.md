@@ -19,7 +19,7 @@ The repository should be safe to make public even if you keep it private while d
 2. iMazing CSV import
 3. Android XML import
 
-The current implementation includes a fake-data CSV importer and a partial real iPhone local-backup importer. The iPhone importer can locate and copy `sms.db` from a local backup, validate and inspect the copied database, and import contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
+The current implementation includes a fake-data CSV importer and a real iPhone local-backup importer. The iPhone importer can run as a one-click detected-backup import, or as a step-by-step troubleshooting flow. It locates and copies `sms.db` from a local backup, validates and inspects the copied database, and imports contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
 
 Linked attachment files are copied only when the backup folder is supplied during import. In browser development, copied files stay in ignored private storage under `data/attachments/iphone/`. In desktop development, copied files stay under the desktop app data folder described below.
 
@@ -41,11 +41,18 @@ Optional ports:
 BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev:message-archive
 ```
 
+The dev command auto-detects the first iPhone backup under the local macOS
+MobileSync backup folder when one is available. To point the app at a specific
+backup folder:
+
+```bash
+MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$HOME/Library/Application Support/MobileSync/Backup/<backup-folder-id>" npm run dev:message-archive
+```
+
 ## Desktop Development
 
-The desktop wrapper is still intentionally thin: it opens the existing React UI
-in an Electron window and starts the local FastAPI backend for development. It
-does not package the backend or rewrite importer logic.
+The desktop wrapper opens the React UI in an Electron window and starts a local
+FastAPI backend with private desktop storage.
 
 From the repository root:
 
@@ -54,8 +61,8 @@ npm run dev:message-archive:desktop
 ```
 
 The desktop dev command starts or reuses the Vite frontend on `127.0.0.1:5173`.
-Electron starts the FastAPI backend on `127.0.0.1:8000`, waits for `/health`, and
-then loads the UI. If a healthy backend is already running on port `8000`,
+Electron starts the FastAPI backend on `127.0.0.1:8765`, waits for `/health`, and
+then loads the UI. If a desktop-mode backend is already running on port `8765`,
 Electron reuses it. If another process owns that port, Electron shows an error.
 
 When Electron starts the backend itself, private app data is stored outside the
@@ -78,6 +85,34 @@ backend that was already running, that backend keeps whatever data paths it was
 started with.
 
 The browser-based dev flow still works with `npm run dev:message-archive`.
+
+To build the frontend for static Electron loading:
+
+```bash
+npm run build:message-archive:desktop
+```
+
+That command bakes the desktop backend URL into the frontend build so the
+packaged/static UI can call the local backend directly from Electron.
+
+To open the built desktop app without the Vite dev server:
+
+```bash
+npm run start:message-archive:desktop
+```
+
+To install a clickable desktop shortcut on macOS or Linux:
+
+```bash
+npm run install:message-archive:shortcut
+```
+
+On macOS this creates `Message Archive Utility.app` on the Desktop. On Linux it
+creates `message-archive-utility.desktop` on the Desktop. Both launch the static
+Electron app and let Electron start the local FastAPI backend with private
+desktop storage. The launcher also handles the reduced PATH macOS uses for apps
+opened from Finder, so Node installed through Homebrew or a login shell can still
+be found.
 
 ## Backend Setup
 
