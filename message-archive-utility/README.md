@@ -86,6 +86,19 @@ started with.
 
 The browser-based dev flow still works with `npm run dev:message-archive`.
 
+The desktop backend expects its Python virtual environment at the app-local path:
+
+```text
+message-archive-utility/.venv
+```
+
+From the `message-archive-utility` folder, set it up with:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements.txt
+```
+
 To build the frontend for static Electron loading:
 
 ```bash
@@ -139,10 +152,11 @@ npm run start:message-archive:desktop
 ## Backend Setup
 
 ```bash
-cd backend
-python -m venv .venv
+cd message-archive-utility
+python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
+cd backend
 uvicorn app.main:app --reload
 ```
 

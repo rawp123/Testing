@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
+BACKEND_VENV_DIR="${MESSAGE_ARCHIVE_BACKEND_VENV_DIR:-$ROOT_DIR/.venv}"
 
 BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
@@ -44,14 +45,14 @@ cleanup() {
   wait "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true
 }
 
-if [[ ! -x "$BACKEND_DIR/.venv/bin/uvicorn" ]]; then
+if [[ ! -x "$BACKEND_VENV_DIR/bin/uvicorn" ]]; then
   printf 'Installing backend dependencies...\n'
   (
-    cd "$BACKEND_DIR"
-    if [[ ! -d .venv ]]; then
-      "$PYTHON_BIN" -m venv .venv
+    cd "$ROOT_DIR"
+    if [[ ! -d "$BACKEND_VENV_DIR" ]]; then
+      "$PYTHON_BIN" -m venv "$BACKEND_VENV_DIR"
     fi
-    .venv/bin/python -m pip install -r requirements.txt
+    "$BACKEND_VENV_DIR/bin/python" -m pip install -r backend/requirements.txt
   )
 fi
 
@@ -70,7 +71,7 @@ printf 'Starting backend on http://%s:%s\n' "$BACKEND_HOST" "$BACKEND_PORT"
   cd "$BACKEND_DIR"
   MESSAGE_ARCHIVE_DB_PATH="${MESSAGE_ARCHIVE_DB_PATH:-data/message-archive.sqlite3}" \
     MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$IPHONE_BACKUP_PATHS" \
-    .venv/bin/uvicorn app.main:app --reload --host "$BACKEND_HOST" --port "$BACKEND_PORT"
+    "$BACKEND_VENV_DIR/bin/uvicorn" app.main:app --reload --host "$BACKEND_HOST" --port "$BACKEND_PORT"
 ) &
 BACKEND_PID="$!"
 

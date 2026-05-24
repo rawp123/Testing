@@ -9,12 +9,13 @@ const DEV_SERVER_URL = process.env.ELECTRON_START_URL || "";
 const FRONTEND_DIST_INDEX = path.resolve(__dirname, "../frontend/dist/index.html");
 const PROJECT_DIR = path.resolve(__dirname, "..");
 const BACKEND_DIR = path.resolve(PROJECT_DIR, "backend");
+const BACKEND_VENV_DIR = process.env.MESSAGE_ARCHIVE_BACKEND_VENV_DIR || path.resolve(PROJECT_DIR, ".venv");
 const BACKEND_HOST = "127.0.0.1";
 const BACKEND_PORT = Number(process.env.MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT || 8765);
 const BACKEND_HEALTH_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}/health`;
 const BACKEND_READY_TIMEOUT_MS = 20000;
 const BACKEND_POLL_INTERVAL_MS = 350;
-const UVICORN_BIN = path.resolve(BACKEND_DIR, ".venv/bin/uvicorn");
+const UVICORN_BIN = path.resolve(BACKEND_VENV_DIR, "bin/uvicorn");
 const DESKTOP_DATA_DIR_NAME = "Message Archive Utility";
 const USE_BACKEND_RELOAD = process.env.MESSAGE_ARCHIVE_BACKEND_RELOAD === "1";
 const ALLOWED_DEV_ORIGINS = new Set([
@@ -162,7 +163,14 @@ async function ensureBackendReady() {
 function startBackendProcess() {
   if (!fs.existsSync(UVICORN_BIN)) {
     throw new Error(
-      "The backend virtual environment is missing Uvicorn. Run the normal web dev setup once before starting desktop mode.",
+      [
+        `The backend virtual environment is missing Uvicorn at ${UVICORN_BIN}.`,
+        "",
+        "Run these setup commands from the message-archive-utility folder:",
+        "",
+        "python3 -m venv .venv",
+        ".venv/bin/python -m pip install -r backend/requirements.txt",
+      ].join("\n"),
     );
   }
 
