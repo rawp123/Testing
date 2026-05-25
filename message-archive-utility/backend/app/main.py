@@ -20,6 +20,7 @@ from app.importers.iphone_backup import (
     validate_copied_sms_db,
 )
 from app.services.export_csv import export_messages_csv
+from app.services.export_pdf import export_messages_pdf, export_search_summary_pdf
 from app.services.contact_display import (
     UNKNOWN_CONTACT_LABEL,
     clean_participant_names,
@@ -694,6 +695,57 @@ def export_csv(conversation_id: int | None = None, q: str | None = None) -> Resp
         content=csv_text,
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@app.get("/export/messages.pdf")
+def export_messages_pdf_response(
+    conversation_id: int | None = None,
+    q: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    contact_id: int | None = None,
+    style: str = "conversation",
+) -> Response:
+    with get_connection() as conn:
+        if conversation_id is not None:
+            conversation = conn.execute(
+                "SELECT id FROM conversations WHERE id = ?",
+                (conversation_id,),
+            ).fetchone()
+            if conversation is None:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+        if contact_id is not None:
+            contact = conn.execute(
+                "SELECT id FROM contacts WHERE id = ?",
+                (contact_id,),
+            ).fetchone()
+            if contact is None:
+                raise HTTPException(status_code=404, detail="Contact not found")
+        pdf = export_messages_pdf(
+            conn,
+            conversation_id=conversation_id,
+            q=q,
+            start_date=start_date,
+            end_date=end_date,
+            contact_id=contact_id,
+            style=style,
+        )
+    return Response(
+        content=pdf.content,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={pdf.filename}"},
+    )
+
+
+@app.get("/export/search-summary.pdf")
+def export_search_summary_pdf_response(q: str = "", style: str = "summary") -> Response:
+    with get_connection() as conn:
+        pdf = export_search_summary_pdf(conn, q=q, style=style)
+    return Response(
+        content=pdf.content,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={pdf.filename}"},
     )
 
 

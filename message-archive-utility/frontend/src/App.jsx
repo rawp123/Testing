@@ -422,7 +422,12 @@ function SearchResultsPanel({
       </header>
 
       {showSummary ? (
-        <SearchSummaryStats summary={summary} isLoading={isSummaryLoading} />
+        <SearchSummaryStats
+          apiBaseUrl={apiBaseUrl}
+          query={normalizedQuery}
+          summary={summary}
+          isLoading={isSummaryLoading}
+        />
       ) : (
         <SearchResultMessages
           results={results}
@@ -472,7 +477,7 @@ function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
   );
 }
 
-function SearchSummaryStats({ summary, isLoading }) {
+function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
   if (isLoading && !summary) {
     return (
       <div className="empty-state empty-panel">
@@ -497,12 +502,17 @@ function SearchSummaryStats({ summary, isLoading }) {
       <div className="search-summary-actions">
         <div>
           <h3>Summary report</h3>
-          <p>PDF and Excel summary exports are planned.</p>
+          <p>Download a PDF summary of this search. Excel summary exports are planned.</p>
         </div>
-        <button className="secondary-button is-disabled" type="button" disabled>
+        <a
+          className={`secondary-button ${query ? "" : "is-disabled"}`}
+          href={query ? buildSearchSummaryExportUrl(apiBaseUrl, query) : undefined}
+          aria-disabled={!query}
+          onClick={(event) => preventDisabledLink(event, Boolean(query))}
+        >
           <Download size={16} aria-hidden="true" />
           Export this summary
-        </button>
+        </a>
       </div>
       <dl className="search-summary-topline">
         <div>
@@ -748,6 +758,10 @@ function formatMonthYear(value) {
 
 function buildSearchExportUrl(apiBaseUrl, query) {
   return `${apiBaseUrl}/export/messages.csv?q=${encodeURIComponent(query)}`;
+}
+
+function buildSearchSummaryExportUrl(apiBaseUrl, query) {
+  return `${apiBaseUrl}/export/search-summary.pdf?q=${encodeURIComponent(query)}`;
 }
 
 function preventDisabledLink(event, isEnabled) {

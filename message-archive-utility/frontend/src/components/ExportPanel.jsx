@@ -5,21 +5,21 @@ const SCOPE_OPTIONS = [
   { id: "fullArchive", label: "Full archive", detail: "All messages in this archive." },
   { id: "selectedConversation", label: "Selected conversation", detail: "Only the open thread." },
   { id: "searchResults", label: "Search results", detail: "Messages matching the current search." },
-  { id: "dateRange", label: "Date range", detail: "Choose a start and end date.", planned: true },
+  { id: "dateRange", label: "Date range", detail: "Choose a start and end date." },
   { id: "person", label: "Contact or person", detail: "Messages with one person.", planned: true },
-  { id: "summaryOnly", label: "Summary report only", detail: "Counts and charts without message rows.", planned: true },
+  { id: "summaryOnly", label: "Summary report only", detail: "Counts without message rows." },
 ];
 
 const FORMAT_OPTIONS = [
-  { id: "pdf", label: "PDF", detail: "Printable reports and transcripts.", planned: true },
+  { id: "pdf", label: "PDF", detail: "Printable reports and transcripts." },
   { id: "excel", label: "Excel", detail: "Workbook for review and sorting.", planned: true },
   { id: "csv", label: "CSV", detail: "Spreadsheet-ready message rows." },
 ];
 
 const PDF_STYLE_OPTIONS = [
-  "Easy-to-read conversation view",
-  "Formal transcript",
-  "Summary report with messages",
+  { id: "conversation", label: "Easy-to-read conversation view" },
+  { id: "transcript", label: "Formal transcript" },
+  { id: "summary", label: "Summary report with messages" },
 ];
 
 const EXCEL_WORKBOOK_OPTIONS = [
@@ -35,24 +35,28 @@ export default function ExportPanel({
 }) {
   const [selectedScope, setSelectedScope] = useState("fullArchive");
   const [selectedFormat, setSelectedFormat] = useState("csv");
-  const [selectedPdfStyle, setSelectedPdfStyle] = useState(PDF_STYLE_OPTIONS[0]);
+  const [selectedPdfStyle, setSelectedPdfStyle] = useState(PDF_STYLE_OPTIONS[0].id);
   const [selectedWorkbookType, setSelectedWorkbookType] = useState(EXCEL_WORKBOOK_OPTIONS[0]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const normalizedSearchQuery = searchQuery.trim();
   const conversationMessageCount = conversation?.messages?.length || 0;
   const canExportConversation = Boolean(conversation?.id && conversationMessageCount > 0);
   const canExportSearchResults = normalizedSearchQuery.length > 0;
+  const canExportDateRange = selectedFormat === "pdf" && Boolean(startDate || endDate);
+  const canExportSummaryOnly = selectedFormat === "pdf" && canExportSearchResults;
 
   const scopeOptions = useMemo(() => {
     return SCOPE_OPTIONS.map((option) => {
       if (option.id === "fullArchive") {
-        return { ...option, enabled: hasArchiveData, status: hasArchiveData ? "Ready for CSV" : "Import messages first" };
+        return { ...option, enabled: hasArchiveData, status: hasArchiveData ? getReadyStatus(selectedFormat) : "Import messages first" };
       }
       if (option.id === "selectedConversation") {
         return {
           ...option,
           enabled: canExportConversation,
-          status: canExportConversation ? "Ready for CSV" : "Choose a conversation",
+          status: canExportConversation ? getReadyStatus(selectedFormat) : "Choose a conversation",
         };
       }
       if (option.id === "searchResults") {
@@ -60,18 +64,51 @@ export default function ExportPanel({
           ...option,
           enabled: canExportSearchResults,
           status: canExportSearchResults
-            ? `${formatNumber(searchResultCount)} matching ${searchResultCount === 1 ? "message" : "messages"}`
+            ? `${getReadyStatus(selectedFormat)} - ${formatNumber(searchResultCount)} matching ${searchResultCount === 1 ? "message" : "messages"}`
             : "Search first",
+        };
+      }
+      if (option.id === "dateRange") {
+        return {
+          ...option,
+          enabled: canExportDateRange,
+          status: selectedFormat === "pdf" ? (canExportDateRange ? "Ready for PDF" : "Choose dates") : "PDF only for now",
+        };
+      }
+      if (option.id === "summaryOnly") {
+        return {
+          ...option,
+          enabled: canExportSummaryOnly,
+          status: selectedFormat === "pdf" ? (canExportSummaryOnly ? "Ready for PDF" : "Search first") : "PDF only for now",
         };
       }
       return { ...option, enabled: false, status: "Planned" };
     });
-  }, [canExportConversation, canExportSearchResults, hasArchiveData, searchResultCount]);
+  }, [
+    canExportConversation,
+    canExportDateRange,
+    canExportSearchResults,
+    canExportSummaryOnly,
+    hasArchiveData,
+    searchResultCount,
+    selectedFormat,
+  ]);
 
   const selectedScopeOption = scopeOptions.find((option) => option.id === selectedScope) || scopeOptions[0];
   const selectedFormatOption = FORMAT_OPTIONS.find((option) => option.id === selectedFormat) || FORMAT_OPTIONS[2];
-  const canDownload = selectedFormat === "csv" && selectedScopeOption.enabled;
-  const exportUrl = canDownload ? buildExportUrl(apiBaseUrl, selectedScope, conversation?.id, normalizedSearchQuery) : "";
+  const canDownload = selectedFormat !== "excel" && selectedScopeOption.enabled;
+  const exportUrl = canDownload
+    ? buildExportUrl({
+        apiBaseUrl,
+        scope: selectedScope,
+        format: selectedFormat,
+        conversationId: conversation?.id,
+        searchQuery: normalizedSearchQuery,
+        startDate,
+        endDate,
+        pdfStyle: selectedPdfStyle,
+      })
+    : "";
   const actionText = canDownload ? getDownloadLabel(selectedScope) : getPlannedActionText(selectedFormatOption, selectedScopeOption);
 
   return (
@@ -84,7 +121,7 @@ export default function ExportPanel({
           <p className="eyebrow">Export Center</p>
           <h2>Export to PDF, Excel, or CSV</h2>
           <p>
-            Choose what you need, then pick the format. CSV downloads are ready now; PDF and Excel are shown as planned outputs.
+            Choose what you need, then pick the format. PDF and CSV downloads are ready now; Excel is still planned.
           </p>
         </div>
       </div>
@@ -92,7 +129,7 @@ export default function ExportPanel({
       <div className="export-quick-actions" aria-label="Quick exports">
         <a
           className={`primary-button ${hasArchiveData ? "" : "is-disabled"}`}
-          href={hasArchiveData ? buildExportUrl(apiBaseUrl, "fullArchive") : undefined}
+          href={hasArchiveData ? buildExportUrl({ apiBaseUrl, scope: "fullArchive", format: "csv" }) : undefined}
           aria-disabled={!hasArchiveData}
           onClick={(event) => preventDisabledLink(event, hasArchiveData)}
         >
@@ -101,7 +138,14 @@ export default function ExportPanel({
         </a>
         <a
           className={`secondary-button ${canExportConversation ? "" : "is-disabled"}`}
-          href={canExportConversation ? buildExportUrl(apiBaseUrl, "selectedConversation", conversation.id) : undefined}
+          href={canExportConversation
+            ? buildExportUrl({
+                apiBaseUrl,
+                scope: "selectedConversation",
+                format: "csv",
+                conversationId: conversation.id,
+              })
+            : undefined}
           aria-disabled={!canExportConversation}
           onClick={(event) => preventDisabledLink(event, canExportConversation)}
         >
@@ -155,9 +199,13 @@ export default function ExportPanel({
       <div className="export-planned-settings" aria-label="Planned export options">
         <label>
           <span>PDF style</span>
-          <select value={selectedPdfStyle} onChange={(event) => setSelectedPdfStyle(event.target.value)} disabled>
+          <select
+            value={selectedPdfStyle}
+            onChange={(event) => setSelectedPdfStyle(event.target.value)}
+            disabled={selectedFormat !== "pdf"}
+          >
             {PDF_STYLE_OPTIONS.map((option) => (
-              <option key={option} value={option}>{option}</option>
+              <option key={option.id} value={option.id}>{option.label}</option>
             ))}
           </select>
         </label>
@@ -168,6 +216,27 @@ export default function ExportPanel({
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
+        </label>
+      </div>
+
+      <div className="export-date-range" aria-label="Date range export">
+        <label>
+          <span>Start date</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+            disabled={selectedFormat !== "pdf"}
+          />
+        </label>
+        <label>
+          <span>End date</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+            disabled={selectedFormat !== "pdf"}
+          />
         </label>
       </div>
 
@@ -189,7 +258,7 @@ export default function ExportPanel({
         <LockKeyhole size={14} aria-hidden="true" />
         <span>
           {hasArchiveData
-            ? "Exports are prepared on this computer. Planned choices stay disabled until their export files exist."
+            ? "Exports are prepared on this computer. Excel and person-only exports stay disabled until those files exist."
             : "Import an archive before exporting messages."}
         </span>
       </div>
@@ -197,22 +266,45 @@ export default function ExportPanel({
   );
 }
 
-function buildExportUrl(apiBaseUrl, scope, conversationId = null, searchQuery = "") {
+function buildExportUrl({
+  apiBaseUrl,
+  scope,
+  format,
+  conversationId = null,
+  searchQuery = "",
+  startDate = "",
+  endDate = "",
+  pdfStyle = "conversation",
+}) {
   const params = new URLSearchParams();
+  const extension = format === "pdf" ? "pdf" : "csv";
   if (scope === "selectedConversation" && conversationId) {
     params.set("conversation_id", conversationId);
   }
   if (scope === "searchResults" && searchQuery) {
     params.set("q", searchQuery);
   }
+  if (scope === "summaryOnly" && searchQuery) {
+    params.set("q", searchQuery);
+  }
+  if (scope === "dateRange") {
+    if (startDate) params.set("start_date", startDate);
+    if (endDate) params.set("end_date", endDate);
+  }
+  if (format === "pdf" && scope !== "summaryOnly") {
+    params.set("style", pdfStyle);
+  }
   const query = params.toString();
-  return `${apiBaseUrl}/export/messages.csv${query ? `?${query}` : ""}`;
+  const path = scope === "summaryOnly" ? "search-summary.pdf" : `messages.${extension}`;
+  return `${apiBaseUrl}/export/${path}${query ? `?${query}` : ""}`;
 }
 
 function getDownloadLabel(scope) {
-  if (scope === "selectedConversation") return "Download conversation CSV";
-  if (scope === "searchResults") return "Download search results CSV";
-  return "Download full archive CSV";
+  if (scope === "selectedConversation") return "Download conversation";
+  if (scope === "searchResults") return "Download search results";
+  if (scope === "dateRange") return "Download date range";
+  if (scope === "summaryOnly") return "Download summary report";
+  return "Download full archive";
 }
 
 function getPlannedActionText(formatOption, scopeOption) {
@@ -227,4 +319,8 @@ function preventDisabledLink(event, isEnabled) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat().format(value || 0);
+}
+
+function getReadyStatus(format) {
+  return format === "pdf" ? "Ready for PDF" : "Ready for CSV";
 }

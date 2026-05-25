@@ -1750,13 +1750,15 @@ a:focus-visible {
   color: #31524d;
 }
 
-.export-planned-settings {
+.export-planned-settings,
+.export-date-range {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.export-planned-settings label {
+.export-planned-settings label,
+.export-date-range label {
   display: grid;
   gap: 6px;
   min-width: 0;
@@ -1765,7 +1767,8 @@ a:focus-visible {
   font-weight: 800;
 }
 
-.export-planned-settings select {
+.export-planned-settings select,
+.export-date-range input {
   width: 100%;
   min-height: 38px;
   border: 1px solid #d9d2c6;
@@ -1773,6 +1776,12 @@ a:focus-visible {
   background: #f4f0e8;
   color: #8a8278;
   padding: 0 10px;
+}
+
+.export-date-range input:not(:disabled),
+.export-planned-settings select:not(:disabled) {
+  background: #ffffff;
+  color: #202124;
 }
 
 .export-copy {
@@ -2195,6 +2204,7 @@ a:focus-visible {
   .export-choice-grid,
   .export-summary,
   .export-planned-settings,
+  .export-date-range,
   .simple-flow-list,
   .step-list,
   .stats-grid,
@@ -2244,6 +2254,14 @@ a:focus-visible {
   .search-summary-actions,
   .search-summary-topline {
     grid-template-columns: 1fr;
+  }
+
+  .export-option {
+    grid-template-columns: 1fr;
+  }
+
+  .export-option em {
+    justify-self: start;
   }
 
   .conversation-export-button {
