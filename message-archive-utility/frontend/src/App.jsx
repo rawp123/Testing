@@ -7,6 +7,7 @@ import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const SHOW_SAMPLE_ARCHIVE = import.meta.env.VITE_ENABLE_SAMPLE_ARCHIVE === "true";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -19,11 +20,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   async function loadConversations({ keepSelection = true } = {}) {
     setIsLoading(true);
-    setError("");
+    setError(null);
     try {
       const data = await request("/conversations");
       const loadedConversations = data.conversations || [];
@@ -35,7 +36,7 @@ export default function App() {
         return loadedConversations[0]?.id || null;
       });
     } catch (requestError) {
-      setError(requestError.message);
+      setError(toUserFacingError(requestError));
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +57,7 @@ export default function App() {
 
     async function loadConversation() {
       setIsConversationLoading(true);
-      setError("");
+      setError(null);
       try {
         const data = await request(`/conversations/${selectedId}/messages`);
         if (!isCurrent) return;
@@ -65,7 +66,7 @@ export default function App() {
           messages: data.messages || [],
         });
       } catch (requestError) {
-        if (isCurrent) setError(requestError.message);
+        if (isCurrent) setError(toUserFacingError(requestError));
       } finally {
         if (isCurrent) setIsConversationLoading(false);
       }
@@ -93,7 +94,7 @@ export default function App() {
         );
         setSearchResults(data.results || []);
       } catch (requestError) {
-        if (requestError.name !== "AbortError") setError(requestError.message);
+        if (requestError.name !== "AbortError") setError(toUserFacingError(requestError));
       }
     }, 200);
 
@@ -123,6 +124,7 @@ export default function App() {
 
   const hasArchiveData = conversations.length > 0 || (archiveStats?.messages?.total || 0) > 0;
   const isSearching = query.trim().length > 0;
+  const sidebarError = getVisibleSidebarError(error, hasArchiveData);
 
   return (
     <main className="app-shell">
@@ -142,9 +144,11 @@ export default function App() {
             <button className="secondary-button" type="button" onClick={() => loadConversations()}>
               Refresh
             </button>
-            <button className="ghost-button" type="button" onClick={loadSampleArchive}>
-              Load sample
-            </button>
+            {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
+              <button className="ghost-button" type="button" onClick={loadSampleArchive}>
+                Demo archive
+              </button>
+            )}
           </div>
           <SearchBar value={query} onChange={setQuery} />
           <div className="list-toolbar">
@@ -169,7 +173,7 @@ export default function App() {
               {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
             </p>
           )}
-          {error && <p className="error-state">{error}</p>}
+          {sidebarError && <SidebarErrorState error={sidebarError} />}
         </div>
         <ConversationList
           conversations={visibleConversations}
@@ -189,29 +193,38 @@ export default function App() {
             archiveStats={archiveStats}
             isArchiveStatsLoading={isStatsLoading}
           />
-          <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
+          {hasArchiveData && (
+            <ExportPanel
+              apiBaseUrl={API_BASE_URL}
+              conversation={selectedConversation}
+              hasArchiveData={hasArchiveData}
+            />
+          )}
         </div>
         <ConversationView
           conversation={selectedConversation}
           isLoading={isConversationLoading}
         />
-        <ExportPanel
-          apiBaseUrl={API_BASE_URL}
-          conversation={selectedConversation}
-          hasArchiveData={hasArchiveData}
-        />
+        {!hasArchiveData && (
+          <ExportPanel
+            apiBaseUrl={API_BASE_URL}
+            conversation={selectedConversation}
+            hasArchiveData={hasArchiveData}
+          />
+        )}
+        <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
       </section>
     </main>
   );
 
   async function loadSampleArchive() {
     setIsLoading(true);
-    setError("");
+    setError(null);
     try {
       await request("/import/dummy-csv", { method: "POST" });
       await refreshArchive();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(toUserFacingError(requestError));
       setIsLoading(false);
     }
   }
@@ -222,7 +235,7 @@ export default function App() {
       const data = await request("/archive/stats");
       setArchiveStats(data);
     } catch (requestError) {
-      setError(requestError.message);
+      setError(toUserFacingError(requestError));
     } finally {
       setIsStatsLoading(false);
     }
@@ -281,6 +294,21 @@ function SidebarArchiveSummary({ stats, isLoading }) {
   );
 }
 
+function SidebarErrorState({ error }) {
+  return (
+    <div className="sidebar-error-state" role="status">
+      <strong>{error.title}</strong>
+      <span>{error.detail}</span>
+      {error.technicalDetail && (
+        <details className="technical-details">
+          <summary>Technical details</summary>
+          <p>{error.technicalDetail}</p>
+        </details>
+      )}
+    </div>
+  );
+}
+
 function formatSidebarNumber(value) {
   return new Intl.NumberFormat().format(value || 0);
 }
@@ -292,14 +320,56 @@ function formatSidebarDate(value) {
   return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
 
+function getVisibleSidebarError(error, hasArchiveData) {
+  if (!error) return null;
+  if (error.kind === "service-unavailable") return error;
+  if (!hasArchiveData) return null;
+  return error;
+}
+
+function toUserFacingError(error) {
+  const technicalDetail = sanitizeTechnicalDetail(error);
+  if (error?.kind === "service-unavailable" || error?.name === "TypeError") {
+    return {
+      kind: "service-unavailable",
+      title: "Local app service is not responding",
+      detail: "Restart the app and try again.",
+      technicalDetail,
+    };
+  }
+
+  return {
+    kind: "backend-error",
+    title: "Messages could not be loaded",
+    detail: "Refresh and try again.",
+    technicalDetail,
+  };
+}
+
+function sanitizeTechnicalDetail(error) {
+  if (!error) return "";
+  if (error.status) return `Local service returned HTTP ${error.status}.`;
+  if (error.name === "TypeError") return "The local service request could not be completed.";
+  return "";
+}
+
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
-    },
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...options.headers,
+      },
+    });
+  } catch (requestError) {
+    if (requestError.name === "AbortError") throw requestError;
+    throw createRequestError("Local service request failed.", {
+      kind: "service-unavailable",
+      cause: requestError,
+    });
+  }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json")
@@ -309,10 +379,16 @@ async function request(path, options = {}) {
   if (!response.ok) {
     const detail = typeof data === "object" && data !== null ? data.detail : data;
     if (response.status === 404 && detail === "Not Found") {
-      throw new Error("The backend route was not found. Make sure the frontend and local API are both running.");
+      throw createRequestError("Local service route was not found.", { status: response.status });
     }
-    throw new Error(detail || `Backend request failed: ${response.status}`);
+    throw createRequestError(detail || "Local service request failed.", { status: response.status });
   }
 
   return data;
+}
+
+function createRequestError(message, metadata = {}) {
+  const error = new Error(message);
+  Object.assign(error, metadata);
+  return error;
 }
