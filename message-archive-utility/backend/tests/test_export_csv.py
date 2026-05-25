@@ -27,6 +27,25 @@ def test_export_messages_csv_can_export_all_or_one_conversation():
     assert "hello second" not in filtered_csv
 
 
+def test_export_messages_csv_can_export_search_results():
+    conn = create_archive_connection()
+    contact_id = conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', 'Ada Lovelace', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = insert_conversation(conn, "iphone-chat:1", "Trip chat")
+    insert_message(conn, conversation_id, contact_id, "1", "Greenland plan")
+    insert_message(conn, conversation_id, contact_id, "2", "Iceland plan")
+
+    search_csv = export_messages_csv(conn, q="Greenland")
+
+    assert "Greenland plan" in search_csv
+    assert "Iceland plan" not in search_csv
+
+
 def insert_conversation(conn, source_thread_id, title):
     return conn.execute(
         """

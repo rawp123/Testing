@@ -3,7 +3,11 @@ import io
 import sqlite3
 
 
-def export_messages_csv(conn: sqlite3.Connection, conversation_id: int | None = None) -> str:
+def export_messages_csv(
+    conn: sqlite3.Connection,
+    conversation_id: int | None = None,
+    q: str | None = None,
+) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
         output,
@@ -19,11 +23,19 @@ def export_messages_csv(conn: sqlite3.Connection, conversation_id: int | None = 
     )
     writer.writeheader()
 
-    where_clause = ""
-    params = ()
+    where_conditions = []
+    params: list[object] = []
     if conversation_id is not None:
-        where_clause = "WHERE conversations.id = ?"
-        params = (conversation_id,)
+        where_conditions.append("conversations.id = ?")
+        params.append(conversation_id)
+    if q and q.strip():
+        query = f"%{q.strip()}%"
+        where_conditions.append(
+            "(messages.body LIKE ? OR conversations.title LIKE ? OR contacts.display_name LIKE ?)"
+        )
+        params.extend([query, query, query])
+
+    where_clause = f"WHERE {' AND '.join(where_conditions)}" if where_conditions else ""
 
     rows = conn.execute(
         f"""
@@ -41,7 +53,7 @@ def export_messages_csv(conn: sqlite3.Connection, conversation_id: int | None = 
         {where_clause}
         ORDER BY messages.sent_at ASC
         """,
-        params,
+        tuple(params),
     ).fetchall()
     for row in rows:
         writer.writerow(dict(row))

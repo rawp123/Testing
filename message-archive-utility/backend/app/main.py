@@ -25,7 +25,7 @@ from app.services.contact_display import (
     clean_participant_names,
     format_contact_display_name,
 )
-from app.services.search import search_messages
+from app.services.search import build_search_summary, count_matching_messages, search_messages
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -665,11 +665,18 @@ def list_conversation_messages(conversation_id: int) -> dict:
 def search(q: str = "", limit: int = 50) -> dict:
     with get_connection() as conn:
         results = search_messages(conn, q=q, limit=limit)
-    return {"query": q, "results": results}
+        total_matching_messages = count_matching_messages(conn, q=q)
+    return {"query": q, "results": results, "total_matching_messages": total_matching_messages}
+
+
+@app.get("/search/summary")
+def search_summary(q: str = "") -> dict:
+    with get_connection() as conn:
+        return build_search_summary(conn, q=q)
 
 
 @app.get("/export/messages.csv")
-def export_csv(conversation_id: int | None = None) -> Response:
+def export_csv(conversation_id: int | None = None, q: str | None = None) -> Response:
     with get_connection() as conn:
         if conversation_id is not None:
             conversation = conn.execute(
@@ -678,8 +685,11 @@ def export_csv(conversation_id: int | None = None) -> Response:
             ).fetchone()
             if conversation is None:
                 raise HTTPException(status_code=404, detail="Conversation not found")
-        csv_text = export_messages_csv(conn, conversation_id=conversation_id)
-    filename = f"conversation-{conversation_id}-messages.csv" if conversation_id else "messages.csv"
+        csv_text = export_messages_csv(conn, conversation_id=conversation_id, q=q)
+    if q and q.strip():
+        filename = "search-results-messages.csv"
+    else:
+        filename = f"conversation-{conversation_id}-messages.csv" if conversation_id else "messages.csv"
     return Response(
         content=csv_text,
         media_type="text/csv",

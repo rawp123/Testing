@@ -1,3 +1,4 @@
+import { BarChart3, Download } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import ArchiveStatsPanel from "./components/ArchiveStatsPanel.jsx";
 import ConversationList from "./components/ConversationList.jsx";
@@ -21,11 +22,15 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchTotalMatches, setSearchTotalMatches] = useState(0);
+  const [searchSummary, setSearchSummary] = useState(null);
+  const [showSearchSummary, setShowSearchSummary] = useState(false);
   const [archiveStats, setArchiveStats] = useState(null);
   const [conversationSort, setConversationSort] = useState("lastMessageDesc");
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
+  const [isSearchSummaryLoading, setIsSearchSummaryLoading] = useState(false);
   const [error, setError] = useState(null);
 
   async function loadConversations({ keepSelection = true } = {}) {
@@ -88,9 +93,14 @@ export default function App() {
     const normalizedQuery = query.trim();
     if (!normalizedQuery) {
       setSearchResults([]);
+      setSearchTotalMatches(0);
+      setSearchSummary(null);
+      setShowSearchSummary(false);
       return;
     }
 
+    setShowSearchSummary(false);
+    setSearchSummary(null);
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
@@ -99,6 +109,7 @@ export default function App() {
           { signal: controller.signal },
         );
         setSearchResults(data.results || []);
+        setSearchTotalMatches(data.total_matching_messages || 0);
       } catch (requestError) {
         if (requestError.name !== "AbortError") setError(toUserFacingError(requestError));
       }
@@ -109,6 +120,30 @@ export default function App() {
       controller.abort();
     };
   }, [query]);
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+    if (!showSearchSummary || !normalizedQuery) return;
+
+    const controller = new AbortController();
+    async function loadSearchSummary() {
+      setIsSearchSummaryLoading(true);
+      try {
+        const data = await request(
+          `/search/summary?q=${encodeURIComponent(normalizedQuery)}`,
+          { signal: controller.signal },
+        );
+        setSearchSummary(data);
+      } catch (requestError) {
+        if (requestError.name !== "AbortError") setError(toUserFacingError(requestError));
+      } finally {
+        if (!controller.signal.aborted) setIsSearchSummaryLoading(false);
+      }
+    }
+
+    loadSearchSummary();
+    return () => controller.abort();
+  }, [query, showSearchSummary]);
 
   const visibleConversations = useMemo(() => {
     const matchingIds = new Set(searchResults.map((result) => result.conversation_id));
@@ -142,6 +177,7 @@ export default function App() {
     hasArchiveData,
     isSearching,
     matchCount: searchResults.length,
+    totalMatchCount: searchTotalMatches,
     conversationCount: visibleConversationCount,
   });
   const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
@@ -266,7 +302,22 @@ export default function App() {
               />
             </section>
             <section className="workspace" aria-label="Message archive workspace">
+              {isSearching && (
+                <SearchResultsPanel
+                  apiBaseUrl={API_BASE_URL}
+                  query={query}
+                  results={searchResults}
+                  totalMatches={searchTotalMatches}
+                  summary={searchSummary}
+                  showSummary={showSearchSummary}
+                  isSummaryLoading={isSearchSummaryLoading}
+                  onShowSummary={() => setShowSearchSummary(true)}
+                  onHideSummary={() => setShowSearchSummary(false)}
+                  onOpenConversation={setSelectedId}
+                />
+              )}
               <ConversationView
+                apiBaseUrl={API_BASE_URL}
                 conversation={selectedConversation}
                 isLoading={isConversationLoading}
               />
@@ -274,6 +325,8 @@ export default function App() {
                 apiBaseUrl={API_BASE_URL}
                 conversation={selectedConversation}
                 hasArchiveData={hasArchiveData}
+                searchQuery={query}
+                searchResultCount={searchTotalMatches}
               />
               <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
             </section>
@@ -321,6 +374,206 @@ export default function App() {
   }
 }
 
+function SearchResultsPanel({
+  apiBaseUrl,
+  query,
+  results,
+  totalMatches,
+  summary,
+  showSummary,
+  isSummaryLoading,
+  onShowSummary,
+  onHideSummary,
+  onOpenConversation,
+}) {
+  const normalizedQuery = query.trim();
+  const resolvedTotalMatches = summary?.total_matching_messages ?? totalMatches;
+  const canExport = normalizedQuery.length > 0;
+
+  return (
+    <section className="search-results-panel" aria-label="Search results">
+      <header className="search-results-header">
+        <div>
+          <p className="eyebrow">Search results</p>
+          <h2>{formatSidebarNumber(resolvedTotalMatches)} matching {resolvedTotalMatches === 1 ? "message" : "messages"}</h2>
+          <p>{normalizedQuery ? `Showing messages that match "${normalizedQuery}".` : "Search your archive."}</p>
+        </div>
+        <div className="search-result-actions">
+          {showSummary ? (
+            <button className="secondary-button" type="button" onClick={onHideSummary}>
+              Matching messages
+            </button>
+          ) : (
+            <button className="secondary-button" type="button" onClick={onShowSummary}>
+              <BarChart3 size={16} aria-hidden="true" />
+              Analyze results
+            </button>
+          )}
+          <a
+            className={`primary-button ${canExport ? "" : "is-disabled"}`}
+            href={canExport ? buildSearchExportUrl(apiBaseUrl, normalizedQuery) : undefined}
+            aria-disabled={!canExport}
+            onClick={(event) => preventDisabledLink(event, canExport)}
+          >
+            <Download size={16} aria-hidden="true" />
+            Export these results
+          </a>
+        </div>
+      </header>
+
+      {showSummary ? (
+        <SearchSummaryStats summary={summary} isLoading={isSummaryLoading} />
+      ) : (
+        <SearchResultMessages
+          results={results}
+          totalMatches={resolvedTotalMatches}
+          onOpenConversation={onOpenConversation}
+        />
+      )}
+    </section>
+  );
+}
+
+function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
+  if (results.length === 0) {
+    return (
+      <div className="empty-state empty-panel">
+        <strong>No messages matched</strong>
+        <span>Try a different name, phone number, word, or phrase.</span>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {totalMatches > results.length && (
+        <p className="search-results-note">
+          Showing the first {formatSidebarNumber(results.length)} matches.
+        </p>
+      )}
+      <div className="search-message-list">
+        {results.map((result) => (
+          <article className="search-message-card" key={result.id}>
+            <div className="search-message-card-header">
+              <div>
+                <strong>{result.sender_name || "Unknown sender"}</strong>
+                <span>{result.conversation_title || "Untitled conversation"}</span>
+              </div>
+              <time>{formatResultDate(result.sent_at)}</time>
+            </div>
+            {result.body ? <p>{result.body}</p> : <p className="empty-message-body">No text body</p>}
+            <button className="ghost-button" type="button" onClick={() => onOpenConversation(result.conversation_id)}>
+              Open conversation
+            </button>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function SearchSummaryStats({ summary, isLoading }) {
+  if (isLoading && !summary) {
+    return (
+      <div className="empty-state empty-panel">
+        <strong>Checking results</strong>
+        <span>Counting matches in your local archive.</span>
+      </div>
+    );
+  }
+
+  const safeSummary = summary || {
+    total_matching_messages: 0,
+    total_keyword_occurrences: 0,
+    people: [],
+    conversations: [],
+    first_mention_at: null,
+    most_recent_mention_at: null,
+    mentions_by_month: [],
+  };
+
+  return (
+    <div className="search-summary-stats">
+      <div className="search-summary-actions">
+        <div>
+          <h3>Summary report</h3>
+          <p>PDF and Excel summary exports are planned.</p>
+        </div>
+        <button className="secondary-button is-disabled" type="button" disabled>
+          <Download size={16} aria-hidden="true" />
+          Export this summary
+        </button>
+      </div>
+      <dl className="search-summary-topline">
+        <div>
+          <dt>Matching messages</dt>
+          <dd>{formatSidebarNumber(safeSummary.total_matching_messages)}</dd>
+        </div>
+        <div>
+          <dt>Total mentions</dt>
+          <dd>{formatSidebarNumber(safeSummary.total_keyword_occurrences)}</dd>
+        </div>
+        <div>
+          <dt>First mention</dt>
+          <dd>{formatSearchSummaryDate(safeSummary.first_mention_at)}</dd>
+        </div>
+        <div>
+          <dt>Most recent</dt>
+          <dd>{formatSearchSummaryDate(safeSummary.most_recent_mention_at)}</dd>
+        </div>
+      </dl>
+
+      <SearchSummarySection title="Who mentioned this?" emptyText="No message text mentions found.">
+        {safeSummary.people.map((person) => (
+          <li key={person.name}>
+            <span>{person.name}</span>
+            <strong>{formatMentionCount(person.mentions)}</strong>
+          </li>
+        ))}
+      </SearchSummarySection>
+
+      <SearchSummarySection title="Where it appeared" emptyText="No conversations matched.">
+        {safeSummary.conversations.map((conversation) => (
+          <li key={conversation.id}>
+            <span>{conversation.title}</span>
+            <strong>{formatMatchCount(conversation.matching_messages)}</strong>
+          </li>
+        ))}
+      </SearchSummarySection>
+
+      <SearchSummarySection title="When it was mentioned" emptyText="No message text mentions found.">
+        <li>
+          <span>First mention</span>
+          <strong>{formatSearchSummaryDate(safeSummary.first_mention_at)}</strong>
+        </li>
+        <li>
+          <span>Most recent mention</span>
+          <strong>{formatSearchSummaryDate(safeSummary.most_recent_mention_at)}</strong>
+        </li>
+      </SearchSummarySection>
+
+      <SearchSummarySection title="Mentions over time" emptyText="No message text mentions found.">
+        {safeSummary.mentions_by_month.map((item) => (
+          <li key={item.month}>
+            <span>{formatMonthYear(item.month)}</span>
+            <strong>{formatMentionCount(item.mentions)}</strong>
+          </li>
+        ))}
+      </SearchSummarySection>
+    </div>
+  );
+}
+
+function SearchSummarySection({ title, emptyText, children }) {
+  const items = React.Children.toArray(children).filter(Boolean);
+  return (
+    <section className="search-summary-section">
+      <h3>{title}</h3>
+      {items.length > 0 ? <ul>{items}</ul> : <p>{emptyText}</p>}
+    </section>
+  );
+}
+
 function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) {
   return (
     <section className="get-started-panel" aria-label="Get started">
@@ -341,7 +594,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
         {[
           ["Back up your iPhone to this computer", "Use Finder or Apple Devices to make a fresh local backup first."],
           ["Import messages", "Let the app prepare and load your messages into private app storage."],
-          ["Search and export your archive", "Browse conversations, search message text, and create a CSV when needed."],
+          ["Search and export your archive", "Browse conversations, search message text, and prepare PDF, Excel, or CSV outputs."],
         ].map(([title, detail], index) => (
           <li key={title}>
             <span>{index + 1}</span>
@@ -393,7 +646,7 @@ function sortConversations(conversations, sortKey) {
   });
 }
 
-function getSearchStatus({ hasArchiveData, isSearching, matchCount, conversationCount }) {
+function getSearchStatus({ hasArchiveData, isSearching, matchCount, totalMatchCount, conversationCount }) {
   if (!hasArchiveData) {
     return {
       tone: "empty",
@@ -410,7 +663,7 @@ function getSearchStatus({ hasArchiveData, isSearching, matchCount, conversation
     };
   }
 
-  if (matchCount === 0) {
+  if (totalMatchCount === 0) {
     return {
       tone: "empty",
       title: "No messages matched",
@@ -420,7 +673,7 @@ function getSearchStatus({ hasArchiveData, isSearching, matchCount, conversation
 
   return {
     tone: "matches",
-    title: `${formatSidebarNumber(matchCount)} message ${matchCount === 1 ? "match" : "matches"}`,
+    title: `${formatSidebarNumber(totalMatchCount)} message ${totalMatchCount === 1 ? "match" : "matches"}`,
     detail: `Found in ${formatSidebarNumber(conversationCount)} conversation${conversationCount === 1 ? "" : "s"}.`,
   };
 }
@@ -471,11 +724,46 @@ function formatSidebarNumber(value) {
   return new Intl.NumberFormat().format(value || 0);
 }
 
+function formatMentionCount(value) {
+  return `${formatSidebarNumber(value)} mention${value === 1 ? "" : "s"}`;
+}
+
+function formatMatchCount(value) {
+  return `${formatSidebarNumber(value)} matching message${value === 1 ? "" : "s"}`;
+}
+
+function formatResultDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+}
+
+function formatMonthYear(value) {
+  if (!value) return "";
+  const date = new Date(`${value}-01T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString([], { month: "long", year: "numeric" });
+}
+
+function buildSearchExportUrl(apiBaseUrl, query) {
+  return `${apiBaseUrl}/export/messages.csv?q=${encodeURIComponent(query)}`;
+}
+
+function preventDisabledLink(event, isEnabled) {
+  if (!isEnabled) event.preventDefault();
+}
+
 function formatSidebarDate(value) {
   if (!value) return "No messages yet";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+}
+
+function formatSearchSummaryDate(value) {
+  if (!value) return "No mentions";
+  return formatSidebarDate(value);
 }
 
 function getVisibleSidebarError(error, hasArchiveData) {

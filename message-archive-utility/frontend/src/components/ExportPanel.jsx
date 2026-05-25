@@ -1,16 +1,78 @@
 import { Download, FileText, LockKeyhole } from "lucide-react";
-import React from "react";
+import React, { useMemo, useState } from "react";
+
+const SCOPE_OPTIONS = [
+  { id: "fullArchive", label: "Full archive", detail: "All messages in this archive." },
+  { id: "selectedConversation", label: "Selected conversation", detail: "Only the open thread." },
+  { id: "searchResults", label: "Search results", detail: "Messages matching the current search." },
+  { id: "dateRange", label: "Date range", detail: "Choose a start and end date.", planned: true },
+  { id: "person", label: "Contact or person", detail: "Messages with one person.", planned: true },
+  { id: "summaryOnly", label: "Summary report only", detail: "Counts and charts without message rows.", planned: true },
+];
+
+const FORMAT_OPTIONS = [
+  { id: "pdf", label: "PDF", detail: "Printable reports and transcripts.", planned: true },
+  { id: "excel", label: "Excel", detail: "Workbook for review and sorting.", planned: true },
+  { id: "csv", label: "CSV", detail: "Spreadsheet-ready message rows." },
+];
+
+const PDF_STYLE_OPTIONS = [
+  "Easy-to-read conversation view",
+  "Formal transcript",
+  "Summary report with messages",
+];
+
+const EXCEL_WORKBOOK_OPTIONS = [
+  "Full analysis workbook",
+];
 
 export default function ExportPanel({
   apiBaseUrl,
   conversation,
   hasArchiveData = false,
+  searchQuery = "",
+  searchResultCount = 0,
 }) {
+  const [selectedScope, setSelectedScope] = useState("fullArchive");
+  const [selectedFormat, setSelectedFormat] = useState("csv");
+  const [selectedPdfStyle, setSelectedPdfStyle] = useState(PDF_STYLE_OPTIONS[0]);
+  const [selectedWorkbookType, setSelectedWorkbookType] = useState(EXCEL_WORKBOOK_OPTIONS[0]);
+
+  const normalizedSearchQuery = searchQuery.trim();
   const conversationMessageCount = conversation?.messages?.length || 0;
   const canExportConversation = Boolean(conversation?.id && conversationMessageCount > 0);
-  const selectedConversationLabel = canExportConversation
-    ? "Selected conversation"
-    : "Choose a conversation with messages";
+  const canExportSearchResults = normalizedSearchQuery.length > 0;
+
+  const scopeOptions = useMemo(() => {
+    return SCOPE_OPTIONS.map((option) => {
+      if (option.id === "fullArchive") {
+        return { ...option, enabled: hasArchiveData, status: hasArchiveData ? "Ready for CSV" : "Import messages first" };
+      }
+      if (option.id === "selectedConversation") {
+        return {
+          ...option,
+          enabled: canExportConversation,
+          status: canExportConversation ? "Ready for CSV" : "Choose a conversation",
+        };
+      }
+      if (option.id === "searchResults") {
+        return {
+          ...option,
+          enabled: canExportSearchResults,
+          status: canExportSearchResults
+            ? `${formatNumber(searchResultCount)} matching ${searchResultCount === 1 ? "message" : "messages"}`
+            : "Search first",
+        };
+      }
+      return { ...option, enabled: false, status: "Planned" };
+    });
+  }, [canExportConversation, canExportSearchResults, hasArchiveData, searchResultCount]);
+
+  const selectedScopeOption = scopeOptions.find((option) => option.id === selectedScope) || scopeOptions[0];
+  const selectedFormatOption = FORMAT_OPTIONS.find((option) => option.id === selectedFormat) || FORMAT_OPTIONS[2];
+  const canDownload = selectedFormat === "csv" && selectedScopeOption.enabled;
+  const exportUrl = canDownload ? buildExportUrl(apiBaseUrl, selectedScope, conversation?.id, normalizedSearchQuery) : "";
+  const actionText = canDownload ? getDownloadLabel(selectedScope) : getPlannedActionText(selectedFormatOption, selectedScopeOption);
 
   return (
     <section className="export-panel" aria-label="Export Center">
@@ -20,32 +82,17 @@ export default function ExportPanel({
         </span>
         <div>
           <p className="eyebrow">Export Center</p>
-          <h2>Export messages</h2>
+          <h2>Export to PDF, Excel, or CSV</h2>
           <p>
-            Create a CSV file from your local archive. Exports are generated on this device and do not change your messages.
+            Choose what you need, then pick the format. CSV downloads are ready now; PDF and Excel are shown as planned outputs.
           </p>
         </div>
       </div>
 
-      <div className="export-summary" aria-label="Export details">
-        <div>
-          <span>Format</span>
-          <strong>CSV file</strong>
-        </div>
-        <div>
-          <span>Privacy</span>
-          <strong>Generated locally</strong>
-        </div>
-        <div>
-          <span>Available</span>
-          <strong>{hasArchiveData ? "Full archive" : "No archive loaded"}</strong>
-        </div>
-      </div>
-
-      <div className="export-actions">
+      <div className="export-quick-actions" aria-label="Quick exports">
         <a
           className={`primary-button ${hasArchiveData ? "" : "is-disabled"}`}
-          href={hasArchiveData ? buildExportUrl(apiBaseUrl) : undefined}
+          href={hasArchiveData ? buildExportUrl(apiBaseUrl, "fullArchive") : undefined}
           aria-disabled={!hasArchiveData}
           onClick={(event) => preventDisabledLink(event, hasArchiveData)}
         >
@@ -54,20 +101,95 @@ export default function ExportPanel({
         </a>
         <a
           className={`secondary-button ${canExportConversation ? "" : "is-disabled"}`}
-          href={canExportConversation ? buildExportUrl(apiBaseUrl, conversation.id) : undefined}
+          href={canExportConversation ? buildExportUrl(apiBaseUrl, "selectedConversation", conversation.id) : undefined}
           aria-disabled={!canExportConversation}
           onClick={(event) => preventDisabledLink(event, canExportConversation)}
         >
           <Download size={16} aria-hidden="true" />
-          Export selected conversation
+          Export this conversation
         </a>
+      </div>
+
+      <div className="export-choice-grid">
+        <fieldset className="export-choice-group">
+          <legend>What to export</legend>
+          <div className="export-option-list">
+            {scopeOptions.map((option) => (
+              <button
+                className={`export-option ${selectedScope === option.id ? "is-selected" : ""}`}
+                disabled={!option.enabled}
+                key={option.id}
+                onClick={() => setSelectedScope(option.id)}
+                type="button"
+              >
+                <span>
+                  <strong>{option.label}</strong>
+                  <small>{option.detail}</small>
+                </span>
+                <em>{option.status}</em>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="export-choice-group">
+          <legend>Format</legend>
+          <div className="export-format-list">
+            {FORMAT_OPTIONS.map((option) => (
+              <button
+                className={`export-format-option ${selectedFormat === option.id ? "is-selected" : ""}`}
+                disabled={option.planned}
+                key={option.id}
+                onClick={() => setSelectedFormat(option.id)}
+                type="button"
+              >
+                <strong>{option.label}</strong>
+                <span>{option.planned ? "Planned" : "Ready"}</span>
+                <small>{option.detail}</small>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="export-planned-settings" aria-label="Planned export options">
+        <label>
+          <span>PDF style</span>
+          <select value={selectedPdfStyle} onChange={(event) => setSelectedPdfStyle(event.target.value)} disabled>
+            {PDF_STYLE_OPTIONS.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Excel workbook type</span>
+          <select value={selectedWorkbookType} onChange={(event) => setSelectedWorkbookType(event.target.value)} disabled>
+            {EXCEL_WORKBOOK_OPTIONS.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="export-actions">
+        {canDownload ? (
+          <a className="primary-button" href={exportUrl}>
+            <Download size={16} aria-hidden="true" />
+            {actionText}
+          </a>
+        ) : (
+          <button className="primary-button is-disabled" type="button" disabled>
+            <Download size={16} aria-hidden="true" />
+            {actionText}
+          </button>
+        )}
       </div>
 
       <div className="export-note" role={hasArchiveData ? undefined : "status"}>
         <LockKeyhole size={14} aria-hidden="true" />
         <span>
           {hasArchiveData
-            ? `${selectedConversationLabel} can be exported separately when it has messages.`
+            ? "Exports are prepared on this computer. Planned choices stay disabled until their export files exist."
             : "Import an archive before exporting messages."}
         </span>
       </div>
@@ -75,13 +197,34 @@ export default function ExportPanel({
   );
 }
 
-function buildExportUrl(apiBaseUrl, conversationId = null) {
-  const query = conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : "";
-  return `${apiBaseUrl}/export/messages.csv${query}`;
+function buildExportUrl(apiBaseUrl, scope, conversationId = null, searchQuery = "") {
+  const params = new URLSearchParams();
+  if (scope === "selectedConversation" && conversationId) {
+    params.set("conversation_id", conversationId);
+  }
+  if (scope === "searchResults" && searchQuery) {
+    params.set("q", searchQuery);
+  }
+  const query = params.toString();
+  return `${apiBaseUrl}/export/messages.csv${query ? `?${query}` : ""}`;
+}
+
+function getDownloadLabel(scope) {
+  if (scope === "selectedConversation") return "Download conversation CSV";
+  if (scope === "searchResults") return "Download search results CSV";
+  return "Download full archive CSV";
+}
+
+function getPlannedActionText(formatOption, scopeOption) {
+  if (!scopeOption.enabled && scopeOption.status !== "Planned") return scopeOption.status;
+  if (!scopeOption.enabled) return `${scopeOption.label} export is planned`;
+  return `${formatOption.label} export is planned`;
 }
 
 function preventDisabledLink(event, isEnabled) {
-  if (!isEnabled) {
-    event.preventDefault();
-  }
+  if (!isEnabled) event.preventDefault();
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat().format(value || 0);
 }

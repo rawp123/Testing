@@ -1,8 +1,9 @@
+import { Download } from "lucide-react";
 import React from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
-export default function ConversationView({ conversation, isLoading }) {
+export default function ConversationView({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
   if (isLoading) {
     return (
       <section className="conversation-view empty-transcript">
@@ -28,6 +29,7 @@ export default function ConversationView({ conversation, isLoading }) {
   const messages = conversation.messages || [];
   const dateRange = formatDateRange(messages);
   const messageCount = messages.length;
+  const canExportConversation = Boolean(conversation.id && messageCount > 0);
 
   return (
     <section className="conversation-view" aria-label={`${conversation.title} timeline`}>
@@ -47,6 +49,15 @@ export default function ConversationView({ conversation, isLoading }) {
             <dd>{dateRange}</dd>
           </div>
         </dl>
+        <a
+          className={`secondary-button conversation-export-button ${canExportConversation ? "" : "is-disabled"}`}
+          href={canExportConversation ? buildConversationExportUrl(apiBaseUrl, conversation.id) : undefined}
+          aria-disabled={!canExportConversation}
+          onClick={(event) => preventDisabledLink(event, canExportConversation)}
+        >
+          <Download size={16} aria-hidden="true" />
+          Export this conversation
+        </a>
       </header>
 
       <div className="timeline">
@@ -59,6 +70,14 @@ export default function ConversationView({ conversation, isLoading }) {
       </div>
     </section>
   );
+}
+
+function buildConversationExportUrl(apiBaseUrl, conversationId) {
+  return `${apiBaseUrl}/export/messages.csv?conversation_id=${encodeURIComponent(conversationId)}`;
+}
+
+function preventDisabledLink(event, isEnabled) {
+  if (!isEnabled) event.preventDefault();
 }
 
 function renderMessagesWithDateDividers(messages) {
