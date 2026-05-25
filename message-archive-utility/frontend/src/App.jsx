@@ -113,6 +113,13 @@ export default function App() {
     return sortConversations(filteredConversations, conversationSort);
   }, [conversations, conversationSort, query, searchResults]);
 
+  const searchMatchCounts = useMemo(() => {
+    return searchResults.reduce((counts, result) => {
+      counts[result.conversation_id] = (counts[result.conversation_id] || 0) + 1;
+      return counts;
+    }, {});
+  }, [searchResults]);
+
   const visibleConversationCount = visibleConversations.length;
 
   useEffect(() => {
@@ -125,6 +132,12 @@ export default function App() {
   const hasArchiveData = conversations.length > 0 || (archiveStats?.messages?.total || 0) > 0;
   const isSearching = query.trim().length > 0;
   const sidebarError = getVisibleSidebarError(error, hasArchiveData);
+  const searchStatus = getSearchStatus({
+    hasArchiveData,
+    isSearching,
+    matchCount: searchResults.length,
+    conversationCount: visibleConversationCount,
+  });
 
   return (
     <main className="app-shell">
@@ -150,10 +163,12 @@ export default function App() {
               </button>
             )}
           </div>
-          <SearchBar value={query} onChange={setQuery} />
+          <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
           <div className="list-toolbar">
             <p>
-              {visibleConversationCount} conversation{visibleConversationCount === 1 ? "" : "s"}
+              {isSearching
+                ? `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"} with matches`
+                : `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"}`}
             </p>
             <label>
               <span>Sort</span>
@@ -168,11 +183,7 @@ export default function App() {
               </select>
             </label>
           </div>
-          {isSearching && (
-            <p className="result-summary">
-              {searchResults.length} message {searchResults.length === 1 ? "match" : "matches"}
-            </p>
-          )}
+          <SearchStatusMessage status={searchStatus} />
           {sidebarError && <SidebarErrorState error={sidebarError} />}
         </div>
         <ConversationList
@@ -182,6 +193,7 @@ export default function App() {
           isLoading={isLoading}
           isSearching={isSearching}
           hasArchiveData={hasArchiveData}
+          searchMatchCounts={searchMatchCounts}
         />
       </section>
       <section className="workspace" aria-label="Message archive workspace">
@@ -249,6 +261,15 @@ export default function App() {
   }
 }
 
+function SearchStatusMessage({ status }) {
+  return (
+    <div className={`search-status ${status.tone}`} role={status.tone === "empty" ? "status" : undefined}>
+      <strong>{status.title}</strong>
+      <span>{status.detail}</span>
+    </div>
+  );
+}
+
 function sortConversations(conversations, sortKey) {
   return [...conversations].sort((left, right) => {
     if (sortKey === "titleAsc") {
@@ -265,6 +286,38 @@ function sortConversations(conversations, sortKey) {
 
     return sortKey === "lastMessageAsc" ? dateComparison : -dateComparison;
   });
+}
+
+function getSearchStatus({ hasArchiveData, isSearching, matchCount, conversationCount }) {
+  if (!hasArchiveData) {
+    return {
+      tone: "empty",
+      title: "Search your local archive",
+      detail: "Import messages first, then search names, phone numbers, and message text on this device.",
+    };
+  }
+
+  if (!isSearching) {
+    return {
+      tone: "ready",
+      title: "Search stays local",
+      detail: "Look across message text, names, and phone numbers without sending your archive anywhere.",
+    };
+  }
+
+  if (matchCount === 0) {
+    return {
+      tone: "empty",
+      title: "No messages matched",
+      detail: "Try a different name, phone number, word, or phrase.",
+    };
+  }
+
+  return {
+    tone: "matches",
+    title: `${formatSidebarNumber(matchCount)} message ${matchCount === 1 ? "match" : "matches"}`,
+    detail: `Found in ${formatSidebarNumber(conversationCount)} conversation${conversationCount === 1 ? "" : "s"}.`,
+  };
 }
 
 function getConversationTimestamp(conversation) {

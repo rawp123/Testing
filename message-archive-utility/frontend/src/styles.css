@@ -254,6 +254,11 @@ a:focus-visible {
   color: #5b554d;
 }
 
+.search-block {
+  display: grid;
+  gap: 7px;
+}
+
 .search-bar {
   display: flex;
   align-items: center;
@@ -267,6 +272,12 @@ a:focus-visible {
   box-shadow: 0 8px 22px rgba(61, 52, 39, 0.05);
 }
 
+.search-bar.is-disabled {
+  background: #f3eee8;
+  color: #9a9085;
+  box-shadow: none;
+}
+
 .search-bar:focus-within {
   border-color: #45625d;
   box-shadow: 0 0 0 3px rgba(69, 98, 93, 0.14);
@@ -278,6 +289,48 @@ a:focus-visible {
   outline: 0;
   color: #202124;
   background: transparent;
+}
+
+.search-bar input:disabled {
+  color: #8a8278;
+  cursor: not-allowed;
+}
+
+.search-status {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #ded6ca;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.66);
+  padding: 10px 11px;
+}
+
+.search-status strong,
+.search-status span {
+  display: block;
+}
+
+.search-status strong {
+  color: #2c2b29;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.search-status span {
+  color: #716a60;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.search-status.matches {
+  border-color: #b8c9c3;
+  background: #eef7f3;
+}
+
+.search-status.empty {
+  border-style: dashed;
 }
 
 .list-toolbar {
@@ -345,6 +398,12 @@ a:focus-visible {
   box-shadow: inset 5px 0 0 #45625d, 0 10px 24px rgba(49, 82, 77, 0.16);
 }
 
+.conversation-row.is-selected .conversation-count {
+  border-color: #b8c9c3;
+  background: #ffffff;
+  color: #31524d;
+}
+
 .conversation-main {
   display: grid;
   gap: 7px;
@@ -404,7 +463,7 @@ a:focus-visible {
 
 .conversation-count {
   width: fit-content;
-  max-width: 92px;
+  max-width: 116px;
   border-color: #e3dbd0;
   background: #fbfaf7;
   color: #716a60;
@@ -414,6 +473,12 @@ a:focus-visible {
   font-weight: 760;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.search-match-count {
+  border-color: #cbded7;
+  background: #eef7f3;
+  color: #31524d;
 }
 
 .import-panel,

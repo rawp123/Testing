@@ -7,6 +7,7 @@ export default function ConversationList({
   isLoading,
   isSearching,
   hasArchiveData,
+  searchMatchCounts = {},
 }) {
   if (isLoading) {
     return (
@@ -18,9 +19,9 @@ export default function ConversationList({
   }
 
   if (conversations.length === 0) {
-    const title = isSearching ? "No search results" : "No conversations yet";
+    const title = isSearching ? "No messages matched" : "No conversations yet";
     const detail = isSearching
-      ? "Try a different word, handle, or phrase."
+      ? "Try a different name, phone number, word, or phrase."
       : hasArchiveData
         ? "No conversations match the current view."
         : "Import an iPhone backup to browse your message archive.";
@@ -37,6 +38,7 @@ export default function ConversationList({
       {conversations.map((conversation) => {
         const title = formatConversationTitle(conversation);
         const detail = formatConversationDetail(conversation, title);
+        const matchCount = searchMatchCounts[conversation.id] || 0;
 
         return (
           <button
@@ -52,7 +54,11 @@ export default function ConversationList({
               </span>
               <span className="conversation-meta-row">
                 {detail && <small>{detail}</small>}
-                {conversation.message_count ? (
+                {isSearching && matchCount > 0 ? (
+                  <span className="conversation-count search-match-count">
+                    {formatMatchCount(matchCount)}
+                  </span>
+                ) : conversation.message_count ? (
                   <span className="conversation-count">
                     {formatCount(conversation.message_count)}
                   </span>
@@ -83,7 +89,11 @@ function formatConversationDetail(conversation, title) {
 }
 
 function formatCount(value) {
-  return `${new Intl.NumberFormat("en").format(value)} msg${value === 1 ? "" : "s"}`;
+  return `${new Intl.NumberFormat("en").format(value)} message${value === 1 ? "" : "s"}`;
+}
+
+function formatMatchCount(value) {
+  return `${new Intl.NumberFormat("en").format(value)} match${value === 1 ? "" : "es"}`;
 }
 
 function formatDate(value) {
