@@ -8,8 +8,14 @@ import SearchBar from "./components/SearchBar.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const SHOW_SAMPLE_ARCHIVE = import.meta.env.VITE_ENABLE_SAMPLE_ARCHIVE === "true";
+const APP_TABS = [
+  { id: "get-started", label: "Get Started" },
+  { id: "import-messages", label: "Import Messages" },
+  { id: "browse-archive", label: "Browse Archive" },
+];
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState(null);
   const [query, setQuery] = useState("");
   const [conversations, setConversations] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -138,96 +144,149 @@ export default function App() {
     matchCount: searchResults.length,
     conversationCount: visibleConversationCount,
   });
+  const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
 
   return (
     <main className="app-shell">
-      <section className="sidebar" aria-label="Conversation browser">
-        <div className="sidebar-top">
-          <div className="brand-block">
-            <p className="eyebrow">Local archive</p>
-            <h1>Messages</h1>
-            <div className="trust-row" aria-label="Privacy safeguards">
-              <span>Local only</span>
-              <span>Private storage</span>
-              <span>No cloud sync</span>
-            </div>
-          </div>
-          <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
-          <div className="sidebar-actions">
-            <button className="secondary-button" type="button" onClick={() => loadConversations()}>
-              Refresh
-            </button>
-            {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
-              <button className="ghost-button" type="button" onClick={loadSampleArchive}>
-                Demo archive
-              </button>
-            )}
-          </div>
-          <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
-          <div className="list-toolbar">
-            <p>
-              {isSearching
-                ? `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"} with matches`
-                : `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"}`}
-            </p>
-            <label>
-              <span>Sort</span>
-              <select
-                value={conversationSort}
-                onChange={(event) => setConversationSort(event.target.value)}
-                aria-label="Sort conversations"
-              >
-                <option value="lastMessageDesc">Newest first</option>
-                <option value="lastMessageAsc">Oldest first</option>
-                <option value="titleAsc">Title</option>
-              </select>
-            </label>
-          </div>
-          <SearchStatusMessage status={searchStatus} />
-          {sidebarError && <SidebarErrorState error={sidebarError} />}
+      <header className="app-header">
+        <div className="app-title-block">
+          <p className="eyebrow">Local archive</p>
+          <h1>Messages</h1>
+          <p>Import, search, and export your iPhone messages on this computer.</p>
         </div>
-        <ConversationList
-          conversations={visibleConversations}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          isLoading={isLoading}
-          isSearching={isSearching}
+        <nav className="app-tabs" aria-label="App sections" role="tablist">
+          {APP_TABS.map((tab) => (
+            <button
+              aria-controls={`${tab.id}-panel`}
+              aria-selected={resolvedActiveTab === tab.id}
+              className={resolvedActiveTab === tab.id ? "is-active" : ""}
+              id={`${tab.id}-tab`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              role="tab"
+              type="button"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <section
+        aria-labelledby="get-started-tab"
+        className="tab-panel"
+        hidden={resolvedActiveTab !== "get-started"}
+        id="get-started-panel"
+        role="tabpanel"
+      >
+        <GetStartedPanel
           hasArchiveData={hasArchiveData}
-          searchMatchCounts={searchMatchCounts}
+          onBrowseArchive={() => setActiveTab("browse-archive")}
+          onImportMessages={() => setActiveTab("import-messages")}
         />
       </section>
-      <section className="workspace" aria-label="Message archive workspace">
-        <div className={`archive-management ${hasArchiveData ? "is-compact" : ""}`}>
-          <IPhoneImportPanel
-            request={request}
-            onArchiveChanged={refreshArchive}
-            hasArchiveData={hasArchiveData}
-            archiveStats={archiveStats}
-            isArchiveStatsLoading={isStatsLoading}
-          />
-          {hasArchiveData && (
-            <ExportPanel
-              apiBaseUrl={API_BASE_URL}
-              conversation={selectedConversation}
-              hasArchiveData={hasArchiveData}
-            />
-          )}
-        </div>
-        <ConversationView
-          conversation={selectedConversation}
-          isLoading={isConversationLoading}
+
+      <section
+        aria-labelledby="import-messages-tab"
+        className="tab-panel tab-panel-narrow"
+        hidden={resolvedActiveTab !== "import-messages"}
+        id="import-messages-panel"
+        role="tabpanel"
+      >
+        <IPhoneImportPanel
+          request={request}
+          onArchiveChanged={handleArchiveChanged}
+          hasArchiveData={hasArchiveData}
+          archiveStats={archiveStats}
+          isArchiveStatsLoading={isStatsLoading}
         />
-        {!hasArchiveData && (
-          <ExportPanel
-            apiBaseUrl={API_BASE_URL}
-            conversation={selectedConversation}
-            hasArchiveData={hasArchiveData}
-          />
+      </section>
+
+      <section
+        aria-labelledby="browse-archive-tab"
+        className="tab-panel browse-tab-panel"
+        hidden={resolvedActiveTab !== "browse-archive"}
+        id="browse-archive-panel"
+        role="tabpanel"
+      >
+        {!hasArchiveData && !isLoading ? (
+          <div className="browse-empty-state empty-panel">
+            <strong>No archive loaded yet</strong>
+            <span>Import messages first, then browse conversations, search your archive, and export a copy.</span>
+            <button className="primary-button" type="button" onClick={() => setActiveTab("import-messages")}>
+              Import Messages
+            </button>
+          </div>
+        ) : (
+          <div className="archive-browser">
+            <section className="sidebar" aria-label="Conversation browser">
+              <div className="sidebar-top">
+                <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
+                <div className="sidebar-actions">
+                  <button className="secondary-button" type="button" onClick={() => loadConversations()}>
+                    Refresh
+                  </button>
+                  {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
+                    <button className="ghost-button" type="button" onClick={loadSampleArchive}>
+                      Demo archive
+                    </button>
+                  )}
+                </div>
+                <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
+                <div className="list-toolbar">
+                  <p>
+                    {isSearching
+                      ? `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"} with matches`
+                      : `${visibleConversationCount} conversation${visibleConversationCount === 1 ? "" : "s"}`}
+                  </p>
+                  <label>
+                    <span>Sort</span>
+                    <select
+                      value={conversationSort}
+                      onChange={(event) => setConversationSort(event.target.value)}
+                      aria-label="Sort conversations"
+                    >
+                      <option value="lastMessageDesc">Newest first</option>
+                      <option value="lastMessageAsc">Oldest first</option>
+                      <option value="titleAsc">Title</option>
+                    </select>
+                  </label>
+                </div>
+                <SearchStatusMessage status={searchStatus} />
+                {sidebarError && <SidebarErrorState error={sidebarError} />}
+              </div>
+              <ConversationList
+                conversations={visibleConversations}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                isLoading={isLoading}
+                isSearching={isSearching}
+                hasArchiveData={hasArchiveData}
+                searchMatchCounts={searchMatchCounts}
+              />
+            </section>
+            <section className="workspace" aria-label="Message archive workspace">
+              <ConversationView
+                conversation={selectedConversation}
+                isLoading={isConversationLoading}
+              />
+              <ExportPanel
+                apiBaseUrl={API_BASE_URL}
+                conversation={selectedConversation}
+                hasArchiveData={hasArchiveData}
+              />
+              <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
+            </section>
+          </div>
         )}
-        <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
       </section>
     </main>
   );
+
+  async function handleArchiveChanged() {
+    await refreshArchive();
+    setActiveTab("browse-archive");
+  }
 
   async function loadSampleArchive() {
     setIsLoading(true);
@@ -235,6 +294,7 @@ export default function App() {
     try {
       await request("/import/dummy-csv", { method: "POST" });
       await refreshArchive();
+      setActiveTab("browse-archive");
     } catch (requestError) {
       setError(toUserFacingError(requestError));
       setIsLoading(false);
@@ -259,6 +319,51 @@ export default function App() {
       loadArchiveStats(),
     ]);
   }
+}
+
+function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) {
+  return (
+    <section className="get-started-panel" aria-label="Get started">
+      <div className="get-started-copy">
+        <p className="eyebrow">Get Started</p>
+        <h2>Keep a readable copy of your messages</h2>
+        <p>
+          This app helps you turn an iPhone backup on this computer into a private archive you can read,
+          search, and export when you need it.
+        </p>
+        <div className="trust-row" aria-label="Privacy safeguards">
+          <span>Local only</span>
+          <span>Private storage</span>
+          <span>No cloud sync</span>
+        </div>
+      </div>
+      <ol className="onboarding-steps" aria-label="Basic setup sequence">
+        {[
+          ["Back up your iPhone to this computer", "Use Finder or Apple Devices to make a fresh local backup first."],
+          ["Import messages", "Let the app prepare and load your messages into private app storage."],
+          ["Search and export your archive", "Browse conversations, search message text, and create a CSV when needed."],
+        ].map(([title, detail], index) => (
+          <li key={title}>
+            <span>{index + 1}</span>
+            <div>
+              <strong>{title}</strong>
+              <p>{detail}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div className="get-started-actions">
+        <button className="primary-button" type="button" onClick={onImportMessages}>
+          Import Messages
+        </button>
+        {hasArchiveData && (
+          <button className="secondary-button" type="button" onClick={onBrowseArchive}>
+            Browse Archive
+          </button>
+        )}
+      </div>
+    </section>
+  );
 }
 
 function SearchStatusMessage({ status }) {

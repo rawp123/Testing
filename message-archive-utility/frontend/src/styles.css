@@ -43,9 +43,84 @@ a:focus-visible {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 360px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
   background: #f4f0e8;
+}
+
+.app-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  border-bottom: 1px solid #ddd4c7;
+  background: rgba(251, 250, 247, 0.94);
+  padding: 22px 32px 18px;
+}
+
+.app-title-block {
+  min-width: 0;
+}
+
+.app-title-block h1,
+.get-started-copy h2 {
+  margin: 0;
+  color: #161715;
+  line-height: 1.12;
+}
+
+.app-title-block h1 {
+  font-size: 31px;
+  font-weight: 760;
+}
+
+.app-title-block p:not(.eyebrow),
+.get-started-copy > p {
+  margin: 7px 0 0;
+  max-width: 640px;
+  color: #716a60;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.app-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.app-tabs button {
+  min-height: 38px;
+  border: 1px solid #d8cfc1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #5b554d;
+  padding: 0 14px;
+  font-weight: 760;
+}
+
+.app-tabs button.is-active {
+  border-color: #45625d;
+  background: #45625d;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(49, 82, 77, 0.14);
+}
+
+.tab-panel {
+  min-width: 0;
+}
+
+.tab-panel-narrow {
+  width: min(100%, 560px);
+  padding: 26px 32px 44px;
+}
+
+.archive-browser {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  min-height: calc(100vh - 101px);
 }
 
 .sidebar {
@@ -252,6 +327,95 @@ a:focus-visible {
   border: 1px solid #ded6ca;
   background: #fbfaf7;
   color: #5b554d;
+}
+
+.get-started-panel {
+  display: grid;
+  gap: 20px;
+  width: min(100%, 820px);
+  padding: 34px 32px 48px;
+}
+
+.get-started-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.get-started-copy h2 {
+  max-width: 680px;
+  font-size: 30px;
+  font-weight: 760;
+}
+
+.get-started-copy .trust-row {
+  margin-top: 6px;
+}
+
+.onboarding-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.onboarding-steps li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid #ded6ca;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.onboarding-steps li > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #45625d;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.onboarding-steps strong,
+.onboarding-steps p {
+  display: block;
+  margin: 0;
+}
+
+.onboarding-steps strong {
+  color: #202124;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.onboarding-steps p {
+  margin-top: 4px;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.get-started-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.browse-empty-state {
+  width: min(100% - 44px, 680px);
+  margin: 26px 32px;
+}
+
+.browse-empty-state .primary-button {
+  justify-self: start;
+  margin-top: 8px;
 }
 
 .search-block {
@@ -1555,7 +1719,7 @@ a:focus-visible {
 }
 
 @media (max-width: 1120px) {
-  .app-shell {
+  .archive-browser {
     grid-template-columns: 328px minmax(0, 1fr);
   }
 
@@ -1576,6 +1740,15 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
+  .app-header {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .app-tabs {
+    justify-content: flex-start;
+  }
+
   .import-progress-list {
     grid-template-columns: 1fr;
   }
@@ -1587,7 +1760,7 @@ a:focus-visible {
 }
 
 @media (max-width: 760px) {
-  .app-shell {
+  .archive-browser {
     grid-template-columns: 1fr;
   }
 
@@ -1606,6 +1779,18 @@ a:focus-visible {
 
   .workspace {
     padding: 22px;
+  }
+
+  .app-header,
+  .get-started-panel,
+  .tab-panel-narrow {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+
+  .browse-empty-state {
+    width: auto;
+    margin: 22px;
   }
 
   .conversation-header h2 {
@@ -1666,8 +1851,16 @@ a:focus-visible {
 
 @media (max-width: 480px) {
   .sidebar,
-  .workspace {
+  .workspace,
+  .app-header,
+  .get-started-panel,
+  .tab-panel-narrow {
     padding: 18px;
+  }
+
+  .app-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .trust-row span {
