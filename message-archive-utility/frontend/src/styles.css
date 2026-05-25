@@ -611,24 +611,229 @@ a:focus-visible {
   padding: 7px 10px;
 }
 
+.guided-import-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #d8cfc1;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 15px;
+}
+
+.guided-import-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: start;
+}
+
+.guided-import-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #cbded7;
+  border-radius: 10px;
+  background: #eef7f3;
+  color: #31524d;
+}
+
+.guided-import-header h2,
+.guided-import-header p {
+  margin: 0;
+}
+
+.guided-import-header h2 {
+  color: #202124;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.guided-import-header p:not(.eyebrow) {
+  margin-top: 5px;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.simple-flow-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.simple-flow-list li {
+  min-width: 0;
+  border: 1px solid #e3dbd0;
+  border-radius: 9px;
+  background: #fbfaf7;
+  padding: 8px 9px;
+  color: #2c2b29;
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
 .import-status-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   border: 1px solid #cbded7;
   border-radius: 10px;
   background: #eef7f3;
-  margin: 0 0 14px;
   padding: 10px 12px;
   color: #31524d;
 }
 
+.import-status-card.is-active {
+  box-shadow: 0 0 0 3px rgba(69, 98, 93, 0.12);
+}
+
+.import-status-card strong,
 .import-status-card p {
+  display: block;
   margin: 0;
-  color: #31524d;
+}
+
+.import-status-card strong {
+  color: #243f3a;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.import-status-card p {
+  margin-top: 2px;
+  color: #31524d;
+  font-size: 12px;
+  font-weight: 650;
   line-height: 1.35;
+}
+
+.import-progress-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.import-progress-list li {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border: 1px solid #e3dbd0;
+  border-radius: 9px;
+  background: #fbfaf7;
+  padding: 8px;
+}
+
+.import-progress-list span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #e9e2d8;
+  color: #716a60;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.import-progress-list strong {
+  color: #716a60;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.import-progress-list li.is-active {
+  border-color: #45625d;
+  background: #eef7f3;
+}
+
+.import-progress-list li.is-complete {
+  border-color: #b8c9c3;
+  background: #f0f8f4;
+}
+
+.import-progress-list li.is-active span,
+.import-progress-list li.is-complete span {
+  background: #45625d;
+  color: #ffffff;
+}
+
+.import-progress-list li.is-active strong,
+.import-progress-list li.is-complete strong {
+  color: #31524d;
+}
+
+.guided-import-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.guided-import-actions .primary-button {
+  min-width: 160px;
+}
+
+.guided-import-actions span {
+  color: #716a60;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.import-options-details {
+  margin-top: 14px;
+}
+
+.diagnostics-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.diagnostics-card > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.diagnostics-card strong,
+.diagnostics-card span {
+  display: block;
+}
+
+.diagnostics-card strong {
+  color: #2c2b29;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.diagnostics-card span {
+  color: #716a60;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.troubleshooting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
 }
 
 .quick-import-card {
@@ -1370,6 +1575,17 @@ a:focus-visible {
   }
 }
 
+@media (max-width: 900px) {
+  .import-progress-list {
+    grid-template-columns: 1fr;
+  }
+
+  .import-progress-list li {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
 @media (max-width: 760px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -1400,9 +1616,14 @@ a:focus-visible {
   .quick-import-card,
   .result-grid,
   .export-summary,
+  .simple-flow-list,
   .step-list,
   .stats-grid,
   .stats-strip .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostics-card {
     grid-template-columns: 1fr;
   }
 
