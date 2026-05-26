@@ -21,6 +21,7 @@ from app.importers.iphone_backup import (
 )
 from app.services.export_csv import export_messages_csv
 from app.services.export_pdf import export_messages_pdf, export_search_summary_pdf
+from app.services.export_xlsx import EXCEL_MEDIA_TYPE, export_messages_xlsx, export_search_summary_xlsx
 from app.services.contact_display import (
     UNKNOWN_CONTACT_LABEL,
     clean_participant_names,
@@ -738,6 +739,35 @@ def export_messages_pdf_response(
     )
 
 
+@app.get("/export/messages.xlsx")
+def export_messages_xlsx_response(
+    conversation_id: int | None = None,
+    q: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> Response:
+    with get_connection() as conn:
+        if conversation_id is not None:
+            conversation = conn.execute(
+                "SELECT id FROM conversations WHERE id = ?",
+                (conversation_id,),
+            ).fetchone()
+            if conversation is None:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+        workbook = export_messages_xlsx(
+            conn,
+            conversation_id=conversation_id,
+            q=q,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    return Response(
+        content=workbook.content,
+        media_type=EXCEL_MEDIA_TYPE,
+        headers={"Content-Disposition": f"attachment; filename={workbook.filename}"},
+    )
+
+
 @app.get("/export/search-summary.pdf")
 def export_search_summary_pdf_response(q: str = "", style: str = "summary") -> Response:
     with get_connection() as conn:
@@ -746,6 +776,17 @@ def export_search_summary_pdf_response(q: str = "", style: str = "summary") -> R
         content=pdf.content,
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={pdf.filename}"},
+    )
+
+
+@app.get("/export/search-summary.xlsx")
+def export_search_summary_xlsx_response(q: str = "") -> Response:
+    with get_connection() as conn:
+        workbook = export_search_summary_xlsx(conn, q=q)
+    return Response(
+        content=workbook.content,
+        media_type=EXCEL_MEDIA_TYPE,
+        headers={"Content-Disposition": f"attachment; filename={workbook.filename}"},
     )
 
 

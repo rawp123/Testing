@@ -137,10 +137,16 @@ def fetch_export_messages(
           conversations.id AS conversation_id,
           conversations.title AS conversation_title,
           contacts.display_name AS sender_name,
-          contacts.handle AS sender_handle
+          contacts.handle AS sender_handle,
+          COALESCE(attachment_counts.attachment_count, 0) AS attachment_count
         FROM messages
         JOIN conversations ON conversations.id = messages.conversation_id
         LEFT JOIN contacts ON contacts.id = messages.sender_contact_id
+        LEFT JOIN (
+          SELECT message_id, COUNT(*) AS attachment_count
+          FROM message_attachments
+          GROUP BY message_id
+        ) attachment_counts ON attachment_counts.message_id = messages.id
         {where_clause}
         ORDER BY messages.sent_at ASC, messages.id ASC
         """,

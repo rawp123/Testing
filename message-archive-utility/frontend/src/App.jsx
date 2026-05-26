@@ -502,7 +502,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
       <div className="search-summary-actions">
         <div>
           <h3>Summary report</h3>
-          <p>Download a PDF summary of this search. Excel summary exports are planned.</p>
+          <p>Download a PDF summary here, or choose Excel in the Export Center for a workbook.</p>
         </div>
         <a
           className={`secondary-button ${query ? "" : "is-disabled"}`}

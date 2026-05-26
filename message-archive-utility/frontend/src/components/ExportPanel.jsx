@@ -12,7 +12,7 @@ const SCOPE_OPTIONS = [
 
 const FORMAT_OPTIONS = [
   { id: "pdf", label: "PDF", detail: "Printable reports and transcripts." },
-  { id: "excel", label: "Excel", detail: "Workbook for review and sorting.", planned: true },
+  { id: "excel", label: "Excel", detail: "Full analysis workbook." },
   { id: "csv", label: "CSV", detail: "Spreadsheet-ready message rows." },
 ];
 
@@ -44,8 +44,8 @@ export default function ExportPanel({
   const conversationMessageCount = conversation?.messages?.length || 0;
   const canExportConversation = Boolean(conversation?.id && conversationMessageCount > 0);
   const canExportSearchResults = normalizedSearchQuery.length > 0;
-  const canExportDateRange = selectedFormat === "pdf" && Boolean(startDate || endDate);
-  const canExportSummaryOnly = selectedFormat === "pdf" && canExportSearchResults;
+  const canExportDateRange = ["pdf", "excel"].includes(selectedFormat) && Boolean(startDate || endDate);
+  const canExportSummaryOnly = ["pdf", "excel"].includes(selectedFormat) && canExportSearchResults;
 
   const scopeOptions = useMemo(() => {
     return SCOPE_OPTIONS.map((option) => {
@@ -72,14 +72,18 @@ export default function ExportPanel({
         return {
           ...option,
           enabled: canExportDateRange,
-          status: selectedFormat === "pdf" ? (canExportDateRange ? "Ready for PDF" : "Choose dates") : "PDF only for now",
+          status: ["pdf", "excel"].includes(selectedFormat)
+            ? (canExportDateRange ? getReadyStatus(selectedFormat) : "Choose dates")
+            : "PDF or Excel only",
         };
       }
       if (option.id === "summaryOnly") {
         return {
           ...option,
           enabled: canExportSummaryOnly,
-          status: selectedFormat === "pdf" ? (canExportSummaryOnly ? "Ready for PDF" : "Search first") : "PDF only for now",
+          status: ["pdf", "excel"].includes(selectedFormat)
+            ? (canExportSummaryOnly ? getReadyStatus(selectedFormat) : "Search first")
+            : "PDF or Excel only",
         };
       }
       return { ...option, enabled: false, status: "Planned" };
@@ -96,7 +100,7 @@ export default function ExportPanel({
 
   const selectedScopeOption = scopeOptions.find((option) => option.id === selectedScope) || scopeOptions[0];
   const selectedFormatOption = FORMAT_OPTIONS.find((option) => option.id === selectedFormat) || FORMAT_OPTIONS[2];
-  const canDownload = selectedFormat !== "excel" && selectedScopeOption.enabled;
+  const canDownload = selectedScopeOption.enabled;
   const exportUrl = canDownload
     ? buildExportUrl({
         apiBaseUrl,
@@ -121,7 +125,7 @@ export default function ExportPanel({
           <p className="eyebrow">Export Center</p>
           <h2>Export to PDF, Excel, or CSV</h2>
           <p>
-            Choose what you need, then pick the format. PDF and CSV downloads are ready now; Excel is still planned.
+            Choose what you need, then pick the format. PDF, Excel, and CSV downloads are ready for supported choices.
           </p>
         </div>
       </div>
@@ -196,7 +200,7 @@ export default function ExportPanel({
         </fieldset>
       </div>
 
-      <div className="export-planned-settings" aria-label="Planned export options">
+      <div className="export-planned-settings" aria-label="Export options">
         <label>
           <span>PDF style</span>
           <select
@@ -211,7 +215,11 @@ export default function ExportPanel({
         </label>
         <label>
           <span>Excel workbook type</span>
-          <select value={selectedWorkbookType} onChange={(event) => setSelectedWorkbookType(event.target.value)} disabled>
+          <select
+            value={selectedWorkbookType}
+            onChange={(event) => setSelectedWorkbookType(event.target.value)}
+            disabled={selectedFormat !== "excel"}
+          >
             {EXCEL_WORKBOOK_OPTIONS.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -226,7 +234,7 @@ export default function ExportPanel({
             type="date"
             value={startDate}
             onChange={(event) => setStartDate(event.target.value)}
-            disabled={selectedFormat !== "pdf"}
+            disabled={!["pdf", "excel"].includes(selectedFormat)}
           />
         </label>
         <label>
@@ -235,7 +243,7 @@ export default function ExportPanel({
             type="date"
             value={endDate}
             onChange={(event) => setEndDate(event.target.value)}
-            disabled={selectedFormat !== "pdf"}
+            disabled={!["pdf", "excel"].includes(selectedFormat)}
           />
         </label>
       </div>
@@ -258,7 +266,7 @@ export default function ExportPanel({
         <LockKeyhole size={14} aria-hidden="true" />
         <span>
           {hasArchiveData
-            ? "Exports are prepared on this computer. Excel and person-only exports stay disabled until those files exist."
+            ? "Exports are prepared on this computer. Person-only exports stay disabled until there is a clear contact choice."
             : "Import an archive before exporting messages."}
         </span>
       </div>
@@ -277,7 +285,7 @@ function buildExportUrl({
   pdfStyle = "conversation",
 }) {
   const params = new URLSearchParams();
-  const extension = format === "pdf" ? "pdf" : "csv";
+  const extension = format === "pdf" ? "pdf" : format === "excel" ? "xlsx" : "csv";
   if (scope === "selectedConversation" && conversationId) {
     params.set("conversation_id", conversationId);
   }
@@ -295,7 +303,8 @@ function buildExportUrl({
     params.set("style", pdfStyle);
   }
   const query = params.toString();
-  const path = scope === "summaryOnly" ? "search-summary.pdf" : `messages.${extension}`;
+  const summaryExtension = format === "excel" ? "xlsx" : "pdf";
+  const path = scope === "summaryOnly" ? `search-summary.${summaryExtension}` : `messages.${extension}`;
   return `${apiBaseUrl}/export/${path}${query ? `?${query}` : ""}`;
 }
 
@@ -322,5 +331,7 @@ function formatNumber(value) {
 }
 
 function getReadyStatus(format) {
-  return format === "pdf" ? "Ready for PDF" : "Ready for CSV";
+  if (format === "pdf") return "Ready for PDF";
+  if (format === "excel") return "Ready for Excel";
+  return "Ready for CSV";
 }
