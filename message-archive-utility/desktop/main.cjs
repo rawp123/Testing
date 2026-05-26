@@ -6,7 +6,10 @@ const path = require("node:path");
 const { fileURLToPath, pathToFileURL } = require("node:url");
 
 const DEV_SERVER_URL = process.env.ELECTRON_START_URL || "";
-const FRONTEND_DIST_INDEX = path.resolve(__dirname, "../frontend/dist/index.html");
+const IS_PACKAGED = app.isPackaged;
+const FRONTEND_DIST_INDEX = IS_PACKAGED
+  ? path.join(process.resourcesPath, "frontend", "dist", "index.html")
+  : path.resolve(__dirname, "../frontend/dist/index.html");
 const PROJECT_DIR = path.resolve(__dirname, "..");
 const BACKEND_DIR = path.resolve(PROJECT_DIR, "backend");
 const BACKEND_VENV_DIR = process.env.MESSAGE_ARCHIVE_BACKEND_VENV_DIR || path.resolve(PROJECT_DIR, ".venv");
@@ -16,6 +19,7 @@ const BACKEND_HEALTH_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}/health`;
 const BACKEND_READY_TIMEOUT_MS = 20000;
 const BACKEND_POLL_INTERVAL_MS = 350;
 const UVICORN_BIN = path.resolve(BACKEND_VENV_DIR, "bin/uvicorn");
+const PACKAGED_BACKEND_EXECUTABLE = path.join(process.resourcesPath, "backend", "message-archive-backend");
 const DESKTOP_DATA_DIR_NAME = "Message Archive Utility";
 const USE_BACKEND_RELOAD = process.env.MESSAGE_ARCHIVE_BACKEND_RELOAD === "1";
 const ALLOWED_DEV_ORIGINS = new Set([
@@ -161,16 +165,19 @@ async function ensureBackendReady() {
 }
 
 function startBackendProcess() {
-  if (!fs.existsSync(UVICORN_BIN)) {
+  const backendExecutable = getBackendExecutable();
+  if (!fs.existsSync(backendExecutable)) {
     throw new Error(
-      [
-        `The backend virtual environment is missing Uvicorn at ${UVICORN_BIN}.`,
-        "",
-        "Run these setup commands from the message-archive-utility folder:",
-        "",
-        "python3 -m venv .venv",
-        ".venv/bin/python -m pip install -r backend/requirements.txt",
-      ].join("\n"),
+      IS_PACKAGED
+        ? "Message Archive could not find its local message service. Please reinstall the app and try again."
+        : [
+            `The backend virtual environment is missing Uvicorn at ${UVICORN_BIN}.`,
+            "",
+            "Run these setup commands from the message-archive-utility folder:",
+            "",
+            "python3 -m venv .venv",
+            ".venv/bin/python -m pip install -r backend/requirements.txt",
+          ].join("\n"),
     );
   }
 
@@ -182,20 +189,14 @@ function startBackendProcess() {
     MESSAGE_ARCHIVE_DB_PATH:
       process.env.MESSAGE_ARCHIVE_DB_PATH || path.join(desktopDataDir, "message-archive.sqlite3"),
   };
+  const backendArgs = getBackendArgs();
+  const backendCwd = getBackendCwd(backendExecutable);
 
   backendProcess = spawn(
-    UVICORN_BIN,
-    [
-      "app.main:app",
-      "--host",
-      BACKEND_HOST,
-      "--port",
-      String(BACKEND_PORT),
-      "--no-access-log",
-      ...(USE_BACKEND_RELOAD ? ["--reload"] : []),
-    ],
+    backendExecutable,
+    backendArgs,
     {
-      cwd: BACKEND_DIR,
+      cwd: backendCwd,
       env,
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -220,6 +221,34 @@ function startBackendProcess() {
     console.error(`Could not start local backend: ${error.message}`);
     backendProcess = null;
   });
+}
+
+function getBackendExecutable() {
+  if (process.env.MESSAGE_ARCHIVE_BACKEND_EXECUTABLE) {
+    return process.env.MESSAGE_ARCHIVE_BACKEND_EXECUTABLE;
+  }
+  return IS_PACKAGED ? PACKAGED_BACKEND_EXECUTABLE : UVICORN_BIN;
+}
+
+function getBackendArgs() {
+  if (IS_PACKAGED || process.env.MESSAGE_ARCHIVE_BACKEND_EXECUTABLE) {
+    return ["--host", BACKEND_HOST, "--port", String(BACKEND_PORT)];
+  }
+  return [
+    "app.main:app",
+    "--host",
+    BACKEND_HOST,
+    "--port",
+    String(BACKEND_PORT),
+    "--no-access-log",
+    ...(USE_BACKEND_RELOAD ? ["--reload"] : []),
+  ];
+}
+
+function getBackendCwd(backendExecutable) {
+  return IS_PACKAGED || process.env.MESSAGE_ARCHIVE_BACKEND_EXECUTABLE
+    ? path.dirname(backendExecutable)
+    : BACKEND_DIR;
 }
 
 function getDesktopDataDir() {
@@ -263,8 +292,8 @@ app.whenReady().then(async () => {
     await ensureBackendReady();
   } catch (error) {
     dialog.showErrorBox(
-      "Message Archive backend unavailable",
-      `${error.message}\n\nClose the process using port ${BACKEND_PORT}, or start the FastAPI backend manually in desktop mode and try again.`,
+      "Message Archive could not open",
+      getStartupErrorMessage(error),
     );
     app.quit();
     return;
@@ -288,3 +317,15 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+function getStartupErrorMessage(error) {
+  if (IS_PACKAGED) {
+    return [
+      error.message || "The local message service could not start.",
+      "",
+      "Your message archive is still stored on this Mac. Please reopen the app, or reinstall it if this keeps happening.",
+    ].join("\n");
+  }
+
+  return `${error.message}\n\nClose the process using port ${BACKEND_PORT}, or start the local backend in desktop mode and try again.`;
+}

@@ -1,13 +1,47 @@
 {
   "name": "message-archive-utility-desktop",
+  "description": "A local-first Mac app for archiving, searching, and exporting iPhone messages.",
   "version": "0.1.0",
   "private": true,
+  "productName": "Message Archive Utility",
+  "author": "Message Archive Utility",
   "main": "main.cjs",
   "scripts": {
     "dev": "electron .",
-    "start": "electron ."
+    "start": "electron .",
+    "pack:mac": "../scripts/build-desktop.sh && electron-builder --mac --dir"
+  },
+  "build": {
+    "appId": "com.messagearchive.utility",
+    "productName": "Message Archive Utility",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "output": "../release/mac"
+    },
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../frontend/dist",
+        "to": "frontend/dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "category": "public.app-category.productivity",
+      "identity": null
+    }
   },
   "devDependencies": {
-    "electron": "^42.2.0"
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1"
   }
 }
