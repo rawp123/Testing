@@ -822,6 +822,14 @@ a:focus-visible {
   line-height: 1.4;
 }
 
+.backup-encryption-note {
+  margin: -2px 0 0;
+  color: #5f776f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .simple-flow-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

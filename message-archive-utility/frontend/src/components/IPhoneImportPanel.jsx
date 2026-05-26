@@ -489,6 +489,10 @@ export default function IPhoneImportPanel({
               <span className="privacy-badge">No account required</span>
             </div>
 
+            <p className="backup-encryption-note">
+              If your iPhone backup is encrypted, keep it that way. The app will tell you if it needs a temporary local backup without encryption for import.
+            </p>
+
             <ol className="simple-flow-list" aria-label="Import overview">
               <li>Back up iPhone</li>
               <li>Import messages</li>
