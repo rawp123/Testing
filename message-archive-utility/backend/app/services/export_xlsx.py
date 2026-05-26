@@ -46,6 +46,7 @@ def export_messages_xlsx(
     q: str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    contact_id: int | None = None,
     summary_only: bool = False,
 ) -> XlsxExport:
     message_rows = fetch_export_messages(
@@ -54,6 +55,7 @@ def export_messages_xlsx(
         q=q,
         start_date=start_date,
         end_date=end_date,
+        contact_id=contact_id,
     )
     scope = build_scope_description(
         conn,
@@ -61,7 +63,7 @@ def export_messages_xlsx(
         q=q,
         start_date=start_date,
         end_date=end_date,
-        contact_id=None,
+        contact_id=contact_id,
     )
     sheets = build_workbook_sheets(
         conn,

@@ -7,6 +7,7 @@ def export_messages_csv(
     conn: sqlite3.Connection,
     conversation_id: int | None = None,
     q: str | None = None,
+    contact_id: int | None = None,
 ) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
@@ -34,6 +35,20 @@ def export_messages_csv(
             "(messages.body LIKE ? OR conversations.title LIKE ? OR contacts.display_name LIKE ?)"
         )
         params.extend([query, query, query])
+    if contact_id is not None:
+        where_conditions.append(
+            """
+            (
+              messages.conversation_id IN (
+                SELECT conversation_id
+                FROM conversation_participants
+                WHERE contact_id = ?
+              )
+              OR messages.sender_contact_id = ?
+            )
+            """
+        )
+        params.extend([contact_id, contact_id])
 
     where_clause = f"WHERE {' AND '.join(where_conditions)}" if where_conditions else ""
 

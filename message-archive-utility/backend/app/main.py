@@ -20,7 +20,7 @@ from app.importers.iphone_backup import (
     validate_copied_sms_db,
 )
 from app.services.export_csv import export_messages_csv
-from app.services.export_pdf import export_messages_pdf, export_search_summary_pdf
+from app.services.export_pdf import export_messages_pdf, export_search_summary_pdf, safe_filename_part
 from app.services.export_xlsx import EXCEL_MEDIA_TYPE, export_messages_xlsx, export_search_summary_xlsx
 from app.services.contact_display import (
     UNKNOWN_CONTACT_LABEL,
@@ -677,8 +677,81 @@ def search_summary(q: str = "") -> dict:
         return build_search_summary(conn, q=q)
 
 
+def build_export_person_name(row: sqlite3.Row) -> str:
+    display_name = row["display_name"]
+    if display_name and display_name.strip():
+        return display_name.strip()
+    return format_contact_display_name(row["handle"])
+
+
+def format_export_person_description(row: sqlite3.Row) -> str:
+    conversation_count = row["conversation_count"] or 0
+    message_count = row["message_count"] or 0
+    conversation_label = "conversation" if conversation_count == 1 else "conversations"
+    message_label = "message" if message_count == 1 else "messages"
+    return f"{conversation_count} {conversation_label}, {message_count} {message_label}"
+
+
+def get_export_person_name_or_404(conn: sqlite3.Connection, contact_id: int) -> str:
+    row = conn.execute(
+        "SELECT display_name, handle FROM contacts WHERE id = ?",
+        (contact_id,),
+    ).fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+    return build_export_person_name(row)
+
+
+@app.get("/export/people")
+def list_export_people() -> dict:
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            WITH contact_conversations AS (
+              SELECT contact_id, conversation_id
+              FROM conversation_participants
+              UNION
+              SELECT sender_contact_id AS contact_id, conversation_id
+              FROM messages
+              WHERE sender_contact_id IS NOT NULL
+            )
+            SELECT
+              contacts.id,
+              contacts.display_name,
+              contacts.handle,
+              COUNT(DISTINCT contact_conversations.conversation_id) AS conversation_count,
+              COUNT(DISTINCT messages.id) AS message_count
+            FROM contacts
+            LEFT JOIN contact_conversations ON contact_conversations.contact_id = contacts.id
+            LEFT JOIN messages ON messages.conversation_id = contact_conversations.conversation_id
+            GROUP BY contacts.id
+            HAVING COUNT(DISTINCT messages.id) > 0
+            ORDER BY LOWER(COALESCE(NULLIF(TRIM(contacts.display_name), ''), contacts.handle))
+            """
+        ).fetchall()
+
+    return {
+        "people": [
+            {
+                "id": row["id"],
+                "name": person_name,
+                "detail": row["handle"] if row["handle"] != person_name else "",
+                "message_count": row["message_count"],
+                "conversation_count": row["conversation_count"],
+                "description": format_export_person_description(row),
+            }
+            for row in rows
+            for person_name in [build_export_person_name(row)]
+        ]
+    }
+
+
 @app.get("/export/messages.csv")
-def export_csv(conversation_id: int | None = None, q: str | None = None) -> Response:
+def export_csv(
+    conversation_id: int | None = None,
+    q: str | None = None,
+    contact_id: int | None = None,
+) -> Response:
     with get_connection() as conn:
         if conversation_id is not None:
             conversation = conn.execute(
@@ -687,8 +760,13 @@ def export_csv(conversation_id: int | None = None, q: str | None = None) -> Resp
             ).fetchone()
             if conversation is None:
                 raise HTTPException(status_code=404, detail="Conversation not found")
-        csv_text = export_messages_csv(conn, conversation_id=conversation_id, q=q)
-    if q and q.strip():
+        contact_label = None
+        if contact_id is not None:
+            contact_label = get_export_person_name_or_404(conn, contact_id)
+        csv_text = export_messages_csv(conn, conversation_id=conversation_id, q=q, contact_id=contact_id)
+    if contact_id is not None and contact_label:
+        filename = f"{safe_filename_part(f'messages-with-{contact_label}')}.csv"
+    elif q and q.strip():
         filename = "search-results-messages.csv"
     else:
         filename = f"conversation-{conversation_id}-messages.csv" if conversation_id else "messages.csv"
@@ -717,12 +795,7 @@ def export_messages_pdf_response(
             if conversation is None:
                 raise HTTPException(status_code=404, detail="Conversation not found")
         if contact_id is not None:
-            contact = conn.execute(
-                "SELECT id FROM contacts WHERE id = ?",
-                (contact_id,),
-            ).fetchone()
-            if contact is None:
-                raise HTTPException(status_code=404, detail="Contact not found")
+            get_export_person_name_or_404(conn, contact_id)
         pdf = export_messages_pdf(
             conn,
             conversation_id=conversation_id,
@@ -745,6 +818,7 @@ def export_messages_xlsx_response(
     q: str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    contact_id: int | None = None,
 ) -> Response:
     with get_connection() as conn:
         if conversation_id is not None:
@@ -754,12 +828,15 @@ def export_messages_xlsx_response(
             ).fetchone()
             if conversation is None:
                 raise HTTPException(status_code=404, detail="Conversation not found")
+        if contact_id is not None:
+            get_export_person_name_or_404(conn, contact_id)
         workbook = export_messages_xlsx(
             conn,
             conversation_id=conversation_id,
             q=q,
             start_date=start_date,
             end_date=end_date,
+            contact_id=contact_id,
         )
     return Response(
         content=workbook.content,

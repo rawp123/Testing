@@ -1,12 +1,12 @@
 import { Download, FileText, LockKeyhole } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const SCOPE_OPTIONS = [
   { id: "fullArchive", label: "Full archive", detail: "All messages in this archive." },
   { id: "selectedConversation", label: "Selected conversation", detail: "Only the open thread." },
   { id: "searchResults", label: "Search results", detail: "Messages matching the current search." },
   { id: "dateRange", label: "Date range", detail: "Choose a start and end date." },
-  { id: "person", label: "Contact or person", detail: "Messages with one person.", planned: true },
+  { id: "person", label: "Contact or person", detail: "Messages with one person." },
   { id: "summaryOnly", label: "Summary report only", detail: "Counts without message rows." },
 ];
 
@@ -39,6 +39,47 @@ export default function ExportPanel({
   const [selectedWorkbookType, setSelectedWorkbookType] = useState(EXCEL_WORKBOOK_OPTIONS[0]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [people, setPeople] = useState([]);
+  const [peopleStatus, setPeopleStatus] = useState("idle");
+  const [selectedPersonId, setSelectedPersonId] = useState("");
+
+  useEffect(() => {
+    let isCurrent = true;
+    if (!hasArchiveData) {
+      setPeople([]);
+      setSelectedPersonId("");
+      setPeopleStatus("idle");
+      return () => {
+        isCurrent = false;
+      };
+    }
+
+    setPeopleStatus("loading");
+    fetch(`${apiBaseUrl}/export/people`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not load people");
+        return response.json();
+      })
+      .then((data) => {
+        if (!isCurrent) return;
+        const nextPeople = Array.isArray(data.people) ? data.people : [];
+        setPeople(nextPeople);
+        setPeopleStatus("ready");
+        setSelectedPersonId((current) => (
+          current && nextPeople.some((person) => String(person.id) === String(current)) ? current : ""
+        ));
+      })
+      .catch(() => {
+        if (!isCurrent) return;
+        setPeople([]);
+        setSelectedPersonId("");
+        setPeopleStatus("error");
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [apiBaseUrl, hasArchiveData]);
 
   const normalizedSearchQuery = searchQuery.trim();
   const conversationMessageCount = conversation?.messages?.length || 0;
@@ -46,6 +87,9 @@ export default function ExportPanel({
   const canExportSearchResults = normalizedSearchQuery.length > 0;
   const canExportDateRange = ["pdf", "excel"].includes(selectedFormat) && Boolean(startDate || endDate);
   const canExportSummaryOnly = ["pdf", "excel"].includes(selectedFormat) && canExportSearchResults;
+  const hasPeople = people.length > 0;
+  const canChoosePerson = hasArchiveData && hasPeople;
+  const canExportPerson = canChoosePerson && selectedPersonId;
 
   const scopeOptions = useMemo(() => {
     return SCOPE_OPTIONS.map((option) => {
@@ -86,34 +130,61 @@ export default function ExportPanel({
             : "PDF or Excel only",
         };
       }
+      if (option.id === "person") {
+        return {
+          ...option,
+          enabled: canChoosePerson,
+          status: getPersonStatus({
+            canChoosePerson,
+            hasArchiveData,
+            peopleStatus,
+            selectedFormat,
+            selectedPersonId,
+          }),
+        };
+      }
       return { ...option, enabled: false, status: "Planned" };
     });
   }, [
     canExportConversation,
     canExportDateRange,
+    canChoosePerson,
     canExportSearchResults,
     canExportSummaryOnly,
     hasArchiveData,
+    peopleStatus,
     searchResultCount,
     selectedFormat,
+    selectedPersonId,
   ]);
 
   const selectedScopeOption = scopeOptions.find((option) => option.id === selectedScope) || scopeOptions[0];
   const selectedFormatOption = FORMAT_OPTIONS.find((option) => option.id === selectedFormat) || FORMAT_OPTIONS[2];
-  const canDownload = selectedScopeOption.enabled;
+  const canDownload = selectedScopeOption.enabled && (selectedScope !== "person" || canExportPerson);
   const exportUrl = canDownload
     ? buildExportUrl({
         apiBaseUrl,
         scope: selectedScope,
         format: selectedFormat,
         conversationId: conversation?.id,
+        personId: selectedPersonId,
         searchQuery: normalizedSearchQuery,
         startDate,
         endDate,
         pdfStyle: selectedPdfStyle,
       })
     : "";
-  const actionText = canDownload ? getDownloadLabel(selectedScope) : getPlannedActionText(selectedFormatOption, selectedScopeOption);
+  const actionText = canDownload
+    ? getDownloadLabel(selectedScope)
+    : selectedScope === "person"
+      ? getPersonStatus({
+          canChoosePerson,
+          hasArchiveData,
+          peopleStatus,
+          selectedFormat,
+          selectedPersonId,
+        })
+      : getPlannedActionText(selectedFormatOption, selectedScopeOption);
 
   return (
     <section className="export-panel" aria-label="Export Center">
@@ -225,6 +296,21 @@ export default function ExportPanel({
             ))}
           </select>
         </label>
+        <label>
+          <span>Choose a person</span>
+          <select
+            value={selectedPersonId}
+            onChange={(event) => setSelectedPersonId(event.target.value)}
+            disabled={!canChoosePerson}
+          >
+            <option value="">{getPersonPlaceholder({ hasArchiveData, peopleStatus, hasPeople })}</option>
+            {people.map((person) => (
+              <option key={person.id} value={person.id}>
+                {formatPersonOption(person)}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="export-date-range" aria-label="Date range export">
@@ -266,7 +352,7 @@ export default function ExportPanel({
         <LockKeyhole size={14} aria-hidden="true" />
         <span>
           {hasArchiveData
-            ? "Exports are prepared on this computer. Person-only exports stay disabled until there is a clear contact choice."
+            ? getExportNoteText({ peopleStatus, hasPeople })
             : "Import an archive before exporting messages."}
         </span>
       </div>
@@ -279,6 +365,7 @@ function buildExportUrl({
   scope,
   format,
   conversationId = null,
+  personId = "",
   searchQuery = "",
   startDate = "",
   endDate = "",
@@ -288,6 +375,9 @@ function buildExportUrl({
   const extension = format === "pdf" ? "pdf" : format === "excel" ? "xlsx" : "csv";
   if (scope === "selectedConversation" && conversationId) {
     params.set("conversation_id", conversationId);
+  }
+  if (scope === "person" && personId) {
+    params.set("contact_id", personId);
   }
   if (scope === "searchResults" && searchQuery) {
     params.set("q", searchQuery);
@@ -312,6 +402,7 @@ function getDownloadLabel(scope) {
   if (scope === "selectedConversation") return "Download conversation";
   if (scope === "searchResults") return "Download search results";
   if (scope === "dateRange") return "Download date range";
+  if (scope === "person") return "Export messages with this person";
   if (scope === "summaryOnly") return "Download summary report";
   return "Download full archive";
 }
@@ -334,4 +425,33 @@ function getReadyStatus(format) {
   if (format === "pdf") return "Ready for PDF";
   if (format === "excel") return "Ready for Excel";
   return "Ready for CSV";
+}
+
+function getPersonStatus({ canChoosePerson, hasArchiveData, peopleStatus, selectedFormat, selectedPersonId }) {
+  if (!hasArchiveData) return "Import messages first";
+  if (peopleStatus === "loading") return "Loading people";
+  if (peopleStatus === "error") return "Could not load people";
+  if (!canChoosePerson) return "No people found";
+  if (!selectedPersonId) return "Choose a person";
+  return getReadyStatus(selectedFormat);
+}
+
+function getPersonPlaceholder({ hasArchiveData, peopleStatus, hasPeople }) {
+  if (!hasArchiveData) return "No people found yet. Import messages first.";
+  if (peopleStatus === "loading") return "Loading people";
+  if (peopleStatus === "error") return "Could not load people";
+  if (!hasPeople) return "No people found yet. Import messages first.";
+  return "Choose a person";
+}
+
+function getExportNoteText({ peopleStatus, hasPeople }) {
+  if (peopleStatus === "error") return "Exports are prepared on this computer. People could not be loaded right now.";
+  if (!hasPeople) return "Exports are prepared on this computer. No people found yet. Import messages first.";
+  return "Exports are prepared on this computer.";
+}
+
+function formatPersonOption(person) {
+  const detail = person.detail ? ` - ${person.detail}` : "";
+  const description = person.description ? `, ${person.description}` : "";
+  return `${person.name}${detail}${description}`;
 }

@@ -122,8 +122,19 @@ def fetch_export_messages(
         where_conditions.append("date(messages.sent_at) <= date(?)")
         params.append(end_date)
     if contact_id is not None:
-        where_conditions.append("contacts.id = ?")
-        params.append(contact_id)
+        where_conditions.append(
+            """
+            (
+              messages.conversation_id IN (
+                SELECT conversation_id
+                FROM conversation_participants
+                WHERE contact_id = ?
+              )
+              OR messages.sender_contact_id = ?
+            )
+            """
+        )
+        params.extend([contact_id, contact_id])
 
     where_clause = f"WHERE {' AND '.join(where_conditions)}" if where_conditions else ""
     rows = conn.execute(
@@ -256,7 +267,7 @@ def build_scope_description(
         row = conn.execute("SELECT display_name, handle FROM contacts WHERE id = ?", (contact_id,)).fetchone()
         contact = (row["display_name"] or row["handle"]) if row else f"Contact {contact_id}"
         details.append(f"Contact or person: {contact}")
-        filename_parts.append(f"person-{contact_id}")
+        filename_parts.append(f"messages-with-{contact}")
 
     if not details:
         details.append("Full archive")
