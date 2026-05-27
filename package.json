@@ -8,6 +8,7 @@
     "dev:message-archive": "/bin/bash message-archive-utility/scripts/dev.sh",
     "dev:message-archive:desktop": "/bin/bash message-archive-utility/scripts/dev-desktop.sh",
     "build:message-archive:desktop": "/bin/bash message-archive-utility/scripts/build-desktop.sh",
+    "build:message-archive:backend": "/bin/bash message-archive-utility/scripts/build-backend-executable.sh",
     "start:message-archive:desktop": "/bin/bash message-archive-utility/scripts/launch-desktop.sh",
     "pack:message-archive:mac": "npm --prefix message-archive-utility/desktop run pack:mac",
     "install:message-archive:shortcut": "/bin/bash message-archive-utility/scripts/install-desktop-shortcut.sh",
