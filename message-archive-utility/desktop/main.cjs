@@ -321,7 +321,7 @@ app.on("window-all-closed", () => {
 function getStartupErrorMessage(error) {
   if (IS_PACKAGED) {
     return [
-      error.message || "The local message service could not start.",
+      "Message Archive could not start its local message service.",
       "",
       "Your message archive is still stored on this Mac. Please reopen the app, or reinstall it if this keeps happening.",
     ].join("\n");

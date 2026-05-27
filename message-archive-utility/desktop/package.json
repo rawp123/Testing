@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "electron .",
     "start": "electron .",
-    "pack:mac": "../scripts/build-desktop.sh && electron-builder --mac --dir"
+    "pack:mac": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac --dir"
   },
   "build": {
     "appId": "com.messagearchive.utility",
@@ -30,6 +30,10 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "../release/backend/message-archive-backend",
+        "to": "backend/message-archive-backend"
       }
     ],
     "mac": {
