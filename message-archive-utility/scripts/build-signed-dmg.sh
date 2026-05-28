@@ -3,6 +3,9 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DESKTOP_DIR="$PROJECT_DIR/desktop"
+APP_VERSION="$(node -p "require(process.argv[1]).version" "$DESKTOP_DIR/package.json")"
+APP_ARCH="$(uname -m)"
+DMG_PATH="$PROJECT_DIR/release/mac/Message Archive Utility-$APP_VERSION-$APP_ARCH.dmg"
 
 has_api_key_notary_credentials() {
   [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" && -n "${APPLE_API_ISSUER:-}" ]]
@@ -45,3 +48,32 @@ npx electron-builder --mac dmg --publish never \
   -c.mac.entitlements=build/entitlements.mac.plist \
   -c.mac.entitlementsInherit=build/entitlements.mac.inherit.plist \
   -c.mac.notarize=true
+
+if [[ ! -f "$DMG_PATH" ]]; then
+  echo "Expected signed DMG was not created." >&2
+  exit 1
+fi
+
+codesign --force --sign "$CSC_NAME" --timestamp "$DMG_PATH"
+
+if has_api_key_notary_credentials; then
+  xcrun notarytool submit "$DMG_PATH" \
+    --key "$APPLE_API_KEY" \
+    --key-id "$APPLE_API_KEY_ID" \
+    --issuer "$APPLE_API_ISSUER" \
+    --wait
+elif has_apple_id_notary_credentials; then
+  xcrun notarytool submit "$DMG_PATH" \
+    --apple-id "$APPLE_ID" \
+    --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+    --team-id "$APPLE_TEAM_ID" \
+    --wait
+else
+  xcrun notarytool submit "$DMG_PATH" \
+    --keychain "$APPLE_KEYCHAIN" \
+    --keychain-profile "$APPLE_KEYCHAIN_PROFILE" \
+    --wait
+fi
+
+xcrun stapler staple "$DMG_PATH"
+xcrun stapler validate "$DMG_PATH"
