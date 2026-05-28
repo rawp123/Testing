@@ -990,6 +990,76 @@ input:focus,textarea:focus,select:focus{
   color:var(--muted);
   line-height:1.75;
 }
+.mau-walkthrough{
+  display:grid;
+  grid-template-columns:minmax(0, .76fr) minmax(0, 1fr);
+  gap:16px;
+  padding-top:16px;
+  padding-bottom:28px;
+}
+.mau-walkthrough-card{
+  padding:24px;
+  border:1px solid var(--glass-strong);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:var(--shadow-sm);
+}
+.light-theme .mau-walkthrough-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(247,250,255,.84));
+}
+.mau-walkthrough-overview,
+.mau-walkthrough-privacy{
+  background:linear-gradient(180deg, rgba(110,231,183,.11), rgba(96,165,250,.055));
+}
+.mau-walkthrough-overview{
+  grid-row:span 2;
+}
+.mau-walkthrough-card h2{
+  margin:0 0 8px;
+  font-size:clamp(1.18rem, 1.55vw, 1.45rem);
+  letter-spacing:-.015em;
+}
+.mau-walkthrough-card p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.75;
+}
+.mau-walkthrough-card .btn{
+  margin-top:18px;
+}
+.mau-step-label{
+  display:inline-flex;
+  margin-bottom:12px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#07111c;
+  font-size:.78rem;
+  font-weight:800;
+}
+.mau-check-list{
+  display:grid;
+  gap:10px;
+  margin:12px 0 0;
+  padding:0;
+  list-style:none;
+}
+.mau-check-list li{
+  position:relative;
+  padding-left:22px;
+  color:var(--muted);
+  line-height:1.65;
+}
+.mau-check-list li::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:.72em;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--accent);
+}
 
 @media (max-width:900px){
   .mau-site-header{
@@ -1017,10 +1087,12 @@ input:focus,textarea:focus,select:focus{
   .mau-steps,
   .mau-split,
   .mau-download,
-  .mau-privacy-layout{
+  .mau-privacy-layout,
+  .mau-walkthrough{
     grid-template-columns:1fr;
   }
-  .mau-privacy-card:first-child{
+  .mau-privacy-card:first-child,
+  .mau-walkthrough-overview{
     grid-row:auto;
   }
   .mau-download .btn{
@@ -1065,7 +1137,8 @@ input:focus,textarea:focus,select:focus{
   .mau-panel,
   .mau-format,
   .mau-steps li,
-  .mau-privacy-card{
+  .mau-privacy-card,
+  .mau-walkthrough-card{
     border-radius:14px;
     padding:18px;
   }
