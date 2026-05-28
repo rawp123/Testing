@@ -11,7 +11,8 @@
     "dev": "electron .",
     "start": "electron .",
     "pack:mac": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac --dir",
-    "pack:mac:dmg": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac dmg"
+    "pack:mac:dmg": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac dmg",
+    "pack:mac:dmg:signed": "../scripts/build-signed-dmg.sh"
   },
   "build": {
     "appId": "com.messagearchive.utility",
