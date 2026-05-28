@@ -829,6 +829,9 @@ input:focus,textarea:focus,select:focus{
   max-width:760px;
   margin-bottom:22px;
 }
+.mau-section-action{
+  margin-top:18px;
+}
 .mau-section h2{
   margin:0;
   max-width:760px;
@@ -1060,6 +1063,33 @@ input:focus,textarea:focus,select:focus{
   border-radius:50%;
   background:var(--accent);
 }
+.mau-faq-list{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px;
+  padding-top:16px;
+  padding-bottom:28px;
+}
+.mau-faq-item{
+  padding:22px;
+  border:1px solid var(--glass-strong);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:var(--shadow-sm);
+}
+.light-theme .mau-faq-item{
+  background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(247,250,255,.84));
+}
+.mau-faq-item h2{
+  margin:0 0 8px;
+  font-size:clamp(1.08rem, 1.4vw, 1.28rem);
+  letter-spacing:-.01em;
+}
+.mau-faq-item p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.72;
+}
 
 @media (max-width:900px){
   .mau-site-header{
@@ -1088,7 +1118,8 @@ input:focus,textarea:focus,select:focus{
   .mau-split,
   .mau-download,
   .mau-privacy-layout,
-  .mau-walkthrough{
+  .mau-walkthrough,
+  .mau-faq-list{
     grid-template-columns:1fr;
   }
   .mau-privacy-card:first-child,
@@ -1138,7 +1169,8 @@ input:focus,textarea:focus,select:focus{
   .mau-format,
   .mau-steps li,
   .mau-privacy-card,
-  .mau-walkthrough-card{
+  .mau-walkthrough-card,
+  .mau-faq-item{
     border-radius:14px;
     padding:18px;
   }
