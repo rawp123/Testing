@@ -5,6 +5,7 @@
   "private": true,
   "productName": "Message Archive Utility",
   "author": "Message Archive Utility",
+  "copyright": "Copyright © 2026 Message Archive Utility",
   "main": "main.cjs",
   "scripts": {
     "dev": "electron .",
@@ -16,6 +17,7 @@
     "productName": "Message Archive Utility",
     "asar": true,
     "npmRebuild": false,
+    "afterPack": "../scripts/patch-mac-info-plist.cjs",
     "directories": {
       "output": "../release/mac"
     },
@@ -41,7 +43,32 @@
         "dir"
       ],
       "category": "public.app-category.productivity",
-      "identity": "-"
+      "identity": "-",
+      "extendInfo": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true,
+          "NSExceptionDomains": {
+            "127.0.0.1": {
+              "NSIncludesSubdomains": false,
+              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
+              "NSTemporaryExceptionAllowsInsecureHTTPSLoads": false,
+              "NSTemporaryExceptionRequiresForwardSecrecy": false
+            },
+            "localhost": {
+              "NSIncludesSubdomains": false,
+              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
+              "NSTemporaryExceptionAllowsInsecureHTTPSLoads": false,
+              "NSTemporaryExceptionRequiresForwardSecrecy": false
+            }
+          }
+        },
+        "NSAudioCaptureUsageDescription": "Message Archive does not use audio capture.",
+        "NSBluetoothAlwaysUsageDescription": "Message Archive does not use Bluetooth.",
+        "NSBluetoothPeripheralUsageDescription": "Message Archive does not use Bluetooth.",
+        "NSCameraUsageDescription": "Message Archive does not use the camera.",
+        "NSMicrophoneUsageDescription": "Message Archive does not use the microphone."
+      }
     }
   },
   "devDependencies": {
