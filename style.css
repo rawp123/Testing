@@ -70,6 +70,7 @@ body[data-page="message-archive-utility"]{background:radial-gradient(860px 420px
 .light-theme body[data-page="all-in-podcast-search"]{background:radial-gradient(980px 420px at 12% 10%, rgba(14,165,233,.16), transparent 54%),radial-gradient(760px 320px at 86% 16%, rgba(245,158,11,.12), transparent 46%),linear-gradient(180deg,#f9fcff,#f0f6fd 58%,#eaf1f9)}
 .light-theme body[data-page="all-in-podcast-episode"]{background:radial-gradient(980px 420px at 12% 10%, rgba(14,165,233,.16), transparent 54%),radial-gradient(760px 320px at 86% 16%, rgba(34,197,94,.12), transparent 46%),linear-gradient(180deg,#f9fcff,#f1f7fd 58%,#ebf2fa)}
 .light-theme body[data-page="message-archive-utility"]{background:radial-gradient(860px 420px at 82% 8%, rgba(199,169,119,.18), transparent 50%),radial-gradient(880px 420px at 12% 12%, rgba(37,99,235,.10), transparent 54%),linear-gradient(180deg,#f7fbff,#eef4fb 56%,#e9f0f8)}
+body[data-page="message-archive-utility"]{overflow-x:hidden}
 main{padding-top:14px;padding-bottom:8px;flex:1 0 auto}
 .container{width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(12px, 1.5vw, 28px)}
 .small{font-size:.86rem}
@@ -1214,6 +1215,34 @@ input:focus,textarea:focus,select:focus{
   gap:16px;
 }
 
+body[data-page="message-archive-utility"] .container,
+.mau-site-header,
+.mau-brand,
+.mau-nav,
+.mau-panel,
+.mau-format,
+.mau-split,
+.mau-download,
+.mau-privacy-card,
+.mau-walkthrough-card,
+.mau-faq-item,
+.mau-export-card,
+.mau-export-preview,
+.mau-sheet-row{
+  min-width:0;
+}
+
+body[data-page="message-archive-utility"] h1,
+body[data-page="message-archive-utility"] h2,
+body[data-page="message-archive-utility"] h3,
+body[data-page="message-archive-utility"] p,
+body[data-page="message-archive-utility"] a,
+body[data-page="message-archive-utility"] li,
+body[data-page="message-archive-utility"] span,
+body[data-page="message-archive-utility"] code{
+  overflow-wrap:anywhere;
+}
+
 @media (max-width:900px){
   .mau-site-header{
     align-items:flex-start;
@@ -1259,28 +1288,67 @@ input:focus,textarea:focus,select:focus{
 @media (max-width:640px){
   .mau-site-header{
     padding:14px 16px;
+    gap:14px;
   }
   .mau-brand{
     font-size:.96rem;
   }
+  .mau-brand-icon{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    flex:0 0 auto;
+  }
+  .mau-brand span{
+    min-width:0;
+  }
   .mau-nav{
-    gap:2px;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:6px;
+    width:100%;
   }
   .mau-nav a{
-    padding:7px 8px;
+    padding:7px 6px;
+    min-width:0;
     font-size:.82rem;
+    text-align:center;
+  }
+  .mau-nav a[href="/#download"]{
+    grid-column:span 2;
   }
   .mau-hero-bg,
   .light-theme .mau-hero-bg{
-    background-position:center, right -180px top 10px;
+    background-size:cover, 260px 260px;
+    background-position:center, right -90px top 8px;
   }
   .mau-hero-inner{
-    padding-top:54px;
+    padding-top:48px;
     padding-bottom:56px;
+  }
+  .mau-hero h1{
+    max-width:100%;
+    font-size:clamp(2.15rem, 12vw, 3rem);
+    line-height:1.02;
+    letter-spacing:-.025em;
+  }
+  .mau-hero-copy{
+    max-width:100%;
+    font-size:1rem;
   }
   .mau-page-hero{
     padding-top:48px;
     padding-bottom:22px;
+  }
+  .mau-page-hero h1{
+    max-width:100%;
+    font-size:clamp(1.9rem, 10.8vw, 2.7rem);
+    line-height:1.05;
+    letter-spacing:-.025em;
+  }
+  .mau-page-hero p:not(.mau-kicker){
+    max-width:100%;
+    font-size:1rem;
   }
   .mau-actions .btn{
     width:100%;
@@ -1299,6 +1367,48 @@ input:focus,textarea:focus,select:focus{
   .mau-export-card{
     border-radius:14px;
     padding:18px;
+  }
+  .mau-export-preview{
+    min-height:auto;
+    padding:16px;
+  }
+  .mau-sheet-tabs{
+    flex-wrap:wrap;
+  }
+  .mau-sheet-row{
+    grid-template-columns:minmax(64px, .7fr) minmax(78px, .82fr) minmax(92px, 1fr);
+    gap:6px;
+    font-size:.74rem;
+  }
+}
+
+@media (max-width:420px){
+  .container{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .mau-nav{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+  .mau-nav a[href="/#download"]{
+    grid-column:auto;
+  }
+  .mau-split,
+  .mau-download,
+  .mau-panel,
+  .mau-format,
+  .mau-steps li,
+  .mau-privacy-card,
+  .mau-walkthrough-card,
+  .mau-faq-item,
+  .mau-export-card{
+    padding:16px;
+  }
+  .mau-export-preview{
+    padding:14px;
+  }
+  .mau-sheet-row{
+    grid-template-columns:1fr;
   }
 }
 
