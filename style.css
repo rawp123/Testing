@@ -783,6 +783,24 @@ input:focus,textarea:focus,select:focus{
   font-size:clamp(1.02rem, 1.35vw, 1.22rem);
   line-height:1.65;
 }
+.mau-page-hero{
+  padding-top:76px;
+  padding-bottom:32px;
+}
+.mau-page-hero h1{
+  max-width:820px;
+  margin:0;
+  font-size:clamp(2.1rem, 5vw, 4.8rem);
+  line-height:1;
+  letter-spacing:-.04em;
+}
+.mau-page-hero p:not(.mau-kicker){
+  max-width:720px;
+  margin:22px 0 0;
+  color:var(--text-soft);
+  font-size:clamp(1rem, 1.3vw, 1.2rem);
+  line-height:1.7;
+}
 .mau-actions{
   display:flex;
   flex-wrap:wrap;
@@ -941,6 +959,37 @@ input:focus,textarea:focus,select:focus{
 .mau-disabled-cta:hover{
   transform:none;
 }
+.mau-privacy-layout{
+  display:grid;
+  grid-template-columns:minmax(0, .78fr) minmax(0, 1fr);
+  gap:16px;
+  padding-top:16px;
+  padding-bottom:28px;
+}
+.mau-privacy-card{
+  padding:24px;
+  border:1px solid var(--glass-strong);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:var(--shadow-sm);
+}
+.light-theme .mau-privacy-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(247,250,255,.84));
+}
+.mau-privacy-card:first-child{
+  grid-row:span 2;
+  background:linear-gradient(180deg, rgba(110,231,183,.11), rgba(96,165,250,.055));
+}
+.mau-privacy-card h2{
+  margin:0 0 8px;
+  font-size:1.16rem;
+  letter-spacing:-.01em;
+}
+.mau-privacy-card p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.75;
+}
 
 @media (max-width:900px){
   .mau-site-header{
@@ -967,8 +1016,12 @@ input:focus,textarea:focus,select:focus{
   .mau-faq-grid,
   .mau-steps,
   .mau-split,
-  .mau-download{
+  .mau-download,
+  .mau-privacy-layout{
     grid-template-columns:1fr;
+  }
+  .mau-privacy-card:first-child{
+    grid-row:auto;
   }
   .mau-download .btn{
     justify-self:start;
@@ -997,6 +1050,10 @@ input:focus,textarea:focus,select:focus{
     padding-top:54px;
     padding-bottom:56px;
   }
+  .mau-page-hero{
+    padding-top:48px;
+    padding-bottom:22px;
+  }
   .mau-actions .btn{
     width:100%;
   }
@@ -1007,7 +1064,8 @@ input:focus,textarea:focus,select:focus{
   .mau-download,
   .mau-panel,
   .mau-format,
-  .mau-steps li{
+  .mau-steps li,
+  .mau-privacy-card{
     border-radius:14px;
     padding:18px;
   }
