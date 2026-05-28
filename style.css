@@ -57,6 +57,7 @@ body[data-page="litigation-analytics"]{background:radial-gradient(940px 420px at
 body[data-page="nuclear-verdict-tracker"]{background:radial-gradient(920px 400px at 14% 10%, rgba(96,165,250,.12), transparent 52%),radial-gradient(760px 340px at 86% 16%, rgba(244,114,182,.08), transparent 46%),linear-gradient(180deg,#101624,#0d1522 58%,#111926)}
 body[data-page="all-in-podcast-search"]{background:radial-gradient(1080px 500px at 12% 8%, rgba(14,165,233,.12), transparent 54%),radial-gradient(860px 380px at 86% 12%, rgba(250,204,21,.08), transparent 46%),linear-gradient(180deg,#0a1220,#0d1726 58%,#101828)}
 body[data-page="all-in-podcast-episode"]{background:radial-gradient(1040px 460px at 10% 8%, rgba(14,165,233,.12), transparent 52%),radial-gradient(820px 360px at 88% 14%, rgba(34,197,94,.08), transparent 44%),linear-gradient(180deg,#0a1220,#0d1726 56%,#0f1729)}
+body[data-page="message-archive-utility"]{background:radial-gradient(860px 420px at 82% 8%, rgba(226,209,181,.16), transparent 50%),radial-gradient(880px 420px at 12% 12%, rgba(96,165,250,.12), transparent 54%),linear-gradient(180deg,#08111f,#101a2b 56%,#0b1220)}
 .light-theme body{background:radial-gradient(1200px 420px at 10% 10%, rgba(37,99,235,.08), transparent 52%),linear-gradient(180deg,#f7fbff,#eef4fb 60%,#e9f0f8)}
 .light-theme body[data-page="game-lab"]{background:radial-gradient(960px 420px at 14% 8%, rgba(56,189,248,.18), transparent 52%),radial-gradient(780px 360px at 86% 12%, rgba(250,204,21,.14), transparent 48%),linear-gradient(180deg,#f7fbff,#eef6ff 58%,#edf3fb)}
 .light-theme body[data-page="game"]{background:radial-gradient(980px 460px at 8% 8%, rgba(251,191,36,.16), transparent 48%),radial-gradient(780px 360px at 88% 12%, rgba(96,165,250,.14), transparent 44%),linear-gradient(180deg,#fffaf4,#f3f7fd 56%,#edf4fb)}
@@ -68,6 +69,7 @@ body[data-page="all-in-podcast-episode"]{background:radial-gradient(1040px 460px
 .light-theme body[data-page="nuclear-verdict-tracker"]{background:radial-gradient(980px 420px at 12% 10%, rgba(59,130,246,.14), transparent 54%),radial-gradient(760px 320px at 86% 16%, rgba(244,114,182,.1), transparent 46%),linear-gradient(180deg,#fbfcff,#f1f5fc 58%,#ebf0f8)}
 .light-theme body[data-page="all-in-podcast-search"]{background:radial-gradient(980px 420px at 12% 10%, rgba(14,165,233,.16), transparent 54%),radial-gradient(760px 320px at 86% 16%, rgba(245,158,11,.12), transparent 46%),linear-gradient(180deg,#f9fcff,#f0f6fd 58%,#eaf1f9)}
 .light-theme body[data-page="all-in-podcast-episode"]{background:radial-gradient(980px 420px at 12% 10%, rgba(14,165,233,.16), transparent 54%),radial-gradient(760px 320px at 86% 16%, rgba(34,197,94,.12), transparent 46%),linear-gradient(180deg,#f9fcff,#f1f7fd 58%,#ebf2fa)}
+.light-theme body[data-page="message-archive-utility"]{background:radial-gradient(860px 420px at 82% 8%, rgba(199,169,119,.18), transparent 50%),radial-gradient(880px 420px at 12% 12%, rgba(37,99,235,.10), transparent 54%),linear-gradient(180deg,#f7fbff,#eef4fb 56%,#e9f0f8)}
 main{padding-top:14px;padding-bottom:8px;flex:1 0 auto}
 .container{width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(12px, 1.5vw, 28px)}
 .small{font-size:.86rem}
@@ -679,6 +681,336 @@ input:focus,textarea:focus,select:focus{
   .hp-bio,.hp-project-desc,.hp-exp-desc{font-size:.92rem}
   .hp-cards-grid{gap:18px}
   .hp-projects-block,.hp-exp-card,.hp-exp-card:last-child,.hp-edu-card{padding:18px}
+}
+
+/* Message Archive Utility landing page */
+.mau-site-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  width:100%;
+  max-width:1320px;
+  margin:0 auto;
+  padding:18px clamp(16px, 3vw, 36px);
+}
+.mau-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  color:var(--text);
+  text-decoration:none;
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+.mau-brand-icon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  box-shadow:0 12px 24px rgba(2,6,23,.26);
+}
+.mau-nav{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:6px;
+}
+.mau-nav a{
+  padding:8px 10px;
+  border-radius:10px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:.9rem;
+  font-weight:600;
+}
+.mau-nav a:hover{
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+}
+.light-theme .mau-nav a:hover{background:rgba(2,6,23,.04)}
+.mau-hero{
+  position:relative;
+  min-height:min(760px, calc(100vh - 80px));
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  isolation:isolate;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.light-theme .mau-hero{border-bottom-color:rgba(2,6,23,.08)}
+.mau-hero-bg{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg, rgba(8,17,31,.96) 0%, rgba(8,17,31,.88) 44%, rgba(8,17,31,.46) 100%),
+    image-set(url("/message-archive-utility/desktop/build/icon-source.png") type("image/png"));
+  background-repeat:no-repeat;
+  background-position:center, right 8vw center;
+  background-size:cover, min(54vw, 680px) min(54vw, 680px);
+  z-index:-1;
+}
+.light-theme .mau-hero-bg{
+  background:
+    linear-gradient(90deg, rgba(247,251,255,.97) 0%, rgba(247,251,255,.90) 46%, rgba(247,251,255,.52) 100%),
+    image-set(url("/message-archive-utility/desktop/build/icon-source.png") type("image/png"));
+  background-repeat:no-repeat;
+  background-position:center, right 8vw center;
+  background-size:cover, min(54vw, 680px) min(54vw, 680px);
+}
+.mau-hero-inner{
+  padding-top:80px;
+  padding-bottom:88px;
+}
+.mau-kicker{
+  margin:0 0 10px;
+  color:color-mix(in srgb, var(--accent) 68%, var(--text) 32%);
+  font-size:.76rem;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.mau-hero h1{
+  max-width:780px;
+  margin:0;
+  font-size:clamp(2.4rem, 6vw, 5.8rem);
+  line-height:.96;
+  letter-spacing:-.04em;
+}
+.mau-hero-copy{
+  max-width:670px;
+  margin:24px 0 0;
+  color:var(--text-soft);
+  font-size:clamp(1.02rem, 1.35vw, 1.22rem);
+  line-height:1.65;
+}
+.mau-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:28px;
+}
+.mau-privacy-note{
+  display:inline-flex;
+  margin:22px 0 0;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font-weight:650;
+}
+.light-theme .mau-privacy-note{
+  border-color:rgba(2,6,23,.10);
+  background:rgba(255,255,255,.72);
+}
+.mau-section{
+  padding-top:68px;
+  padding-bottom:22px;
+}
+.mau-section-head{
+  max-width:760px;
+  margin-bottom:22px;
+}
+.mau-section h2{
+  margin:0;
+  max-width:760px;
+  font-size:clamp(1.7rem, 3vw, 3rem);
+  letter-spacing:-.03em;
+}
+.mau-section p{
+  color:var(--muted);
+}
+.mau-promise-grid,
+.mau-format-grid,
+.mau-faq-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:16px;
+}
+.mau-panel,
+.mau-format{
+  padding:22px;
+  border:1px solid var(--glass-strong);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:var(--shadow-sm);
+}
+.light-theme .mau-panel,
+.light-theme .mau-format{
+  background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,250,255,.82));
+}
+.mau-panel h3,
+.mau-format h3{
+  margin:0 0 8px;
+  font-size:1.05rem;
+}
+.mau-panel p,
+.mau-format p{
+  margin:0;
+  line-height:1.7;
+}
+.mau-steps{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.mau-steps li{
+  display:grid;
+  gap:14px;
+  align-content:start;
+  padding:20px;
+  border:1px solid var(--glass-strong);
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+}
+.light-theme .mau-steps li{background:rgba(255,255,255,.76)}
+.mau-steps span{
+  display:inline-grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#07111c;
+  font-weight:800;
+}
+.mau-steps h3{
+  margin:0 0 6px;
+  font-size:1rem;
+}
+.mau-steps p{
+  margin:0;
+  line-height:1.65;
+}
+.mau-format h3{
+  font-size:1.35rem;
+}
+.mau-split,
+.mau-download{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(280px, .56fr);
+  gap:24px;
+  align-items:center;
+  padding:28px;
+  border:1px solid var(--glass-strong);
+  border-radius:20px;
+  background:linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+}
+.light-theme .mau-split,
+.light-theme .mau-download{
+  background:linear-gradient(135deg, rgba(255,255,255,.92), rgba(247,250,255,.78));
+}
+.mau-split h2,
+.mau-download h2{
+  margin:0 0 12px;
+}
+.mau-split p,
+.mau-download p{
+  max-width:720px;
+  margin:0;
+}
+.mau-audience-list{
+  display:grid;
+  gap:10px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.mau-audience-list li{
+  padding:12px 14px;
+  border:1px solid var(--glass-strong);
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  color:var(--text-soft);
+}
+.light-theme .mau-audience-list li{background:rgba(2,6,23,.035)}
+.mau-download{
+  align-items:center;
+}
+.mau-download .btn{
+  justify-self:end;
+  white-space:nowrap;
+}
+.mau-disabled-cta{
+  cursor:not-allowed;
+  opacity:.78;
+}
+.mau-disabled-cta:hover{
+  transform:none;
+}
+
+@media (max-width:900px){
+  .mau-site-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .mau-nav{
+    justify-content:flex-start;
+  }
+  .mau-hero{
+    min-height:auto;
+  }
+  .mau-hero-bg,
+  .light-theme .mau-hero-bg{
+    background-size:cover, 420px 420px;
+    background-position:center, right -140px top 20px;
+  }
+  .mau-hero-inner{
+    padding-top:74px;
+    padding-bottom:68px;
+  }
+  .mau-promise-grid,
+  .mau-format-grid,
+  .mau-faq-grid,
+  .mau-steps,
+  .mau-split,
+  .mau-download{
+    grid-template-columns:1fr;
+  }
+  .mau-download .btn{
+    justify-self:start;
+  }
+}
+
+@media (max-width:640px){
+  .mau-site-header{
+    padding:14px 16px;
+  }
+  .mau-brand{
+    font-size:.96rem;
+  }
+  .mau-nav{
+    gap:2px;
+  }
+  .mau-nav a{
+    padding:7px 8px;
+    font-size:.82rem;
+  }
+  .mau-hero-bg,
+  .light-theme .mau-hero-bg{
+    background-position:center, right -180px top 10px;
+  }
+  .mau-hero-inner{
+    padding-top:54px;
+    padding-bottom:56px;
+  }
+  .mau-actions .btn{
+    width:100%;
+  }
+  .mau-section{
+    padding-top:48px;
+  }
+  .mau-split,
+  .mau-download,
+  .mau-panel,
+  .mau-format,
+  .mau-steps li{
+    border-radius:14px;
+    padding:18px;
+  }
 }
 
 /* Yelp UI */

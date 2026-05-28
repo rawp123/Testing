@@ -107,10 +107,6 @@ function startServer() {
 
   registerPageAvailability(server);
 
-  server.get(['/', '/index.html'], (request, response) => {
-    response.redirect(302, dashboardRoute);
-  });
-
   server.get(['/jpml-dashboard', '/jpml-dashboard/'], (request, response) => {
     response.redirect(302, dashboardRoute);
   });
