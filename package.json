@@ -11,6 +11,7 @@
     "build:message-archive:backend": "/bin/bash message-archive-utility/scripts/build-backend-executable.sh",
     "start:message-archive:desktop": "/bin/bash message-archive-utility/scripts/launch-desktop.sh",
     "pack:message-archive:mac": "npm --prefix message-archive-utility/desktop run pack:mac",
+    "pack:message-archive:mac:dmg": "npm --prefix message-archive-utility/desktop run pack:mac:dmg",
     "install:message-archive:shortcut": "/bin/bash message-archive-utility/scripts/install-desktop-shortcut.sh",
     "scrape:nuclear-verdicts": "tsx scripts/runScrapers.ts",
     "typecheck:scrapers": "tsc --noEmit",

@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "electron .",
     "start": "electron .",
-    "pack:mac": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac --dir"
+    "pack:mac": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac --dir",
+    "pack:mac:dmg": "../scripts/build-backend-executable.sh && ../scripts/build-desktop.sh && electron-builder --mac dmg"
   },
   "build": {
     "appId": "com.messagearchive.utility",
@@ -69,6 +70,22 @@
         "NSCameraUsageDescription": "Message Archive does not use the camera.",
         "NSMicrophoneUsageDescription": "Message Archive does not use the microphone."
       }
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "title": "Message Archive Utility ${version}",
+      "contents": [
+        {
+          "x": 140,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     }
   },
   "devDependencies": {
