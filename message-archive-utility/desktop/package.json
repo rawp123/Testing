@@ -44,6 +44,7 @@
       "target": [
         "dir"
       ],
+      "icon": "icon.icns",
       "category": "public.app-category.productivity",
       "identity": "-",
       "extendInfo": {
@@ -75,14 +76,22 @@
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "title": "Message Archive Utility ${version}",
+      "icon": "icon.icns",
+      "iconSize": 128,
+      "iconTextSize": 14,
+      "backgroundColor": "#f6f4ef",
+      "window": {
+        "width": 560,
+        "height": 360
+      },
       "contents": [
         {
-          "x": 140,
-          "y": 220
+          "x": 170,
+          "y": 185
         },
         {
-          "x": 410,
-          "y": 220,
+          "x": 390,
+          "y": 185,
           "type": "link",
           "path": "/Applications"
         }
