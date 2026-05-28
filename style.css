@@ -1090,6 +1090,129 @@ input:focus,textarea:focus,select:focus{
   color:var(--muted);
   line-height:1.72;
 }
+.mau-export-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:18px;
+  padding-top:16px;
+  padding-bottom:24px;
+}
+.mau-export-card{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding:22px;
+  border:1px solid var(--glass-strong);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:var(--shadow-sm);
+}
+.light-theme .mau-export-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(247,250,255,.84));
+}
+.mau-export-card h2{
+  margin:0 0 -8px;
+  font-size:1.35rem;
+}
+.mau-export-card p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.7;
+}
+.mau-export-preview{
+  min-height:220px;
+  padding:16px;
+  border:1px solid var(--glass-strong);
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+  overflow:hidden;
+}
+.light-theme .mau-export-preview{
+  background:rgba(2,6,23,.035);
+}
+.mau-export-preview-pdf{
+  display:grid;
+  align-content:start;
+  gap:12px;
+}
+.mau-export-doc-title{
+  padding-bottom:10px;
+  border-bottom:1px solid var(--glass-strong);
+  font-weight:800;
+}
+.mau-export-message{
+  display:grid;
+  gap:4px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.055);
+}
+.light-theme .mau-export-message{background:rgba(255,255,255,.74)}
+.mau-export-message strong{
+  font-size:.82rem;
+}
+.mau-export-message span,
+.mau-export-page{
+  color:var(--muted);
+  font-size:.88rem;
+}
+.mau-export-page{
+  justify-self:end;
+  margin-top:8px;
+}
+.mau-export-preview-excel{
+  display:grid;
+  align-content:start;
+  gap:8px;
+}
+.mau-sheet-tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:8px;
+}
+.mau-sheet-tabs span{
+  padding:6px 8px;
+  border-radius:8px;
+  background:rgba(110,231,183,.14);
+  font-size:.78rem;
+  font-weight:700;
+}
+.mau-sheet-row{
+  display:grid;
+  grid-template-columns:.7fr .82fr 1fr;
+  gap:8px;
+  padding:9px 8px;
+  border-radius:8px;
+  background:rgba(255,255,255,.045);
+  color:var(--muted);
+  font-size:.8rem;
+}
+.mau-sheet-head{
+  color:var(--text);
+  font-weight:800;
+}
+.mau-export-preview-csv{
+  display:grid;
+  align-content:start;
+  gap:10px;
+}
+.mau-export-preview-csv code{
+  display:block;
+  padding:8px 9px;
+  border-radius:8px;
+  background:rgba(2,6,23,.26);
+  color:var(--text-soft);
+  font-size:.78rem;
+  white-space:normal;
+}
+.light-theme .mau-export-preview-csv code{
+  background:rgba(255,255,255,.82);
+}
+.mau-use-case-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:16px;
+}
 
 @media (max-width:900px){
   .mau-site-header{
@@ -1119,7 +1242,9 @@ input:focus,textarea:focus,select:focus{
   .mau-download,
   .mau-privacy-layout,
   .mau-walkthrough,
-  .mau-faq-list{
+  .mau-faq-list,
+  .mau-export-grid,
+  .mau-use-case-grid{
     grid-template-columns:1fr;
   }
   .mau-privacy-card:first-child,
@@ -1170,7 +1295,8 @@ input:focus,textarea:focus,select:focus{
   .mau-steps li,
   .mau-privacy-card,
   .mau-walkthrough-card,
-  .mau-faq-item{
+  .mau-faq-item,
+  .mau-export-card{
     border-radius:14px;
     padding:18px;
   }
