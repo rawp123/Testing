@@ -1,9 +1,16 @@
 import { Download } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const CONVERSATION_FORMATS = [
+  { id: "pdf", label: "PDF" },
+  { id: "excel", label: "Excel" },
+  { id: "csv", label: "CSV" },
+];
 
 export default function ConversationView({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
+  const [selectedFormat, setSelectedFormat] = useState("pdf");
+
   if (isLoading) {
     return (
       <section className="conversation-view empty-transcript">
@@ -35,7 +42,7 @@ export default function ConversationView({ conversation, isLoading, apiBaseUrl =
     <section className="conversation-view" aria-label={`${conversation.title} timeline`}>
       <header className="conversation-header">
         <div>
-          <p className="eyebrow">Conversation</p>
+          <p className="eyebrow">Selected thread</p>
           <h2>{conversation.title}</h2>
           <p>{conversation.participants.join(", ")}</p>
         </div>
@@ -49,15 +56,48 @@ export default function ConversationView({ conversation, isLoading, apiBaseUrl =
             <dd>{dateRange}</dd>
           </div>
         </dl>
-        <a
-          className={`secondary-button conversation-export-button ${canExportConversation ? "" : "is-disabled"}`}
-          href={canExportConversation ? buildConversationExportUrl(apiBaseUrl, conversation.id) : undefined}
-          aria-disabled={!canExportConversation}
-          onClick={(event) => preventDisabledLink(event, canExportConversation)}
-        >
-          <Download size={16} aria-hidden="true" />
-          Export this conversation
-        </a>
+        <div className="conversation-export-control">
+          <a
+            className={`conversation-export-main ${canExportConversation ? "" : "is-disabled"}`}
+            href={canExportConversation ? buildConversationExportUrl(apiBaseUrl, conversation.id, selectedFormat) : undefined}
+            aria-disabled={!canExportConversation}
+            onClick={(event) => preventDisabledLink(event, canExportConversation)}
+          >
+            <Download size={16} aria-hidden="true" />
+            Export conversation
+          </a>
+          <label className="conversation-export-format">
+            <span className="sr-only">Conversation export format</span>
+            <select
+              value={selectedFormat}
+              onChange={(event) => setSelectedFormat(event.target.value)}
+              disabled={!canExportConversation}
+            >
+              {CONVERSATION_FORMATS.map((format) => (
+                <option key={format.id} value={format.id}>{format.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </header>
+    </section>
+  );
+}
+
+export function ConversationMessages({ conversation, isLoading }) {
+  if (isLoading || !conversation) return null;
+
+  const messages = conversation.messages || [];
+  const displayMessages = sortMessagesNewestFirst(messages);
+
+  return (
+    <section className="conversation-messages-section" aria-label={`${conversation.title} messages`}>
+      <header className="messages-section-header">
+        <div>
+          <p className="eyebrow">Messages</p>
+          <h2>Conversation messages</h2>
+        </div>
+        {messages.length > 0 && <span>{messages.length} message{messages.length === 1 ? "" : "s"}</span>}
       </header>
 
       <div className="timeline">
@@ -66,14 +106,22 @@ export default function ConversationView({ conversation, isLoading, apiBaseUrl =
             <strong>No messages found</strong>
             <span>This thread exists in the archive, but no message rows were linked to it.</span>
           </div>
-        ) : renderMessagesWithDateDividers(messages)}
+        ) : (
+          <>
+            <p className="timeline-note">Latest messages are shown first.</p>
+            {renderMessagesWithDateDividers(displayMessages)}
+          </>
+        )}
       </div>
     </section>
   );
 }
 
-function buildConversationExportUrl(apiBaseUrl, conversationId) {
-  return `${apiBaseUrl}/export/messages.csv?conversation_id=${encodeURIComponent(conversationId)}`;
+function buildConversationExportUrl(apiBaseUrl, conversationId, format) {
+  const extension = format === "excel" ? "xlsx" : format;
+  const params = new URLSearchParams({ conversation_id: conversationId });
+  if (format === "pdf") params.set("style", "conversation");
+  return `${apiBaseUrl}/export/messages.${extension}?${params.toString()}`;
 }
 
 function preventDisabledLink(event, isEnabled) {
@@ -106,6 +154,10 @@ function renderMessagesWithDateDividers(messages) {
   });
 }
 
+function sortMessagesNewestFirst(messages) {
+  return [...messages].sort((left, right) => getTimestamp(right.sent_at) - getTimestamp(left.sent_at));
+}
+
 function MessageBubble({ message, startsGroup }) {
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
@@ -113,7 +165,7 @@ function MessageBubble({ message, startsGroup }) {
         <strong>{message.sender_name}</strong>
         <time>{formatTime(message.sent_at)}</time>
       </div>
-      {message.body ? <p>{message.body}</p> : <p className="empty-message-body">No text body</p>}
+      {message.body ? <p>{message.body}</p> : <p className="empty-message-body">No message text</p>}
       {message.attachments?.length > 0 && (
         <ul className="attachment-list" aria-label="Attachments">
           {message.attachments.map((attachment) => (
@@ -191,6 +243,12 @@ function getDateKey(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 10);
+}
+
+function getTimestamp(value) {
+  if (!value) return 0;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
 function formatDateDivider(value) {

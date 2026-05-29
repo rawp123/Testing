@@ -1,8 +1,8 @@
 import { BarChart3, Download } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
-import ArchiveStatsPanel from "./components/ArchiveStatsPanel.jsx";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import BackupGuide from "./components/BackupGuide.jsx";
 import ConversationList from "./components/ConversationList.jsx";
-import ConversationView from "./components/ConversationView.jsx";
+import ConversationView, { ConversationMessages } from "./components/ConversationView.jsx";
 import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
@@ -32,6 +32,7 @@ export default function App() {
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [isSearchSummaryLoading, setIsSearchSummaryLoading] = useState(false);
   const [error, setError] = useState(null);
+  const conversationPanelRef = useRef(null);
 
   async function loadConversations({ keepSelection = true } = {}) {
     setIsLoading(true);
@@ -173,14 +174,12 @@ export default function App() {
   const hasArchiveData = conversations.length > 0 || (archiveStats?.messages?.total || 0) > 0;
   const isSearching = query.trim().length > 0;
   const sidebarError = getVisibleSidebarError(error, hasArchiveData);
-  const searchStatus = getSearchStatus({
-    hasArchiveData,
-    isSearching,
-    matchCount: searchResults.length,
-    totalMatchCount: searchTotalMatches,
-    conversationCount: visibleConversationCount,
-  });
   const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
+
+  useEffect(() => {
+    if (resolvedActiveTab !== "browse-archive" || !selectedConversation || isConversationLoading) return;
+    conversationPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [isConversationLoading, resolvedActiveTab, selectedConversation?.id]);
 
   return (
     <main className="app-shell">
@@ -188,7 +187,7 @@ export default function App() {
         <div className="app-title-block">
           <p className="eyebrow">Local archive</p>
           <h1>Messages</h1>
-          <p>Import, search, and export your iPhone messages on this computer.</p>
+          <p>Import, search, and export your iPhone messages on this Mac.</p>
         </div>
         <nav className="app-tabs" aria-label="App sections" role="tablist">
           {APP_TABS.map((tab) => (
@@ -235,6 +234,7 @@ export default function App() {
           hasArchiveData={hasArchiveData}
           archiveStats={archiveStats}
           isArchiveStatsLoading={isStatsLoading}
+          onOpenArchive={() => setActiveTab("browse-archive")}
         />
       </section>
 
@@ -257,16 +257,18 @@ export default function App() {
           <div className="archive-browser">
             <section className="sidebar" aria-label="Conversation browser">
               <div className="sidebar-top">
-                <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
-                <div className="sidebar-actions">
-                  <button className="secondary-button" type="button" onClick={() => loadConversations()}>
-                    Refresh
-                  </button>
-                  {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
-                    <button className="ghost-button" type="button" onClick={loadSampleArchive}>
-                      Demo archive
+                <div className="sidebar-overview-row">
+                  <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
+                  <div className="sidebar-actions">
+                    <button className="secondary-button" type="button" onClick={() => loadConversations()}>
+                      Refresh
                     </button>
-                  )}
+                    {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
+                      <button className="ghost-button" type="button" onClick={loadSampleArchive}>
+                        Demo archive
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
                 <div className="list-toolbar">
@@ -288,7 +290,6 @@ export default function App() {
                     </select>
                   </label>
                 </div>
-                <SearchStatusMessage status={searchStatus} />
                 {sidebarError && <SidebarErrorState error={sidebarError} />}
               </div>
               <ConversationList
@@ -299,6 +300,10 @@ export default function App() {
                 isSearching={isSearching}
                 hasArchiveData={hasArchiveData}
                 searchMatchCounts={searchMatchCounts}
+              />
+              <ExportPanel
+                apiBaseUrl={API_BASE_URL}
+                hasArchiveData={hasArchiveData}
               />
             </section>
             <section className="workspace" aria-label="Message archive workspace">
@@ -316,19 +321,17 @@ export default function App() {
                   onOpenConversation={setSelectedId}
                 />
               )}
-              <ConversationView
-                apiBaseUrl={API_BASE_URL}
+              <div className="conversation-anchor" ref={conversationPanelRef}>
+                <ConversationView
+                  apiBaseUrl={API_BASE_URL}
+                  conversation={selectedConversation}
+                  isLoading={isConversationLoading}
+                />
+              </div>
+              <ConversationMessages
                 conversation={selectedConversation}
                 isLoading={isConversationLoading}
               />
-              <ExportPanel
-                apiBaseUrl={API_BASE_URL}
-                conversation={selectedConversation}
-                hasArchiveData={hasArchiveData}
-                searchQuery={query}
-                searchResultCount={searchTotalMatches}
-              />
-              <ArchiveStatsPanel stats={archiveStats} isLoading={isStatsLoading} />
             </section>
           </div>
         )}
@@ -406,7 +409,7 @@ function SearchResultsPanel({
           ) : (
             <button className="secondary-button" type="button" onClick={onShowSummary}>
               <BarChart3 size={16} aria-hidden="true" />
-              Analyze results
+              View summary
             </button>
           )}
           <a
@@ -466,7 +469,7 @@ function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
               </div>
               <time>{formatResultDate(result.sent_at)}</time>
             </div>
-            {result.body ? <p>{result.body}</p> : <p className="empty-message-body">No text body</p>}
+            {result.body ? <p>{result.body}</p> : <p className="empty-message-body">No message text</p>}
             <button className="ghost-button" type="button" onClick={() => onOpenConversation(result.conversation_id)}>
               Open conversation
             </button>
@@ -501,8 +504,8 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
     <div className="search-summary-stats">
       <div className="search-summary-actions">
         <div>
-          <h3>Summary report</h3>
-          <p>Download a PDF summary here, or choose Excel in the Export Center for a workbook.</p>
+          <h3>Search summary</h3>
+          <p>See where this search appears, then export the summary if you need a copy.</p>
         </div>
         <a
           className={`secondary-button ${query ? "" : "is-disabled"}`}
@@ -520,7 +523,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
           <dd>{formatSidebarNumber(safeSummary.total_matching_messages)}</dd>
         </div>
         <div>
-          <dt>Total mentions</dt>
+          <dt>Times found</dt>
           <dd>{formatSidebarNumber(safeSummary.total_keyword_occurrences)}</dd>
         </div>
         <div>
@@ -533,7 +536,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
         </div>
       </dl>
 
-      <SearchSummarySection title="Who mentioned this?" emptyText="No message text mentions found.">
+      <SearchSummarySection title="People" emptyText="No matches found.">
         {safeSummary.people.map((person) => (
           <li key={person.name}>
             <span>{person.name}</span>
@@ -542,7 +545,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
         ))}
       </SearchSummarySection>
 
-      <SearchSummarySection title="Where it appeared" emptyText="No conversations matched.">
+      <SearchSummarySection title="Conversations" emptyText="No conversations matched.">
         {safeSummary.conversations.map((conversation) => (
           <li key={conversation.id}>
             <span>{conversation.title}</span>
@@ -551,7 +554,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
         ))}
       </SearchSummarySection>
 
-      <SearchSummarySection title="When it was mentioned" emptyText="No message text mentions found.">
+      <SearchSummarySection title="Dates" emptyText="No matches found.">
         <li>
           <span>First mention</span>
           <strong>{formatSearchSummaryDate(safeSummary.first_mention_at)}</strong>
@@ -562,7 +565,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
         </li>
       </SearchSummarySection>
 
-      <SearchSummarySection title="Mentions over time" emptyText="No message text mentions found.">
+      <SearchSummarySection title="By month" emptyText="No matches found.">
         {safeSummary.mentions_by_month.map((item) => (
           <li key={item.month}>
             <span>{formatMonthYear(item.month)}</span>
@@ -589,52 +592,61 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
     <section className="get-started-panel" aria-label="Get started">
       <div className="get-started-copy">
         <p className="eyebrow">Get Started</p>
-        <h2>Keep a readable copy of your messages</h2>
+        <h2>Save, search, and export your iPhone messages</h2>
         <p>
-          This app helps you turn an iPhone backup on this computer into a private archive you can read,
-          search, and export when you need it.
+          The app walks you through creating a local iPhone backup, then lets you search and export your messages when needed.
         </p>
         <div className="trust-row" aria-label="Privacy safeguards">
-          <span>Local only</span>
-          <span>Private storage</span>
-          <span>No cloud sync</span>
+          <span>Stays on this Mac</span>
+          <span>Nothing uploaded</span>
+          <span>No account needed</span>
         </div>
       </div>
-      <ol className="onboarding-steps" aria-label="Basic setup sequence">
-        {[
-          ["Back up your iPhone to this computer", "Use Finder or Apple Devices to make a fresh local backup first."],
-          ["Import messages", "Let the app prepare and load your messages into private app storage."],
-          ["Search and export your archive", "Browse conversations, search message text, and prepare PDF, Excel, or CSV outputs."],
-        ].map(([title, detail], index) => (
-          <li key={title}>
-            <span>{index + 1}</span>
-            <div>
+      <div className="get-started-layout">
+        <div className="get-started-primary">
+          <ol className="onboarding-steps" aria-label="Basic setup sequence">
+            {[
+              ["Back up your iPhone", "Plug in your iPhone and use Finder to create a local backup."],
+              ["Import messages", "Let the app prepare a private message archive on this Mac."],
+              ["Search and export", "Browse conversations and export PDF, Excel, or CSV files."],
+            ].map(([title, detail], index) => (
+              <li key={title}>
+                <span>{index + 1}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <p>{detail}</p>
+                  {index === 0 && <BackupGuide compact />}
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="get-started-actions">
+            <button className="primary-button" type="button" onClick={onImportMessages}>
+              {hasArchiveData ? "Import More Messages" : "Start Import"}
+            </button>
+            {hasArchiveData && (
+              <button className="secondary-button" type="button" onClick={onBrowseArchive}>
+                Browse Existing Archive
+              </button>
+            )}
+          </div>
+        </div>
+        <aside className="after-import-panel" aria-label="After import">
+          <h3>After import</h3>
+          {[
+            ["Search conversations", "Find names, numbers, dates, and message text."],
+            ["See useful summaries", "Search a word like \"coffee\" and see who mentioned it, where it appeared, and when."],
+            ["Export readable files", "Create PDF, Excel, or CSV copies."],
+            ["Keep everything local", "Your archive stays on this Mac."],
+          ].map(([title, detail]) => (
+            <div key={title}>
               <strong>{title}</strong>
               <p>{detail}</p>
             </div>
-          </li>
-        ))}
-      </ol>
-      <div className="get-started-actions">
-        <button className="primary-button" type="button" onClick={onImportMessages}>
-          Import Messages
-        </button>
-        {hasArchiveData && (
-          <button className="secondary-button" type="button" onClick={onBrowseArchive}>
-            Browse Archive
-          </button>
-        )}
+          ))}
+        </aside>
       </div>
     </section>
-  );
-}
-
-function SearchStatusMessage({ status }) {
-  return (
-    <div className={`search-status ${status.tone}`} role={status.tone === "empty" ? "status" : undefined}>
-      <strong>{status.title}</strong>
-      <span>{status.detail}</span>
-    </div>
   );
 }
 
@@ -654,38 +666,6 @@ function sortConversations(conversations, sortKey) {
 
     return sortKey === "lastMessageAsc" ? dateComparison : -dateComparison;
   });
-}
-
-function getSearchStatus({ hasArchiveData, isSearching, matchCount, totalMatchCount, conversationCount }) {
-  if (!hasArchiveData) {
-    return {
-      tone: "empty",
-      title: "Search your local archive",
-      detail: "Import messages first, then search names, phone numbers, and message text on this device.",
-    };
-  }
-
-  if (!isSearching) {
-    return {
-      tone: "ready",
-      title: "Search stays local",
-      detail: "Look across message text, names, and phone numbers without sending your archive anywhere.",
-    };
-  }
-
-  if (totalMatchCount === 0) {
-    return {
-      tone: "empty",
-      title: "No messages matched",
-      detail: "Try a different name, phone number, word, or phrase.",
-    };
-  }
-
-  return {
-    tone: "matches",
-    title: `${formatSidebarNumber(totalMatchCount)} message ${totalMatchCount === 1 ? "match" : "matches"}`,
-    detail: `Found in ${formatSidebarNumber(conversationCount)} conversation${conversationCount === 1 ? "" : "s"}.`,
-  };
 }
 
 function getConversationTimestamp(conversation) {
@@ -792,7 +772,7 @@ function toUserFacingError(error) {
   if (error?.kind === "service-unavailable" || error?.name === "TypeError") {
     return {
       kind: "service-unavailable",
-      title: "Local app service is not responding",
+      title: "The app needs a restart",
       detail: "Restart the app and try again.",
       technicalDetail,
     };

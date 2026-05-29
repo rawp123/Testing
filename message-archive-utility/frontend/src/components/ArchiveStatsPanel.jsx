@@ -13,21 +13,21 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
     { label: "Conversations", value: formatNumber(conversations.total) },
     { label: "Contacts", value: formatNumber(contacts.total) },
     { label: "Attachments", value: formatNumber(attachments.total) },
-    { label: "Attachment links", value: formatNumber(attachments.linked_messages) },
+    { label: "Messages with attachments", value: formatNumber(attachments.linked_messages) },
     {
-      label: "Blank bodies",
+      label: "Messages without text",
       value: formatNumber(messages.blank),
       detail: formatPercent(messages.blank_percent),
     },
-    { label: "Latest message date", value: formatDate(messages.latest_sent_at) },
+    { label: "Latest message", value: formatDate(messages.latest_sent_at) },
   ];
 
   return (
-    <section className="stats-panel stats-strip" aria-label="Archive quality report">
+    <section className="stats-panel stats-strip" aria-label="Archive details">
       <header className="panel-header">
         <div>
-          <p className="eyebrow">Quality report</p>
-          <h2>Archive health</h2>
+          <p className="eyebrow">Local archive</p>
+          <h2>At a glance</h2>
         </div>
         {isLoading && <span className="stats-status">Updating</span>}
       </header>

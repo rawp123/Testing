@@ -2,11 +2,10 @@ import {
   CheckCircle2,
   Import,
   Loader2,
-  LockKeyhole,
   SearchCheck,
-  ShieldCheck,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import BackupGuide from "./BackupGuide.jsx";
 
 const STEP_ORDER = ["locate", "copy", "validate", "inspect", "import"];
 
@@ -20,7 +19,7 @@ const RESULT_LABELS = {
   backup_folder_exists: "Folder exists",
   backup_folder_is_directory: "Folder is directory",
   chat: "Chats",
-  chat_message_join: "Chat links",
+  chat_message_join: "Messages linked to chats",
   contacts_imported: "Contacts",
   contacts_named: "Named contacts",
   conversation_participants_imported: "Participants",
@@ -34,8 +33,8 @@ const RESULT_LABELS = {
   manifest_exists: "Backup index found",
   manifest_readable_sqlite: "Backup index readable",
   message: "Messages",
-  message_attachment_join: "Attachment links",
-  message_attachment_links_imported: "Attachment links",
+  message_attachment_join: "Messages with attachments",
+  message_attachment_links_imported: "Messages with attachments",
   messages_imported: "Messages",
   message_contents_read: "Message contents read",
   sms_db_manifest_entry_exists: "iPhone message file listed",
@@ -52,9 +51,21 @@ const DEFAULT_BACKUP_FOLDER_PATH =
   import.meta.env.VITE_DEFAULT_IPHONE_BACKUP_PATH || "";
 
 const TECHNICAL_RESULT_LABELS = new Set([
+  "backup_appears_encrypted",
+  "backup_appears_incomplete",
+  "backup_folder_exists",
   "backup_folder_path",
+  "backup_folder_is_directory",
   "copied_sms_db_path",
   "destination_path",
+  "manifest_appears_truncated",
+  "manifest_exists",
+  "manifest_found",
+  "manifest_readable_sqlite",
+  "sms_db_found",
+  "sms_db_manifest_entry_exists",
+  "sms_db_payload_exists",
+  "sms_db_payload_nonzero",
   "source_path",
   "sms_db_payload_size_bytes",
 ]);
@@ -65,6 +76,7 @@ export default function IPhoneImportPanel({
   hasArchiveData = false,
   archiveStats = null,
   isArchiveStatsLoading = false,
+  onOpenArchive,
 }) {
   const [backupFolderPath, setBackupFolderPath] = useState(DEFAULT_BACKUP_FOLDER_PATH);
   const [copiedSmsDbPath, setCopiedSmsDbPath] = useState("");
@@ -78,7 +90,7 @@ export default function IPhoneImportPanel({
   const [copiedSmsDbImportDir, setCopiedSmsDbImportDir] = useState("");
   const [copiedSmsDbStatus, setCopiedSmsDbStatus] = useState("");
   const [completedSteps, setCompletedSteps] = useState(new Set());
-  const [isImportToolsOpen, setIsImportToolsOpen] = useState(!hasArchiveData);
+  const [isImportToolsOpen, setIsImportToolsOpen] = useState(true);
 
   const canUseBackupPath = backupFolderPath.trim().length > 0;
   const canUseCopiedPath = copiedSmsDbPath.trim().length > 0;
@@ -92,9 +104,12 @@ export default function IPhoneImportPanel({
   const canCopySmsDb = canUseBackupPath && completedSteps.has("locate");
   const canRunQuickImport = (canUseBackupPath || importableBackupCandidate) && !isBusy;
   const hasDetectedBackup = backupCandidates.length > 0 || canUseBackupPath;
+  const hasBackupSearchFeedback = backupCandidateStatus.trim().length > 0;
+  const shouldShowBackupLocator = shouldShowImportTools && (hasDetectedBackup || hasBackupSearchFeedback);
+  const shouldOpenManualBackupEntry = hasBackupSearchFeedback && !hasDetectedBackup;
 
   useEffect(() => {
-    setIsImportToolsOpen(!hasArchiveData);
+    setIsImportToolsOpen(true);
   }, [hasArchiveData]);
 
   useEffect(() => {
@@ -175,20 +190,20 @@ export default function IPhoneImportPanel({
     activeStep,
     canUseBackupPath,
     completedSteps,
-    hasArchiveData,
+    hasArchiveData: false,
     hasDetectedBackup,
     importableBackupCandidate,
     isBusy,
-  }), [activeStep, canUseBackupPath, completedSteps, hasArchiveData, hasDetectedBackup, importableBackupCandidate, isBusy]);
+  }), [activeStep, canUseBackupPath, completedSteps, hasDetectedBackup, importableBackupCandidate, isBusy]);
   const importProgressSteps = useMemo(() => getImportProgressSteps({
     activeStep,
     completedSteps,
-    hasArchiveData,
+    hasArchiveData: false,
     hasDetectedBackup,
-  }), [activeStep, completedSteps, hasArchiveData, hasDetectedBackup]);
+  }), [activeStep, completedSteps, hasDetectedBackup]);
   const primaryImportAction = getPrimaryImportAction({
     canRunQuickImport,
-    hasArchiveData,
+    hasArchiveData: false,
     hasDetectedBackup,
     isBusy,
   });
@@ -221,7 +236,7 @@ export default function IPhoneImportPanel({
 
     if (!data) return;
     if (data.usable_without_import) {
-      setStatus("This app can see the backup folder and found a readable backup index plus a message file with data.");
+      setStatus("Backup found.");
       return;
     }
     setStatus("");
@@ -239,12 +254,12 @@ export default function IPhoneImportPanel({
         setBackupFolderPath(data.default_path || candidates[0]?.path || "");
       }
       if (candidates.length && !data.default_path) {
-        setBackupCandidateStatus("A backup was detected, but the iPhone message file is not available to copy yet.");
+        setBackupCandidateStatus("A backup was detected, but it may need review before import.");
       } else if (showStatus) {
         setBackupCandidateStatus(
           candidates.length
             ? "A local iPhone backup was found."
-            : "No local iPhone backup was found yet. Back up your iPhone to this computer, then try again.",
+            : "No local iPhone backup was found yet. Back up your iPhone to this Mac, then try again.",
         );
       }
     } catch {
@@ -267,8 +282,8 @@ export default function IPhoneImportPanel({
       }
       setCopiedSmsDbStatus(
         candidates.length
-          ? `Found ${candidates.length} local message cop${candidates.length === 1 ? "y" : "ies"}.`
-          : "No local message copy found yet.",
+          ? "A prepared local copy is available."
+          : "No prepared import is available yet.",
       );
     } catch {
       if (isCurrent()) setCopiedSmsDbStatus("");
@@ -305,14 +320,14 @@ export default function IPhoneImportPanel({
       setCompletedSteps((current) => removeSteps(current, ["locate", "copy", "validate", "inspect", "import"]));
       setStatus("");
       setError(
-        "I could open the backup folder, but I could not find the iPhone message file inside it.",
+        "I could open the backup, but I could not find message data inside it.",
       );
       return;
     }
     setStatus(
       data.manifest_readable
-        ? "Found the iPhone message file in this backup."
-        : "The backup index could not be read, but the iPhone message file is available to copy directly.",
+        ? "Backup found."
+        : "Backup found. A local preparation step is needed.",
     );
   }
 
@@ -326,11 +341,7 @@ export default function IPhoneImportPanel({
 
     if (!data) return;
     setCopiedSmsDbPath(data.destination_path || "");
-    setStatus(
-      data.manifest_readable === false
-        ? "Copied the iPhone message file into the app's private import folder."
-        : "Copied the iPhone message file into the app's private import folder.",
-    );
+    setStatus("Prepared a local copy for import.");
   }
 
   async function validateSmsDb() {
@@ -342,7 +353,7 @@ export default function IPhoneImportPanel({
     );
 
     if (!data) return;
-    setStatus(data.valid ? "The message file looks valid." : "The message file does not look valid.");
+    setStatus(data.valid ? "Prepared import ready." : "The prepared import needs review.");
   }
 
   async function inspectSmsDb() {
@@ -354,7 +365,7 @@ export default function IPhoneImportPanel({
     );
 
     if (!data) return;
-    setStatus(data.inspected ? "Message totals were checked without reading message text." : "Message totals could not be checked.");
+    setStatus(data.inspected ? "Message archive ready." : "Message totals could not be checked.");
   }
 
   async function importMessages() {
@@ -459,6 +470,7 @@ export default function IPhoneImportPanel({
           stats={archiveStats}
           isLoading={isArchiveStatsLoading}
           isImportToolsOpen={isImportToolsOpen}
+          onOpenArchive={onOpenArchive}
           onToggleImportTools={() => setIsImportToolsOpen((isOpen) => !isOpen)}
         />
       )}
@@ -473,33 +485,21 @@ export default function IPhoneImportPanel({
               <div>
                 <p className="eyebrow">Import</p>
                 <h2>Import iPhone messages</h2>
-                <p>
-                  Back up your iPhone to this computer, then import messages into a private local archive.
-                </p>
+                <p>Import messages from an iPhone backup on this Mac.</p>
               </div>
             </div>
 
-            <div className="privacy-safeguards" aria-label="Import privacy notes">
-              <span className="privacy-badge">
-                <LockKeyhole size={16} aria-hidden="true" />
-                Local only
-              </span>
-              <span className="privacy-badge">No cloud sync</span>
-              <span className="privacy-badge">No external upload</span>
-              <span className="privacy-badge">No account required</span>
-            </div>
-
             <p className="backup-encryption-note">
-              If your iPhone backup is encrypted, keep it that way. The app will tell you if it needs a temporary local backup without encryption for import.
+              Start with an unencrypted local iPhone backup on this Mac.
             </p>
 
-            <ol className="simple-flow-list" aria-label="Import overview">
-              <li>Back up iPhone</li>
-              <li>Import messages</li>
-              <li>Search and export</li>
-            </ol>
+            <BackupGuide />
 
-            <div className={`import-status-card ${isBusy ? "is-active" : ""}`}>
+            <p className="import-repeat-note">
+              You can import again later. The app skips messages already in your archive and adds new ones.
+            </p>
+
+            <div className={`import-status-line ${isBusy ? "is-active" : ""}`}>
               {isBusy ? <Loader2 className="spin" size={18} aria-hidden="true" /> : <SearchCheck size={18} aria-hidden="true" />}
               <div>
                 <strong>{importStatus.title}</strong>
@@ -507,7 +507,7 @@ export default function IPhoneImportPanel({
               </div>
             </div>
 
-            <ol className="import-progress-list" aria-label="Import progress">
+            <ol className="import-checklist" aria-label="Import progress">
               {importProgressSteps.map((step) => (
                 <li className={`${step.isComplete ? "is-complete" : ""} ${step.isActive ? "is-active" : ""}`} key={step.key}>
                   <span>{step.isComplete ? <CheckCircle2 size={14} aria-hidden="true" /> : step.number}</span>
@@ -516,11 +516,27 @@ export default function IPhoneImportPanel({
               ))}
             </ol>
 
+            {shouldShowBackupLocator && (
+              <BackupLocatorPanel
+                activeStep={activeStep}
+                backupCandidates={backupCandidates}
+                backupCandidateStatus={backupCandidateStatus}
+                backupFolderPath={backupFolderPath}
+                canUseBackupPath={canUseBackupPath}
+                isBusy={isBusy}
+                onBackupFolderPathChange={updateBackupFolderPath}
+                onCheckBackup={runBackupDiagnostics}
+                onFindBackups={stepActions.backup.onClick}
+                openManualEntry={shouldOpenManualBackupEntry}
+                selectedBackupCandidate={selectedBackupCandidate}
+              />
+            )}
+
             <div className="guided-import-actions">
               <button
                 className="primary-button"
                 type="button"
-                onClick={primaryImportAction.kind === "find" ? stepActions.backup.onClick : primaryImportAction.kind === "open" ? stepActions.review.onClick : importDetectedBackup}
+                onClick={primaryImportAction.kind === "find" ? stepActions.backup.onClick : primaryImportAction.kind === "open" ? onOpenArchive : importDetectedBackup}
                 disabled={primaryImportAction.disabled}
                 title={primaryImportAction.disabledReason}
               >
@@ -531,116 +547,140 @@ export default function IPhoneImportPanel({
           </section>
 
           <details className="advanced-details import-options-details">
-            <summary>Advanced import options</summary>
-            <div className="diagnostics-card">
+            <summary>Technical import details</summary>
+            <div className="advanced-import-panel">
               <div>
-                <strong>Check backup</strong>
-                <span>Use this when import needs help finding or checking a backup.</span>
+                <strong>Manual controls</strong>
+                <p>Use these only if the guided import asks you to review a prepared import.</p>
               </div>
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={runBackupDiagnostics}
-                disabled={!canUseBackupPath || isBusy}
-                title={!canUseBackupPath ? "Add a backup folder path first." : undefined}
-              >
-                {activeStep === "diagnostics" ? "Checking" : "Check backup"}
-              </button>
+              <div className="advanced-action-row" aria-label="Import troubleshooting actions">
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={runBackupDiagnostics}
+                  disabled={!canUseBackupPath || isBusy}
+                  title={!canUseBackupPath ? "Find an iPhone backup first." : undefined}
+                >
+                  {activeStep === "diagnostics" ? "Checking" : "Check backup"}
+                </button>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={stepActions.backup.onClick}
+                  disabled={stepActions.backup.disabled}
+                >
+                  Find iPhone backup
+                </button>
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={() => loadCopiedSmsDbCandidates()}
+                  disabled={isBusy}
+                >
+                  Refresh files
+                </button>
+              </div>
+              {!canUseBackupPath && (
+                <p className="advanced-action-note">Find an iPhone backup before checking it.</p>
+              )}
             </div>
 
-            <div className="troubleshooting-actions" aria-label="Troubleshooting actions">
-              {["backup", "locate", "copy", "validate", "import"].map((key) => {
-                const action = stepActions[key];
-                return (
-                  <button
-                    className={action.variant}
-                    type="button"
-                    onClick={action.onClick}
-                    disabled={action.disabled}
-                    title={action.title}
-                    key={key}
-                  >
-                    {action.label}
-                  </button>
-                );
-              })}
-            </div>
+            <details className="advanced-details technical-import-details">
+              <summary>Show technical details</summary>
+              <div className="troubleshooting-actions" aria-label="Technical import actions">
+                {["backup", "locate", "copy", "validate", "import"].map((key) => {
+                  const action = stepActions[key];
+                  return (
+                    <button
+                      className={action.variant}
+                      type="button"
+                      onClick={action.onClick}
+                      disabled={action.disabled}
+                      title={action.title}
+                      key={key}
+                    >
+                      {action.label}
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className="import-grid">
-              <label className="field">
-                <span>iPhone backup</span>
-                {backupCandidates.length > 0 && (
-                  <select
-                    value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
+              <div className="import-grid">
+                <label className="field">
+                  <span>iPhone backup</span>
+                  {backupCandidates.length > 0 && (
+                    <select
+                      value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
+                      onChange={(event) => updateBackupFolderPath(event.target.value)}
+                      aria-label="Detected backup folders"
+                    >
+                      <option value="">Choose detected backup</option>
+                      {backupCandidates.map((candidate) => (
+                        <option key={candidate.path} value={candidate.path}>
+                          {formatBackupCandidateName(candidate)} - {formatBackupCandidateStatus(candidate)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <input
+                    value={backupFolderPath}
                     onChange={(event) => updateBackupFolderPath(event.target.value)}
-                    aria-label="Detected backup folders"
-                  >
-                    <option value="">Choose detected backup</option>
-                    {backupCandidates.map((candidate) => (
-                      <option key={candidate.path} value={candidate.path}>
-                        {candidate.name} - {formatBackupCandidateStatus(candidate)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <input
-                  value={backupFolderPath}
-                  onChange={(event) => updateBackupFolderPath(event.target.value)}
-                  placeholder="Choose or paste a backup location"
-                />
-                <small>
-                  Use this only if the app cannot detect your iPhone backup automatically.
-                </small>
-                {backupCandidateStatus && <small className="field-warning">{backupCandidateStatus}</small>}
-                {selectedBackupCandidate?.detail && (
-                  <small className={backupCandidateDetailClassName(selectedBackupCandidate)}>
-                    {selectedBackupCandidate.detail}
+                    placeholder="Choose or paste a backup location"
+                  />
+                  <small>
+                    Use this only if the app cannot detect your iPhone backup automatically.
                   </small>
-                )}
-              </label>
-              <label className="field">
-                <span className="field-heading">
-                  Prepared import
-                  <button
-                    className="inline-text-button"
-                    type="button"
-                    onClick={() => loadCopiedSmsDbCandidates()}
-                    disabled={isBusy}
-                  >
-                    Refresh files
-                  </button>
-                </span>
-                {copiedSmsDbCandidates.length > 0 && (
-                  <select
-                    value={copiedSmsDbCandidates.some((candidate) => candidate.path === copiedSmsDbPath) ? copiedSmsDbPath : ""}
+                  {backupCandidateStatus && <small className="field-warning">{backupCandidateStatus}</small>}
+                  {selectedBackupCandidate?.detail && (
+                    <small className={backupCandidateDetailClassName(selectedBackupCandidate)}>
+                      {simplifyBackupDetail(selectedBackupCandidate.detail)}
+                    </small>
+                  )}
+                </label>
+                <label className="field">
+                  <span className="field-heading">
+                    Prepared import
+                    <button
+                      className="inline-text-button"
+                      type="button"
+                      onClick={() => loadCopiedSmsDbCandidates()}
+                      disabled={isBusy}
+                    >
+                      Refresh files
+                    </button>
+                  </span>
+                  {copiedSmsDbCandidates.length > 0 && (
+                    <select
+                      value={copiedSmsDbCandidates.some((candidate) => candidate.path === copiedSmsDbPath) ? copiedSmsDbPath : ""}
+                      onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
+                      aria-label="Prepared import files"
+                    >
+                      <option value="">Choose prepared import</option>
+                      {copiedSmsDbCandidates.map((candidate) => (
+                        <option key={candidate.path} value={candidate.path}>
+                          {maskPathForDisplay(candidate.name)} - {candidate.valid ? "Ready" : "Needs review"}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <input
+                    value={copiedSmsDbPath}
                     onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
-                    aria-label="Local message copies"
-                  >
-                    <option value="">Choose local message copy</option>
-                    {copiedSmsDbCandidates.map((candidate) => (
-                      <option key={candidate.path} value={candidate.path}>
-                        {candidate.name} - {candidate.valid ? "Ready" : "Needs review"}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <input
-                  value={copiedSmsDbPath}
-                  onChange={(event) => updateCopiedSmsDbPath(event.target.value)}
-                  placeholder="Filled automatically during import"
-                />
-                <small>
-                  Use this only when troubleshooting an import that was already prepared.
-                </small>
-                {copiedSmsDbImportDir && <small>A prepared import is available in private local storage.</small>}
-                {copiedSmsDbStatus && <small>{copiedSmsDbStatus}</small>}
-                {selectedCopiedSmsDbCandidate?.detail && (
-                  <small className={selectedCopiedSmsDbCandidate.valid ? "" : "field-warning"}>
-                    {selectedCopiedSmsDbCandidate.detail}
+                    placeholder="Filled automatically during import"
+                  />
+                  <small>
+                    Use this only when troubleshooting an import that was already prepared.
                   </small>
-                )}
-              </label>
-            </div>
+                  {copiedSmsDbImportDir && <small>A prepared local copy is available.</small>}
+                  {copiedSmsDbStatus && <small>{copiedSmsDbStatus}</small>}
+                  {selectedCopiedSmsDbCandidate?.detail && (
+                    <small className={selectedCopiedSmsDbCandidate.valid ? "" : "field-warning"}>
+                      {maskPathForDisplay(selectedCopiedSmsDbCandidate.detail)}
+                    </small>
+                  )}
+                </label>
+              </div>
+            </details>
           </details>
         </>
       )}
@@ -702,24 +742,121 @@ function ImportRecoveryHelp({ backupFolderPath, selectedBackupCandidate }) {
         <details className="advanced-details recovery-details">
           <summary>Show technical details</summary>
           {detail && <p>{simplifyBackupDetail(detail)}</p>}
-          {hasBackupFolderPath && <p>The app checks the standard iPhone backup message-file location inside the selected folder.</p>}
+          {hasBackupFolderPath && <p>The app checks the standard message location inside the selected backup folder.</p>}
         </details>
       )}
     </div>
   );
 }
 
-function simplifyBackupDetail(detail) {
-  if (detail.includes("truncated")) {
-    return "The backup index looks incomplete. The app will still try the direct message-file location, but Apple backups need the index and backup files to be fully copied.";
-  }
-  if (detail.includes("missing or empty")) {
-    return "The standard iPhone message file is missing or empty in this folder.";
-  }
-  return detail;
+function BackupLocatorPanel({
+  activeStep,
+  backupCandidates,
+  backupCandidateStatus,
+  backupFolderPath,
+  canUseBackupPath,
+  isBusy,
+  onBackupFolderPathChange,
+  onCheckBackup,
+  onFindBackups,
+  openManualEntry,
+  selectedBackupCandidate,
+}) {
+  const hasCandidates = backupCandidates.length > 0;
+  const hasBackupLocation = backupFolderPath.trim().length > 0;
+  const title = hasCandidates || hasBackupLocation ? "Backup selected" : "Choose a backup";
+  const detail = getBackupLocatorDetail({
+    backupCandidateStatus,
+    hasBackupLocation,
+    hasCandidates,
+    selectedBackupCandidate,
+  });
+
+  return (
+    <section className="backup-locator-panel" aria-label="Backup selection">
+      <div className="backup-locator-copy">
+        <strong>{title}</strong>
+        <p>{detail}</p>
+      </div>
+
+      {hasCandidates && (
+        <label className="backup-locator-field">
+          <span>Detected backup</span>
+          <select
+            value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
+            onChange={(event) => onBackupFolderPathChange(event.target.value)}
+          >
+            <option value="">Choose detected backup</option>
+            {backupCandidates.map((candidate) => (
+              <option key={candidate.path} value={candidate.path}>
+                {formatBackupCandidateName(candidate)} - {formatBackupCandidateStatus(candidate)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      <details className="manual-backup-details" open={openManualEntry}>
+        <summary>{hasCandidates || hasBackupLocation ? "Use a different backup" : "Enter backup location"}</summary>
+        <label className="backup-locator-field">
+          <span>Backup location</span>
+          <input
+            value={backupFolderPath}
+            onChange={(event) => onBackupFolderPathChange(event.target.value)}
+            placeholder="Paste the local backup folder location"
+          />
+        </label>
+        <div className="backup-locator-actions">
+          <button
+            className="primary-button"
+            type="button"
+            onClick={onCheckBackup}
+            disabled={!canUseBackupPath || isBusy}
+            title={!canUseBackupPath ? "Choose a backup first." : undefined}
+          >
+            {activeStep === "diagnostics" ? "Checking" : "Check backup"}
+          </button>
+          <button className="secondary-button" type="button" onClick={onFindBackups} disabled={isBusy}>
+            Find again
+          </button>
+        </div>
+      </details>
+    </section>
+  );
 }
 
-function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onToggleImportTools }) {
+function getBackupLocatorDetail({
+  backupCandidateStatus,
+  hasBackupLocation,
+  hasCandidates,
+  selectedBackupCandidate,
+}) {
+  if (backupCandidateStatus && !hasCandidates && !hasBackupLocation) {
+    return backupCandidateStatus;
+  }
+  if (selectedBackupCandidate) {
+    return "The app found a local iPhone backup. Import when you are ready.";
+  }
+  if (hasCandidates) {
+    return "Choose the backup you want to import.";
+  }
+  if (hasBackupLocation) {
+    return "A backup location is selected. Check it or import when ready.";
+  }
+  return "Find a backup or enter its location.";
+}
+
+function simplifyBackupDetail(detail) {
+  if (detail.includes("truncated")) {
+    return "The backup looks incomplete. The app will still try the direct preparation step, but the backup files may need to finish copying first.";
+  }
+  if (detail.includes("missing or empty")) {
+    return "The expected message data is missing or empty in this backup.";
+  }
+  return maskPathForDisplay(detail);
+}
+
+function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onOpenArchive, onToggleImportTools }) {
   const messages = stats?.messages || {};
   const conversations = stats?.conversations || {};
 
@@ -737,9 +874,8 @@ function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onToggleImport
         </span>
         <div>
           <p className="archive-loaded-status">
-            {isLoading ? "Archive loaded, updating counts" : "Archive loaded"}
+            {isLoading ? "Archive ready, updating counts" : "Archive ready"}
           </p>
-          <p className="archive-loaded-note">Stored locally in private app storage on this device.</p>
         </div>
       </div>
       <dl className="archive-loaded-stats">
@@ -750,20 +886,14 @@ function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onToggleImport
           </div>
         ))}
       </dl>
-      <div className="archive-loaded-safeguards" aria-label="Archive safeguards">
-        <span className="privacy-badge">
-          <ShieldCheck size={14} aria-hidden="true" />
-          Local only
-        </span>
-        <span className="privacy-badge">
-          <LockKeyhole size={14} aria-hidden="true" />
-          Private storage
-        </span>
-        <span className="privacy-badge">No cloud sync</span>
+      <div className="archive-loaded-actions">
+        <button className="secondary-button" type="button" onClick={onOpenArchive}>
+          Open archive
+        </button>
+        <button className="ghost-button" type="button" onClick={onToggleImportTools}>
+          {isImportToolsOpen ? "Hide import guide" : "Import another backup"}
+        </button>
       </div>
-      <button className="secondary-button" type="button" onClick={onToggleImportTools}>
-        {isImportToolsOpen ? "Close Import" : "Manage Import"}
-      </button>
     </section>
   );
 }
@@ -775,9 +905,21 @@ function removeSteps(currentSteps, stepKeys) {
 }
 
 function formatBackupCandidateStatus(candidate) {
-  if (candidate.manifest_readable) return candidate.source;
-  if (candidate.sms_db_copyable) return "Message file available";
+  if (candidate.manifest_readable) return "Backup found";
+  if (candidate.sms_db_copyable) return "Prepared import ready";
   return "Needs review";
+}
+
+function formatBackupCandidateName(candidate) {
+  return maskPathForDisplay(candidate.name || "Detected backup");
+}
+
+function maskPathForDisplay(value) {
+  if (!value) return "";
+  return String(value)
+    .replace(/\/Users\/[^/\s]+/g, "~")
+    .replace(/(MobileSync\/Backup\/)[^/\s]+/g, "$1...")
+    .replace(/([A-Fa-f0-9]{16,})/g, "...");
 }
 
 function backupCandidateDetailClassName(candidate) {
@@ -789,7 +931,7 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
     return {
       kind: "open",
       label: "Open archive",
-      detail: "Your messages are ready to search and export.",
+      detail: "Review your imported messages.",
       disabled: isBusy,
       disabledReason: undefined,
     };
@@ -799,7 +941,7 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
     return {
       kind: "find",
       label: "Find iPhone backup",
-      detail: "Back up your iPhone to this computer first, then let the app look for it.",
+      detail: "Back up your iPhone to this Mac first, then let the app look for it.",
       disabled: isBusy,
       disabledReason: undefined,
     };
@@ -808,9 +950,9 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
   return {
     kind: "import",
     label: "Import messages",
-    detail: "The app will prepare, check, and import your messages into this private archive.",
+    detail: "The app will prepare, check, and import your messages into this archive.",
     disabled: !canRunQuickImport || isBusy,
-    disabledReason: canRunQuickImport ? undefined : "Back up your iPhone to this computer, then try again.",
+    disabledReason: canRunQuickImport ? undefined : "Back up your iPhone to this Mac, then try again.",
   };
 }
 
@@ -832,12 +974,12 @@ function getImportStatus({
 
   if (isBusy) {
     const busyMessages = {
-      diagnostics: ["Checking backup", "Making sure this computer can use the selected backup."],
-      locate: ["Finding iPhone backup", "Looking for a usable local backup on this computer."],
-      copy: ["Preparing private local copy", "Preparing messages for this app's private local archive."],
+      diagnostics: ["Checking backup", "Making sure this Mac can use the selected backup."],
+      locate: ["Finding iPhone backup", "Looking for a usable local backup on this Mac."],
+      copy: ["Preparing local copy", "Preparing messages for this app's archive."],
       validate: ["Checking message archive", "Checking that the prepared import is ready."],
       inspect: ["Checking message archive", "Checking message totals before import."],
-      import: ["Importing messages", "Adding messages to your private local archive."],
+      import: ["Importing messages", "Adding messages to your archive."],
       "auto-import": ["Importing messages", "Preparing, checking, and importing messages."],
     };
     const [title, detail] = busyMessages[activeStep] || ["Working", "Preparing your import."];
@@ -847,7 +989,7 @@ function getImportStatus({
   if (!hasDetectedBackup && !importableBackupCandidate) {
     return {
       title: "Back up your iPhone first",
-      detail: "Use Finder or Apple Devices to make a backup on this computer, then find it here.",
+      detail: "Plug in your iPhone and use Finder to create a local backup, then find it here.",
     };
   }
 
@@ -876,36 +1018,22 @@ function getImportProgressSteps({ activeStep, completedSteps, hasArchiveData, ha
   return [
     {
       key: "backup",
-      label: "Find iPhone backup",
+      label: "Back up iPhone",
       number: "1",
       isComplete: hasDetectedBackup || hasArchiveData,
       isActive: isActive(["diagnostics", "locate"]) || (!hasDetectedBackup && !hasArchiveData),
     },
     {
-      key: "prepare",
-      label: "Prepare private local copy",
-      number: "2",
-      isComplete: completedSteps.has("copy") || completedSteps.has("import") || hasArchiveData,
-      isActive: isActive(["copy"]),
-    },
-    {
-      key: "check",
-      label: "Check message archive",
-      number: "3",
-      isComplete: completedSteps.has("validate") || completedSteps.has("inspect") || completedSteps.has("import") || hasArchiveData,
-      isActive: isActive(["validate", "inspect"]),
-    },
-    {
       key: "import",
       label: "Import messages",
-      number: "4",
+      number: "2",
       isComplete: completedSteps.has("import") || hasArchiveData,
-      isActive: isActive(["import", "auto-import"]),
+      isActive: isActive(["copy", "validate", "inspect", "import", "auto-import"]),
     },
     {
       key: "ready",
-      label: "Ready to search",
-      number: "5",
+      label: "Search and export",
+      number: "3",
       isComplete: hasArchiveData,
       isActive: hasArchiveData,
     },
@@ -913,7 +1041,7 @@ function getImportProgressSteps({ activeStep, completedSteps, hasArchiveData, ha
 }
 
 function toImportErrorMessage(error) {
-  if (error?.status) return "The import could not be completed. Try again, or open advanced import options.";
+  if (error?.status) return "The import could not be completed. Try again, or open technical import details.";
   if (error?.kind === "service-unavailable" || error?.name === "TypeError") {
     return "The local app is not responding. Restart it and try again.";
   }
@@ -928,24 +1056,24 @@ function buildDiagnosticError(data) {
     return "The selected backup path exists, but it is not a folder.";
   }
   if (!data.manifest_exists) {
-    return "The backup index was not found in the selected backup folder.";
+    return "The selected backup is missing information this app needs.";
   }
   if (!data.manifest_readable_sqlite) {
     return data.manifest_appears_truncated
-      ? "The backup index exists but appears incomplete."
-      : "The backup index exists but could not be read.";
+      ? "The selected backup appears incomplete."
+      : "The selected backup could not be read.";
   }
   if (data.backup_appears_encrypted) {
-    return "This backup appears encrypted, so the app cannot copy the iPhone message file directly.";
+    return "This backup appears encrypted. The app will need a temporary local backup it can read.";
   }
   if (!data.sms_db_manifest_entry_exists) {
-    return "The backup index is readable, but it does not list the iPhone message file.";
+    return "The backup does not list the message data this app needs.";
   }
   if (!data.sms_db_payload_exists) {
-    return "The backup index lists the iPhone message file, but the matching backup file was not found.";
+    return "The backup lists message data, but the matching file was not found.";
   }
   if (!data.sms_db_payload_nonzero) {
-    return "The matching iPhone message file exists but is empty.";
+    return "The matching message data exists but is empty.";
   }
   return "The backup did not pass diagnostics in this runtime environment.";
 }
