@@ -8,7 +8,6 @@
   const FALLBACK_REGISTRY = {
     pages: [
       { id: 'home', label: 'Home', href: '/', status: 'online', nav: false },
-      { id: 'dashboard', label: 'JPML Dashboard', href: '/jpml-dashboard.html', status: 'online' },
       { id: 'podcast-utility', label: 'All-In Search', href: '/all-in-podcast-search/', status: 'online', parent: 'work-in-progress' },
       { id: 'wip-nuclear-verdict-tracker', label: 'Nuclear Verdict Tracker', href: '/work-in-progress/nuclear-verdict-tracker/', status: 'online', parent: 'work-in-progress' },
       { id: 'wip-silly-word-builder', label: 'Silly Word Builder', href: '/work-in-progress/silly-word-builder/', status: 'online', parent: 'work-in-progress' },
@@ -20,7 +19,6 @@
       { id: 'contact', label: 'Contact', href: '/contact/', status: 'online' }
     ],
     navigation: [
-      { page: 'dashboard' },
       { group: 'work-in-progress', label: 'Work In Progress', pages: ['podcast-utility', 'wip-nuclear-verdict-tracker', 'wip-silly-word-builder'] },
       { page: 'contact' }
     ]

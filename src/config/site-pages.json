@@ -9,14 +9,6 @@
       "nav": false
     },
     {
-      "id": "dashboard",
-      "label": "JPML Dashboard",
-      "href": "/jpml-dashboard.html",
-      "status": "online",
-      "paths": ["/jpml-dashboard.html", "/jpml-dashboard", "/jpml-dashboard/"],
-      "pathPrefixes": ["/data/mdl/", "/data/pdfs/"]
-    },
-    {
       "id": "podcast-utility",
       "label": "All-In Search",
       "href": "/all-in-podcast-search/",
@@ -106,7 +98,6 @@
     }
   ],
   "navigation": [
-    { "page": "dashboard" },
     {
       "group": "work-in-progress",
       "label": "Work In Progress",

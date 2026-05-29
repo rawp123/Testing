@@ -1,10 +1,10 @@
 {
-  "name": "jpml-dashboard-site",
+  "name": "message-archive-utility-site",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node jpml-server.js",
-    "start:dev": "NODE_ENV=development node jpml-server.js",
+    "start": "node server.js",
+    "start:dev": "NODE_ENV=development node server.js",
     "dev:message-archive": "/bin/bash message-archive-utility/scripts/dev.sh",
     "dev:message-archive:desktop": "/bin/bash message-archive-utility/scripts/dev-desktop.sh",
     "build:message-archive:desktop": "/bin/bash message-archive-utility/scripts/build-desktop.sh",

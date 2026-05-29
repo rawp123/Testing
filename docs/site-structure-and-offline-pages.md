@@ -1,6 +1,6 @@
 # Site Structure And Offline Pages
 
-This site is a static HTML/CSS/JavaScript site served by `jpml-server.js`.
+This site is a static HTML/CSS/JavaScript site served by `server.js`.
 Use `src/config/site-pages.json` as the registry for page availability and primary navigation.
 
 ## Page Registry
@@ -23,7 +23,7 @@ to:
 "status": "offline"
 ```
 
-Then restart the local server. Offline pages are removed from the header and blocked by `jpml-server.js` for direct URL requests.
+Then restart the local server. Offline pages are removed from the header and blocked by `server.js` for direct URL requests.
 
 Use `paths` for exact page URLs and `pathPrefixes` for related folders or generated data that should go offline with the page.
 
@@ -45,7 +45,6 @@ Use `"nav": false` for pages that should remain online but should not appear in 
 ## Website Code
 
 - `index.html`: homepage
-- `jpml-dashboard.html`: JPML dashboard entry point
 - `contact/index.html`: contact page
 - `db-diagram/index.html`: database diagram builder
 - `games/`: game pages
@@ -64,8 +63,6 @@ Generated files should not be hand-edited.
 - `data/all-in-podcast-search/episodes/`: generated episode JSON
 - `all-in-podcast-search/pagefind-source/`: generated HTML used by Pagefind
 - `all-in-podcast-search/pagefind/`: generated Pagefind index files
-- `data/mdl/`: generated JPML monthly snapshots
-- `data/pdfs/`: JPML PDF index and PDF files
 
 Rebuild generated All-In podcast data with:
 

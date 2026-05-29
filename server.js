@@ -5,7 +5,6 @@ const path = require('path');
 const rootDir = __dirname;
 const port = Number.parseInt(process.env.PORT || '3000', 10);
 const isProduction = process.env.NODE_ENV === 'production';
-const dashboardRoute = '/jpml-dashboard.html';
 const pageRegistryPath = path.join(rootDir, 'src', 'config', 'site-pages.json');
 
 const staticMounts = [
@@ -106,10 +105,6 @@ function startServer() {
   server.use(express.json());
 
   registerPageAvailability(server);
-
-  server.get(['/jpml-dashboard', '/jpml-dashboard/'], (request, response) => {
-    response.redirect(302, dashboardRoute);
-  });
 
   registerStaticMounts(server);
 

@@ -37,7 +37,7 @@ OUT_FILE   = DATA_DIR / "courtlistener.json"
 CL_SEARCH  = "https://www.courtlistener.com/api/rest/v4/search/"
 CL_SITE    = "https://www.courtlistener.com"
 HEADERS    = {
-    "User-Agent": "jpml-dashboard-enrichment/1.0 (educational, non-commercial)",
+    "User-Agent": "litigation-analytics-enrichment/1.0 (educational, non-commercial)",
     "Accept": "application/json",
 }
 
