@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Export iPhone Text Messages to PDF, Excel, or CSV on Mac | Message Archive Utility</title>
-  <meta name="description" content="Save iPhone text messages to your Mac, search old conversations, and export a local archive to PDF, Excel, or CSV. Your messages stay on your Mac.">
+  <title>Save, Search, and Export iPhone Messages on Mac | Message Archive Utility</title>
+  <meta name="description" content="Save, search, and export your iPhone messages on your Mac. Message Archive Utility is a private beta Mac app for local message archives.">
   <link rel="canonical" href="/">
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -25,36 +25,87 @@
 
   <main>
     <section class="mau-hero">
-      <div class="mau-hero-bg" aria-hidden="true"></div>
       <div class="container mau-hero-inner">
-        <p class="mau-kicker">Private Mac app for iPhone messages</p>
-        <h1>Message Archive Utility</h1>
-        <p class="mau-hero-copy">A private Mac app for ordinary iPhone users who want to save iPhone text messages locally, search old conversations, and export what they need.</p>
-        <div class="mau-actions">
-          <a class="btn primary" href="/availability/">Check availability</a>
-          <a class="btn ghost" href="/how-it-works/">See how it works</a>
+        <div class="mau-hero-copy-block">
+          <p class="mau-kicker">Local iPhone message archive</p>
+          <h1>Save, search, and export your iPhone messages.</h1>
+          <p class="mau-hero-copy">Create a readable local archive from an unencrypted iPhone backup on your Mac.</p>
+          <ul class="mau-badges" aria-label="Privacy basics">
+            <li>Local only</li>
+            <li>No cloud upload</li>
+            <li>No account required</li>
+          </ul>
+          <div class="mau-actions">
+            <a class="btn primary" href="/availability/">Check availability</a>
+            <a class="btn ghost" href="/how-it-works/">See how it works</a>
+          </div>
+          <p class="mau-privacy-note">Public download is not live yet. Private beta access is limited.</p>
         </div>
-        <p class="mau-privacy-note">Your messages stay on your Mac. Nothing is uploaded.</p>
+        <aside class="mau-app-preview" aria-label="Message Archive Utility preview">
+          <div class="mau-preview-window">
+            <div class="mau-preview-titlebar">
+              <span class="mau-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <strong>Local archive</strong>
+              <span>Private beta</span>
+            </div>
+            <div class="mau-preview-stats" aria-label="Archive stats">
+              <div>
+                <span>Messages</span>
+                <strong>18,420</strong>
+              </div>
+              <div>
+                <span>Conversations</span>
+                <strong>312</strong>
+              </div>
+              <div>
+                <span>Latest</span>
+                <strong>Today</strong>
+              </div>
+            </div>
+            <div class="mau-preview-conversation">
+              <div class="mau-preview-thread-head">
+                <span>Selected thread</span>
+                <strong>Family notes</strong>
+              </div>
+              <div class="mau-preview-message is-left">
+                <span>Person A</span>
+                <p>Found the older messages about the trip.</p>
+              </div>
+              <div class="mau-preview-message is-right">
+                <span>You</span>
+                <p>I’ll export that conversation as a PDF.</p>
+              </div>
+            </div>
+            <div class="mau-preview-footer">
+              <div class="mau-preview-export-chips" aria-label="Export formats">
+                <span>PDF</span>
+                <span>Excel</span>
+                <span>CSV</span>
+              </div>
+              <p>Archive stays on your Mac</p>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
     <section class="container mau-section" id="privacy">
       <div class="mau-section-head">
-        <p class="mau-kicker">Local first</p>
-        <h2>Your archive stays with you.</h2>
+        <p class="mau-kicker">Privacy basics</p>
+        <h2>Your archive stays on your Mac.</h2>
       </div>
       <div class="mau-promise-grid">
         <article class="mau-panel">
-          <h3>Private by design</h3>
-          <p>The app works with message data stored on your computer and keeps the archive in your Mac user folder.</p>
+          <h3>Local only</h3>
+          <p>The app imports from a local iPhone backup and keeps the archive on your Mac.</p>
+        </article>
+        <article class="mau-panel">
+          <h3>No cloud upload</h3>
+          <p>Messages are not sent to a website for import, search, or export.</p>
         </article>
         <article class="mau-panel">
           <h3>No account required</h3>
-          <p>The core workflow is local. There is no web account, cloud inbox, or remote message review.</p>
-        </article>
-        <article class="mau-panel">
-          <h3>Plain-language exports</h3>
-          <p>PDF, Excel, and CSV outputs are made for people to read, print, sort, and share when they choose.</p>
+          <p>The app runs on your Mac without a web account or remote message inbox.</p>
         </article>
       </div>
     </section>
@@ -62,35 +113,28 @@
     <section class="container mau-section" id="how-it-works">
       <div class="mau-section-head">
         <p class="mau-kicker">How it works</p>
-        <h2>Save iPhone messages to your Mac, then search the archive.</h2>
+        <h2>Back up, import, search, and export.</h2>
       </div>
       <ol class="mau-steps">
         <li>
           <span>1</span>
           <div>
-            <h3>Make a local iPhone backup</h3>
-            <p>The app guides you through the Mac steps needed before importing messages.</p>
+            <h3>Back up your iPhone on your Mac</h3>
+            <p>Create an unencrypted local iPhone backup before importing messages.</p>
           </div>
         </li>
         <li>
           <span>2</span>
           <div>
-            <h3>Import messages</h3>
-            <p>Bring the message archive into the app so it can be browsed and searched locally.</p>
+            <h3>Import messages from that backup</h3>
+            <p>Choose the backup on this Mac and let the app create a local archive.</p>
           </div>
         </li>
         <li>
           <span>3</span>
           <div>
-            <h3>Search and review</h3>
-            <p>Find matching messages first, then open summary stats when you want a wider view.</p>
-          </div>
-        </li>
-        <li>
-          <span>4</span>
-          <div>
-            <h3>Export what you need</h3>
-            <p>Create readable PDF reports, Excel workbooks, or CSV files for your own records. For more detail, see the <a href="/exports/">export examples</a>.</p>
+            <h3>Search conversations and export files</h3>
+            <p>Browse conversations, search old messages, and export PDF, Excel, or CSV files.</p>
           </div>
         </li>
       </ol>
@@ -99,20 +143,20 @@
     <section class="container mau-section" id="exports">
       <div class="mau-section-head">
         <p class="mau-kicker">Exports</p>
-        <h2>Export iPhone texts to PDF, Excel, or CSV.</h2>
+        <h2>What you can export.</h2>
       </div>
       <div class="mau-format-grid">
         <article class="mau-format">
           <h3>PDF</h3>
-          <p>Readable conversation-style exports and summary reports for saving or printing.</p>
+          <p>Readable conversation-style files for saving or printing selected messages.</p>
         </article>
         <article class="mau-format">
           <h3>Excel</h3>
-          <p>Workbooks with messages, conversations, contacts, search stats, and monthly counts.</p>
+          <p>Workbooks for reviewing message details, search results, and summary tabs.</p>
         </article>
         <article class="mau-format">
           <h3>CSV</h3>
-          <p>Simple spreadsheet-friendly files for people who want a lightweight copy.</p>
+          <p>Simple spreadsheet-friendly files when you want a lightweight copy.</p>
         </article>
       </div>
       <div class="mau-section-action">
@@ -120,51 +164,11 @@
       </div>
     </section>
 
-    <section class="container mau-section">
-      <div class="mau-split">
-        <div>
-          <p class="mau-kicker">Who it is for</p>
-          <h2>People who need their messages organized and readable.</h2>
-          <p>Message Archive Utility is for Mac users who want a calmer way to preserve personal, family, research, or project conversations without sending their messages to a website.</p>
-        </div>
-        <ul class="mau-audience-list" aria-label="Example users">
-          <li>Families preserving important conversations</li>
-          <li>Researchers organizing interview or project texts</li>
-          <li>Professionals saving client or volunteer threads</li>
-          <li>Anyone who wants a searchable local copy</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="container mau-section">
-      <div class="mau-section-head">
-        <p class="mau-kicker">FAQ preview</p>
-        <h2>A few basics before release.</h2>
-      </div>
-      <div class="mau-faq-grid">
-        <article class="mau-panel">
-          <h3>Does it upload my messages?</h3>
-          <p>No. The app is designed for local use on your Mac.</p>
-        </article>
-        <article class="mau-panel">
-          <h3>What can I export?</h3>
-          <p>You can export the full archive, a conversation, search results, summary reports, and messages with a selected person.</p>
-        </article>
-        <article class="mau-panel">
-          <h3>Is the first release Mac-focused?</h3>
-          <p>Yes. The first release is being prepared for Mac users.</p>
-        </article>
-      </div>
-      <div class="mau-section-action">
-        <a class="btn ghost" href="/faq/">Read the full FAQ</a>
-      </div>
-    </section>
-
     <section class="container mau-section" id="download">
       <div class="mau-download">
         <div>
           <p class="mau-kicker">Private beta</p>
-          <h2>Limited testing is being prepared.</h2>
+          <h2>Private beta access is limited.</h2>
           <p>The app is not available for public download yet. Private beta access may be shared with a small number of named testers while release details are finalized.</p>
         </div>
         <a class="btn ghost" href="/availability/">Read availability notes</a>
