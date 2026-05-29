@@ -8,15 +8,37 @@ const CONVERSATION_FORMATS = [
   { id: "csv", label: "CSV" },
 ];
 
-export default function ConversationView({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
+export default function ConversationView({
+  conversation,
+  isLoading,
+  apiBaseUrl = API_BASE_URL,
+  loadingConversation = null,
+}) {
   const [selectedFormat, setSelectedFormat] = useState("pdf");
 
   if (isLoading) {
+    const loadingTitle = loadingConversation?.title || "Selected conversation";
+    const participantText = loadingConversation?.participants?.join(", ") || "";
+
     return (
-      <section className="conversation-view empty-transcript">
-        <div className="empty-state empty-panel">
-          <strong>Loading conversation</strong>
-          <span>Opening the local message timeline.</span>
+      <section
+        className="conversation-view conversation-loading-panel"
+        aria-label="Loading conversation"
+        aria-live="polite"
+      >
+        <div className="conversation-loading-copy">
+          <p className="eyebrow">Loading messages</p>
+          <h2>{loadingTitle}</h2>
+          {participantText && <p>{participantText}</p>}
+          <span>Opening this conversation...</span>
+        </div>
+        <div
+          className="conversation-loading-bar"
+          role="progressbar"
+          aria-label="Loading messages"
+          aria-valuetext="Loading"
+        >
+          <span />
         </div>
       </section>
     );
@@ -203,9 +225,9 @@ function MessageBubble({ message, startsGroup }) {
   );
 }
 
-function getDisplayMessageBody(message) {
+export function getDisplayMessageBody(message) {
   const body = message.body || "";
-  if (message.attachments?.length > 0 && looksLikeDecodedBinaryNoise(body)) {
+  if (looksLikeDecodedBinaryNoise(body)) {
     return "";
   }
   return body;
@@ -214,21 +236,86 @@ function getDisplayMessageBody(message) {
 function looksLikeDecodedBinaryNoise(value) {
   const normalized = (value || "").split(/\s+/).filter(Boolean).join(" ");
   if (normalized.length < 40) return false;
+  if (hasRepeatedSingleCharacterShape(normalized)) return true;
   if (hasHighSymbolDensity(normalized)) return true;
   if (hasHumanTextShape(normalized)) return false;
-  return true;
+  if (hasCoherentNonLatinTextShape(normalized)) return false;
+  if (hasMixedScriptNoiseShape(normalized)) return true;
+  return false;
+}
+
+function hasRepeatedSingleCharacterShape(value) {
+  return new Set([...value]).size / value.length <= 0.12;
 }
 
 function hasHighSymbolDensity(value) {
+  const counts = countTextCharacterGroups(value);
+  return counts.symbols / value.length >= 0.04;
+}
+
+function hasMixedScriptNoiseShape(value) {
+  const counts = countTextCharacterGroups(value);
+  if (counts.space || counts.commonPunctuation) return false;
+
+  const cjkRatio = counts.cjk / value.length;
+  const latinRatio = counts.latin / value.length;
+  const symbolRatio = counts.symbols / value.length;
+  const otherScriptRatio = (counts.hangul + counts.kana + counts.otherLetters) / value.length;
+
+  return cjkRatio >= 0.5
+    && (latinRatio >= 0.035 || symbolRatio >= 0.03 || otherScriptRatio >= 0.03);
+}
+
+function hasCoherentNonLatinTextShape(value) {
+  const counts = countTextCharacterGroups(value);
+  const symbolRatio = counts.symbols / value.length;
+  const latinRatio = counts.latin / value.length;
+  const otherScriptRatio = (counts.hangul + counts.kana + counts.otherLetters) / value.length;
+  const cjkRatio = counts.cjk / value.length;
+  const hangulRatio = counts.hangul / value.length;
+  const kanaCjkRatio = (counts.kana + counts.cjk) / value.length;
+
+  if (symbolRatio > 0.015 || latinRatio > 0.02) return false;
+  if (cjkRatio >= 0.92 && otherScriptRatio <= 0.02) return true;
+  if (hangulRatio >= 0.85 && (counts.cjk + counts.kana + counts.otherLetters) / value.length <= 0.05) return true;
+  if (kanaCjkRatio >= 0.85 && counts.kana > 0 && (counts.hangul + counts.otherLetters) / value.length <= 0.03) return true;
+  return false;
+}
+
+function countTextCharacterGroups(value) {
   const commonPunctuation = new Set([".", ",", "!", "?", ";", ":", "'", "\"", "(", ")", "-", "，", "。", "！", "？", "、"]);
-  let symbols = 0;
+  const counts = {
+    latin: 0,
+    cjk: 0,
+    hangul: 0,
+    kana: 0,
+    digits: 0,
+    space: 0,
+    commonPunctuation: 0,
+    symbols: 0,
+    otherLetters: 0,
+  };
   for (const char of value) {
-    if (/[A-Za-z0-9\s]/.test(char)) continue;
-    if (commonPunctuation.has(char)) continue;
-    if (/\p{Letter}|\p{Number}/u.test(char)) continue;
-    symbols += 1;
+    const codePoint = char.codePointAt(0);
+    if (/[A-Za-z]/.test(char)) counts.latin += 1;
+    else if (/[0-9]/.test(char)) counts.digits += 1;
+    else if (/\s/.test(char)) counts.space += 1;
+    else if (commonPunctuation.has(char)) counts.commonPunctuation += 1;
+    else if (
+      (codePoint >= 0x3400 && codePoint <= 0x4dbf)
+      || (codePoint >= 0x4e00 && codePoint <= 0x9fff)
+      || (codePoint >= 0xf900 && codePoint <= 0xfaff)
+    ) counts.cjk += 1;
+    else if (
+      (codePoint >= 0x1100 && codePoint <= 0x11ff)
+      || (codePoint >= 0x3130 && codePoint <= 0x318f)
+      || (codePoint >= 0xac00 && codePoint <= 0xd7af)
+    ) counts.hangul += 1;
+    else if (codePoint >= 0x3040 && codePoint <= 0x30ff) counts.kana += 1;
+    else if (/\p{Letter}/u.test(char)) counts.otherLetters += 1;
+    else counts.symbols += 1;
   }
-  return symbols / value.length >= 0.12;
+  return counts;
 }
 
 function hasHumanTextShape(value) {

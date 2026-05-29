@@ -2,7 +2,7 @@ import { BarChart3, Download } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import BackupGuide from "./components/BackupGuide.jsx";
 import ConversationList from "./components/ConversationList.jsx";
-import ConversationView, { ConversationMessages } from "./components/ConversationView.jsx";
+import ConversationView, { ConversationMessages, getDisplayMessageBody } from "./components/ConversationView.jsx";
 import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
@@ -175,6 +175,7 @@ export default function App() {
   const isSearching = query.trim().length > 0;
   const sidebarError = getVisibleSidebarError(error, hasArchiveData);
   const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
+  const selectedConversationSummary = conversations.find((conversation) => conversation.id === selectedId) || null;
 
   useEffect(() => {
     if (resolvedActiveTab !== "browse-archive" || !selectedConversation || isConversationLoading) return;
@@ -326,6 +327,7 @@ export default function App() {
                   apiBaseUrl={API_BASE_URL}
                   conversation={selectedConversation}
                   isLoading={isConversationLoading}
+                  loadingConversation={selectedConversationSummary}
                 />
               </div>
               <ConversationMessages
@@ -460,21 +462,24 @@ function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
         </p>
       )}
       <div className="search-message-list">
-        {results.map((result) => (
-          <article className="search-message-card" key={result.id}>
-            <div className="search-message-card-header">
-              <div>
-                <strong>{result.sender_name || "Unknown sender"}</strong>
-                <span>{result.conversation_title || "Untitled conversation"}</span>
+        {results.map((result) => {
+          const displayBody = getDisplayMessageBody(result);
+          return (
+            <article className="search-message-card" key={result.id}>
+              <div className="search-message-card-header">
+                <div>
+                  <strong>{result.sender_name || "Unknown sender"}</strong>
+                  <span>{result.conversation_title || "Untitled conversation"}</span>
+                </div>
+                <time>{formatResultDate(result.sent_at)}</time>
               </div>
-              <time>{formatResultDate(result.sent_at)}</time>
-            </div>
-            {result.body ? <p>{result.body}</p> : <p className="empty-message-body">No message text</p>}
-            <button className="ghost-button" type="button" onClick={() => onOpenConversation(result.conversation_id)}>
-              Open conversation
-            </button>
-          </article>
-        ))}
+              {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">No message text</p>}
+              <button className="ghost-button" type="button" onClick={() => onOpenConversation(result.conversation_id)}>
+                Open conversation
+              </button>
+            </article>
+          );
+        })}
       </div>
     </>
   );

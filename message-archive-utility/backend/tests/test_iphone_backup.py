@@ -941,6 +941,28 @@ def test_ignores_long_symbol_like_attributed_body_noise_when_text_is_empty():
     assert body == ""
 
 
+def test_ignores_mixed_script_decoded_body_noise_when_text_is_empty():
+    fake_decoded_binary_noise = (
+        "敖複挠槙莈º噢葵樑⇧鈾莞⊙华棉瑔漢億侵鑚bl詩陽弦欺腐澀數"
+        "煻瑩渝舫物挽棉湯瑁牴扩璐乏淖薇詩莈丈丘泅敢r莞万噓污敵鑚b莉b"
+    ).encode("utf-16-be")
+
+    body = extract_message_body_text(None, fake_decoded_binary_noise, None)
+
+    assert body == ""
+
+
+def test_preserves_coherent_non_latin_attributed_body_text_when_text_is_empty():
+    real_message_text = (
+        "今天我们一起去喝咖啡然后讨论周末计划我觉得这个地方很好"
+        "我们下午三点见面可以吗谢谢你"
+    )
+
+    body = extract_message_body_text(None, real_message_text.encode("utf-16-be"), None)
+
+    assert body == real_message_text
+
+
 def test_ignores_binary_payload_data_when_text_is_empty():
     fake_decoded_binary_noise = ("龘" * 90).encode("utf-16-be")
 

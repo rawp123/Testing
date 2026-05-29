@@ -1694,6 +1694,65 @@ a:focus-visible {
   width: min(100%, 940px);
 }
 
+.conversation-loading-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(49, 82, 77, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 18px;
+  box-shadow: 0 12px 34px rgba(45, 39, 29, 0.045);
+}
+
+.conversation-loading-copy {
+  min-width: 0;
+}
+
+.conversation-loading-copy h2 {
+  margin: 0;
+  color: #161715;
+  font-size: 24px;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+}
+
+.conversation-loading-copy p:not(.eyebrow),
+.conversation-loading-copy span {
+  display: block;
+  margin: 5px 0 0;
+  color: #716a60;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.conversation-loading-bar {
+  position: relative;
+  overflow: hidden;
+  height: 7px;
+  border-radius: 999px;
+  background: #e4ded5;
+}
+
+.conversation-loading-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #31524d, #6f8f86);
+  animation: loading-bar-sweep 1.15s ease-in-out infinite;
+}
+
+@keyframes loading-bar-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
 .conversation-messages-section {
   display: grid;
   gap: 12px;

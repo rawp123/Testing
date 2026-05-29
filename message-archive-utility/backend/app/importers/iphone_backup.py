@@ -820,7 +820,7 @@ def extract_readable_text_from_blob(blob, *, allow_lossy_unicode: bool = True) -
         except LookupError:
             continue
         cleaned = normalize_extracted_blob_text(decoded)
-        if cleaned and has_human_text_shape(cleaned):
+        if cleaned and has_readable_text_shape(cleaned):
             candidates.append(cleaned)
 
     if not candidates:
@@ -887,23 +887,49 @@ def looks_like_decoded_binary_noise(value: str) -> bool:
     if len(normalized) < 40:
         return False
 
+    if has_repeated_single_character_shape(normalized):
+        return True
     if has_high_symbol_density(normalized):
         return True
-
     if has_human_text_shape(normalized):
         return False
+    if has_coherent_non_latin_text_shape(normalized):
+        return False
+    if has_mixed_script_noise_shape(normalized):
+        return True
 
-    return True
+    return False
+
+
+def has_repeated_single_character_shape(value: str) -> bool:
+    return len(set(value)) / len(value) <= 0.12
 
 
 def has_high_symbol_density(value: str) -> bool:
-    symbols = sum(
-        not char.isalnum()
-        and not char.isspace()
-        and char not in ".,!?;:'\"()-，。！？、"
-        for char in value
+    counts = count_text_character_groups(value)
+    return counts["symbols"] / len(value) >= 0.04
+
+
+def has_mixed_script_noise_shape(value: str) -> bool:
+    counts = count_text_character_groups(value)
+    if counts["space"] or counts["common_punctuation"]:
+        return False
+
+    cjk_ratio = counts["cjk"] / len(value)
+    latin_ratio = counts["latin"] / len(value)
+    symbol_ratio = counts["symbols"] / len(value)
+    other_script_ratio = (
+        counts["hangul"] + counts["kana"] + counts["other_letters"]
+    ) / len(value)
+
+    return (
+        cjk_ratio >= 0.5
+        and (
+            latin_ratio >= 0.035
+            or symbol_ratio >= 0.03
+            or other_script_ratio >= 0.03
+        )
     )
-    return symbols / len(value) >= 0.12
 
 
 def has_human_text_shape(value: str) -> bool:
@@ -918,6 +944,75 @@ def has_human_text_shape(value: str) -> bool:
         return True
 
     return False
+
+
+def has_readable_text_shape(value: str) -> bool:
+    return has_human_text_shape(value) or has_coherent_non_latin_text_shape(value)
+
+
+def has_coherent_non_latin_text_shape(value: str) -> bool:
+    counts = count_text_character_groups(value)
+    text_length = len(value)
+    symbol_ratio = counts["symbols"] / text_length
+    latin_ratio = counts["latin"] / text_length
+    other_script_ratio = (counts["hangul"] + counts["kana"] + counts["other_letters"]) / text_length
+    cjk_ratio = counts["cjk"] / text_length
+    hangul_ratio = counts["hangul"] / text_length
+    kana_cjk_ratio = (counts["kana"] + counts["cjk"]) / text_length
+
+    if symbol_ratio > 0.015 or latin_ratio > 0.02:
+        return False
+    if cjk_ratio >= 0.92 and other_script_ratio <= 0.02:
+        return True
+    if hangul_ratio >= 0.85 and (counts["cjk"] + counts["kana"] + counts["other_letters"]) / text_length <= 0.05:
+        return True
+    if kana_cjk_ratio >= 0.85 and counts["kana"] > 0 and (counts["hangul"] + counts["other_letters"]) / text_length <= 0.03:
+        return True
+
+    return False
+
+
+def count_text_character_groups(value: str) -> dict[str, int]:
+    counts = {
+        "latin": 0,
+        "cjk": 0,
+        "hangul": 0,
+        "kana": 0,
+        "digits": 0,
+        "space": 0,
+        "common_punctuation": 0,
+        "symbols": 0,
+        "other_letters": 0,
+    }
+    for char in value:
+        codepoint = ord(char)
+        if "a" <= char.lower() <= "z":
+            counts["latin"] += 1
+        elif char.isdigit():
+            counts["digits"] += 1
+        elif char.isspace():
+            counts["space"] += 1
+        elif char in ".,!?;:'\"()-，。！？、":
+            counts["common_punctuation"] += 1
+        elif (
+            0x3400 <= codepoint <= 0x4DBF
+            or 0x4E00 <= codepoint <= 0x9FFF
+            or 0xF900 <= codepoint <= 0xFAFF
+        ):
+            counts["cjk"] += 1
+        elif (
+            0x1100 <= codepoint <= 0x11FF
+            or 0x3130 <= codepoint <= 0x318F
+            or 0xAC00 <= codepoint <= 0xD7AF
+        ):
+            counts["hangul"] += 1
+        elif 0x3040 <= codepoint <= 0x30FF:
+            counts["kana"] += 1
+        elif char.isalpha():
+            counts["other_letters"] += 1
+        else:
+            counts["symbols"] += 1
+    return counts
 
 
 def printable_score(value: str) -> float:
