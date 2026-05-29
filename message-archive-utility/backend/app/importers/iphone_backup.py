@@ -820,7 +820,7 @@ def extract_readable_text_from_blob(blob, *, allow_lossy_unicode: bool = True) -
         except LookupError:
             continue
         cleaned = normalize_extracted_blob_text(decoded)
-        if cleaned:
+        if cleaned and has_human_text_shape(cleaned):
             candidates.append(cleaned)
 
     if not candidates:
@@ -883,12 +883,41 @@ def normalize_extracted_blob_text(value: str) -> str:
 
 
 def looks_like_decoded_binary_noise(value: str) -> bool:
-    if len(value) < 80:
+    normalized = " ".join((value or "").split())
+    if len(normalized) < 40:
         return False
-    has_separator = any(char.isspace() or char in ".,!?;:，。！？、" for char in value)
-    if has_separator:
+
+    if has_high_symbol_density(normalized):
+        return True
+
+    if has_human_text_shape(normalized):
         return False
+
     return True
+
+
+def has_high_symbol_density(value: str) -> bool:
+    symbols = sum(
+        not char.isalnum()
+        and not char.isspace()
+        and char not in ".,!?;:'\"()-，。！？、"
+        for char in value
+    )
+    return symbols / len(value) >= 0.12
+
+
+def has_human_text_shape(value: str) -> bool:
+    has_word_separator = any(char.isspace() for char in value)
+    has_sentence_punctuation = any(char in ".,!?;:，。！？、" for char in value)
+    latin_letters = sum("a" <= char.lower() <= "z" for char in value)
+    ascii_digits = sum(char.isdigit() for char in value)
+
+    if latin_letters >= 3 and (has_word_separator or has_sentence_punctuation):
+        return True
+    if ascii_digits >= 3 and (has_word_separator or has_sentence_punctuation):
+        return True
+
+    return False
 
 
 def printable_score(value: str) -> float:

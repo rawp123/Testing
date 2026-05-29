@@ -159,13 +159,16 @@ function sortMessagesNewestFirst(messages) {
 }
 
 function MessageBubble({ message, startsGroup }) {
+  const displayBody = getDisplayMessageBody(message);
+  const emptyBodyLabel = message.attachments?.length > 0 ? "Attachment only" : "No message text";
+
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
       <div className="message-meta">
         <strong>{message.sender_name}</strong>
         <time>{formatTime(message.sent_at)}</time>
       </div>
-      {message.body ? <p>{message.body}</p> : <p className="empty-message-body">No message text</p>}
+      {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">{emptyBodyLabel}</p>}
       {message.attachments?.length > 0 && (
         <ul className="attachment-list" aria-label="Attachments">
           {message.attachments.map((attachment) => (
@@ -198,6 +201,45 @@ function MessageBubble({ message, startsGroup }) {
       )}
     </article>
   );
+}
+
+function getDisplayMessageBody(message) {
+  const body = message.body || "";
+  if (message.attachments?.length > 0 && looksLikeDecodedBinaryNoise(body)) {
+    return "";
+  }
+  return body;
+}
+
+function looksLikeDecodedBinaryNoise(value) {
+  const normalized = (value || "").split(/\s+/).filter(Boolean).join(" ");
+  if (normalized.length < 40) return false;
+  if (hasHighSymbolDensity(normalized)) return true;
+  if (hasHumanTextShape(normalized)) return false;
+  return true;
+}
+
+function hasHighSymbolDensity(value) {
+  const commonPunctuation = new Set([".", ",", "!", "?", ";", ":", "'", "\"", "(", ")", "-", "，", "。", "！", "？", "、"]);
+  let symbols = 0;
+  for (const char of value) {
+    if (/[A-Za-z0-9\s]/.test(char)) continue;
+    if (commonPunctuation.has(char)) continue;
+    if (/\p{Letter}|\p{Number}/u.test(char)) continue;
+    symbols += 1;
+  }
+  return symbols / value.length >= 0.12;
+}
+
+function hasHumanTextShape(value) {
+  const hasWordSeparator = /\s/.test(value);
+  const hasSentencePunctuation = /[.,!?;:，。！？、]/.test(value);
+  const latinLetters = (value.match(/[A-Za-z]/g) || []).length;
+  const asciiDigits = (value.match(/[0-9]/g) || []).length;
+
+  if (latinLetters >= 3 && (hasWordSeparator || hasSentencePunctuation)) return true;
+  if (asciiDigits >= 3 && (hasWordSeparator || hasSentencePunctuation)) return true;
+  return false;
 }
 
 function buildAttachmentUrl(attachment, download = false) {

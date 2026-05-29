@@ -930,6 +930,17 @@ def test_ignores_decoded_binary_attributed_body_noise_when_text_is_empty():
     assert body == ""
 
 
+def test_ignores_long_symbol_like_attributed_body_noise_when_text_is_empty():
+    fake_decoded_binary_noise = (
+        "懵擎獵薔།鐡詩荒刀臺挨棉湯牡∨請樟鉚喔⊖護鐵祕泪呻懵獨敦"
+        "賬繳拐琊蔣昪藥撿腸憾墩艘整慎斂鈿限汪蛹旡殮勞巴Xㄱㄴ"
+    ).encode("utf-16-be")
+
+    body = extract_message_body_text(None, fake_decoded_binary_noise, None)
+
+    assert body == ""
+
+
 def test_ignores_binary_payload_data_when_text_is_empty():
     fake_decoded_binary_noise = ("龘" * 90).encode("utf-16-be")
 
@@ -967,7 +978,11 @@ def test_reimport_clears_existing_binary_noise_body():
         )
         VALUES (?, ?, '1', '2001-01-01T00:00:00+00:00', 'incoming', ?, 'iMessage')
         """,
-        (conversation_id, contact_id, "龘" * 90),
+        (
+            conversation_id,
+            contact_id,
+            "懵擎獵薔鐡詩荒刀臺挨棉湯牡請樟鉚喔護鐵祕泪呻懵獨敦賬繳拐琊蔣昪藥撿腸憾墩艘整慎斂鈿限汪蛹旡殮勞巴Xㄱㄴ",
+        ),
     )
     archive_conn.commit()
 
