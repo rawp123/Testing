@@ -786,15 +786,21 @@ def extract_message_body_text(text, attributed_body, payload_data) -> str:
     if text:
         return str(text)
 
-    for candidate in (attributed_body, payload_data):
-        extracted = extract_readable_text_from_blob(candidate)
+    for candidate, allow_lossy_unicode in (
+        (attributed_body, True),
+        (payload_data, False),
+    ):
+        extracted = extract_readable_text_from_blob(
+            candidate,
+            allow_lossy_unicode=allow_lossy_unicode,
+        )
         if extracted:
             return extracted
 
     return ""
 
 
-def extract_readable_text_from_blob(blob) -> str:
+def extract_readable_text_from_blob(blob, *, allow_lossy_unicode: bool = True) -> str:
     if blob is None:
         return ""
     if isinstance(blob, memoryview):
@@ -804,11 +810,39 @@ def extract_readable_text_from_blob(blob) -> str:
     if not isinstance(blob, bytes):
         return ""
 
+    if not allow_lossy_unicode:
+        return extract_plain_text_blob(blob)
+
     candidates = []
     for encoding in ("utf-8", "utf-16-be", "utf-16-le"):
         try:
             decoded = blob.decode(encoding, errors="ignore")
         except LookupError:
+            continue
+        cleaned = normalize_extracted_blob_text(decoded)
+        if cleaned:
+            candidates.append(cleaned)
+
+    if not candidates:
+        return ""
+    return max(candidates, key=lambda value: (len(value), printable_score(value)))
+
+
+def extract_plain_text_blob(blob: bytes) -> str:
+    if not blob:
+        return ""
+
+    encodings = []
+    if blob.startswith((b"\xff\xfe", b"\xfe\xff")):
+        encodings.append("utf-16")
+    if b"\x00" not in blob:
+        encodings.append("utf-8")
+
+    candidates = []
+    for encoding in encodings:
+        try:
+            decoded = blob.decode(encoding)
+        except UnicodeDecodeError:
             continue
         cleaned = normalize_extracted_blob_text(decoded)
         if cleaned:
@@ -839,11 +873,22 @@ def normalize_extracted_blob_text(value: str) -> str:
             continue
         if printable_score(cleaned) < 0.72:
             continue
+        if looks_like_decoded_binary_noise(cleaned):
+            continue
         cleaned_runs.append(cleaned)
 
     if not cleaned_runs:
         return ""
     return max(cleaned_runs, key=len)
+
+
+def looks_like_decoded_binary_noise(value: str) -> bool:
+    if len(value) < 80:
+        return False
+    has_separator = any(char.isspace() or char in ".,!?;:，。！？、" for char in value)
+    if has_separator:
+        return False
+    return True
 
 
 def printable_score(value: str) -> float:
@@ -1018,16 +1063,30 @@ def insert_iphone_message(
             message["service"],
         ),
     )
-    if cursor.rowcount == 0 and message["text"]:
-        cursor = conn.execute(
-            """
-            UPDATE messages
-            SET body = ?
-            WHERE source_message_id = ?
-              AND body = ''
-            """,
-            (message["text"], str(message["rowid"])),
-        )
+    if cursor.rowcount == 0:
+        row = conn.execute(
+            "SELECT body FROM messages WHERE source_message_id = ?",
+            (str(message["rowid"]),),
+        ).fetchone()
+        current_body = row["body"] if row else ""
+        if message["text"] and (not current_body or looks_like_decoded_binary_noise(current_body)):
+            cursor = conn.execute(
+                """
+                UPDATE messages
+                SET body = ?
+                WHERE source_message_id = ?
+                """,
+                (message["text"], str(message["rowid"])),
+            )
+        elif current_body and looks_like_decoded_binary_noise(current_body):
+            cursor = conn.execute(
+                """
+                UPDATE messages
+                SET body = ''
+                WHERE source_message_id = ?
+                """,
+                (str(message["rowid"]),),
+            )
     return cursor.rowcount
 
 

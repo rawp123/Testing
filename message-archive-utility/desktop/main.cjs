@@ -49,7 +49,22 @@ function isAllowedNavigation(targetUrl) {
     return fileURLToPath(parsedUrl) === FRONTEND_DIST_INDEX;
   }
 
+  if (isAllowedBackendDownloadUrl(parsedUrl)) {
+    return true;
+  }
+
   return ALLOWED_DEV_ORIGINS.has(parsedUrl.origin);
+}
+
+function isAllowedBackendDownloadUrl(parsedUrl) {
+  const backendOrigin = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
+  return (
+    parsedUrl.origin === backendOrigin
+    && (
+      parsedUrl.pathname.startsWith("/export/")
+      || parsedUrl.pathname.startsWith("/attachments/")
+    )
+  );
 }
 
 function createWindow() {
@@ -323,7 +338,7 @@ function getStartupErrorMessage(error) {
     return [
       "Message Archive could not start its local message service.",
       "",
-      "Your message archive is still stored on this Mac. Please reopen the app, or reinstall it if this keeps happening.",
+      "Your message archive is still stored on this computer. Please reopen the app, or reinstall it if this keeps happening.",
     ].join("\n");
   }
 

@@ -187,7 +187,7 @@ export default function App() {
         <div className="app-title-block">
           <p className="eyebrow">Local archive</p>
           <h1>Messages</h1>
-          <p>Import, search, and export your iPhone messages on this Mac.</p>
+          <p>Import, search, and export your iPhone messages on this computer.</p>
         </div>
         <nav className="app-tabs" aria-label="App sections" role="tablist">
           {APP_TABS.map((tab) => (
@@ -597,7 +597,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
           The app walks you through creating a local iPhone backup, then lets you search and export your messages when needed.
         </p>
         <div className="trust-row" aria-label="Privacy safeguards">
-          <span>Stays on this Mac</span>
+          <span>Stays on this computer</span>
           <span>Nothing uploaded</span>
           <span>No account needed</span>
         </div>
@@ -607,7 +607,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
           <ol className="onboarding-steps" aria-label="Basic setup sequence">
             {[
               ["Back up your iPhone", "Plug in your iPhone and use Finder to create a local backup."],
-              ["Import messages", "Let the app prepare a private message archive on this Mac."],
+              ["Import messages", "Let the app prepare a private message archive on this computer."],
               ["Search and export", "Browse conversations and export PDF, Excel, or CSV files."],
             ].map(([title, detail], index) => (
               <li key={title}>
@@ -637,7 +637,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
             ["Search conversations", "Find names, numbers, dates, and message text."],
             ["See useful summaries", "Search a word like \"coffee\" and see who mentioned it, where it appeared, and when."],
             ["Export readable files", "Create PDF, Excel, or CSV copies."],
-            ["Keep everything local", "Your archive stays on this Mac."],
+            ["Keep everything local", "Your archive stays on this computer."],
           ].map(([title, detail]) => (
             <div key={title}>
               <strong>{title}</strong>

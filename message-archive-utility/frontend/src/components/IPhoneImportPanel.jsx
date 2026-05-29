@@ -259,7 +259,7 @@ export default function IPhoneImportPanel({
         setBackupCandidateStatus(
           candidates.length
             ? "A local iPhone backup was found."
-            : "No local iPhone backup was found yet. Back up your iPhone to this Mac, then try again.",
+            : "No local iPhone backup was found yet. Back up your iPhone to this computer, then try again.",
         );
       }
     } catch {
@@ -485,12 +485,12 @@ export default function IPhoneImportPanel({
               <div>
                 <p className="eyebrow">Import</p>
                 <h2>Import iPhone messages</h2>
-                <p>Import messages from an iPhone backup on this Mac.</p>
+                <p>Import messages from an iPhone backup on this computer.</p>
               </div>
             </div>
 
             <p className="backup-encryption-note">
-              Start with an unencrypted local iPhone backup on this Mac.
+              Start with an unencrypted local iPhone backup on this computer.
             </p>
 
             <BackupGuide />
@@ -941,7 +941,7 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
     return {
       kind: "find",
       label: "Find iPhone backup",
-      detail: "Back up your iPhone to this Mac first, then let the app look for it.",
+      detail: "Back up your iPhone to this computer first, then let the app look for it.",
       disabled: isBusy,
       disabledReason: undefined,
     };
@@ -952,7 +952,7 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
     label: "Import messages",
     detail: "The app will prepare, check, and import your messages into this archive.",
     disabled: !canRunQuickImport || isBusy,
-    disabledReason: canRunQuickImport ? undefined : "Back up your iPhone to this Mac, then try again.",
+    disabledReason: canRunQuickImport ? undefined : "Back up your iPhone to this computer, then try again.",
   };
 }
 
@@ -974,8 +974,8 @@ function getImportStatus({
 
   if (isBusy) {
     const busyMessages = {
-      diagnostics: ["Checking backup", "Making sure this Mac can use the selected backup."],
-      locate: ["Finding iPhone backup", "Looking for a usable local backup on this Mac."],
+      diagnostics: ["Checking backup", "Making sure this computer can use the selected backup."],
+      locate: ["Finding iPhone backup", "Looking for a usable local backup on this computer."],
       copy: ["Preparing local copy", "Preparing messages for this app's archive."],
       validate: ["Checking message archive", "Checking that the prepared import is ready."],
       inspect: ["Checking message archive", "Checking message totals before import."],

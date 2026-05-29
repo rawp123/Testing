@@ -11,6 +11,7 @@ from app.importers.iphone_backup import (
     copy_sms_db_from_backup,
     extract_message_body_text,
     import_copied_sms_db_messages,
+    insert_iphone_message,
     inspect_copied_sms_db_metadata,
     locate_sms_db_dry_run,
     validate_copied_sms_db,
@@ -913,6 +914,81 @@ def test_extracts_message_text_from_attributed_body_when_text_is_empty():
     )
 
     assert body == "Recovered attributed body text"
+
+
+def test_extracts_plain_payload_text_when_text_is_empty():
+    body = extract_message_body_text(None, None, b"Recovered payload text")
+
+    assert body == "Recovered payload text"
+
+
+def test_ignores_decoded_binary_attributed_body_noise_when_text_is_empty():
+    fake_decoded_binary_noise = ("龘" * 90).encode("utf-16-be")
+
+    body = extract_message_body_text(None, fake_decoded_binary_noise, None)
+
+    assert body == ""
+
+
+def test_ignores_binary_payload_data_when_text_is_empty():
+    fake_decoded_binary_noise = ("龘" * 90).encode("utf-16-be")
+
+    body = extract_message_body_text(None, None, fake_decoded_binary_noise)
+
+    assert body == ""
+
+
+def test_reimport_clears_existing_binary_noise_body():
+    archive_conn = create_archive_connection()
+    archive_conn.execute(
+        """
+        INSERT INTO conversations (source_thread_id, title)
+        VALUES ('iphone-chat:1', 'Existing chat')
+        """
+    )
+    archive_conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', '+15550001111', 'iphone')
+        """
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    contact_id = archive_conn.execute("SELECT id FROM contacts").fetchone()["id"]
+    archive_conn.execute(
+        """
+        INSERT INTO messages (
+          conversation_id,
+          sender_contact_id,
+          source_message_id,
+          sent_at,
+          direction,
+          body,
+          service
+        )
+        VALUES (?, ?, '1', '2001-01-01T00:00:00+00:00', 'incoming', ?, 'iMessage')
+        """,
+        (conversation_id, contact_id, "龘" * 90),
+    )
+    archive_conn.commit()
+
+    updated = insert_iphone_message(
+        archive_conn,
+        conversation_id=conversation_id,
+        sender_contact_id=contact_id,
+        message={
+            "rowid": 1,
+            "date": 0,
+            "text": "",
+            "is_from_me": 0,
+            "service": "iMessage",
+        },
+    )
+
+    body = archive_conn.execute(
+        "SELECT body FROM messages WHERE source_message_id = '1'"
+    ).fetchone()["body"]
+    assert updated == 1
+    assert body == ""
 
 
 def test_reimport_updates_existing_blank_body_from_attributed_body(tmp_path):
