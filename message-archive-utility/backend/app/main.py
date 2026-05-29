@@ -260,6 +260,92 @@ def describe_unreadable_backup(backup_folder: Path, *, allow_schema_scan: bool =
     return f"Manifest.db could not be read as a SQLite database. {sms_file_status}"
 
 
+def diagnose_iphone_backup_path(backup_folder_path: str) -> dict:
+    backup_folder = Path(backup_folder_path).expanduser()
+    diagnostics = {
+        "backup_folder_exists": backup_folder.exists(),
+        "backup_folder_is_directory": False,
+        "manifest_exists": False,
+        "manifest_readable_sqlite": False,
+        "manifest_appears_truncated": False,
+        "backup_appears_encrypted": False,
+        "sms_db_manifest_entry_exists": False,
+        "sms_db_payload_exists": False,
+        "sms_db_payload_nonzero": False,
+        "sms_db_payload_size_bytes": None,
+        "usable_without_import": False,
+    }
+
+    if not diagnostics["backup_folder_exists"]:
+        return diagnostics
+
+    diagnostics["backup_folder_is_directory"] = backup_folder.is_dir()
+    if not diagnostics["backup_folder_is_directory"]:
+        return diagnostics
+
+    backup_folder = backup_folder.resolve()
+    manifest_path = backup_folder / "Manifest.db"
+    diagnostics["manifest_exists"] = manifest_path.is_file()
+    if not diagnostics["manifest_exists"]:
+        return diagnostics
+
+    diagnostics["manifest_appears_truncated"] = manifest_appears_truncated(manifest_path)
+
+    try:
+        locator_result = locate_sms_db_dry_run(str(backup_folder))
+    except sqlite3.DatabaseError:
+        return diagnostics
+    except (FileNotFoundError, NotADirectoryError, PermissionError, OSError):
+        return diagnostics
+
+    diagnostics["manifest_readable_sqlite"] = bool(locator_result.get("manifest_readable"))
+    diagnostics["sms_db_manifest_entry_exists"] = bool(locator_result.get("sms_db_found"))
+    if not locator_result.get("sms_db_found"):
+        return diagnostics
+
+    try:
+        sms_db_path = Path(locator_result["expected_backup_file_path"]).resolve(strict=True)
+    except (KeyError, OSError):
+        return diagnostics
+
+    if not sms_db_path.is_relative_to(backup_folder):
+        return diagnostics
+
+    diagnostics["sms_db_payload_exists"] = sms_db_path.is_file()
+    if diagnostics["sms_db_payload_exists"]:
+        diagnostics["sms_db_payload_size_bytes"] = sms_db_path.stat().st_size
+        diagnostics["sms_db_payload_nonzero"] = diagnostics["sms_db_payload_size_bytes"] > 0
+
+    diagnostics["usable_without_import"] = (
+        diagnostics["manifest_exists"]
+        and diagnostics["sms_db_manifest_entry_exists"]
+        and diagnostics["sms_db_payload_exists"]
+        and diagnostics["sms_db_payload_nonzero"]
+    )
+    return diagnostics
+
+
+def manifest_appears_truncated(manifest_path: Path) -> bool:
+    try:
+        header = manifest_path.read_bytes()[:100]
+    except OSError:
+        return False
+
+    if not header.startswith(b"SQLite format 3\x00") or len(header) < 32:
+        return False
+
+    page_size = int.from_bytes(header[16:18], "big")
+    if page_size == 1:
+        page_size = 65536
+    page_count = int.from_bytes(header[28:32], "big")
+    expected_size = page_size * page_count
+    try:
+        actual_size = manifest_path.stat().st_size
+    except OSError:
+        return False
+    return expected_size > actual_size
+
+
 def get_db_path() -> Path:
     configured_path = Path(os.getenv("MESSAGE_ARCHIVE_DB_PATH", get_data_dir() / DEFAULT_DB_PATH.name))
     if not configured_path.is_absolute():
@@ -405,6 +491,11 @@ def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
         backup_folder = Path(request.backup_folder_path).expanduser()
         detail = describe_unreadable_backup(backup_folder)
         raise HTTPException(status_code=400, detail=detail) from error
+
+
+@app.post("/import/iphone-backup/diagnostics")
+def iphone_backup_diagnostics(request: IPhoneBackupDryRunRequest) -> dict:
+    return diagnose_iphone_backup_path(request.backup_folder_path)
 
 
 @app.get("/import/iphone-backup/candidates")

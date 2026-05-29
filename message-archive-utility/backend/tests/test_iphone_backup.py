@@ -137,6 +137,49 @@ def test_requires_manifest_inside_provided_folder(tmp_path):
         locate_sms_db_dry_run(str(backup_folder))
 
 
+def test_diagnostics_endpoint_reports_usable_fake_backup(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
+
+    assert route_exists("/import/iphone-backup/diagnostics", "POST")
+
+    result = app_main.iphone_backup_diagnostics(
+        app_main.IPhoneBackupDryRunRequest(backup_folder_path=str(backup_folder)),
+    )
+
+    assert result == {
+        "backup_folder_exists": True,
+        "backup_folder_is_directory": True,
+        "manifest_exists": True,
+        "manifest_readable_sqlite": True,
+        "manifest_appears_truncated": False,
+        "backup_appears_encrypted": False,
+        "sms_db_manifest_entry_exists": True,
+        "sms_db_payload_exists": True,
+        "sms_db_payload_nonzero": True,
+        "sms_db_payload_size_bytes": len(b"fake sms database bytes"),
+        "usable_without_import": True,
+    }
+
+
+def test_diagnostics_endpoint_returns_safe_shape_for_missing_backup(tmp_path, monkeypatch):
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
+
+    result = app_main.iphone_backup_diagnostics(
+        app_main.IPhoneBackupDryRunRequest(backup_folder_path=str(tmp_path / "missing-backup")),
+    )
+
+    assert result["backup_folder_exists"] is False
+    assert result["usable_without_import"] is False
+    assert "backup_folder_path" not in result
+    assert "expected_backup_file_path" not in result
+
+
 def test_copies_fake_backup_file_to_ignored_import_folder(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -959,6 +1002,13 @@ def create_fake_manifest(path, include_sms, extra_files=None):
         conn.commit()
     finally:
         conn.close()
+
+
+def route_exists(path, method):
+    return any(
+        route.path == path and method in route.methods
+        for route in app_main.app.routes
+    )
 
 
 def create_fake_sms_metadata_db(path):
