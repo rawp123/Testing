@@ -29,14 +29,14 @@
         <div class="mau-hero-copy-block">
           <p class="mau-kicker">Local iPhone message archive</p>
           <h1>Save, search, and export your iPhone messages.</h1>
-          <p class="mau-hero-copy">Create a readable local archive from an unencrypted iPhone backup on your Mac.</p>
+          <p class="mau-hero-copy">A private beta Mac app for turning an unencrypted local iPhone backup into a searchable message archive.</p>
           <ul class="mau-badges" aria-label="Privacy basics">
             <li>Local only</li>
             <li>No cloud upload</li>
             <li>No account required</li>
           </ul>
           <div class="mau-actions">
-            <a class="btn primary" href="/availability/">Check availability</a>
+            <a class="btn primary" href="/availability/">Private beta details</a>
             <a class="btn ghost" href="/how-it-works/">See how it works</a>
           </div>
           <p class="mau-privacy-note">Public download is not live yet. Private beta access is limited.</p>
@@ -45,35 +45,51 @@
           <div class="mau-preview-window">
             <div class="mau-preview-titlebar">
               <span class="mau-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <strong>Local archive</strong>
+              <strong>Message Archive Utility</strong>
               <span>Private beta</span>
             </div>
-            <div class="mau-preview-stats" aria-label="Archive stats">
-              <div>
-                <span>Messages</span>
-                <strong>18,420</strong>
+            <div class="mau-preview-app-shell">
+              <div class="mau-preview-sidebar" aria-label="Archive navigation preview">
+                <div class="mau-preview-status">
+                  <span>Archive ready</span>
+                  <strong>18,420 messages</strong>
+                </div>
+                <div class="mau-preview-search">Search messages</div>
+                <div class="mau-preview-thread is-active">
+                  <strong>Family notes</strong>
+                  <span>Today</span>
+                  <small>Trip details and dates</small>
+                </div>
+                <div class="mau-preview-thread">
+                  <strong>Weekend plans</strong>
+                  <span>Jan 8</span>
+                  <small>Coffee and errands</small>
+                </div>
+                <div class="mau-preview-thread">
+                  <strong>Old messages</strong>
+                  <span>Dec 22</span>
+                  <small>Search results saved</small>
+                </div>
               </div>
-              <div>
-                <span>Conversations</span>
-                <strong>312</strong>
-              </div>
-              <div>
-                <span>Latest</span>
-                <strong>Today</strong>
-              </div>
-            </div>
-            <div class="mau-preview-conversation">
-              <div class="mau-preview-thread-head">
-                <span>Selected thread</span>
-                <strong>Family notes</strong>
-              </div>
-              <div class="mau-preview-message is-left">
-                <span>Person A</span>
-                <p>Found the older messages about the trip.</p>
-              </div>
-              <div class="mau-preview-message is-right">
-                <span>You</span>
-                <p>I’ll export that conversation as a PDF.</p>
+              <div class="mau-preview-conversation">
+                <div class="mau-preview-thread-head">
+                  <div>
+                    <span>Selected conversation</span>
+                    <strong>Family notes</strong>
+                  </div>
+                  <div class="mau-preview-meta">
+                    <span>4 messages</span>
+                    <span>PDF export</span>
+                  </div>
+                </div>
+                <div class="mau-preview-message is-left">
+                  <span>Person A</span>
+                  <p>Found the older messages about the trip.</p>
+                </div>
+                <div class="mau-preview-message is-right">
+                  <span>You</span>
+                  <p>I will export that conversation as a PDF.</p>
+                </div>
               </div>
             </div>
             <div class="mau-preview-footer">
@@ -91,50 +107,51 @@
 
     <section class="container mau-section" id="privacy">
       <div class="mau-section-head">
-        <p class="mau-kicker">Privacy basics</p>
-        <h2>Your archive stays on your Mac.</h2>
+        <p class="mau-kicker">What it does</p>
+        <h2>A focused Mac utility for old messages.</h2>
       </div>
       <div class="mau-promise-grid">
         <article class="mau-panel">
-          <h3>Local only</h3>
-          <p>The app imports from a local iPhone backup and keeps the archive on your Mac.</p>
+          <h3>Import from a local backup</h3>
+          <p>Use an unencrypted iPhone backup stored on this Mac as the message source.</p>
         </article>
         <article class="mau-panel">
-          <h3>No cloud upload</h3>
-          <p>Messages are not sent to a website for import, search, or export.</p>
+          <h3>Search conversations</h3>
+          <p>Browse threads and search old messages by names, words, and phrases.</p>
         </article>
         <article class="mau-panel">
-          <h3>No account required</h3>
-          <p>The app runs on your Mac without a web account or remote message inbox.</p>
+          <h3>Export useful copies</h3>
+          <p>Create PDF, Excel, or CSV files from the archive views the app supports.</p>
         </article>
       </div>
     </section>
 
     <section class="container mau-section" id="how-it-works">
       <div class="mau-section-head">
-        <p class="mau-kicker">How it works</p>
-        <h2>Back up, import, search, and export.</h2>
+        <p class="mau-kicker">First import</p>
+        <h2>Start with a local iPhone backup.</h2>
+        <p>The backup step happens in Finder. After that, Message Archive Utility imports the messages it can read and keeps the archive on this Mac.</p>
       </div>
-      <ol class="mau-steps">
+      <ol class="mau-backup-flow">
         <li>
           <span>1</span>
           <div>
-            <h3>Back up your iPhone on your Mac</h3>
-            <p>Create an unencrypted local iPhone backup before importing messages.</p>
+            <h3>Back up your iPhone in Finder</h3>
+            <p>Connect your iPhone, open Finder, and create a local backup on this Mac.</p>
           </div>
         </li>
         <li>
           <span>2</span>
           <div>
-            <h3>Import messages from that backup</h3>
-            <p>Choose the backup on this Mac and let the app create a local archive.</p>
+            <h3>Leave encryption off for this import</h3>
+            <p>For the current beta, make sure "Encrypt local backup" is not selected.</p>
           </div>
         </li>
         <li>
           <span>3</span>
           <div>
-            <h3>Search conversations and export files</h3>
-            <p>Browse conversations, search old messages, and export PDF, Excel, or CSV files.</p>
+            <h3>Import, search, and export</h3>
+            <p>Choose the backup in the app, then search conversations and export PDF, Excel, or CSV files.</p>
           </div>
         </li>
       </ol>
