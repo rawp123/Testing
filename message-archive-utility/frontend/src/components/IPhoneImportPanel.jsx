@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import BackupGuide from "./BackupGuide.jsx";
+import LoadingStatus from "./LoadingStatus.jsx";
 
 const STEP_ORDER = ["locate", "copy", "validate", "inspect", "import"];
 
@@ -91,10 +92,12 @@ export default function IPhoneImportPanel({
   const [copiedSmsDbStatus, setCopiedSmsDbStatus] = useState("");
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [isImportToolsOpen, setIsImportToolsOpen] = useState(true);
+  const [isFindingBackups, setIsFindingBackups] = useState(false);
+  const [isRefreshingPreparedFiles, setIsRefreshingPreparedFiles] = useState(false);
 
   const canUseBackupPath = backupFolderPath.trim().length > 0;
   const canUseCopiedPath = copiedSmsDbPath.trim().length > 0;
-  const isBusy = activeStep.length > 0;
+  const isBusy = activeStep.length > 0 || isFindingBackups || isRefreshingPreparedFiles;
   const shouldShowImportTools = !hasArchiveData || isImportToolsOpen;
   const selectedBackupCandidate = backupCandidates.find((candidate) => candidate.path === backupFolderPath);
   const selectedCopiedSmsDbCandidate = copiedSmsDbCandidates.find((candidate) => candidate.path === copiedSmsDbPath);
@@ -207,6 +210,11 @@ export default function IPhoneImportPanel({
     hasDetectedBackup,
     isBusy,
   });
+  const loadingStatus = getImportLoadingStatus({
+    activeStep,
+    isFindingBackups,
+    isRefreshingPreparedFiles,
+  });
 
   function updateBackupFolderPath(value) {
     setBackupFolderPath(value);
@@ -244,6 +252,7 @@ export default function IPhoneImportPanel({
   }
 
   async function loadBackupCandidates({ isCurrent = () => true, showStatus = false } = {}) {
+    if (showStatus) setIsFindingBackups(true);
     setBackupCandidateStatus(showStatus ? "Looking for local iPhone backups..." : "");
     try {
       const data = await request("/import/iphone-backup/candidates");
@@ -266,10 +275,13 @@ export default function IPhoneImportPanel({
       if (isCurrent()) {
         setBackupCandidateStatus(showStatus ? "The app could not check for local backups right now." : "");
       }
+    } finally {
+      if (showStatus && isCurrent()) setIsFindingBackups(false);
     }
   }
 
-  async function loadCopiedSmsDbCandidates({ isCurrent = () => true } = {}) {
+  async function loadCopiedSmsDbCandidates({ isCurrent = () => true, showStatus = false } = {}) {
+    if (showStatus) setIsRefreshingPreparedFiles(true);
     try {
       const data = await request("/import/iphone-backup/copied-sms-db-candidates");
       if (!isCurrent()) return;
@@ -287,6 +299,8 @@ export default function IPhoneImportPanel({
       );
     } catch {
       if (isCurrent()) setCopiedSmsDbStatus("");
+    } finally {
+      if (showStatus && isCurrent()) setIsRefreshingPreparedFiles(false);
     }
   }
 
@@ -507,6 +521,14 @@ export default function IPhoneImportPanel({
               </div>
             </div>
 
+            {loadingStatus && (
+              <LoadingStatus
+                label={loadingStatus.label}
+                detail={loadingStatus.detail}
+                className="import-loading-status"
+              />
+            )}
+
             <ol className="import-checklist" aria-label="Import progress">
               {importProgressSteps.map((step) => (
                 <li className={`${step.isComplete ? "is-complete" : ""} ${step.isActive ? "is-active" : ""}`} key={step.key}>
@@ -574,7 +596,7 @@ export default function IPhoneImportPanel({
                 <button
                   className="ghost-button"
                   type="button"
-                  onClick={() => loadCopiedSmsDbCandidates()}
+                  onClick={() => loadCopiedSmsDbCandidates({ showStatus: true })}
                   disabled={isBusy}
                 >
                   Refresh files
@@ -643,7 +665,7 @@ export default function IPhoneImportPanel({
                     <button
                       className="inline-text-button"
                       type="button"
-                      onClick={() => loadCopiedSmsDbCandidates()}
+                      onClick={() => loadCopiedSmsDbCandidates({ showStatus: true })}
                       disabled={isBusy}
                     >
                       Refresh files
@@ -894,6 +916,14 @@ function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onOpenArchive,
           {isImportToolsOpen ? "Hide import guide" : "Import another backup"}
         </button>
       </div>
+      {isLoading && (
+        <LoadingStatus
+          compact
+          label="Updating archive"
+          detail="Refreshing message counts."
+          className="archive-ready-loading"
+        />
+      )}
     </section>
   );
 }
@@ -954,6 +984,34 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
     disabled: !canRunQuickImport || isBusy,
     disabledReason: canRunQuickImport ? undefined : "Back up your iPhone to this computer, then try again.",
   };
+}
+
+function getImportLoadingStatus({ activeStep, isFindingBackups, isRefreshingPreparedFiles }) {
+  if (isFindingBackups) {
+    return {
+      label: "Looking for backups",
+      detail: "Checking this computer for local iPhone backups.",
+    };
+  }
+  if (isRefreshingPreparedFiles) {
+    return {
+      label: "Refreshing files",
+      detail: "Checking prepared import files.",
+    };
+  }
+
+  const loadingMessages = {
+    diagnostics: ["Checking backup", "Looking at the selected local backup."],
+    locate: ["Checking backup", "Looking for message data in the backup."],
+    copy: ["Preparing import", "Creating the local copy needed for import."],
+    validate: ["Checking prepared import", "Making sure the prepared messages can be read."],
+    inspect: ["Checking message totals", "Counting the prepared messages."],
+    import: ["Importing messages", "Adding new messages to the archive."],
+    "auto-import": ["Importing messages", "Preparing, checking, and importing messages."],
+  };
+  const message = loadingMessages[activeStep];
+  if (!message) return null;
+  return { label: message[0], detail: message[1] };
 }
 
 function getImportStatus({

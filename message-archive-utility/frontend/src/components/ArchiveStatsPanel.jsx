@@ -1,4 +1,5 @@
 import React from "react";
+import LoadingStatus from "./LoadingStatus.jsx";
 
 const numberFormatter = new Intl.NumberFormat();
 
@@ -31,6 +32,13 @@ export default function ArchiveStatsPanel({ stats, isLoading }) {
         </div>
         {isLoading && <span className="stats-status">Updating</span>}
       </header>
+      {isLoading && (
+        <LoadingStatus
+          compact
+          label="Updating archive details"
+          className="stats-loading-status"
+        />
+      )}
       <dl className="stats-grid">
         {items.map((item) => (
           <div key={item.label}>

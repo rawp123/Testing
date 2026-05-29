@@ -1,5 +1,7 @@
 import { Download } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import LoadingStatus from "./LoadingStatus.jsx";
+import { downloadFile } from "../utils/downloadFile.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const CONVERSATION_FORMATS = [
@@ -15,6 +17,12 @@ export default function ConversationView({
   loadingConversation = null,
 }) {
   const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const [exportState, setExportState] = useState({ status: "idle", message: "" });
+  const isExporting = exportState.status === "loading";
+
+  useEffect(() => {
+    setExportState({ status: "idle", message: "" });
+  }, [conversation?.id, selectedFormat]);
 
   if (isLoading) {
     const loadingTitle = loadingConversation?.title || "Selected conversation";
@@ -59,6 +67,20 @@ export default function ConversationView({
   const dateRange = formatDateRange(messages);
   const messageCount = messages.length;
   const canExportConversation = Boolean(conversation.id && messageCount > 0);
+  const exportUrl = canExportConversation
+    ? buildConversationExportUrl(apiBaseUrl, conversation.id, selectedFormat)
+    : "";
+
+  async function handleExportConversation() {
+    if (!canExportConversation || isExporting) return;
+    setExportState({ status: "loading", message: "" });
+    try {
+      const filename = await downloadFile(exportUrl);
+      setExportState({ status: "done", message: `Saved ${filename}.` });
+    } catch {
+      setExportState({ status: "error", message: "Conversation export could not be created. Try again." });
+    }
+  }
 
   return (
     <section className="conversation-view" aria-label={`${conversation.title} timeline`}>
@@ -79,15 +101,16 @@ export default function ConversationView({
           </div>
         </dl>
         <div className="conversation-export-control">
-          <a
+          <button
             className={`conversation-export-main ${canExportConversation ? "" : "is-disabled"}`}
-            href={canExportConversation ? buildConversationExportUrl(apiBaseUrl, conversation.id, selectedFormat) : undefined}
+            type="button"
             aria-disabled={!canExportConversation}
-            onClick={(event) => preventDisabledLink(event, canExportConversation)}
+            disabled={!canExportConversation || isExporting}
+            onClick={handleExportConversation}
           >
             <Download size={16} aria-hidden="true" />
-            Export conversation
-          </a>
+            {isExporting ? "Preparing export" : "Export conversation"}
+          </button>
           <label className="conversation-export-format">
             <span className="sr-only">Conversation export format</span>
             <select
@@ -102,6 +125,15 @@ export default function ConversationView({
           </label>
         </div>
       </header>
+      {isExporting && (
+        <LoadingStatus
+          label="Preparing conversation export"
+          detail="Creating the selected conversation file."
+          className="conversation-export-status"
+        />
+      )}
+      {exportState.status === "error" && <p className="inline-error-state">{exportState.message}</p>}
+      {exportState.status === "done" && <p className="inline-success-state">{exportState.message}</p>}
     </section>
   );
 }
@@ -144,10 +176,6 @@ function buildConversationExportUrl(apiBaseUrl, conversationId, format) {
   const params = new URLSearchParams({ conversation_id: conversationId });
   if (format === "pdf") params.set("style", "conversation");
   return `${apiBaseUrl}/export/messages.${extension}?${params.toString()}`;
-}
-
-function preventDisabledLink(event, isEnabled) {
-  if (!isEnabled) event.preventDefault();
 }
 
 function renderMessagesWithDateDividers(messages) {

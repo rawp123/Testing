@@ -5,7 +5,9 @@ import ConversationList from "./components/ConversationList.jsx";
 import ConversationView, { ConversationMessages, getDisplayMessageBody } from "./components/ConversationView.jsx";
 import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
+import LoadingStatus from "./components/LoadingStatus.jsx";
 import SearchBar from "./components/SearchBar.jsx";
+import { downloadFile } from "./utils/downloadFile.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const SHOW_SAMPLE_ARCHIVE = import.meta.env.VITE_ENABLE_SAMPLE_ARCHIVE === "true";
@@ -30,6 +32,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [isSearchSummaryLoading, setIsSearchSummaryLoading] = useState(false);
   const [error, setError] = useState(null);
   const conversationPanelRef = useRef(null);
@@ -97,11 +100,13 @@ export default function App() {
       setSearchTotalMatches(0);
       setSearchSummary(null);
       setShowSearchSummary(false);
+      setIsSearchLoading(false);
       return;
     }
 
     setShowSearchSummary(false);
     setSearchSummary(null);
+    setIsSearchLoading(true);
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
@@ -113,6 +118,8 @@ export default function App() {
         setSearchTotalMatches(data.total_matching_messages || 0);
       } catch (requestError) {
         if (requestError.name !== "AbortError") setError(toUserFacingError(requestError));
+      } finally {
+        if (!controller.signal.aborted) setIsSearchLoading(false);
       }
     }, 200);
 
@@ -176,6 +183,7 @@ export default function App() {
   const sidebarError = getVisibleSidebarError(error, hasArchiveData);
   const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
   const selectedConversationSummary = conversations.find((conversation) => conversation.id === selectedId) || null;
+  const isRefreshingArchive = isLoading || isStatsLoading;
 
   useEffect(() => {
     if (resolvedActiveTab !== "browse-archive" || !selectedConversation || isConversationLoading) return;
@@ -261,8 +269,8 @@ export default function App() {
                 <div className="sidebar-overview-row">
                   <SidebarArchiveSummary stats={archiveStats} isLoading={isStatsLoading} />
                   <div className="sidebar-actions">
-                    <button className="secondary-button" type="button" onClick={() => loadConversations()}>
-                      Refresh
+                    <button className="secondary-button" type="button" onClick={() => refreshArchive()} disabled={isRefreshingArchive}>
+                      {isRefreshingArchive ? "Refreshing" : "Refresh"}
                     </button>
                     {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
                       <button className="ghost-button" type="button" onClick={loadSampleArchive}>
@@ -272,6 +280,14 @@ export default function App() {
                   </div>
                 </div>
                 <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
+                {isSearchLoading && (
+                  <LoadingStatus
+                    compact
+                    label="Searching archive"
+                    detail="Checking local conversations."
+                    className="sidebar-loading-status"
+                  />
+                )}
                 <div className="list-toolbar">
                   <p>
                     {isSearching
@@ -317,6 +333,7 @@ export default function App() {
                   summary={searchSummary}
                   showSummary={showSearchSummary}
                   isSummaryLoading={isSearchSummaryLoading}
+                  isSearchLoading={isSearchLoading}
                   onShowSummary={() => setShowSearchSummary(true)}
                   onHideSummary={() => setShowSearchSummary(false)}
                   onOpenConversation={setSelectedId}
@@ -387,6 +404,7 @@ function SearchResultsPanel({
   summary,
   showSummary,
   isSummaryLoading,
+  isSearchLoading,
   onShowSummary,
   onHideSummary,
   onOpenConversation,
@@ -394,6 +412,23 @@ function SearchResultsPanel({
   const normalizedQuery = query.trim();
   const resolvedTotalMatches = summary?.total_matching_messages ?? totalMatches;
   const canExport = normalizedQuery.length > 0;
+  const [exportState, setExportState] = useState({ status: "idle", message: "" });
+  const isExporting = exportState.status === "loading";
+
+  useEffect(() => {
+    setExportState({ status: "idle", message: "" });
+  }, [normalizedQuery]);
+
+  async function handleExportResults() {
+    if (!canExport || isExporting) return;
+    setExportState({ status: "loading", message: "" });
+    try {
+      const filename = await downloadFile(buildSearchExportUrl(apiBaseUrl, normalizedQuery));
+      setExportState({ status: "done", message: `Saved ${filename}.` });
+    } catch {
+      setExportState({ status: "error", message: "Export could not be created. Try again." });
+    }
+  }
 
   return (
     <section className="search-results-panel" aria-label="Search results">
@@ -414,17 +449,35 @@ function SearchResultsPanel({
               View summary
             </button>
           )}
-          <a
+          <button
             className={`primary-button ${canExport ? "" : "is-disabled"}`}
-            href={canExport ? buildSearchExportUrl(apiBaseUrl, normalizedQuery) : undefined}
+            type="button"
             aria-disabled={!canExport}
-            onClick={(event) => preventDisabledLink(event, canExport)}
+            disabled={!canExport || isExporting}
+            onClick={handleExportResults}
           >
             <Download size={16} aria-hidden="true" />
-            Export these results
-          </a>
+            {isExporting ? "Preparing export" : "Export these results"}
+          </button>
         </div>
       </header>
+
+      {isSearchLoading && (
+        <LoadingStatus
+          label="Searching messages"
+          detail="Checking matching conversations in your archive."
+          className="search-loading-status"
+        />
+      )}
+      {isExporting && (
+        <LoadingStatus
+          label="Preparing search export"
+          detail="Creating a file from the matching messages."
+          className="search-loading-status"
+        />
+      )}
+      {exportState.status === "error" && <p className="inline-error-state">{exportState.message}</p>}
+      {exportState.status === "done" && <p className="inline-success-state">{exportState.message}</p>}
 
       {showSummary ? (
         <SearchSummaryStats
@@ -486,12 +539,31 @@ function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
 }
 
 function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
+  const [exportState, setExportState] = useState({ status: "idle", message: "" });
+  const isExporting = exportState.status === "loading";
+
+  useEffect(() => {
+    setExportState({ status: "idle", message: "" });
+  }, [query]);
+
+  async function handleExportSummary() {
+    if (!query || isExporting) return;
+    setExportState({ status: "loading", message: "" });
+    try {
+      const filename = await downloadFile(buildSearchSummaryExportUrl(apiBaseUrl, query));
+      setExportState({ status: "done", message: `Saved ${filename}.` });
+    } catch {
+      setExportState({ status: "error", message: "Summary export could not be created. Try again." });
+    }
+  }
+
   if (isLoading && !summary) {
     return (
-      <div className="empty-state empty-panel">
-        <strong>Checking results</strong>
-        <span>Counting matches in your local archive.</span>
-      </div>
+      <LoadingStatus
+        label="Checking results"
+        detail="Counting matches in your local archive."
+        className="search-loading-status"
+      />
     );
   }
 
@@ -512,16 +584,27 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
           <h3>Search summary</h3>
           <p>See where this search appears, then export the summary if you need a copy.</p>
         </div>
-        <a
+        <button
           className={`secondary-button ${query ? "" : "is-disabled"}`}
-          href={query ? buildSearchSummaryExportUrl(apiBaseUrl, query) : undefined}
+          type="button"
           aria-disabled={!query}
-          onClick={(event) => preventDisabledLink(event, Boolean(query))}
+          disabled={!query || isExporting}
+          onClick={handleExportSummary}
         >
           <Download size={16} aria-hidden="true" />
-          Export this summary
-        </a>
+          {isExporting ? "Preparing export" : "Export this summary"}
+        </button>
       </div>
+      {isExporting && (
+        <LoadingStatus
+          compact
+          label="Preparing summary export"
+          detail="Creating the summary file."
+          className="export-loading-status"
+        />
+      )}
+      {exportState.status === "error" && <p className="inline-error-state">{exportState.message}</p>}
+      {exportState.status === "done" && <p className="inline-success-state">{exportState.message}</p>}
       <dl className="search-summary-topline">
         <div>
           <dt>Matching messages</dt>
@@ -601,11 +684,6 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
         <p>
           The app walks you through creating a local iPhone backup, then lets you search and export your messages when needed.
         </p>
-        <div className="trust-row" aria-label="Privacy safeguards">
-          <span>Stays on this computer</span>
-          <span>Nothing uploaded</span>
-          <span>No account needed</span>
-        </div>
       </div>
       <div className="get-started-layout">
         <div className="get-started-primary">
@@ -696,6 +774,13 @@ function SidebarArchiveSummary({ stats, isLoading }) {
         <strong>{formatSidebarNumber(conversations)}</strong>
       </div>
       <p>{isLoading ? "Updating archive summary..." : `Latest ${formatSidebarDate(latest)}`}</p>
+      {isLoading && (
+        <LoadingStatus
+          compact
+          label="Updating counts"
+          className="sidebar-summary-loading"
+        />
+      )}
     </section>
   );
 }
@@ -747,10 +832,6 @@ function buildSearchExportUrl(apiBaseUrl, query) {
 
 function buildSearchSummaryExportUrl(apiBaseUrl, query) {
   return `${apiBaseUrl}/export/search-summary.pdf?q=${encodeURIComponent(query)}`;
-}
-
-function preventDisabledLink(event, isEnabled) {
-  if (!isEnabled) event.preventDefault();
 }
 
 function formatSidebarDate(value) {

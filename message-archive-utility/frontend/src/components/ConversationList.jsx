@@ -1,4 +1,5 @@
 import React from "react";
+import LoadingStatus from "./LoadingStatus.jsx";
 
 export default function ConversationList({
   conversations,
@@ -12,8 +13,10 @@ export default function ConversationList({
   if (isLoading) {
     return (
       <div className="empty-state empty-panel">
-        <strong>Loading archive</strong>
-        <span>Reading conversations from local storage.</span>
+        <LoadingStatus
+          label="Loading archive"
+          detail="Reading conversations from local storage."
+        />
       </div>
     );
   }

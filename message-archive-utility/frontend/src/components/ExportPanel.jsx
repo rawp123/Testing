@@ -1,5 +1,7 @@
 import { ChevronDown, Download, FileText, LockKeyhole } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import LoadingStatus from "./LoadingStatus.jsx";
+import { downloadFile } from "../utils/downloadFile.js";
 
 const SCOPE_OPTIONS = [
   { id: "fullArchive", label: "Full archive", detail: "Every message in this archive." },
@@ -21,6 +23,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
   const [people, setPeople] = useState([]);
   const [peopleStatus, setPeopleStatus] = useState("idle");
   const [selectedPersonId, setSelectedPersonId] = useState("");
+  const [exportState, setExportState] = useState({ status: "idle", message: "" });
 
   useEffect(() => {
     let isCurrent = true;
@@ -101,6 +104,22 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
   const actionText = canDownload
     ? getDownloadLabel(selectedScope, selectedFormatOption.label)
     : getDisabledActionText(selectedScopeOption);
+  const isExporting = exportState.status === "loading";
+
+  useEffect(() => {
+    setExportState({ status: "idle", message: "" });
+  }, [exportUrl]);
+
+  async function handleDownload() {
+    if (!canDownload || isExporting) return;
+    setExportState({ status: "loading", message: "" });
+    try {
+      const filename = await downloadFile(exportUrl);
+      setExportState({ status: "done", message: `Saved ${filename}.` });
+    } catch {
+      setExportState({ status: "error", message: "Archive export could not be created. Try again." });
+    }
+  }
 
   return (
     <details className="archive-export-panel">
@@ -191,10 +210,10 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
         </label>
 
         {canDownload ? (
-          <a className="primary-button" href={exportUrl}>
+          <button className="primary-button" type="button" onClick={handleDownload} disabled={isExporting}>
             <Download size={16} aria-hidden="true" />
-            {actionText}
-          </a>
+            {isExporting ? "Preparing export" : actionText}
+          </button>
         ) : (
           <button className="primary-button is-disabled" type="button" disabled>
             <Download size={16} aria-hidden="true" />
@@ -202,6 +221,24 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
           </button>
         )}
       </div>
+
+      {peopleStatus === "loading" && (
+        <LoadingStatus
+          compact
+          label="Loading contacts"
+          detail="Preparing contact export choices."
+          className="export-loading-status"
+        />
+      )}
+      {isExporting && (
+        <LoadingStatus
+          label="Preparing archive export"
+          detail="Creating the selected export file."
+          className="export-loading-status"
+        />
+      )}
+      {exportState.status === "error" && <p className="inline-error-state">{exportState.message}</p>}
+      {exportState.status === "done" && <p className="inline-success-state">{exportState.message}</p>}
 
       <div className="export-note" role={hasArchiveData ? undefined : "status"}>
         <LockKeyhole size={14} aria-hidden="true" />
