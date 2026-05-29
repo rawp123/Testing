@@ -402,6 +402,7 @@ def import_copied_sms_db_messages(
     }
     for attachment in attachment_rows:
         local_path = None
+        is_linked_attachment = attachment["rowid"] in linked_attachment_rowids
         if backup_folder and attachment["rowid"] in linked_attachment_rowids:
             copy_result = copy_iphone_attachment_file(
                 attachment=attachment,
@@ -412,10 +413,15 @@ def import_copied_sms_db_messages(
             )
             local_path = copy_result["local_path"]
             attachment_files_copied += copy_result["copied"]
+        availability_status = build_attachment_availability_status(
+            local_path=local_path,
+            copy_was_attempted=bool(backup_folder and is_linked_attachment),
+        )
         attachment_id, inserted = upsert_iphone_attachment_metadata(
             archive_conn,
             attachment,
             local_path=local_path,
+            availability_status=availability_status,
         )
         attachment_ids_by_rowid[attachment["rowid"]] = attachment_id
         attachments_imported += inserted
@@ -1323,8 +1329,10 @@ def upsert_iphone_attachment_metadata(
     attachment: dict,
     *,
     local_path: str | None = None,
+    availability_status: str = "metadata_only",
 ) -> tuple[int, int]:
     source_ref = build_iphone_attachment_source_ref(attachment)
+    source_relative_path = build_iphone_attachment_source_relative_path(attachment)
     original_filename = attachment["transfer_name"] or basename_or_none(attachment["filename"])
     existing_row = conn.execute(
         "SELECT id FROM attachments WHERE source_ref = ?",
@@ -1337,16 +1345,20 @@ def upsert_iphone_attachment_metadata(
             UPDATE attachments
             SET
               original_filename = COALESCE(?, original_filename),
+              source_relative_path = COALESCE(?, source_relative_path),
               mime_type = COALESCE(?, mime_type),
               local_path = COALESCE(?, local_path),
-              byte_size = COALESCE(?, byte_size)
+              byte_size = COALESCE(?, byte_size),
+              availability_status = ?
             WHERE source_ref = ?
             """,
             (
                 original_filename,
+                source_relative_path,
                 attachment["mime_type"],
                 local_path,
                 normalized_byte_size,
+                availability_status,
                 source_ref,
             ),
         )
@@ -1356,19 +1368,23 @@ def upsert_iphone_attachment_metadata(
         """
         INSERT INTO attachments (
           source_ref,
+          source_relative_path,
           original_filename,
           mime_type,
           local_path,
-          byte_size
+          byte_size,
+          availability_status
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             source_ref,
+            source_relative_path,
             original_filename,
             attachment["mime_type"],
             local_path,
             normalized_byte_size,
+            availability_status,
         ),
     )
     return int(cursor.lastrowid), cursor.rowcount
@@ -1377,6 +1393,19 @@ def upsert_iphone_attachment_metadata(
 def build_iphone_attachment_source_ref(attachment: dict) -> str:
     filename = attachment["filename"] or ""
     return f"iphone-attachment:{attachment['rowid']}:{filename}"
+
+
+def build_iphone_attachment_source_relative_path(attachment: dict) -> str | None:
+    candidates = build_attachment_manifest_relative_path_candidates(attachment["filename"])
+    return candidates[0] if candidates else None
+
+
+def build_attachment_availability_status(*, local_path: str | None, copy_was_attempted: bool) -> str:
+    if local_path:
+        return "available"
+    if copy_was_attempted:
+        return "missing"
+    return "metadata_only"
 
 
 def basename_or_none(value) -> str | None:

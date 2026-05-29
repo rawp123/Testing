@@ -211,6 +211,7 @@ function sortMessagesNewestFirst(messages) {
 function MessageBubble({ message, startsGroup }) {
   const displayBody = getDisplayMessageBody(message);
   const emptyBodyLabel = message.attachments?.length > 0 ? "Attachment only" : "No message text";
+  const attachmentSummary = summarizeAttachments(message.attachments || []);
 
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
@@ -219,35 +220,11 @@ function MessageBubble({ message, startsGroup }) {
         <time>{formatTime(message.sent_at)}</time>
       </div>
       {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">{emptyBodyLabel}</p>}
-      {message.attachments?.length > 0 && (
-        <ul className="attachment-list" aria-label="Attachments">
-          {message.attachments.map((attachment) => (
-            <li
-              className={attachment.available && attachment.is_image ? "has-preview" : ""}
-              key={attachment.id}
-            >
-              {attachment.available && attachment.is_image ? (
-                <img
-                  src={buildAttachmentUrl(attachment)}
-                  alt={attachment.original_filename || "Message attachment"}
-                  loading="lazy"
-                />
-              ) : null}
-              <div className="attachment-details">
-                <span>{attachment.original_filename || attachment.mime_type || "Attachment"}</span>
-                <small>
-                  {formatAttachmentMeta(attachment)}
-                </small>
-              </div>
-              {attachment.available ? (
-                <div className="attachment-actions">
-                  <a href={buildAttachmentUrl(attachment)} target="_blank" rel="noreferrer">Open</a>
-                  <a href={buildAttachmentUrl(attachment, true)}>Download</a>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+      {attachmentSummary && (
+        <div className="attachment-indicator" aria-label={attachmentSummary.accessibleLabel}>
+          <span>{attachmentSummary.label}</span>
+          <small>{attachmentSummary.detail}</small>
+        </div>
       )}
     </article>
   );
@@ -357,34 +334,63 @@ function hasHumanTextShape(value) {
   return false;
 }
 
-function buildAttachmentUrl(attachment, download = false) {
-  if (!attachment.url) return "";
-  const separator = attachment.url.includes("?") ? "&" : "?";
-  return `${API_BASE_URL}${attachment.url}${download ? `${separator}download=1` : ""}`;
+function summarizeAttachments(attachments) {
+  if (!attachments.length) return null;
+
+  const availableCount = attachments.filter((attachment) => attachment.availability_status === "available").length;
+  const missingCount = attachments.filter((attachment) => attachment.availability_status === "missing").length;
+  const metadataOnlyCount = attachments.filter((attachment) => attachment.availability_status === "metadata_only").length;
+  const totalCount = attachments.length;
+  const attachmentLabel = totalCount === 1
+    ? formatAttachmentKind(attachments[0].mime_type)
+    : `${totalCount} attachments`;
+
+  if (availableCount === totalCount) {
+    return {
+      label: attachmentLabel,
+      detail: "Available in this archive",
+      accessibleLabel: `${attachmentLabel}. Available in this archive.`,
+    };
+  }
+
+  if (missingCount === totalCount) {
+    return {
+      label: totalCount === 1 ? "Attachment not available" : `${totalCount} attachments not available`,
+      detail: "The file was referenced but could not be found.",
+      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} not available in this archive.`,
+    };
+  }
+
+  if (metadataOnlyCount === totalCount) {
+    return {
+      label: totalCount === 1 ? "Attachment referenced" : `${totalCount} attachments referenced`,
+      detail: "File not copied into this archive.",
+      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} referenced but not copied into this archive.`,
+    };
+  }
+
+  return {
+    label: `${totalCount} attachments`,
+    detail: buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount }),
+    accessibleLabel: `${totalCount} attachments. ${buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount })}`,
+  };
 }
 
-function formatBytes(value) {
-  return new Intl.NumberFormat("en", {
-    maximumFractionDigits: 1,
-    notation: Number(value) >= 1_000_000 ? "compact" : "standard",
-  }).format(value);
-}
-
-function formatAttachmentMeta(attachment) {
+function buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount }) {
   return [
-    formatMimeType(attachment.mime_type),
-    attachment.byte_size ? formatBytes(attachment.byte_size) : null,
-    attachment.available ? null : "File not copied",
+    availableCount ? `${availableCount} available` : null,
+    missingCount ? `${missingCount} not available` : null,
+    metadataOnlyCount ? `${metadataOnlyCount} referenced` : null,
   ].filter(Boolean).join(" · ");
 }
 
-function formatMimeType(value) {
-  if (!value) return null;
-  if (value.startsWith("image/")) return "Image";
-  if (value === "application/pdf") return "PDF";
-  if (value.startsWith("video/")) return "Video";
-  if (value.startsWith("audio/")) return "Audio";
-  return value;
+function formatAttachmentKind(value) {
+  if (!value) return "Attachment";
+  if (value.startsWith("image/")) return "Photo attachment";
+  if (value === "application/pdf") return "PDF attachment";
+  if (value.startsWith("video/")) return "Video attachment";
+  if (value.startsWith("audio/")) return "Audio attachment";
+  return "Attachment";
 }
 
 function formatTime(value) {

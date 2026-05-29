@@ -41,10 +41,14 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS attachments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   source_ref TEXT,
+  source_relative_path TEXT,
   original_filename TEXT,
   mime_type TEXT,
   local_path TEXT,
   byte_size INTEGER,
+  availability_status TEXT NOT NULL DEFAULT 'metadata_only'
+    CHECK (availability_status IN ('available', 'missing', 'metadata_only')),
+  imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

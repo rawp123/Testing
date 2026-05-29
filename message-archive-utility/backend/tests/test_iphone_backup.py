@@ -489,16 +489,29 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
     ]
     attachment = archive_conn.execute(
         """
-        SELECT source_ref, original_filename, mime_type, local_path, byte_size
+        SELECT
+          source_ref,
+          source_relative_path,
+          original_filename,
+          mime_type,
+          local_path,
+          byte_size,
+          availability_status,
+          imported_at
         FROM attachments
         """
     ).fetchone()
-    assert dict(attachment) == {
+    attachment_data = dict(attachment)
+    imported_at = attachment_data.pop("imported_at")
+    assert imported_at
+    assert attachment_data == {
         "source_ref": "iphone-attachment:1:not-imported.jpg",
+        "source_relative_path": None,
         "original_filename": "not-imported.jpg",
         "mime_type": None,
         "local_path": None,
         "byte_size": None,
+        "availability_status": "metadata_only",
     }
     linked_source_message = archive_conn.execute(
         """
@@ -508,6 +521,81 @@ def test_imports_fake_iphone_messages_into_normalized_archive(tmp_path):
         """
     ).fetchone()
     assert linked_source_message["source_message_id"] == "1"
+
+
+def test_import_stores_safe_attachment_metadata_and_message_link(tmp_path):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="/private/var/mobile/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    assert result["attachments_imported"] == 1
+    assert result["message_attachment_links_imported"] == 1
+    attachment = archive_conn.execute(
+        """
+        SELECT
+          attachments.source_relative_path,
+          attachments.original_filename,
+          attachments.mime_type,
+          attachments.local_path,
+          attachments.byte_size,
+          attachments.availability_status,
+          messages.source_message_id
+        FROM attachments
+        JOIN message_attachments ON message_attachments.attachment_id = attachments.id
+        JOIN messages ON messages.id = message_attachments.message_id
+        """
+    ).fetchone()
+    assert dict(attachment) == {
+        "source_relative_path": "Library/SMS/Attachments/fake/photo.jpg",
+        "original_filename": "photo.jpg",
+        "mime_type": "image/jpeg",
+        "local_path": None,
+        "byte_size": 8,
+        "availability_status": "metadata_only",
+        "source_message_id": "1",
+    }
+
+
+def test_conversation_api_returns_only_safe_attachment_display_metadata(tmp_path, monkeypatch):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="/private/var/mobile/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    message = next(message for message in response["messages"] if message["attachments"])
+    attachment = message["attachments"][0]
+    assert attachment == {
+        "mime_type": "image/jpeg",
+        "available": False,
+        "availability_status": "metadata_only",
+    }
+    assert "original_filename" not in attachment
+    assert "source_relative_path" not in attachment
+    assert "local_path" not in attachment
+    assert "url" not in attachment
+    assert "id" not in attachment
 
 
 def test_one_click_import_copies_validates_and_imports_detected_backup(tmp_path, monkeypatch):
@@ -669,17 +757,30 @@ def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
     assert result["attachment_files_copied"] == 1
     attachment = archive_conn.execute(
         """
-        SELECT source_ref, original_filename, mime_type, local_path, byte_size
+        SELECT
+          source_ref,
+          source_relative_path,
+          original_filename,
+          mime_type,
+          local_path,
+          byte_size,
+          availability_status,
+          imported_at
         FROM attachments
         """
     ).fetchone()
     local_path = project_dir / attachment["local_path"]
-    assert dict(attachment) == {
+    attachment_data = dict(attachment)
+    imported_at = attachment_data.pop("imported_at")
+    assert imported_at
+    assert attachment_data == {
         "source_ref": "iphone-attachment:1:~/Library/SMS/Attachments/fake/photo.jpg",
+        "source_relative_path": "Library/SMS/Attachments/fake/photo.jpg",
         "original_filename": "photo.jpg",
         "mime_type": "image/jpeg",
         "local_path": "data/attachments/iphone/sms_import_20260101T120000Z/1-photo.jpg",
         "byte_size": 8,
+        "availability_status": "available",
     }
     assert local_path.read_bytes() == b"fake jpg"
 
@@ -760,10 +861,17 @@ def test_missing_attachment_source_keeps_metadata_only(tmp_path):
         backup_folder_path=str(backup_folder),
     )
 
-    attachment = archive_conn.execute("SELECT local_path FROM attachments").fetchone()
+    attachment = archive_conn.execute(
+        """
+        SELECT source_relative_path, local_path, availability_status
+        FROM attachments
+        """
+    ).fetchone()
     assert result["attachments_imported"] == 1
     assert result["attachment_files_copied"] == 0
     assert attachment["local_path"] is None
+    assert attachment["source_relative_path"] == "Library/SMS/Attachments/fake/missing.jpg"
+    assert attachment["availability_status"] == "missing"
 
 
 def test_unreadable_manifest_does_not_block_message_import(tmp_path):

@@ -394,6 +394,27 @@ def migrate_database(conn: sqlite3.Connection) -> None:
               AND local_path LIKE 'iphone-attachment:%'
             """
         )
+    if "source_relative_path" not in attachment_columns:
+        conn.execute("ALTER TABLE attachments ADD COLUMN source_relative_path TEXT")
+    if "availability_status" not in attachment_columns:
+        conn.execute(
+            """
+            ALTER TABLE attachments
+            ADD COLUMN availability_status TEXT NOT NULL DEFAULT 'metadata_only'
+            """
+        )
+        conn.execute(
+            """
+            UPDATE attachments
+            SET availability_status = CASE
+              WHEN local_path IS NOT NULL AND local_path != '' THEN 'available'
+              ELSE 'metadata_only'
+            END
+            """
+        )
+    if "imported_at" not in attachment_columns:
+        conn.execute("ALTER TABLE attachments ADD COLUMN imported_at TEXT")
+        conn.execute("UPDATE attachments SET imported_at = CURRENT_TIMESTAMP WHERE imported_at IS NULL")
     conn.execute(
         """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_attachments_source_ref
@@ -710,7 +731,8 @@ def list_conversation_messages(conversation_id: int) -> dict:
               attachments.original_filename,
               attachments.mime_type,
               attachments.local_path,
-              attachments.byte_size
+              attachments.byte_size,
+              attachments.availability_status
             FROM message_attachments
             JOIN attachments ON attachments.id = message_attachments.attachment_id
             JOIN messages ON messages.id = message_attachments.message_id
@@ -724,13 +746,9 @@ def list_conversation_messages(conversation_id: int) -> dict:
     for attachment in attachment_rows:
         attachments_by_message_id.setdefault(attachment["message_id"], []).append(
             {
-                "id": attachment["id"],
-                "original_filename": attachment["original_filename"],
                 "mime_type": attachment["mime_type"],
-                "byte_size": attachment["byte_size"],
-                "available": bool(attachment["local_path"]),
-                "url": f"/attachments/{attachment['id']}" if attachment["local_path"] else None,
-                "is_image": is_image_mime_type(attachment["mime_type"]),
+                "available": attachment["availability_status"] == "available" and bool(attachment["local_path"]),
+                "availability_status": attachment["availability_status"],
             }
         )
 
