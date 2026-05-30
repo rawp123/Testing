@@ -607,7 +607,7 @@ def test_conversation_api_includes_render_url_only_for_available_image_attachmen
         extra_files=[
             (
                 FAKE_ATTACHMENT_FILE_ID,
-                "HomeDomain",
+                "MediaDomain",
                 "Library/SMS/Attachments/fake/photo.jpg",
             ),
         ],
@@ -1044,7 +1044,7 @@ def test_import_copies_three_linked_sample_image_attachments(tmp_path):
         backup_folder / "Manifest.db",
         include_sms=True,
         extra_files=[
-            (file_id, "HomeDomain", relative_path)
+            (file_id, "MediaDomain", relative_path)
             for file_id, relative_path, _name, _mime_type, _bytes in image_files
         ],
     )

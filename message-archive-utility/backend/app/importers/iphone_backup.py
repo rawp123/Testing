@@ -8,6 +8,7 @@ from app.services.contact_display import format_contact_display_name
 
 
 SMS_DOMAIN = "HomeDomain"
+SMS_ATTACHMENT_DOMAINS = ("MediaDomain", SMS_DOMAIN)
 SMS_RELATIVE_PATH = "Library/SMS/sms.db"
 EXPECTED_SMS_FILE_ID = "3d0d7e5fb2ce288813306e4d4636395e047a3d28"
 ADDRESS_BOOK_RELATIVE_PATHS = [
@@ -1491,16 +1492,17 @@ def query_manifest_file_row(manifest_path: Path, relative_paths: list[str]) -> s
     conn = sqlite3.connect(f"{manifest_path.as_uri()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     try:
-        placeholders = ", ".join("?" for _ in relative_paths)
+        domain_placeholders = ", ".join("?" for _ in SMS_ATTACHMENT_DOMAINS)
+        path_placeholders = ", ".join("?" for _ in relative_paths)
         return conn.execute(
             f"""
             SELECT fileID, domain, relativePath
             FROM Files
-            WHERE domain = ?
-              AND relativePath IN ({placeholders})
+            WHERE domain IN ({domain_placeholders})
+              AND relativePath IN ({path_placeholders})
             LIMIT 1
             """,
-            (SMS_DOMAIN, *relative_paths),
+            (*SMS_ATTACHMENT_DOMAINS, *relative_paths),
         ).fetchone()
     finally:
         conn.close()
