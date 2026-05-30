@@ -179,6 +179,11 @@ async function ensureBackendReady() {
         `Port ${BACKEND_PORT} is responding, but it is not running in Message Archive desktop mode.`,
       );
     }
+    if (!initialHealth.body?.auth_required) {
+      throw new Error(
+        `Port ${BACKEND_PORT} is running an older Message Archive local service. Close the other app window and try again.`,
+      );
+    }
     const tokenCheck = await requestBackendTokenCheck();
     if (!tokenCheck.ok) {
       throw new Error(

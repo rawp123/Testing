@@ -87,6 +87,8 @@ if health.get("status") != "ok":
     raise SystemExit("health status was not ok")
 if health.get("desktop_mode") is not True:
     raise SystemExit("desktop_mode was not true")
+if health.get("auth_required") is not True:
+    raise SystemExit("auth_required was not true")
 PY
 }
 
