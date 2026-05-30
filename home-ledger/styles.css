@@ -375,6 +375,35 @@ textarea:focus-visible {
   display: none;
 }
 
+.safety-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.safety-list div {
+  display: grid;
+  gap: 6px;
+  min-height: 118px;
+  border: 1px solid #e0e7e1;
+  border-radius: 8px;
+  background: #f8faf7;
+  padding: 12px;
+}
+
+.safety-list strong {
+  color: #1b211f;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.safety-list span {
+  color: #5c6a64;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .notice-card {
   display: flex;
   align-items: flex-start;
@@ -784,6 +813,10 @@ td > span:not(.pill, .money) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .safety-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .two-columns,
   .project-layout {
     grid-template-columns: 1fr;
@@ -822,6 +855,7 @@ td > span:not(.pill, .money) {
   .metric-grid,
   .metric-grid.compact,
   .storage-health-grid,
+  .safety-list,
   .filter-bar,
   .expense-filters,
   .form-row,
@@ -833,6 +867,18 @@ td > span:not(.pill, .money) {
   .form-actions,
   .backup-actions {
     justify-content: stretch;
+  }
+
+  .document-card {
+    grid-template-columns: 1fr;
+  }
+
+  .document-actions {
+    justify-items: stretch;
+  }
+
+  .document-actions .row-actions {
+    justify-content: flex-start;
   }
 
   .button {

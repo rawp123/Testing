@@ -1,7 +1,7 @@
 export const STORAGE_KEY = "home-ledger:v1";
 export const BACKUP_APP_ID = "home-basis-tracker";
 export const BACKUP_VERSION = 1;
-export const MAX_BACKUP_FILE_SIZE = 250 * 1024 * 1024;
+export const MAX_BACKUP_FILE_SIZE = 100 * 1024 * 1024;
 export const MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024;
 
 export const EMPTY_DATA = {
@@ -70,37 +70,46 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 });
 
 export function sanitizeData(value) {
-  return {
+  const sanitized = {
     properties: Array.isArray(value?.properties) ? value.properties.map(sanitizeProperty) : [],
     projects: Array.isArray(value?.projects) ? value.projects.map(sanitizeProject) : [],
     expenses: Array.isArray(value?.expenses) ? value.expenses.map(sanitizeExpense) : [],
     documents: Array.isArray(value?.documents) ? value.documents.map(sanitizeDocument) : [],
   };
+  return normalizeRelationships(sanitized);
 }
 
 function sanitizeProperty(property) {
   return {
-    ...property,
+    id: cleanText(property?.id),
     name: removeLocalPaths(property?.name || ""),
     address: removeLocalPaths(property?.address || ""),
+    purchaseDate: cleanDate(property?.purchaseDate),
+    purchasePrice: parseAmount(property?.purchasePrice),
     notes: removeLocalPaths(property?.notes || ""),
   };
 }
 
 function sanitizeProject(project) {
   return {
-    ...project,
+    id: cleanText(project?.id),
+    propertyId: cleanText(project?.propertyId),
     name: removeLocalPaths(project?.name || ""),
     category: allowedOptionValue(EXPENSE_CATEGORIES, project?.category, "other"),
-    status: allowedOptionValue(PROJECT_STATUSES, project?.status, "planned"),
+    startDate: cleanDate(project?.startDate),
+    completionDate: cleanDate(project?.completionDate),
     contractor: removeLocalPaths(project?.contractor || ""),
+    status: allowedOptionValue(PROJECT_STATUSES, project?.status, "planned"),
     notes: removeLocalPaths(project?.notes || ""),
   };
 }
 
 function sanitizeExpense(expense) {
   return {
-    ...expense,
+    id: cleanText(expense?.id),
+    propertyId: cleanText(expense?.propertyId),
+    projectId: cleanText(expense?.projectId),
+    date: cleanDate(expense?.date),
     vendor: removeLocalPaths(expense?.vendor || ""),
     description: removeLocalPaths(expense?.description || ""),
     amount: parseAmount(expense?.amount),
@@ -113,18 +122,91 @@ function sanitizeExpense(expense) {
 
 function sanitizeDocument(document) {
   return {
-    ...document,
+    id: cleanText(document?.id),
+    propertyId: cleanText(document?.propertyId),
+    projectId: cleanText(document?.projectId),
+    expenseId: cleanText(document?.expenseId),
     displayName: removeLocalPaths(document?.displayName || ""),
-    notes: removeLocalPaths(document?.notes || ""),
     documentType: allowedOptionValue(DOCUMENT_TYPES, document?.documentType, "other"),
+    addedDate: cleanDate(document?.addedDate),
+    notes: removeLocalPaths(document?.notes || ""),
     hasFile: Boolean(document?.hasFile),
-    fileId: document?.fileId || "",
+    fileId: cleanText(document?.fileId),
     fileName: removeLocalPaths(document?.fileName || ""),
     mimeType: document?.mimeType || "",
     fileSize: Number(document?.fileSize) || 0,
     fileLastModified: document?.fileLastModified || null,
     fileStoredAt: document?.fileStoredAt || "",
   };
+}
+
+function normalizeRelationships(cleanData) {
+  const properties = cleanData.properties.filter((property) => property.id && property.name);
+  const propertyIds = new Set(properties.map((property) => property.id));
+  const fallbackPropertyId = properties[0]?.id || "";
+
+  const projects = cleanData.projects
+    .filter((project) => project.id && project.name)
+    .map((project) => ({
+      ...project,
+      propertyId: propertyIds.has(project.propertyId) ? project.propertyId : fallbackPropertyId,
+    }))
+    .filter((project) => project.propertyId);
+  const projectIds = new Set(projects.map((project) => project.id));
+
+  const expenses = cleanData.expenses
+    .filter((expense) => expense.id && expense.vendor && expense.description)
+    .map((expense) => {
+      const propertyId = propertyIds.has(expense.propertyId) ? expense.propertyId : fallbackPropertyId;
+      const linkedProject = projects.find((project) => project.id === expense.projectId && project.propertyId === propertyId);
+      return {
+        ...expense,
+        propertyId,
+        projectId: linkedProject?.id || "",
+      };
+    })
+    .filter((expense) => expense.propertyId);
+  const expenseIds = new Set(expenses.map((expense) => expense.id));
+
+  const documents = cleanData.documents
+    .filter((document) => document.id && document.displayName)
+    .map((document) => {
+      const linkedExpense = expenses.find((expense) => expense.id === document.expenseId);
+      if (linkedExpense) {
+        return {
+          ...document,
+          propertyId: linkedExpense.propertyId,
+          projectId: linkedExpense.projectId,
+          expenseId: linkedExpense.id,
+        };
+      }
+
+      const propertyId = propertyIds.has(document.propertyId) ? document.propertyId : fallbackPropertyId;
+      const linkedProject = projects.find((project) => project.id === document.projectId && project.propertyId === propertyId);
+      return {
+        ...document,
+        propertyId,
+        projectId: linkedProject?.id || "",
+        expenseId: expenseIds.has(document.expenseId) ? document.expenseId : "",
+      };
+    })
+    .filter((document) => document.propertyId);
+
+  return {
+    properties,
+    projects: projects.filter((project) => projectIds.has(project.id)),
+    expenses,
+    documents,
+  };
+}
+
+function cleanText(value) {
+  return removeLocalPaths(value).trim();
+}
+
+function cleanDate(value) {
+  const text = String(value || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
 }
 
 export function createId(prefix) {
