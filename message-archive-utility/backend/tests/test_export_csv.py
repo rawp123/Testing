@@ -85,6 +85,26 @@ def test_export_messages_csv_neutralizes_spreadsheet_formulas():
     assert "'=cmd" in csv_text
 
 
+def test_export_messages_csv_neutralizes_whitespace_prefixed_formulas():
+    conn = create_archive_connection()
+    contact_id = conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('\t=cmd', '\n+SUM(1,1)', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = insert_conversation(conn, "iphone-chat:1", " @Risky chat")
+    insert_message(conn, conversation_id, contact_id, "1", "\t=HYPERLINK(\"http://example.test\")")
+
+    csv_text = export_messages_csv(conn)
+
+    assert "'\t=HYPERLINK" in csv_text
+    assert "'\n+SUM(1,1)" in csv_text
+    assert "' @Risky chat" in csv_text
+    assert "'\t=cmd" in csv_text
+
+
 def insert_conversation(conn, source_thread_id, title):
     return conn.execute(
         """

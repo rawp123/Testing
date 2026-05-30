@@ -38,6 +38,11 @@ SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
 API_TOKEN_HEADER = "X-Message-Archive-Token"
 UNAUTHENTICATED_PATHS = {"/", "/health"}
+PRIVATE_RESPONSE_HEADERS = {
+    "Cache-Control": "no-store",
+    "Pragma": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+}
 
 app = FastAPI(
     title="Message Archive Utility",
@@ -54,9 +59,9 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "null",
     ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "HEAD", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", API_TOKEN_HEADER],
     expose_headers=["Content-Disposition"],
 )
 
@@ -71,12 +76,13 @@ async def require_local_api_token(request: Request, call_next):
         request.headers.get(API_TOKEN_HEADER),
         expected_token,
     ):
-        return JSONResponse(
+        return add_private_response_headers(JSONResponse(
             status_code=401,
             content={"detail": "Local app authorization is required."},
-        )
+        ))
 
-    return await call_next(request)
+    response = await call_next(request)
+    return add_private_response_headers(response)
 
 
 class IPhoneBackupDryRunRequest(BaseModel):
@@ -111,6 +117,20 @@ def is_valid_api_token(
 ) -> bool:
     provided_token = (header_token or "").strip()
     return bool(provided_token) and secrets.compare_digest(provided_token, expected_token)
+
+
+def private_response_headers(extra_headers: dict[str, str] | None = None) -> dict[str, str]:
+    headers = dict(PRIVATE_RESPONSE_HEADERS)
+    if extra_headers:
+        headers.update(extra_headers)
+    return headers
+
+
+def add_private_response_headers(response: Response) -> Response:
+    for key, value in PRIVATE_RESPONSE_HEADERS.items():
+        if key not in response.headers:
+            response.headers[key] = value
+    return response
 
 
 def find_iphone_backup_candidates() -> list[dict]:
@@ -230,7 +250,7 @@ def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
             detail = str(error)
 
     return {
-        "path": str(sms_db_path),
+        "path": sms_db_path.name,
         "name": sms_db_path.name,
         "size_bytes": size_bytes,
         "valid": valid,
@@ -510,7 +530,7 @@ def import_iphone_backup_from_path(backup_folder_path: str) -> dict:
             data_dir=get_data_dir(),
         )
 
-    return {
+    return safe_import_response({
         "imported": True,
         "backup_folder_path": backup_folder_path,
         "copied_sms_db_path": copied_sms_db_path,
@@ -522,6 +542,36 @@ def import_iphone_backup_from_path(backup_folder_path: str) -> dict:
         "inspected": inspection["inspected"],
         "row_counts": inspection["row_counts"],
         **import_result,
+    })
+
+
+def safe_import_response(result: dict) -> dict:
+    safe_result = dict(result)
+    safe_result.pop("backup_folder_path", None)
+    safe_result.pop("source_path", None)
+    if safe_result.get("copied_sms_db_path"):
+        safe_result["copied_sms_db_path"] = Path(safe_result["copied_sms_db_path"]).name
+    if safe_result.get("destination_path"):
+        safe_result["destination_path"] = Path(safe_result["destination_path"]).name
+    return safe_result
+
+
+def safe_sms_db_copy_response(result: dict) -> dict:
+    safe_result = dict(result)
+    safe_result.pop("source_path", None)
+    safe_result.pop("domain", None)
+    safe_result.pop("relativePath", None)
+    safe_result.pop("fileID", None)
+    if safe_result.get("destination_path"):
+        safe_result["destination_path"] = Path(safe_result["destination_path"]).name
+    return safe_result
+
+
+def safe_sms_db_locator_response(result: dict) -> dict:
+    return {
+        "sms_db_found": bool(result.get("sms_db_found")),
+        "manifest_readable": bool(result.get("manifest_readable")),
+        "locator": result.get("locator", ""),
     }
 
 
@@ -546,7 +596,7 @@ def import_sample() -> dict:
 @app.post("/import/iphone-backup/dry-run")
 def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
     try:
-        return locate_sms_db_dry_run(request.backup_folder_path)
+        return safe_sms_db_locator_response(locate_sms_db_dry_run(request.backup_folder_path))
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except NotADirectoryError as error:
@@ -619,7 +669,7 @@ def iphone_copied_sms_db_candidates() -> dict:
     ]
     return {
         "candidates": candidates,
-        "import_dir": str(get_iphone_import_dir()),
+        "import_dir": "private app storage",
         "default_path": valid_candidates[0]["path"] if valid_candidates else "",
     }
 
@@ -627,7 +677,8 @@ def iphone_copied_sms_db_candidates() -> dict:
 @app.post("/import/iphone-backup/copy-sms-db")
 def iphone_backup_copy_sms_db(request: IPhoneBackupDryRunRequest) -> dict:
     try:
-        return copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
+        result = copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
+        return safe_sms_db_copy_response(result)
     except SmsDbNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except FileNotFoundError as error:
@@ -930,7 +981,7 @@ def export_csv(
     return Response(
         content=csv_text,
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
+        headers=private_response_headers({"Content-Disposition": f"attachment; filename={filename}"}),
     )
 
 
@@ -965,7 +1016,7 @@ def export_messages_pdf_response(
     return Response(
         content=pdf.content,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={pdf.filename}"},
+        headers=private_response_headers({"Content-Disposition": f"attachment; filename={pdf.filename}"}),
     )
 
 
@@ -998,7 +1049,7 @@ def export_messages_xlsx_response(
     return Response(
         content=workbook.content,
         media_type=EXCEL_MEDIA_TYPE,
-        headers={"Content-Disposition": f"attachment; filename={workbook.filename}"},
+        headers=private_response_headers({"Content-Disposition": f"attachment; filename={workbook.filename}"}),
     )
 
 
@@ -1009,7 +1060,7 @@ def export_search_summary_pdf_response(q: str = "", style: str = "summary") -> R
     return Response(
         content=pdf.content,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={pdf.filename}"},
+        headers=private_response_headers({"Content-Disposition": f"attachment; filename={pdf.filename}"}),
     )
 
 
@@ -1020,7 +1071,7 @@ def export_search_summary_xlsx_response(q: str = "") -> Response:
     return Response(
         content=workbook.content,
         media_type=EXCEL_MEDIA_TYPE,
-        headers={"Content-Disposition": f"attachment; filename={workbook.filename}"},
+        headers=private_response_headers({"Content-Disposition": f"attachment; filename={workbook.filename}"}),
     )
 
 
@@ -1047,6 +1098,7 @@ def get_attachment_file(attachment_id: int, download: bool = False) -> FileRespo
         media_type=row["mime_type"] or "application/octet-stream",
         filename=response_filename,
         content_disposition_type=content_disposition_type,
+        headers=private_response_headers(),
     )
 
 

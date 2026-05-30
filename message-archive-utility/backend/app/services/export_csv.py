@@ -85,6 +85,6 @@ def export_messages_csv(
 
 
 def safe_csv_cell(value):
-    if isinstance(value, str) and value[:1] in {"=", "+", "-", "@"}:
+    if isinstance(value, str) and value.lstrip(" \t\r\n\ufeff")[:1] in {"=", "+", "-", "@"}:
         return f"'{value}"
     return value

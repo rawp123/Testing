@@ -454,7 +454,11 @@ def import_copied_sms_db_messages(
 
 def resolve_copied_sms_db_path(copied_sms_db_path: str, project_dir: Path, data_dir: Path | None = None) -> Path:
     import_root = get_iphone_import_root(project_dir, data_dir)
-    sms_db_path = Path(copied_sms_db_path).expanduser().resolve(strict=True)
+    candidate_path = Path(copied_sms_db_path).expanduser()
+    if candidate_path.is_absolute():
+        sms_db_path = candidate_path.resolve(strict=True)
+    else:
+        sms_db_path = (import_root / candidate_path).resolve(strict=True)
     if not sms_db_path.is_relative_to(import_root):
         raise UnsafeBackupPathError("Copied sms.db path must stay inside the configured iPhone import folder.")
     if not sms_db_path.is_file():

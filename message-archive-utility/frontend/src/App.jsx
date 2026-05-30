@@ -445,12 +445,12 @@ function SearchResultsPanel({
         <div className="search-result-actions">
           {showSummary ? (
             <button className="secondary-button" type="button" onClick={onHideSummary}>
-              Matching messages
+              Show messages
             </button>
           ) : (
             <button className="secondary-button" type="button" onClick={onShowSummary}>
               <BarChart3 size={16} aria-hidden="true" />
-              View summary
+              Show counts
             </button>
           )}
           <button
@@ -590,7 +590,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
       <div className="search-summary-actions">
         <div>
           <h3>Search summary</h3>
-          <p>See where this search appears, then export the summary if you need a copy.</p>
+          <p>See who appears in these results and when the matches occur.</p>
         </div>
         <button
           className={`secondary-button ${query ? "" : "is-disabled"}`}
@@ -688,9 +688,9 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
     <section className="get-started-panel" aria-label="Get started">
       <div className="get-started-copy">
         <p className="eyebrow">Get Started</p>
-        <h2>Save, search, and export your iPhone messages</h2>
+        <h2>Make a searchable copy of your iPhone messages</h2>
         <p>
-          The app walks you through creating a local iPhone backup, then lets you search and export your messages when needed.
+          Create an unencrypted local backup in Finder, then import it here. No account is needed and messages are not uploaded.
         </p>
       </div>
       <div className="get-started-layout">
@@ -698,8 +698,8 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
           <ol className="onboarding-steps" aria-label="Basic setup sequence">
             {[
               ["Back up your iPhone", "Plug in your iPhone and use Finder to create a local backup."],
-              ["Import messages", "Let the app prepare a local message archive on this computer."],
-              ["Search and export", "Browse conversations and export PDF, Excel, or CSV files."],
+              ["Import messages", "Build the message archive on this computer."],
+              ["Search and export", "Browse conversations or save PDF, Excel, or CSV files."],
             ].map(([title, detail], index) => (
               <li key={title}>
                 <span>{index + 1}</span>
@@ -728,7 +728,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
             ["Search conversations", "Find names, numbers, dates, and message text."],
             ["See useful summaries", "Search a word like \"coffee\" and see who mentioned it, where it appeared, and when."],
             ["Export readable files", "Create PDF, Excel, or CSV copies."],
-            ["Keep everything local", "Your archive stays on this computer."],
+            ["Keep the archive local", "Your archive stays on this computer."],
           ].map(([title, detail]) => (
             <div key={title}>
               <strong>{title}</strong>

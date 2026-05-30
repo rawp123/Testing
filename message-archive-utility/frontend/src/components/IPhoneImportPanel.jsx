@@ -123,7 +123,7 @@ export default function IPhoneImportPanel({
   const shouldOpenManualBackupEntry = hasBackupSearchFeedback && !hasDetectedBackup;
 
   useEffect(() => {
-    setIsImportToolsOpen(true);
+    setIsImportToolsOpen(!hasArchiveData);
   }, [hasArchiveData]);
 
   useEffect(() => {
@@ -347,7 +347,7 @@ export default function IPhoneImportPanel({
       setCompletedSteps((current) => removeSteps(current, ["locate", "copy", "validate", "inspect", "import"]));
       setStatus("");
       setError(
-        "I could open the backup, but I could not find message data inside it.",
+        "The backup opened, but message data was not found.",
       );
       return;
     }
@@ -523,7 +523,7 @@ export default function IPhoneImportPanel({
             <BackupGuide />
 
             <p className="import-repeat-note">
-              You can import again later. The app skips messages already in your archive and adds new ones. The local archive and copied attachments stay on this computer; this app does not encrypt them.
+              You can import again later. Existing messages are skipped, and new messages are added to the archive.
             </p>
 
             <div className={`import-status-line ${isBusy ? "is-active" : ""}`}>
@@ -590,11 +590,11 @@ export default function IPhoneImportPanel({
           </section>
 
           <details className="advanced-details import-options-details">
-            <summary>Technical import details</summary>
+            <summary>More import options</summary>
             <div className="advanced-import-panel">
               <div>
-                <strong>Manual controls</strong>
-                <p>Use these only if the guided import asks you to review a prepared import.</p>
+                <strong>Troubleshooting</strong>
+                <p>Use these if an import stops or you need to choose a backup manually.</p>
               </div>
               <div className="advanced-action-row" aria-label="Import troubleshooting actions">
                 <button
@@ -629,7 +629,7 @@ export default function IPhoneImportPanel({
             </div>
 
             <details className="advanced-details technical-import-details">
-              <summary>Show technical details</summary>
+              <summary>Show file details</summary>
               <div className="troubleshooting-actions" aria-label="Technical import actions">
                 {["backup", "locate", "copy", "validate", "import"].map((key) => {
                   const action = stepActions[key];
@@ -753,7 +753,7 @@ export default function IPhoneImportPanel({
           )}
           {technicalSummaryItems.length > 0 && (
             <details className="advanced-details result-details">
-              <summary>Show technical details</summary>
+              <summary>Show file details</summary>
               <dl className="result-grid">
                 {technicalSummaryItems.map((item) => (
                   <div key={item.label}>
@@ -783,7 +783,7 @@ function ImportRecoveryHelp({ backupFolderPath, selectedBackupCandidate }) {
       </ol>
       {(detail || hasBackupFolderPath) && (
         <details className="advanced-details recovery-details">
-          <summary>Show technical details</summary>
+          <summary>Show file details</summary>
           {detail && <p>{simplifyBackupDetail(detail)}</p>}
           {hasBackupFolderPath && <p>The app checks the standard message location inside the selected backup folder.</p>}
         </details>
@@ -934,7 +934,7 @@ function ArchiveLoadedCard({ stats, isLoading, isImportToolsOpen, onOpenArchive,
           Open archive
         </button>
         <button className="ghost-button" type="button" onClick={onToggleImportTools}>
-          {isImportToolsOpen ? "Hide import guide" : "Import another backup"}
+          {isImportToolsOpen ? "Hide import options" : "Import another backup"}
         </button>
       </div>
       {isLoading && (
@@ -1147,7 +1147,7 @@ function toImportErrorMessage(error) {
 
 function buildDiagnosticError(data) {
   if (!data.backup_folder_exists) {
-    return "This app cannot see that backup folder in its current runtime environment.";
+    return "This app cannot see that backup folder right now.";
   }
   if (!data.backup_folder_is_directory) {
     return "The selected backup path exists, but it is not a folder.";
@@ -1172,7 +1172,7 @@ function buildDiagnosticError(data) {
   if (!data.sms_db_payload_nonzero) {
     return "The matching message data exists but is empty.";
   }
-  return "The backup did not pass diagnostics in this runtime environment.";
+  return "The backup did not pass diagnostics.";
 }
 
 function formatResultLabel(label) {

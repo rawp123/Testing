@@ -182,6 +182,46 @@ def test_diagnostics_endpoint_returns_safe_shape_for_missing_backup(tmp_path, mo
     assert "expected_backup_file_path" not in result
 
 
+def test_dry_run_endpoint_omits_private_backup_paths_and_ids(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+
+    result = app_main.iphone_backup_dry_run(
+        app_main.IPhoneBackupDryRunRequest(backup_folder_path=str(backup_folder)),
+    )
+
+    assert result == {
+        "sms_db_found": True,
+        "manifest_readable": True,
+        "locator": "manifest",
+    }
+    assert_no_private_import_api_fields(result)
+
+
+def test_copy_sms_db_endpoint_returns_safe_prepared_import_reference(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"fake sms database bytes")
+    app_data_dir = tmp_path / "app-data"
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(app_data_dir))
+
+    result = app_main.iphone_backup_copy_sms_db(
+        app_main.IPhoneBackupDryRunRequest(backup_folder_path=str(backup_folder)),
+    )
+
+    assert result["copied"] is True
+    assert result["destination_path"].startswith("sms_import_")
+    assert (app_data_dir / "imports" / "iphone" / result["destination_path"]).is_file()
+    assert_no_private_import_api_fields(result)
+
+
 def test_local_api_token_validation_accepts_only_header_token():
     expected_token = "fake-launch-token"
 
@@ -324,6 +364,18 @@ def test_validation_uses_configured_data_dir(tmp_path):
     create_fake_sms_db(copied_sms_db, EXPECTED_SMS_TABLES)
 
     result = validate_copied_sms_db(str(copied_sms_db), project_dir, data_dir=data_dir)
+
+    assert result["valid"] is True
+
+
+def test_validation_accepts_prepared_import_filename(tmp_path):
+    project_dir = tmp_path / "project"
+    data_dir = tmp_path / "app-support"
+    copied_sms_db = data_dir / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_db(copied_sms_db, EXPECTED_SMS_TABLES)
+
+    result = validate_copied_sms_db(copied_sms_db.name, project_dir, data_dir=data_dir)
 
     assert result["valid"] is True
 
@@ -871,12 +923,13 @@ def test_one_click_import_copies_validates_and_imports_detected_backup(tmp_path,
     result = app_main.import_iphone_backup_from_path(str(backup_folder))
 
     assert result["imported"] is True
-    assert result["backup_folder_path"] == str(backup_folder)
     assert result["valid"] is True
     assert result["inspected"] is True
     assert result["messages_imported"] == 2
     assert result["contacts_imported"] == 3
-    assert Path(result["copied_sms_db_path"]).is_file()
+    assert result["copied_sms_db_path"].startswith("sms_import_")
+    assert (app_data_dir / "imports" / "iphone" / result["copied_sms_db_path"]).is_file()
+    assert_no_private_import_api_fields(result)
 
     with app_main.get_connection() as conn:
         assert conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 2
@@ -1300,6 +1353,47 @@ def test_import_normalizes_image_uti_for_inline_preview_metadata(tmp_path, monke
         "availability_status": "available",
         "render_url": f"/attachments/{attachment_id}",
     }
+
+
+def test_attachment_file_response_uses_private_headers_and_generic_filename(tmp_path, monkeypatch):
+    data_dir = tmp_path / "app-data"
+    attachment_path = data_dir / "attachments" / "iphone" / "fake-import" / "private-photo.jpg"
+    attachment_path.parent.mkdir(parents=True)
+    attachment_path.write_bytes(b"fake image bytes")
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(data_dir))
+    archive_conn = create_archive_connection()
+    archive_conn.execute(
+        """
+        INSERT INTO attachments (
+          source_ref,
+          source_relative_path,
+          original_filename,
+          mime_type,
+          local_path,
+          byte_size,
+          availability_status
+        )
+        VALUES (
+          'iphone-attachment:1:private-photo.jpg',
+          'Library/SMS/Attachments/fake/private-photo.jpg',
+          'private-photo.jpg',
+          'image/jpeg',
+          'attachments/iphone/fake-import/private-photo.jpg',
+          16,
+          'available'
+        )
+        """
+    )
+    attachment_id = archive_conn.execute("SELECT id FROM attachments").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.get_attachment_file(attachment_id)
+
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["pragma"] == "no-cache"
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["content-disposition"] == 'inline; filename="attachment"'
+    assert "private-photo" not in response.headers["content-disposition"]
 
 
 def test_attachment_copy_rejects_manifest_file_id_outside_backup(tmp_path):
@@ -2109,6 +2203,25 @@ def assert_no_private_attachment_api_fields(attachment):
         "source_path",
         "byte_size",
     } & set(attachment)
+
+
+def assert_no_private_import_api_fields(result):
+    assert not {
+        "backup_folder_path",
+        "copied_sms_db_path_absolute",
+        "domain",
+        "expected_backup_file_path",
+        "fileID",
+        "relativePath",
+        "source_path",
+    } & set(result)
+    for key in ("copied_sms_db_path", "destination_path"):
+        if key in result and isinstance(result[key], str):
+            assert not Path(result[key]).is_absolute()
+    for value in result.values():
+        if isinstance(value, str):
+            assert "/Users/" not in value
+            assert str(Path.home()) not in value
 
 
 def create_fake_sms_db(path, tables):

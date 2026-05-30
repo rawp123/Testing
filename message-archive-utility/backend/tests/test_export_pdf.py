@@ -18,6 +18,23 @@ def test_pdf_full_archive_export_returns_downloadable_pdf(tmp_path, monkeypatch)
     assert b"Attachments are not included in this export." in response.body
 
 
+def test_export_responses_include_private_file_headers(tmp_path, monkeypatch):
+    create_test_archive(tmp_path, monkeypatch)
+
+    responses = [
+        main.export_csv(),
+        main.export_messages_pdf_response(),
+        main.export_messages_xlsx_response(),
+        main.export_search_summary_pdf_response(q="Greenland"),
+        main.export_search_summary_xlsx_response(q="Greenland"),
+    ]
+
+    for response in responses:
+        assert response.headers["cache-control"] == "no-store"
+        assert response.headers["pragma"] == "no-cache"
+        assert response.headers["x-content-type-options"] == "nosniff"
+
+
 def test_pdf_selected_conversation_export_filters_messages(tmp_path, monkeypatch):
     create_test_archive(tmp_path, monkeypatch)
 

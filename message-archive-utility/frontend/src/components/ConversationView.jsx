@@ -127,7 +127,7 @@ export default function ConversationView({
         </div>
       </header>
       <p className="conversation-export-note">
-        Exports include message text and attachment references, not attachment files.
+        Conversation exports include message text and attachment references.
       </p>
       {isExporting && (
         <LoadingStatus
@@ -170,7 +170,7 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
         {messages.length === 0 ? (
           <div className="empty-state empty-panel">
             <strong>No messages found</strong>
-            <span>This thread exists in the archive, but no message rows were linked to it.</span>
+            <span>No messages were imported for this conversation.</span>
           </div>
         ) : (
           <>
@@ -186,7 +186,7 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
                 type="button"
                 onClick={() => setVisibleMessageCount((current) => current + INITIAL_VISIBLE_MESSAGE_COUNT)}
               >
-                Load older messages
+                Show 200 older messages
               </button>
             )}
           </>
@@ -236,8 +236,10 @@ function sortMessagesNewestFirst(messages) {
 function MessageBubble({ message, startsGroup, apiBaseUrl }) {
   const displayBody = getDisplayMessageBody(message);
   const emptyBodyLabel = message.attachments?.length > 0 ? "Attachment only" : "No message text";
-  const attachmentSummary = summarizeAttachments(message.attachments || []);
-  const imageAttachments = getRenderableImageAttachments(message.attachments || []);
+  const attachments = message.attachments || [];
+  const attachmentSummary = summarizeAttachments(attachments);
+  const imageAttachments = getRenderableImageAttachments(attachments);
+  const shouldShowAttachmentSummary = attachmentSummary && imageAttachments.length !== attachments.length;
 
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
@@ -253,7 +255,7 @@ function MessageBubble({ message, startsGroup, apiBaseUrl }) {
           ))}
         </div>
       )}
-      {attachmentSummary && (
+      {shouldShowAttachmentSummary && (
         <div
           className={`attachment-indicator ${attachmentSummary.className}`}
           aria-label={attachmentSummary.accessibleLabel}
@@ -473,7 +475,7 @@ function summarizeAttachments(attachments) {
     const label = totalCount === 1
       ? formatUnavailableAttachmentLabel(attachments[0].mime_type)
       : `${totalCount} attachments not in backup`;
-    const detail = "The message references a file, but this backup did not include it.";
+    const detail = "The file was referenced by Messages but was not included in this backup.";
     return {
       label,
       detail,

@@ -138,8 +138,8 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
             <FileText size={16} aria-hidden="true" />
           </span>
           <span>
-            <strong>Archive exports</strong>
-            <small>Full archive, dates, or one person</small>
+            <strong>Export</strong>
+            <small>Save PDF, Excel, or CSV files</small>
           </span>
         </span>
         <ChevronDown size={17} aria-hidden="true" />
@@ -147,7 +147,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
 
       <section className="archive-export-body" aria-label="Archive exports">
         <p className="archive-export-help">
-          These create archive-wide files. Use the selected thread header for one conversation.
+          Use this for full-archive, date-range, or person exports. For one conversation, use Export conversation at the top of that thread.
         </p>
 
       <fieldset className="export-choice-group">
@@ -290,9 +290,9 @@ function buildExportUrl({
 }
 
 function getDownloadLabel(scope, formatLabel) {
-  if (scope === "dateRange") return `Download date range ${formatLabel}`;
-  if (scope === "person") return `Download contact ${formatLabel}`;
-  return `Download archive ${formatLabel}`;
+  if (scope === "dateRange") return `Export date range ${formatLabel}`;
+  if (scope === "person") return `Export contact ${formatLabel}`;
+  return `Export archive ${formatLabel}`;
 }
 
 function getDisabledActionText(scopeOption) {
@@ -319,10 +319,9 @@ function getPersonPlaceholder({ hasArchiveData, peopleStatus, hasPeople }) {
 }
 
 function getExportNoteText({ peopleStatus, hasPeople }) {
-  const attachmentNote = " Exports include message text and attachment references, not attachment files.";
-  if (peopleStatus === "error") return `Exports are prepared on this computer. Contacts could not be loaded right now.${attachmentNote}`;
-  if (!hasPeople) return `Exports are prepared on this computer. No contacts found yet.${attachmentNote}`;
-  return `Exports are prepared on this computer.${attachmentNote}`;
+  if (peopleStatus === "error") return "Exports are created on this computer. Contacts could not be loaded right now.";
+  if (!hasPeople) return "Exports are created on this computer. No contacts found yet.";
+  return "Exports are created on this computer. Attachment files are not included.";
 }
 
 function formatPersonOption(person) {

@@ -1,9 +1,4 @@
-/*
-  style.css — clean, well-commented stylesheet
-  - Uses CSS variables for colors and spacing
-  - Layouts use Flexbox and CSS Grid (explained inline)
-  - Includes responsive breakpoints and subtle animations
-*/
+/* Shared site styles */
 :root{
   --bg:#0b1220; /* dark page background */
   --card:#0f1724; /* card surface */
@@ -1525,7 +1520,14 @@ body[data-page="message-archive-utility"] h3,
 body[data-page="message-archive-utility"] p,
 body[data-page="message-archive-utility"] a,
 body[data-page="message-archive-utility"] li,
-body[data-page="message-archive-utility"] span,
+body[data-page="message-archive-utility"] span{
+  overflow-wrap:break-word;
+}
+body[data-page="message-archive-utility"] h1,
+body[data-page="message-archive-utility"] h2,
+body[data-page="message-archive-utility"] h3{
+  letter-spacing:0;
+}
 body[data-page="message-archive-utility"] code{
   overflow-wrap:anywhere;
 }
@@ -1882,7 +1884,7 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
     max-width:100%;
     font-size:clamp(1.82rem, 7.65vw, 2.16rem);
     line-height:1.1;
-    letter-spacing:-.015em;
+    letter-spacing:0;
     overflow-wrap:break-word;
   }
   .mau-hero-copy{
@@ -1897,7 +1899,7 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
     max-width:100%;
     font-size:clamp(1.72rem, 7.7vw, 2.18rem);
     line-height:1.08;
-    letter-spacing:-.015em;
+    letter-spacing:0;
     overflow-wrap:break-word;
   }
   .mau-page-hero p:not(.mau-kicker){
