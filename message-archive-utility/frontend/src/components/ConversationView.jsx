@@ -221,7 +221,10 @@ function MessageBubble({ message, startsGroup }) {
       </div>
       {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">{emptyBodyLabel}</p>}
       {attachmentSummary && (
-        <div className="attachment-indicator" aria-label={attachmentSummary.accessibleLabel}>
+        <div
+          className={`attachment-indicator ${attachmentSummary.className}`}
+          aria-label={attachmentSummary.accessibleLabel}
+        >
           <span>{attachmentSummary.label}</span>
           <small>{attachmentSummary.detail}</small>
         </div>
@@ -348,8 +351,9 @@ function summarizeAttachments(attachments) {
   if (availableCount === totalCount) {
     return {
       label: attachmentLabel,
-      detail: "Available in this archive",
-      accessibleLabel: `${attachmentLabel}. Available in this archive.`,
+      detail: "Saved with this archive",
+      accessibleLabel: `${attachmentLabel}. Saved with this archive.`,
+      className: "is-available",
     };
   }
 
@@ -358,14 +362,16 @@ function summarizeAttachments(attachments) {
       label: totalCount === 1 ? "Attachment not available" : `${totalCount} attachments not available`,
       detail: "The file was referenced but could not be found.",
       accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} not available in this archive.`,
+      className: "is-missing",
     };
   }
 
   if (metadataOnlyCount === totalCount) {
     return {
       label: totalCount === 1 ? "Attachment referenced" : `${totalCount} attachments referenced`,
-      detail: "File not copied into this archive.",
-      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} referenced but not copied into this archive.`,
+      detail: "File is not available yet.",
+      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} referenced but not available yet.`,
+      className: "is-referenced",
     };
   }
 
@@ -373,6 +379,7 @@ function summarizeAttachments(attachments) {
     label: `${totalCount} attachments`,
     detail: buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount }),
     accessibleLabel: `${totalCount} attachments. ${buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount })}`,
+    className: "is-mixed",
   };
 }
 

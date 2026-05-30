@@ -769,7 +769,7 @@ def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
         FROM attachments
         """
     ).fetchone()
-    local_path = project_dir / attachment["local_path"]
+    local_path = project_dir / "data" / attachment["local_path"]
     attachment_data = dict(attachment)
     imported_at = attachment_data.pop("imported_at")
     assert imported_at
@@ -778,7 +778,7 @@ def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
         "source_relative_path": "Library/SMS/Attachments/fake/photo.jpg",
         "original_filename": "photo.jpg",
         "mime_type": "image/jpeg",
-        "local_path": "data/attachments/iphone/sms_import_20260101T120000Z/1-photo.jpg",
+        "local_path": "attachments/iphone/sms_import_20260101T120000Z/1-photo.jpg",
         "byte_size": 8,
         "availability_status": "available",
     }
@@ -793,6 +793,55 @@ def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
 
     assert second_result["attachments_imported"] == 0
     assert second_result["attachment_files_copied"] == 0
+
+
+def test_attachment_copy_stores_data_dir_relative_path_for_configured_data_dir(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "HomeDomain",
+                "Library/SMS/Attachments/fake/photo.jpg",
+            ),
+        ],
+    )
+    attachment_source = backup_folder / FAKE_ATTACHMENT_FILE_ID[:2] / FAKE_ATTACHMENT_FILE_ID
+    attachment_source.parent.mkdir()
+    attachment_source.write_bytes(b"fake jpg")
+
+    project_dir = tmp_path / "project"
+    data_dir = tmp_path / "app-support"
+    copied_sms_db = data_dir / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+        data_dir=data_dir,
+    )
+
+    attachment = archive_conn.execute(
+        "SELECT local_path, availability_status FROM attachments"
+    ).fetchone()
+    assert result["attachment_files_copied"] == 1
+    assert attachment["local_path"] == "attachments/iphone/sms_import_20260101T120000Z/1-photo.jpg"
+    assert attachment["availability_status"] == "available"
+    assert not Path(attachment["local_path"]).is_absolute()
+    assert (data_dir / attachment["local_path"]).read_bytes() == b"fake jpg"
 
 
 def test_attachment_copy_rejects_manifest_file_id_outside_backup(tmp_path):
@@ -963,7 +1012,7 @@ def test_unlinked_attachment_files_are_not_copied(tmp_path):
     assert [dict(row) for row in attachments] == [
         {
             "original_filename": "linked.jpg",
-            "local_path": "data/attachments/iphone/sms_import_20260101T120000Z/1-linked.jpg",
+            "local_path": "attachments/iphone/sms_import_20260101T120000Z/1-linked.jpg",
         },
         {
             "original_filename": "unlinked.jpg",
@@ -1010,8 +1059,8 @@ def test_attachment_destination_filename_is_sanitized(tmp_path):
 
     attachment = archive_conn.execute("SELECT local_path FROM attachments").fetchone()
     local_path = attachment["local_path"]
-    assert local_path == "data/attachments/iphone/sms_import_20260101T120000Z/1-private_photo_.jpg"
-    assert (project_dir / local_path).read_bytes() == b"fake jpg"
+    assert local_path == "attachments/iphone/sms_import_20260101T120000Z/1-private_photo_.jpg"
+    assert (project_dir / "data" / local_path).read_bytes() == b"fake jpg"
 
 
 def test_extracts_message_text_from_attributed_body_when_text_is_empty():

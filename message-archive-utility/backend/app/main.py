@@ -1017,7 +1017,11 @@ def resolve_private_attachment_path(local_path: str) -> Path:
     if path.is_absolute():
         resolved_path = path.resolve(strict=False)
     else:
-        resolved_path = (PROJECT_DIR / path).resolve(strict=False)
+        data_dir_path = (get_data_dir() / path).resolve(strict=False)
+        if data_dir_path.is_relative_to(attachment_root):
+            resolved_path = data_dir_path
+        else:
+            resolved_path = (PROJECT_DIR / path).resolve(strict=False)
     if not resolved_path.is_relative_to(attachment_root):
         raise HTTPException(status_code=400, detail="Attachment path is outside private storage.")
     if not resolved_path.is_file():

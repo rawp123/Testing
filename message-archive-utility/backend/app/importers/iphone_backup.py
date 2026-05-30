@@ -1248,7 +1248,7 @@ def copy_iphone_attachment_file(
 
     return {
         "copied": copied,
-        "local_path": build_stored_local_path(destination_path, project_dir),
+        "local_path": build_stored_local_path(destination_path, project_dir, resolved_data_dir),
     }
 
 
@@ -1262,7 +1262,11 @@ def get_iphone_import_root(project_dir: Path, data_dir: Path | None = None) -> P
     return (resolve_data_dir(project_dir, data_dir) / "imports" / "iphone").resolve()
 
 
-def build_stored_local_path(destination_path: Path, project_dir: Path) -> str:
+def build_stored_local_path(destination_path: Path, project_dir: Path, data_dir: Path) -> str:
+    resolved_data_dir = data_dir.resolve()
+    if destination_path.is_relative_to(resolved_data_dir):
+        return str(destination_path.relative_to(resolved_data_dir))
+
     resolved_project_dir = project_dir.resolve()
     if destination_path.is_relative_to(resolved_project_dir):
         return str(destination_path.relative_to(resolved_project_dir))
