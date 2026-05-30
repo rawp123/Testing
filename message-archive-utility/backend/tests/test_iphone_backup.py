@@ -1029,6 +1029,51 @@ def test_missing_attachment_source_keeps_metadata_only(tmp_path):
     assert attachment["availability_status"] == "missing"
 
 
+def test_attachment_reference_without_manifest_file_row_is_marked_missing(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=1234,
+    )
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+
+    attachment = archive_conn.execute(
+        """
+        SELECT source_relative_path, original_filename, mime_type, local_path, byte_size, availability_status
+        FROM attachments
+        """
+    ).fetchone()
+    link_count = archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0]
+    assert result["messages_imported"] == 2
+    assert result["attachments_imported"] == 1
+    assert result["message_attachment_links_imported"] == 1
+    assert result["attachment_files_copied"] == 0
+    assert link_count == 1
+    assert dict(attachment) == {
+        "source_relative_path": "Library/SMS/Attachments/fake/photo.jpg",
+        "original_filename": "photo.jpg",
+        "mime_type": "image/jpeg",
+        "local_path": None,
+        "byte_size": 1234,
+        "availability_status": "missing",
+    }
+
+
 def test_unreadable_manifest_does_not_block_message_import(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
