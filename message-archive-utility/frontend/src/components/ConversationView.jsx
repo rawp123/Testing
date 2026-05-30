@@ -351,26 +351,32 @@ function summarizeAttachments(attachments) {
   if (availableCount === totalCount) {
     return {
       label: attachmentLabel,
-      detail: "Saved with this archive",
-      accessibleLabel: `${attachmentLabel}. Saved with this archive.`,
+      detail: "Saved in archive",
+      accessibleLabel: `${attachmentLabel}. Saved in this archive.`,
       className: "is-available",
     };
   }
 
   if (missingCount === totalCount) {
+    const label = totalCount === 1
+      ? formatUnavailableAttachmentLabel(attachments[0].mime_type)
+      : `${totalCount} attachments not in backup`;
+    const detail = "The message references a file, but this backup did not include it.";
     return {
-      label: totalCount === 1 ? "Attachment not available" : `${totalCount} attachments not available`,
-      detail: "The file was referenced but could not be found.",
-      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} not available in this archive.`,
+      label,
+      detail,
+      accessibleLabel: `${label}. ${detail}`,
       className: "is-missing",
     };
   }
 
   if (metadataOnlyCount === totalCount) {
+    const label = totalCount === 1 ? "Attachment reference only" : `${totalCount} attachment references`;
+    const detail = "The archive has the message reference, but not the file.";
     return {
-      label: totalCount === 1 ? "Attachment referenced" : `${totalCount} attachments referenced`,
-      detail: "File is not available yet.",
-      accessibleLabel: `${totalCount} ${totalCount === 1 ? "attachment is" : "attachments are"} referenced but not available yet.`,
+      label,
+      detail,
+      accessibleLabel: `${label}. ${detail}`,
       className: "is-referenced",
     };
   }
@@ -386,9 +392,18 @@ function summarizeAttachments(attachments) {
 function buildMixedAttachmentDetail({ availableCount, missingCount, metadataOnlyCount }) {
   return [
     availableCount ? `${availableCount} available` : null,
-    missingCount ? `${missingCount} not available` : null,
-    metadataOnlyCount ? `${metadataOnlyCount} referenced` : null,
+    missingCount ? `${missingCount} not in backup` : null,
+    metadataOnlyCount ? `${metadataOnlyCount} reference only` : null,
   ].filter(Boolean).join(" · ");
+}
+
+function formatUnavailableAttachmentLabel(value) {
+  if (!value) return "Attachment not in backup";
+  if (value.startsWith("image/")) return "Photo not in backup";
+  if (value === "application/pdf") return "PDF not in backup";
+  if (value.startsWith("video/")) return "Video not in backup";
+  if (value.startsWith("audio/")) return "Audio not in backup";
+  return "Attachment not in backup";
 }
 
 function formatAttachmentKind(value) {
