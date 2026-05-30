@@ -728,10 +728,8 @@ def list_conversation_messages(conversation_id: int) -> dict:
             SELECT
               message_attachments.message_id,
               attachments.id,
-              attachments.original_filename,
               attachments.mime_type,
               attachments.local_path,
-              attachments.byte_size,
               attachments.availability_status
             FROM message_attachments
             JOIN attachments ON attachments.id = message_attachments.attachment_id
@@ -745,11 +743,7 @@ def list_conversation_messages(conversation_id: int) -> dict:
     attachments_by_message_id: dict[int, list[dict]] = {}
     for attachment in attachment_rows:
         attachments_by_message_id.setdefault(attachment["message_id"], []).append(
-            {
-                "mime_type": attachment["mime_type"],
-                "available": attachment["availability_status"] == "available" and bool(attachment["local_path"]),
-                "availability_status": attachment["availability_status"],
-            }
+            build_safe_attachment_display_metadata(attachment)
         )
 
     return {
@@ -993,10 +987,11 @@ def get_attachment_file(attachment_id: int, download: bool = False) -> FileRespo
 
     file_path = resolve_private_attachment_path(row["local_path"])
     content_disposition_type = "attachment" if download else "inline"
+    response_filename = "attachment" if not download else "message-attachment"
     return FileResponse(
         file_path,
         media_type=row["mime_type"] or "application/octet-stream",
-        filename=row["original_filename"] or file_path.name,
+        filename=response_filename,
         content_disposition_type=content_disposition_type,
     )
 
@@ -1009,6 +1004,18 @@ def split_participants(value: str | None) -> list[str]:
 
 def is_image_mime_type(value: str | None) -> bool:
     return bool(value and value.lower().startswith("image/"))
+
+
+def build_safe_attachment_display_metadata(attachment: sqlite3.Row) -> dict:
+    is_available = attachment["availability_status"] == "available" and bool(attachment["local_path"])
+    metadata = {
+        "mime_type": attachment["mime_type"],
+        "available": is_available,
+        "availability_status": attachment["availability_status"],
+    }
+    if is_available and is_image_mime_type(attachment["mime_type"]):
+        metadata["render_url"] = f"/attachments/{attachment['id']}"
+    return metadata
 
 
 def resolve_private_attachment_path(local_path: str) -> Path:

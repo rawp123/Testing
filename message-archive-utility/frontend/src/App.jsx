@@ -348,6 +348,7 @@ export default function App() {
                 />
               </div>
               <ConversationMessages
+                apiBaseUrl={API_BASE_URL}
                 conversation={selectedConversation}
                 isLoading={isConversationLoading}
               />

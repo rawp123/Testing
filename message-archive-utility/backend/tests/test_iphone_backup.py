@@ -598,6 +598,176 @@ def test_conversation_api_returns_only_safe_attachment_display_metadata(tmp_path
     assert "id" not in attachment
 
 
+def test_conversation_api_includes_render_url_only_for_available_image_attachment(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "HomeDomain",
+                "Library/SMS/Attachments/fake/photo.jpg",
+            ),
+        ],
+    )
+    attachment_source = backup_folder / FAKE_ATTACHMENT_FILE_ID[:2] / FAKE_ATTACHMENT_FILE_ID
+    attachment_source.parent.mkdir()
+    attachment_source.write_bytes(b"fake jpg")
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    attachment_id = archive_conn.execute("SELECT id FROM attachments").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    message = next(message for message in response["messages"] if message["attachments"])
+    attachment = message["attachments"][0]
+    assert attachment == {
+        "mime_type": "image/jpeg",
+        "available": True,
+        "availability_status": "available",
+        "render_url": f"/attachments/{attachment_id}",
+    }
+    assert_no_private_attachment_api_fields(attachment)
+
+
+def test_conversation_api_omits_render_url_for_available_non_image_attachment(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "HomeDomain",
+                "Library/SMS/Attachments/fake/file.pdf",
+            ),
+        ],
+    )
+    attachment_source = backup_folder / FAKE_ATTACHMENT_FILE_ID[:2] / FAKE_ATTACHMENT_FILE_ID
+    attachment_source.parent.mkdir()
+    attachment_source.write_bytes(b"%PDF fake")
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/file.pdf",
+        transfer_name="file.pdf",
+        mime_type="application/pdf",
+        byte_size=9,
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    attachment = next(message for message in response["messages"] if message["attachments"])["attachments"][0]
+    assert attachment == {
+        "mime_type": "application/pdf",
+        "available": True,
+        "availability_status": "available",
+    }
+    assert_no_private_attachment_api_fields(attachment)
+
+
+def test_conversation_api_omits_render_url_for_missing_image_attachment(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "HomeDomain",
+                "Library/SMS/Attachments/fake/missing.jpg",
+            ),
+        ],
+    )
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/missing.jpg",
+        transfer_name="missing.jpg",
+        mime_type="image/jpeg",
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    attachment = next(message for message in response["messages"] if message["attachments"])["attachments"][0]
+    assert attachment == {
+        "mime_type": "image/jpeg",
+        "available": False,
+        "availability_status": "missing",
+    }
+    assert_no_private_attachment_api_fields(attachment)
+
+
+def test_conversation_api_omits_render_url_for_metadata_only_image_attachment(tmp_path, monkeypatch):
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    attachment = next(message for message in response["messages"] if message["attachments"])["attachments"][0]
+    assert attachment == {
+        "mime_type": "image/jpeg",
+        "available": False,
+        "availability_status": "metadata_only",
+    }
+    assert_no_private_attachment_api_fields(attachment)
+
+
 def test_one_click_import_copies_validates_and_imports_detected_backup(tmp_path, monkeypatch):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -1717,6 +1887,24 @@ def create_archive_connection():
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(schema_path.read_text())
     return conn
+
+
+def assert_no_private_attachment_api_fields(attachment):
+    assert not {
+        "id",
+        "original_filename",
+        "source_ref",
+        "source_relative_path",
+        "local_path",
+        "backup_folder_path",
+        "backup_id",
+        "fileID",
+        "file_id",
+        "storage_path",
+        "destination_path",
+        "source_path",
+        "byte_size",
+    } & set(attachment)
 
 
 def create_fake_sms_db(path, tables):

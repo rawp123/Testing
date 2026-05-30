@@ -138,7 +138,7 @@ export default function ConversationView({
   );
 }
 
-export function ConversationMessages({ conversation, isLoading }) {
+export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
   if (isLoading || !conversation) return null;
 
   const messages = conversation.messages || [];
@@ -163,7 +163,7 @@ export function ConversationMessages({ conversation, isLoading }) {
         ) : (
           <>
             <p className="timeline-note">Latest messages are shown first.</p>
-            {renderMessagesWithDateDividers(displayMessages)}
+            {renderMessagesWithDateDividers(displayMessages, apiBaseUrl)}
           </>
         )}
       </div>
@@ -178,7 +178,7 @@ function buildConversationExportUrl(apiBaseUrl, conversationId, format) {
   return `${apiBaseUrl}/export/messages.${extension}?${params.toString()}`;
 }
 
-function renderMessagesWithDateDividers(messages) {
+function renderMessagesWithDateDividers(messages, apiBaseUrl) {
   let previousDateKey = "";
   let previousSender = "";
   let previousDirection = "";
@@ -199,7 +199,7 @@ function renderMessagesWithDateDividers(messages) {
       message.sender_name !== previousSender || message.direction !== previousDirection;
     previousSender = message.sender_name;
     previousDirection = message.direction;
-    items.push(<MessageBubble message={message} startsGroup={startsGroup} key={message.id} />);
+    items.push(<MessageBubble apiBaseUrl={apiBaseUrl} message={message} startsGroup={startsGroup} key={message.id} />);
     return items;
   });
 }
@@ -208,10 +208,11 @@ function sortMessagesNewestFirst(messages) {
   return [...messages].sort((left, right) => getTimestamp(right.sent_at) - getTimestamp(left.sent_at));
 }
 
-function MessageBubble({ message, startsGroup }) {
+function MessageBubble({ message, startsGroup, apiBaseUrl }) {
   const displayBody = getDisplayMessageBody(message);
   const emptyBodyLabel = message.attachments?.length > 0 ? "Attachment only" : "No message text";
   const attachmentSummary = summarizeAttachments(message.attachments || []);
+  const imageAttachments = getRenderableImageAttachments(message.attachments || []);
 
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
@@ -220,6 +221,13 @@ function MessageBubble({ message, startsGroup }) {
         <time>{formatTime(message.sent_at)}</time>
       </div>
       {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">{emptyBodyLabel}</p>}
+      {imageAttachments.length > 0 && (
+        <div className="message-attachments" aria-label="Message attachments">
+          {imageAttachments.map((attachment) => (
+            <ImageAttachmentPreview apiBaseUrl={apiBaseUrl} attachment={attachment} key={attachment.render_url} />
+          ))}
+        </div>
+      )}
       {attachmentSummary && (
         <div
           className={`attachment-indicator ${attachmentSummary.className}`}
@@ -231,6 +239,38 @@ function MessageBubble({ message, startsGroup }) {
       )}
     </article>
   );
+}
+
+function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
+  const [didFail, setDidFail] = useState(false);
+
+  if (didFail) {
+    return (
+      <div className="attachment-preview-fallback" role="status">
+        Photo attachment could not be previewed.
+      </div>
+    );
+  }
+
+  return (
+    <figure className="message-image-attachment">
+      <img
+        alt="Photo attachment"
+        decoding="async"
+        loading="lazy"
+        onError={() => setDidFail(true)}
+        src={buildAttachmentRenderUrl(apiBaseUrl, attachment.render_url)}
+      />
+    </figure>
+  );
+}
+
+function buildAttachmentRenderUrl(apiBaseUrl, renderUrl) {
+  if (renderUrl.startsWith("http://") || renderUrl.startsWith("https://")) {
+    return renderUrl;
+  }
+  const normalizedBaseUrl = String(apiBaseUrl || "").replace(/\/$/, "");
+  return `${normalizedBaseUrl}${renderUrl}`;
 }
 
 export function getDisplayMessageBody(message) {
@@ -337,6 +377,16 @@ function hasHumanTextShape(value) {
   return false;
 }
 
+function getRenderableImageAttachments(attachments) {
+  return attachments.filter((attachment) => (
+    attachment.available === true
+    && attachment.availability_status === "available"
+    && typeof attachment.render_url === "string"
+    && attachment.render_url.startsWith("/attachments/")
+    && isImageMimeType(attachment.mime_type)
+  ));
+}
+
 function summarizeAttachments(attachments) {
   if (!attachments.length) return null;
 
@@ -408,11 +458,15 @@ function formatUnavailableAttachmentLabel(value) {
 
 function formatAttachmentKind(value) {
   if (!value) return "Attachment";
-  if (value.startsWith("image/")) return "Photo attachment";
+  if (isImageMimeType(value)) return "Photo attachment";
   if (value === "application/pdf") return "PDF attachment";
   if (value.startsWith("video/")) return "Video attachment";
   if (value.startsWith("audio/")) return "Audio attachment";
   return "Attachment";
+}
+
+function isImageMimeType(value) {
+  return Boolean(value && value.toLowerCase().startsWith("image/"));
 }
 
 function formatTime(value) {
