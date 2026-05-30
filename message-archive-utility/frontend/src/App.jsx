@@ -7,9 +7,9 @@ import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import LoadingStatus from "./components/LoadingStatus.jsx";
 import SearchBar from "./components/SearchBar.jsx";
+import { API_BASE_URL, apiFetch } from "./utils/apiAuth.js";
 import { downloadFile } from "./utils/downloadFile.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const SHOW_SAMPLE_ARCHIVE = import.meta.env.VITE_ENABLE_SAMPLE_ARCHIVE === "true";
 const APP_TABS = [
   { id: "get-started", label: "Get Started" },
@@ -883,7 +883,7 @@ function sanitizeTechnicalDetail(error) {
 async function request(path, options = {}) {
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
+    response = await apiFetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers: {
         ...(options.body ? { "Content-Type": "application/json" } : {}),

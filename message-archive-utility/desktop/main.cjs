@@ -1,5 +1,6 @@
 const { app, BrowserWindow, dialog } = require("electron");
 const { spawn } = require("node:child_process");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -15,19 +16,23 @@ const BACKEND_DIR = path.resolve(PROJECT_DIR, "backend");
 const BACKEND_VENV_DIR = process.env.MESSAGE_ARCHIVE_BACKEND_VENV_DIR || path.resolve(PROJECT_DIR, ".venv");
 const BACKEND_HOST = "127.0.0.1";
 const BACKEND_PORT = Number(process.env.MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT || 8765);
-const BACKEND_HEALTH_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}/health`;
+const BACKEND_ORIGIN = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
+const BACKEND_HEALTH_URL = `${BACKEND_ORIGIN}/health`;
 const BACKEND_READY_TIMEOUT_MS = 20000;
 const BACKEND_POLL_INTERVAL_MS = 350;
 const UVICORN_BIN = path.resolve(BACKEND_VENV_DIR, "bin/uvicorn");
 const PACKAGED_BACKEND_EXECUTABLE = path.join(process.resourcesPath, "backend", "message-archive-backend");
+const PRELOAD_SCRIPT = path.join(__dirname, "preload.cjs");
 const DESKTOP_DATA_DIR_NAME = "Message Archive Utility";
 const USE_BACKEND_RELOAD = process.env.MESSAGE_ARCHIVE_BACKEND_RELOAD === "1";
+const API_TOKEN_HEADER = "X-Message-Archive-Token";
 const ALLOWED_DEV_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
 ]);
 
 let backendProcess = null;
+let apiToken = "";
 
 function getStartTarget() {
   if (DEV_SERVER_URL) {
@@ -49,22 +54,7 @@ function isAllowedNavigation(targetUrl) {
     return fileURLToPath(parsedUrl) === FRONTEND_DIST_INDEX;
   }
 
-  if (isAllowedBackendDownloadUrl(parsedUrl)) {
-    return true;
-  }
-
   return ALLOWED_DEV_ORIGINS.has(parsedUrl.origin);
-}
-
-function isAllowedBackendDownloadUrl(parsedUrl) {
-  const backendOrigin = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
-  return (
-    parsedUrl.origin === backendOrigin
-    && (
-      parsedUrl.pathname.startsWith("/export/")
-      || parsedUrl.pathname.startsWith("/attachments/")
-    )
-  );
 }
 
 function createWindow() {
@@ -81,6 +71,7 @@ function createWindow() {
       sandbox: true,
       webSecurity: true,
       allowRunningInsecureContent: false,
+      preload: PRELOAD_SCRIPT,
     },
   });
 
@@ -138,6 +129,34 @@ function requestBackendHealth() {
   });
 }
 
+function requestBackendTokenCheck() {
+  return new Promise((resolve) => {
+    const request = http.get(
+      `${BACKEND_ORIGIN}/archive/stats`,
+      {
+        timeout: 1200,
+        headers: {
+          [API_TOKEN_HEADER]: getApiToken(),
+        },
+      },
+      (response) => {
+        response.resume();
+        response.on("end", () => {
+          resolve({ ok: response.statusCode === 200, statusCode: response.statusCode });
+        });
+      },
+    );
+
+    request.on("timeout", () => {
+      request.destroy(new Error("Backend token check timed out."));
+    });
+
+    request.on("error", (error) => {
+      resolve({ ok: false, error });
+    });
+  });
+}
+
 async function waitForBackendHealth() {
   const startedAt = Date.now();
 
@@ -158,6 +177,12 @@ async function ensureBackendReady() {
     if (!initialHealth.body?.desktop_mode) {
       throw new Error(
         `Port ${BACKEND_PORT} is responding, but it is not running in Message Archive desktop mode.`,
+      );
+    }
+    const tokenCheck = await requestBackendTokenCheck();
+    if (!tokenCheck.ok) {
+      throw new Error(
+        `Port ${BACKEND_PORT} is already running a different Message Archive local service. Close the other app window and try again.`,
       );
     }
     console.log(`Using existing local desktop backend at http://${BACKEND_HOST}:${BACKEND_PORT}.`);
@@ -201,6 +226,8 @@ function startBackendProcess() {
     ...process.env,
     MESSAGE_ARCHIVE_DATA_DIR: process.env.MESSAGE_ARCHIVE_DATA_DIR || desktopDataDir,
     MESSAGE_ARCHIVE_DESKTOP_MODE: "1",
+    MESSAGE_ARCHIVE_API_TOKEN: getApiToken(),
+    MESSAGE_ARCHIVE_API_BASE_URL: BACKEND_ORIGIN,
     MESSAGE_ARCHIVE_DB_PATH:
       process.env.MESSAGE_ARCHIVE_DB_PATH || path.join(desktopDataDir, "message-archive.sqlite3"),
   };
@@ -268,6 +295,15 @@ function getBackendCwd(backendExecutable) {
 
 function getDesktopDataDir() {
   return path.join(app.getPath("appData"), DESKTOP_DATA_DIR_NAME);
+}
+
+function getApiToken() {
+  if (!apiToken) {
+    apiToken = process.env.MESSAGE_ARCHIVE_API_TOKEN || crypto.randomBytes(32).toString("hex");
+    process.env.MESSAGE_ARCHIVE_API_TOKEN = apiToken;
+    process.env.MESSAGE_ARCHIVE_API_BASE_URL = BACKEND_ORIGIN;
+  }
+  return apiToken;
 }
 
 function logBackendLine(chunk) {

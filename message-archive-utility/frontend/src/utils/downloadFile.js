@@ -1,5 +1,7 @@
+import { apiFetch } from "./apiAuth.js";
+
 export async function downloadFile(url) {
-  const response = await fetch(url);
+  const response = await apiFetch(url);
   if (!response.ok) {
     throw new Error("Download failed");
   }

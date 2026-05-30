@@ -9,6 +9,7 @@ SMOKE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/message-archive-installed-smoke-XXXXXX"
 SMOKE_DATA_DIR="$SMOKE_ROOT/data"
 SMOKE_EXPORT_DIR="$SMOKE_ROOT/exports"
 SMOKE_PORT="${MESSAGE_ARCHIVE_SMOKE_PORT:-}"
+SMOKE_API_TOKEN="${MESSAGE_ARCHIVE_API_TOKEN:-}"
 APP_PID=""
 
 cleanup() {
@@ -52,6 +53,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 PY
 }
 
+generate_api_token() {
+  python3 - <<'PY'
+import secrets
+
+print(secrets.token_hex(32))
+PY
+}
+
+curl_auth() {
+  curl -fsS -H "X-Message-Archive-Token: $SMOKE_API_TOKEN" "$@"
+}
+
 wait_for_health() {
   for _ in $(seq 1 60); do
     if curl -fsS "http://127.0.0.1:$SMOKE_PORT/health" >"$SMOKE_ROOT/health.json" 2>/dev/null; then
@@ -92,6 +105,7 @@ launch_app() {
   APP_PID=""
   env -u ELECTRON_RUN_AS_NODE \
     MESSAGE_ARCHIVE_DESKTOP_BACKEND_PORT="$SMOKE_PORT" \
+    MESSAGE_ARCHIVE_API_TOKEN="$SMOKE_API_TOKEN" \
     MESSAGE_ARCHIVE_DATA_DIR="$SMOKE_DATA_DIR" \
     MESSAGE_ARCHIVE_DB_PATH="$SMOKE_DATA_DIR/message-archive.sqlite3" \
     "$APP_EXECUTABLE" >/dev/null 2>&1 &
@@ -158,18 +172,18 @@ download_and_assert_content_type() {
   local expected_type="$3"
   local headers="$output.headers"
 
-  curl -fsS -D "$headers" -o "$output" "$url"
+  curl_auth -D "$headers" -o "$output" "$url"
   [[ -s "$output" ]] || fail "Export output was empty: $output"
   grep -i "^content-type: $expected_type" "$headers" >/dev/null \
     || fail "Unexpected content type for $url"
 }
 
 run_fake_data_checks() {
-  curl -fsS -X POST "http://127.0.0.1:$SMOKE_PORT/dev/import-sample" >"$SMOKE_ROOT/import.json"
-  curl -fsS "http://127.0.0.1:$SMOKE_PORT/archive/stats" >"$SMOKE_ROOT/stats.json"
+  curl_auth -X POST "http://127.0.0.1:$SMOKE_PORT/dev/import-sample" >"$SMOKE_ROOT/import.json"
+  curl_auth "http://127.0.0.1:$SMOKE_PORT/archive/stats" >"$SMOKE_ROOT/stats.json"
   assert_stats
 
-  curl -fsS "http://127.0.0.1:$SMOKE_PORT/search?q=coffee" >"$SMOKE_ROOT/search.json"
+  curl_auth "http://127.0.0.1:$SMOKE_PORT/search?q=coffee" >"$SMOKE_ROOT/search.json"
   assert_search
 
   mkdir -p "$SMOKE_EXPORT_DIR"
@@ -200,6 +214,9 @@ mkdir -p "$SMOKE_DATA_DIR" "$SMOKE_EXPORT_DIR"
 if [[ -z "$SMOKE_PORT" ]]; then
   SMOKE_PORT="$(find_open_port)"
 fi
+if [[ -z "$SMOKE_API_TOKEN" ]]; then
+  SMOKE_API_TOKEN="$(generate_api_token)"
+fi
 
 printf 'Installed app: %s\n' "$APP_PATH"
 printf 'Smoke data: %s\n' "$SMOKE_DATA_DIR"
@@ -211,7 +228,7 @@ run_fake_data_checks
 quit_app
 
 launch_app
-curl -fsS "http://127.0.0.1:$SMOKE_PORT/archive/stats" >"$SMOKE_ROOT/stats-after-reopen.json"
+curl_auth "http://127.0.0.1:$SMOKE_PORT/archive/stats" >"$SMOKE_ROOT/stats-after-reopen.json"
 cp "$SMOKE_ROOT/stats-after-reopen.json" "$SMOKE_ROOT/stats.json"
 assert_stats
 quit_app

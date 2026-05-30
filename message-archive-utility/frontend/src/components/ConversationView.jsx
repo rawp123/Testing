@@ -1,9 +1,9 @@
 import { Download } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import LoadingStatus from "./LoadingStatus.jsx";
+import { API_BASE_URL, apiFetch } from "../utils/apiAuth.js";
 import { downloadFile } from "../utils/downloadFile.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const CONVERSATION_FORMATS = [
   { id: "pdf", label: "PDF" },
   { id: "excel", label: "Excel" },
@@ -243,6 +243,37 @@ function MessageBubble({ message, startsGroup, apiBaseUrl }) {
 
 function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
   const [didFail, setDidFail] = useState(false);
+  const [objectUrl, setObjectUrl] = useState("");
+  const attachmentUrl = buildAttachmentRenderUrl(apiBaseUrl, attachment.render_url);
+
+  useEffect(() => {
+    let isCurrent = true;
+    let nextObjectUrl = "";
+
+    async function loadAttachmentPreview() {
+      setDidFail(false);
+      setObjectUrl("");
+      try {
+        const response = await apiFetch(attachmentUrl);
+        if (!response.ok) throw new Error("Attachment preview failed");
+        const blob = await response.blob();
+        nextObjectUrl = URL.createObjectURL(blob);
+        if (isCurrent) {
+          setObjectUrl(nextObjectUrl);
+        } else {
+          URL.revokeObjectURL(nextObjectUrl);
+        }
+      } catch {
+        if (isCurrent) setDidFail(true);
+      }
+    }
+
+    loadAttachmentPreview();
+    return () => {
+      isCurrent = false;
+      if (nextObjectUrl) URL.revokeObjectURL(nextObjectUrl);
+    };
+  }, [attachmentUrl]);
 
   if (didFail) {
     return (
@@ -254,13 +285,19 @@ function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
 
   return (
     <figure className="message-image-attachment">
-      <img
-        alt="Photo attachment"
-        decoding="async"
-        loading="lazy"
-        onError={() => setDidFail(true)}
-        src={buildAttachmentRenderUrl(apiBaseUrl, attachment.render_url)}
-      />
+      {objectUrl ? (
+        <img
+          alt="Photo attachment"
+          decoding="async"
+          loading="lazy"
+          onError={() => setDidFail(true)}
+          src={objectUrl}
+        />
+      ) : (
+        <div className="attachment-preview-loading" role="status">
+          Loading photo preview...
+        </div>
+      )}
     </figure>
   );
 }

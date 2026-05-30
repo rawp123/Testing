@@ -1,6 +1,7 @@
 import { ChevronDown, Download, FileText, LockKeyhole } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingStatus from "./LoadingStatus.jsx";
+import { apiFetch } from "../utils/apiAuth.js";
 import { downloadFile } from "../utils/downloadFile.js";
 
 const SCOPE_OPTIONS = [
@@ -37,7 +38,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
     }
 
     setPeopleStatus("loading");
-    fetch(`${apiBaseUrl}/export/people`)
+    apiFetch(`${apiBaseUrl}/export/people`)
       .then((response) => {
         if (!response.ok) throw new Error("Could not load contacts");
         return response.json();

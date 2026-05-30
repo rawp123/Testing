@@ -2733,7 +2733,8 @@ a:focus-visible {
   object-fit: contain;
 }
 
-.attachment-preview-fallback {
+.attachment-preview-fallback,
+.attachment-preview-loading {
   width: fit-content;
   max-width: 100%;
   margin-top: 8px;

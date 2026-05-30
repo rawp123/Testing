@@ -181,6 +181,64 @@ def test_diagnostics_endpoint_returns_safe_shape_for_missing_backup(tmp_path, mo
     assert "expected_backup_file_path" not in result
 
 
+def test_local_api_token_validation_accepts_only_header_token():
+    expected_token = "fake-launch-token"
+
+    assert app_main.is_valid_api_token(expected_token, expected_token)
+    assert not app_main.is_valid_api_token(None, expected_token)
+    assert not app_main.is_valid_api_token("wrong-token", expected_token)
+
+
+def test_local_api_routes_require_token_except_root_health_and_options():
+    assert not app_main.route_requires_api_token("/", "GET")
+    assert not app_main.route_requires_api_token("/health", "GET")
+    assert not app_main.route_requires_api_token("/archive/stats", "OPTIONS")
+    assert app_main.route_requires_api_token("/archive/stats", "GET")
+    assert app_main.route_requires_api_token("/conversations", "GET")
+    assert app_main.route_requires_api_token("/export/messages.pdf", "GET")
+    assert app_main.route_requires_api_token("/attachments/1", "GET")
+    assert app_main.route_requires_api_token("/import/iphone-backup/candidates", "GET")
+
+
+def test_route_inventory_is_token_protected_by_default():
+    exposed_paths = {
+        route.path
+        for route in app_main.app.routes
+        if getattr(route, "include_in_schema", True)
+    }
+
+    assert "/openapi.json" not in exposed_paths
+    assert "/docs" not in exposed_paths
+    assert "/redoc" not in exposed_paths
+    assert all(
+        not path.startswith("/api")
+        for path in exposed_paths
+    )
+    assert all(
+        path in app_main.UNAUTHENTICATED_PATHS
+        or app_main.route_requires_api_token(path, "GET")
+        for path in exposed_paths
+    )
+
+
+def test_health_response_does_not_expose_private_paths(monkeypatch, tmp_path):
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(tmp_path / "private-data"))
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "private-data" / "archive.sqlite3"))
+    monkeypatch.setenv("MESSAGE_ARCHIVE_API_TOKEN", "fake-launch-token")
+
+    result = app_main.health()
+
+    assert result == {
+        "status": "ok",
+        "app": "message-archive-utility",
+        "storage": "local",
+        "desktop_mode": False,
+        "auth_required": True,
+    }
+    assert "data_dir" not in result
+    assert "db_path" not in result
+
+
 def test_copies_fake_backup_file_to_ignored_import_folder(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()

@@ -1,10 +1,11 @@
 from pathlib import Path
 import os
+import secrets
 import sqlite3
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
 from app.importers.dummy_csv import import_sample_csv
@@ -35,8 +36,16 @@ PROJECT_DIR = BACKEND_DIR.parent
 SCHEMA_PATH = BACKEND_DIR / "app" / "db" / "schema.sql"
 SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
+API_TOKEN_HEADER = "X-Message-Archive-Token"
+UNAUTHENTICATED_PATHS = {"/", "/health"}
 
-app = FastAPI(title="Message Archive Utility", version="0.1.0")
+app = FastAPI(
+    title="Message Archive Utility",
+    version="0.1.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +58,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def require_local_api_token(request: Request, call_next):
+    if not route_requires_api_token(request.url.path, request.method):
+        return await call_next(request)
+
+    expected_token = get_configured_api_token()
+    if expected_token and not is_valid_api_token(
+        request.headers.get(API_TOKEN_HEADER),
+        expected_token,
+    ):
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Local app authorization is required."},
+        )
+
+    return await call_next(request)
 
 
 class IPhoneBackupDryRunRequest(BaseModel):
@@ -65,6 +92,24 @@ class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
 
 class IPhoneDetectedImportRequest(BaseModel):
     backup_folder_path: str | None = None
+
+
+def get_configured_api_token() -> str:
+    return os.getenv("MESSAGE_ARCHIVE_API_TOKEN", "").strip()
+
+
+def route_requires_api_token(path: str, method: str) -> bool:
+    if method.upper() == "OPTIONS":
+        return False
+    return path not in UNAUTHENTICATED_PATHS
+
+
+def is_valid_api_token(
+    header_token: str | None,
+    expected_token: str,
+) -> bool:
+    provided_token = (header_token or "").strip()
+    return bool(provided_token) and secrets.compare_digest(provided_token, expected_token)
 
 
 def find_iphone_backup_candidates() -> list[dict]:
@@ -441,8 +486,7 @@ def health() -> dict:
         "app": "message-archive-utility",
         "storage": "local",
         "desktop_mode": os.getenv("MESSAGE_ARCHIVE_DESKTOP_MODE") == "1",
-        "data_dir": str(get_data_dir()),
-        "db_path": str(get_db_path()),
+        "auth_required": bool(get_configured_api_token()),
     }
 
 
