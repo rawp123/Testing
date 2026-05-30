@@ -621,7 +621,7 @@ def fetch_attachment_rows(conn: sqlite3.Connection) -> list[dict]:
             "rowid": row["rowid"],
             "filename": row["filename"],
             "transfer_name": row["transfer_name"],
-            "mime_type": row["mime_type"],
+            "mime_type": normalize_attachment_mime_type(row["mime_type"]),
             "byte_size": row["byte_size"],
         }
         for row in rows
@@ -1354,7 +1354,12 @@ def upsert_iphone_attachment_metadata(
               mime_type = COALESCE(?, mime_type),
               local_path = COALESCE(?, local_path),
               byte_size = COALESCE(?, byte_size),
-              availability_status = ?
+              availability_status = CASE
+                WHEN COALESCE(?, local_path) IS NOT NULL
+                  AND COALESCE(?, local_path) != ''
+                THEN 'available'
+                ELSE ?
+              END
             WHERE source_ref = ?
             """,
             (
@@ -1363,6 +1368,8 @@ def upsert_iphone_attachment_metadata(
                 attachment["mime_type"],
                 local_path,
                 normalized_byte_size,
+                local_path,
+                local_path,
                 availability_status,
                 source_ref,
             ),
@@ -1411,6 +1418,29 @@ def build_attachment_availability_status(*, local_path: str | None, copy_was_att
     if copy_was_attempted:
         return "missing"
     return "metadata_only"
+
+
+def normalize_attachment_mime_type(value) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if not normalized:
+        return None
+    uti_mime_types = {
+        "public.jpeg": "image/jpeg",
+        "public.jpg": "image/jpeg",
+        "public.png": "image/png",
+        "public.heic": "image/heic",
+        "public.heif": "image/heif",
+        "public.tiff": "image/tiff",
+        "public.gif": "image/gif",
+        "com.compuserve.gif": "image/gif",
+        "public.mpeg-4": "video/mp4",
+        "public.mpeg-4-audio": "audio/mp4",
+        "public.mp3": "audio/mpeg",
+        "com.adobe.pdf": "application/pdf",
+    }
+    return uti_mime_types.get(normalized, normalized)
 
 
 def basename_or_none(value) -> str | None:

@@ -7,6 +7,8 @@ def export_messages_csv(
     conn: sqlite3.Connection,
     conversation_id: int | None = None,
     q: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     contact_id: int | None = None,
 ) -> str:
     output = io.StringIO()
@@ -35,6 +37,12 @@ def export_messages_csv(
             "(messages.body LIKE ? OR conversations.title LIKE ? OR contacts.display_name LIKE ?)"
         )
         params.extend([query, query, query])
+    if start_date:
+        where_conditions.append("date(messages.sent_at) >= date(?)")
+        params.append(start_date)
+    if end_date:
+        where_conditions.append("date(messages.sent_at) <= date(?)")
+        params.append(end_date)
     if contact_id is not None:
         where_conditions.append(
             """
@@ -71,6 +79,12 @@ def export_messages_csv(
         tuple(params),
     ).fetchall()
     for row in rows:
-        writer.writerow(dict(row))
+        writer.writerow({key: safe_csv_cell(value) for key, value in dict(row).items()})
 
     return output.getvalue()
+
+
+def safe_csv_cell(value):
+    if isinstance(value, str) and value[:1] in {"=", "+", "-", "@"}:
+        return f"'{value}"
+    return value

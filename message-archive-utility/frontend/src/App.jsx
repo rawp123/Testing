@@ -106,6 +106,8 @@ export default function App() {
 
     setShowSearchSummary(false);
     setSearchSummary(null);
+    setSearchResults([]);
+    setSearchTotalMatches(0);
     setIsSearchLoading(true);
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
@@ -315,6 +317,7 @@ export default function App() {
                 onSelect={setSelectedId}
                 isLoading={isLoading}
                 isSearching={isSearching}
+                isSearchLoading={isSearchLoading}
                 hasArchiveData={hasArchiveData}
                 searchMatchCounts={searchMatchCounts}
               />
@@ -458,18 +461,11 @@ function SearchResultsPanel({
             onClick={handleExportResults}
           >
             <Download size={16} aria-hidden="true" />
-            {isExporting ? "Preparing export" : "Export these results"}
+            {isExporting ? "Preparing export" : "Export results CSV"}
           </button>
         </div>
       </header>
 
-      {isSearchLoading && (
-        <LoadingStatus
-          label="Searching messages"
-          detail="Checking matching conversations in your archive."
-          className="search-loading-status"
-        />
-      )}
       {isExporting && (
         <LoadingStatus
           label="Preparing search export"
@@ -491,6 +487,7 @@ function SearchResultsPanel({
         <SearchResultMessages
           results={results}
           totalMatches={resolvedTotalMatches}
+          isLoading={isSearchLoading}
           onOpenConversation={onOpenConversation}
         />
       )}
@@ -498,7 +495,17 @@ function SearchResultsPanel({
   );
 }
 
-function SearchResultMessages({ results, totalMatches, onOpenConversation }) {
+function SearchResultMessages({ results, totalMatches, isLoading, onOpenConversation }) {
+  if (isLoading) {
+    return (
+      <LoadingStatus
+        label="Searching messages"
+        detail="Checking matching conversations in your archive."
+        className="search-loading-status"
+      />
+    );
+  }
+
   if (results.length === 0) {
     return (
       <div className="empty-state empty-panel">
@@ -593,7 +600,7 @@ function SearchSummaryStats({ apiBaseUrl, query, summary, isLoading }) {
           onClick={handleExportSummary}
         >
           <Download size={16} aria-hidden="true" />
-          {isExporting ? "Preparing export" : "Export this summary"}
+          {isExporting ? "Preparing export" : "Export summary PDF"}
         </button>
       </div>
       {isExporting && (
@@ -691,7 +698,7 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
           <ol className="onboarding-steps" aria-label="Basic setup sequence">
             {[
               ["Back up your iPhone", "Plug in your iPhone and use Finder to create a local backup."],
-              ["Import messages", "Let the app prepare a private message archive on this computer."],
+              ["Import messages", "Let the app prepare a local message archive on this computer."],
               ["Search and export", "Browse conversations and export PDF, Excel, or CSV files."],
             ].map(([title, detail], index) => (
               <li key={title}>

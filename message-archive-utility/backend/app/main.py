@@ -57,6 +57,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 
@@ -66,7 +67,7 @@ async def require_local_api_token(request: Request, call_next):
         return await call_next(request)
 
     expected_token = get_configured_api_token()
-    if expected_token and not is_valid_api_token(
+    if not expected_token or not is_valid_api_token(
         request.headers.get(API_TOKEN_HEADER),
         expected_token,
     ):
@@ -486,7 +487,7 @@ def health() -> dict:
         "app": "message-archive-utility",
         "storage": "local",
         "desktop_mode": os.getenv("MESSAGE_ARCHIVE_DESKTOP_MODE") == "1",
-        "auth_required": bool(get_configured_api_token()),
+        "auth_required": True,
     }
 
 
@@ -897,6 +898,8 @@ def list_export_people() -> dict:
 def export_csv(
     conversation_id: int | None = None,
     q: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     contact_id: int | None = None,
 ) -> Response:
     with get_connection() as conn:
@@ -910,7 +913,14 @@ def export_csv(
         contact_label = None
         if contact_id is not None:
             contact_label = get_export_person_name_or_404(conn, contact_id)
-        csv_text = export_messages_csv(conn, conversation_id=conversation_id, q=q, contact_id=contact_id)
+        csv_text = export_messages_csv(
+            conn,
+            conversation_id=conversation_id,
+            q=q,
+            start_date=start_date,
+            end_date=end_date,
+            contact_id=contact_id,
+        )
     if contact_id is not None and contact_label:
         filename = f"{safe_filename_part(f'messages-with-{contact_label}')}.csv"
     elif q and q.strip():

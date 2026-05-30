@@ -1,3 +1,4 @@
+import asyncio
 import sqlite3
 from pathlib import Path
 
@@ -237,6 +238,34 @@ def test_health_response_does_not_expose_private_paths(monkeypatch, tmp_path):
     }
     assert "data_dir" not in result
     assert "db_path" not in result
+
+
+def test_protected_api_fails_closed_without_configured_token(monkeypatch, tmp_path):
+    monkeypatch.delenv("MESSAGE_ARCHIVE_API_TOKEN", raising=False)
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(tmp_path / "data"))
+
+    response = run_token_middleware("/archive/stats", "GET", headers={})
+
+    assert response.status_code == 401
+
+
+def test_protected_api_requires_matching_token(monkeypatch, tmp_path):
+    monkeypatch.setenv("MESSAGE_ARCHIVE_API_TOKEN", "fake-launch-token")
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(tmp_path / "data"))
+
+    no_token = run_token_middleware("/archive/stats", "GET", headers={})
+    wrong_token = run_token_middleware("/archive/stats", "GET", headers={app_main.API_TOKEN_HEADER: "wrong"})
+    valid_token = run_token_middleware(
+        "/archive/stats",
+        "GET",
+        headers={app_main.API_TOKEN_HEADER: "fake-launch-token"},
+    )
+
+    assert no_token.status_code == 401
+    assert wrong_token.status_code == 401
+    assert valid_token.status_code == 200
 
 
 def test_copies_fake_backup_file_to_ignored_import_folder(tmp_path):
@@ -1023,6 +1052,51 @@ def test_import_copies_linked_attachment_files_from_backup_manifest(tmp_path):
     assert second_result["attachment_files_copied"] == 0
 
 
+def test_reimport_without_backup_keeps_available_copied_attachment(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "HomeDomain",
+                "Library/SMS/Attachments/fake/photo.jpg",
+            ),
+        ],
+    )
+    attachment_source = backup_folder / FAKE_ATTACHMENT_FILE_ID[:2] / FAKE_ATTACHMENT_FILE_ID
+    attachment_source.parent.mkdir()
+    attachment_source.write_bytes(b"fake jpg")
+
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="image/jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+
+    import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+    import_copied_sms_db_messages(str(copied_sms_db), project_dir, archive_conn)
+
+    attachment = archive_conn.execute(
+        "SELECT local_path, availability_status FROM attachments"
+    ).fetchone()
+    assert attachment["local_path"] == "attachments/iphone/sms_import_20260101T120000Z/1-photo.jpg"
+    assert attachment["availability_status"] == "available"
+
+
 def test_attachment_copy_stores_data_dir_relative_path_for_configured_data_dir(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -1176,6 +1250,56 @@ def test_import_copies_three_linked_sample_image_attachments(tmp_path):
     ]
     for row, image_file in zip(attachments, image_files, strict=True):
         assert (project_dir / "data" / row["local_path"]).read_bytes() == image_file[4]
+
+
+def test_import_normalizes_image_uti_for_inline_preview_metadata(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (
+                FAKE_ATTACHMENT_FILE_ID,
+                "MediaDomain",
+                "Library/SMS/Attachments/fake/photo.jpg",
+            ),
+        ],
+    )
+    attachment_source = backup_folder / FAKE_ATTACHMENT_FILE_ID[:2] / FAKE_ATTACHMENT_FILE_ID
+    attachment_source.parent.mkdir()
+    attachment_source.write_bytes(b"fake jpg")
+
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename="~/Library/SMS/Attachments/fake/photo.jpg",
+        transfer_name="photo.jpg",
+        mime_type="public.jpeg",
+        byte_size=8,
+    )
+    archive_conn = create_archive_connection()
+    import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+    conversation_id = archive_conn.execute("SELECT id FROM conversations").fetchone()["id"]
+    attachment_id = archive_conn.execute("SELECT id FROM attachments").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.list_conversation_messages(conversation_id)
+
+    attachment = next(message for message in response["messages"] if message["attachments"])["attachments"][0]
+    assert attachment == {
+        "mime_type": "image/jpeg",
+        "available": True,
+        "availability_status": "available",
+        "render_url": f"/attachments/{attachment_id}",
+    }
 
 
 def test_attachment_copy_rejects_manifest_file_id_outside_backup(tmp_path):
@@ -1657,6 +1781,28 @@ def route_exists(path, method):
     return any(
         route.path == path and method in route.methods
         for route in app_main.app.routes
+    )
+
+
+def run_token_middleware(path, method, *, headers):
+    class FakeUrl:
+        def __init__(self, path):
+            self.path = path
+
+    class FakeRequest:
+        def __init__(self, path, method, headers):
+            self.url = FakeUrl(path)
+            self.method = method
+            self.headers = headers
+
+    async def call_next(_request):
+        return app_main.JSONResponse(status_code=200, content={"ok": True})
+
+    return asyncio.run(
+        app_main.require_local_api_token(
+            FakeRequest(path, method, headers),
+            call_next,
+        )
     )
 
 

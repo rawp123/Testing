@@ -7,6 +7,7 @@ export default function ConversationList({
   onSelect,
   isLoading,
   isSearching,
+  isSearchLoading,
   hasArchiveData,
   searchMatchCounts = {},
 }) {
@@ -22,6 +23,17 @@ export default function ConversationList({
   }
 
   if (conversations.length === 0) {
+    if (isSearching && isSearchLoading) {
+      return (
+        <div className="empty-state empty-panel">
+          <LoadingStatus
+            label="Searching messages"
+            detail="Checking matching conversations in your archive."
+          />
+        </div>
+      );
+    }
+
     const title = isSearching ? "No messages matched" : "No conversations yet";
     const detail = isSearching
       ? "Try a different name, phone number, word, or phrase."

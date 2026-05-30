@@ -46,6 +46,45 @@ def test_export_messages_csv_can_export_search_results():
     assert "Iceland plan" not in search_csv
 
 
+def test_export_messages_csv_can_export_date_range():
+    conn = create_archive_connection()
+    contact_id = conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', 'Ada Lovelace', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = insert_conversation(conn, "iphone-chat:1", "Date chat")
+    insert_message(conn, conversation_id, contact_id, "1", "January message", sent_at="2026-01-15T12:00:00+00:00")
+    insert_message(conn, conversation_id, contact_id, "2", "February message", sent_at="2026-02-15T12:00:00+00:00")
+
+    date_csv = export_messages_csv(conn, start_date="2026-02-01", end_date="2026-02-28")
+
+    assert "February message" in date_csv
+    assert "January message" not in date_csv
+
+
+def test_export_messages_csv_neutralizes_spreadsheet_formulas():
+    conn = create_archive_connection()
+    contact_id = conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('=cmd', '+SUM(1,1)', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = insert_conversation(conn, "iphone-chat:1", "@Risky chat")
+    insert_message(conn, conversation_id, contact_id, "1", "=HYPERLINK(\"http://example.test\")")
+
+    csv_text = export_messages_csv(conn)
+
+    assert "'=HYPERLINK" in csv_text
+    assert "'+SUM(1,1)" in csv_text
+    assert "'@Risky chat" in csv_text
+    assert "'=cmd" in csv_text
+
+
 def insert_conversation(conn, source_thread_id, title):
     return conn.execute(
         """
@@ -57,7 +96,7 @@ def insert_conversation(conn, source_thread_id, title):
     ).fetchone()["id"]
 
 
-def insert_message(conn, conversation_id, contact_id, source_message_id, body):
+def insert_message(conn, conversation_id, contact_id, source_message_id, body, *, sent_at="2026-05-13T12:00:00+00:00"):
     conn.execute(
         """
         INSERT INTO messages (
@@ -69,9 +108,9 @@ def insert_message(conn, conversation_id, contact_id, source_message_id, body):
           body,
           service
         )
-        VALUES (?, ?, ?, '2026-05-13T12:00:00+00:00', 'incoming', ?, 'iMessage')
+        VALUES (?, ?, ?, ?, 'incoming', ?, 'iMessage')
         """,
-        (conversation_id, contact_id, source_message_id, body),
+        (conversation_id, contact_id, source_message_id, sent_at, body),
     )
     conn.commit()
 

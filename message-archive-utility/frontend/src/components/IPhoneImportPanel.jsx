@@ -104,8 +104,19 @@ export default function IPhoneImportPanel({
   const importableBackupCandidate = backupCandidates.find((candidate) => (
     candidate.sms_db_copyable || candidate.manifest_readable
   ));
+  const selectedBackupIsImportable = Boolean(
+    selectedBackupCandidate && (selectedBackupCandidate.sms_db_copyable || selectedBackupCandidate.manifest_readable),
+  );
+  const hasUsableCheckedBackup = Boolean(
+    canUseBackupPath
+      && completedSteps.has("diagnostics")
+      && result?.usable_without_import === true,
+  );
+  const canImportSelectedBackup = selectedBackupIsImportable || hasUsableCheckedBackup || (
+    !canUseBackupPath && Boolean(importableBackupCandidate)
+  );
   const canCopySmsDb = canUseBackupPath && completedSteps.has("locate");
-  const canRunQuickImport = (canUseBackupPath || importableBackupCandidate) && !isBusy;
+  const canRunQuickImport = canImportSelectedBackup && !isBusy;
   const hasDetectedBackup = backupCandidates.length > 0 || canUseBackupPath;
   const hasBackupSearchFeedback = backupCandidateStatus.trim().length > 0;
   const shouldShowBackupLocator = shouldShowImportTools && (hasDetectedBackup || hasBackupSearchFeedback);
@@ -195,9 +206,10 @@ export default function IPhoneImportPanel({
     completedSteps,
     hasArchiveData: false,
     hasDetectedBackup,
+    canImportSelectedBackup,
     importableBackupCandidate,
     isBusy,
-  }), [activeStep, canUseBackupPath, completedSteps, hasDetectedBackup, importableBackupCandidate, isBusy]);
+  }), [activeStep, canImportSelectedBackup, canUseBackupPath, completedSteps, hasDetectedBackup, importableBackupCandidate, isBusy]);
   const importProgressSteps = useMemo(() => getImportProgressSteps({
     activeStep,
     completedSteps,
@@ -208,6 +220,7 @@ export default function IPhoneImportPanel({
     canRunQuickImport,
     hasArchiveData: false,
     hasDetectedBackup,
+    canImportSelectedBackup,
     isBusy,
   });
   const loadingStatus = getImportLoadingStatus({
@@ -440,7 +453,7 @@ export default function IPhoneImportPanel({
       variant: "secondary-button",
     },
     copy: {
-      label: "Prepare private local copy",
+      label: "Prepare local copy",
       onClick: copySmsDb,
       disabled: !canCopySmsDb || isBusy,
       title: !canUseBackupPath
@@ -454,7 +467,7 @@ export default function IPhoneImportPanel({
       label: completedSteps.has("validate") && !completedSteps.has("inspect") ? "Check message totals" : "Check message archive",
       onClick: completedSteps.has("validate") && !completedSteps.has("inspect") ? inspectSmsDb : validateSmsDb,
       disabled: !canUseCopiedPath || isBusy,
-      title: !canUseCopiedPath ? "Prepare a private local copy first." : undefined,
+      title: !canUseCopiedPath ? "Prepare a local copy first." : undefined,
       variant: "secondary-button",
     },
     import: {
@@ -462,7 +475,7 @@ export default function IPhoneImportPanel({
       onClick: importMessages,
       disabled: !canUseCopiedPath || !completedSteps.has("validate") || isBusy,
       title: !canUseCopiedPath
-        ? "Prepare a private local copy first."
+        ? "Prepare a local copy first."
         : !completedSteps.has("validate")
           ? "Check the message archive first."
           : undefined,
@@ -510,7 +523,7 @@ export default function IPhoneImportPanel({
             <BackupGuide />
 
             <p className="import-repeat-note">
-              You can import again later. The app skips messages already in your archive and adds new ones.
+              You can import again later. The app skips messages already in your archive and adds new ones. The local archive and copied attachments stay on this computer; this app does not encrypt them.
             </p>
 
             <div className={`import-status-line ${isBusy ? "is-active" : ""}`}>
@@ -558,7 +571,15 @@ export default function IPhoneImportPanel({
               <button
                 className="primary-button"
                 type="button"
-                onClick={primaryImportAction.kind === "find" ? stepActions.backup.onClick : primaryImportAction.kind === "open" ? onOpenArchive : importDetectedBackup}
+                onClick={
+                  primaryImportAction.kind === "find"
+                    ? stepActions.backup.onClick
+                    : primaryImportAction.kind === "open"
+                      ? onOpenArchive
+                      : primaryImportAction.kind === "check"
+                        ? runBackupDiagnostics
+                        : importDetectedBackup
+                }
                 disabled={primaryImportAction.disabled}
                 title={primaryImportAction.disabledReason}
               >
@@ -863,7 +884,7 @@ function getBackupLocatorDetail({
     return "Choose the backup you want to import.";
   }
   if (hasBackupLocation) {
-    return "A backup location is selected. Check it or import when ready.";
+    return "A backup location is selected. Check it before importing.";
   }
   return "Find a backup or enter its location.";
 }
@@ -956,7 +977,7 @@ function backupCandidateDetailClassName(candidate) {
   return candidate.manifest_readable || candidate.sms_db_copyable ? "" : "field-warning";
 }
 
-function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetectedBackup, isBusy }) {
+function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetectedBackup, canImportSelectedBackup, isBusy }) {
   if (hasArchiveData) {
     return {
       kind: "open",
@@ -972,6 +993,16 @@ function getPrimaryImportAction({ canRunQuickImport, hasArchiveData, hasDetected
       kind: "find",
       label: "Find iPhone backup",
       detail: "Back up your iPhone to this computer first, then let the app look for it.",
+      disabled: isBusy,
+      disabledReason: undefined,
+    };
+  }
+
+  if (!canImportSelectedBackup) {
+    return {
+      kind: "check",
+      label: "Check backup",
+      detail: "Confirm the selected backup before importing messages.",
       disabled: isBusy,
       disabledReason: undefined,
     };
@@ -1017,6 +1048,7 @@ function getImportLoadingStatus({ activeStep, isFindingBackups, isRefreshingPrep
 function getImportStatus({
   activeStep,
   canUseBackupPath,
+  canImportSelectedBackup,
   completedSteps,
   hasArchiveData,
   hasDetectedBackup,
@@ -1059,6 +1091,13 @@ function getImportStatus({
   }
 
   if (!completedSteps.has("import")) {
+    if (canUseBackupPath && !canImportSelectedBackup) {
+      return {
+        title: "Check backup first",
+        detail: "The app will confirm this backup before importing messages.",
+      };
+    }
+
     return {
       title: "Ready to import",
       detail: "The app will handle the preparation and checks before loading your archive.",
@@ -1144,7 +1183,7 @@ function formatResultValue(value) {
   if (typeof value === "number") return new Intl.NumberFormat().format(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (value === null || value === undefined) return "Unknown";
-  return String(value);
+  return maskPathForDisplay(value);
 }
 
 function formatArchiveDate(value) {

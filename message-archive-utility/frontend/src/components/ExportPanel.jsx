@@ -67,7 +67,9 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
   const hasPeople = people.length > 0;
   const canChoosePerson = hasArchiveData && hasPeople;
   const canExportPerson = selectedScope !== "person" || (canChoosePerson && selectedPersonId);
-  const canExportDateRange = selectedScope !== "dateRange" || Boolean(startDate || endDate);
+  const hasDateRangeValue = Boolean(startDate || endDate);
+  const hasDateRangeOrderError = Boolean(startDate && endDate && startDate > endDate);
+  const canExportDateRange = selectedScope !== "dateRange" || (hasDateRangeValue && !hasDateRangeOrderError);
   const canDownload = hasArchiveData && canExportPerson && canExportDateRange;
 
   const scopeOptions = useMemo(() => {
@@ -79,7 +81,13 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
         return {
           ...option,
           enabled: hasArchiveData,
-          status: !hasArchiveData ? "Import first" : startDate || endDate ? "Available" : "Choose dates",
+          status: !hasArchiveData
+            ? "Import first"
+            : hasDateRangeOrderError
+              ? "Check dates"
+              : hasDateRangeValue
+                ? "Available"
+                : "Choose dates",
         };
       }
       return {
@@ -88,7 +96,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
         status: getPersonStatus({ canChoosePerson, hasArchiveData, peopleStatus, selectedPersonId }),
       };
     });
-  }, [canChoosePerson, hasArchiveData, peopleStatus, selectedPersonId, startDate, endDate]);
+  }, [canChoosePerson, hasArchiveData, hasDateRangeOrderError, hasDateRangeValue, peopleStatus, selectedPersonId]);
 
   const selectedScopeOption = scopeOptions.find((option) => option.id === selectedScope) || scopeOptions[0];
   const selectedFormatOption = FORMAT_OPTIONS.find((option) => option.id === selectedFormat) || FORMAT_OPTIONS[0];
@@ -197,6 +205,9 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
               onChange={(event) => setEndDate(event.target.value)}
             />
           </label>
+          {hasDateRangeOrderError && (
+            <p className="inline-error-state export-date-error">Start date must be before end date.</p>
+          )}
         </div>
       )}
 
@@ -285,6 +296,7 @@ function getDownloadLabel(scope, formatLabel) {
 }
 
 function getDisabledActionText(scopeOption) {
+  if (scopeOption.id === "dateRange" && scopeOption.status === "Check dates") return "Check date range";
   if (!scopeOption.enabled && scopeOption.status !== "Available") return scopeOption.status;
   return "Choose export";
 }
@@ -307,9 +319,10 @@ function getPersonPlaceholder({ hasArchiveData, peopleStatus, hasPeople }) {
 }
 
 function getExportNoteText({ peopleStatus, hasPeople }) {
-  if (peopleStatus === "error") return "Exports are prepared on this computer. Contacts could not be loaded right now.";
-  if (!hasPeople) return "Exports are prepared on this computer. No contacts found yet.";
-  return "Exports are prepared on this computer.";
+  const attachmentNote = " Exports include message text and attachment references, not attachment files.";
+  if (peopleStatus === "error") return `Exports are prepared on this computer. Contacts could not be loaded right now.${attachmentNote}`;
+  if (!hasPeople) return `Exports are prepared on this computer. No contacts found yet.${attachmentNote}`;
+  return `Exports are prepared on this computer.${attachmentNote}`;
 }
 
 function formatPersonOption(person) {

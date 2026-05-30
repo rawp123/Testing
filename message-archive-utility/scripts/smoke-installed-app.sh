@@ -103,6 +103,17 @@ assert_backend_from_app() {
   fi
 }
 
+assert_api_auth_required() {
+  local no_token_status
+  local wrong_token_status
+  no_token_status="$(curl -sS -o /dev/null -w "%{http_code}" "http://127.0.0.1:$SMOKE_PORT/archive/stats")"
+  wrong_token_status="$(curl -sS -o /dev/null -w "%{http_code}" -H "X-Message-Archive-Token: wrong" "http://127.0.0.1:$SMOKE_PORT/archive/stats")"
+
+  [[ "$no_token_status" == "401" ]] || fail "Local API accepted a protected request without a token"
+  [[ "$wrong_token_status" == "401" ]] || fail "Local API accepted a protected request with the wrong token"
+  curl_auth "http://127.0.0.1:$SMOKE_PORT/archive/stats" >/dev/null
+}
+
 launch_app() {
   APP_PID=""
   env -u ELECTRON_RUN_AS_NODE \
@@ -115,6 +126,7 @@ launch_app() {
   wait_for_health || fail "App backend did not become healthy"
   assert_health
   assert_backend_from_app
+  assert_api_auth_required
 }
 
 quit_app() {

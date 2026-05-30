@@ -9,6 +9,7 @@ const CONVERSATION_FORMATS = [
   { id: "excel", label: "Excel" },
   { id: "csv", label: "CSV" },
 ];
+const INITIAL_VISIBLE_MESSAGE_COUNT = 200;
 
 export default function ConversationView({
   conversation,
@@ -125,6 +126,9 @@ export default function ConversationView({
           </label>
         </div>
       </header>
+      <p className="conversation-export-note">
+        Exports include message text and attachment references, not attachment files.
+      </p>
       {isExporting && (
         <LoadingStatus
           label="Preparing conversation export"
@@ -139,10 +143,18 @@ export default function ConversationView({
 }
 
 export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
+  const [visibleMessageCount, setVisibleMessageCount] = useState(INITIAL_VISIBLE_MESSAGE_COUNT);
+
+  useEffect(() => {
+    setVisibleMessageCount(INITIAL_VISIBLE_MESSAGE_COUNT);
+  }, [conversation?.id]);
+
   if (isLoading || !conversation) return null;
 
   const messages = conversation.messages || [];
-  const displayMessages = sortMessagesNewestFirst(messages);
+  const sortedMessages = sortMessagesNewestFirst(messages);
+  const displayMessages = sortedMessages.slice(0, visibleMessageCount);
+  const hasHiddenOlderMessages = sortedMessages.length > displayMessages.length;
 
   return (
     <section className="conversation-messages-section" aria-label={`${conversation.title} messages`}>
@@ -162,8 +174,21 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
           </div>
         ) : (
           <>
-            <p className="timeline-note">Latest messages are shown first.</p>
+            <p className="timeline-note">
+              {hasHiddenOlderMessages
+                ? `Showing newest ${displayMessages.length} of ${messages.length} messages.`
+                : "Latest messages are shown first."}
+            </p>
             {renderMessagesWithDateDividers(displayMessages, apiBaseUrl)}
+            {hasHiddenOlderMessages && (
+              <button
+                className="load-older-messages-button"
+                type="button"
+                onClick={() => setVisibleMessageCount((current) => current + INITIAL_VISIBLE_MESSAGE_COUNT)}
+              >
+                Load older messages
+              </button>
+            )}
           </>
         )}
       </div>
