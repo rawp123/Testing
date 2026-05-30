@@ -844,6 +844,112 @@ def test_attachment_copy_stores_data_dir_relative_path_for_configured_data_dir(t
     assert (data_dir / attachment["local_path"]).read_bytes() == b"fake jpg"
 
 
+def test_import_copies_three_linked_sample_image_attachments(tmp_path):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    image_files = [
+        (
+            "1111111111111111111111111111111111111111",
+            "Library/SMS/Attachments/fake/photo-1.jpg",
+            "photo-1.jpg",
+            "image/jpeg",
+            b"\xff\xd8fake sample image one\xff\xd9",
+        ),
+        (
+            "2222222222222222222222222222222222222222",
+            "Library/SMS/Attachments/fake/photo-2.png",
+            "photo-2.png",
+            "image/png",
+            b"\x89PNG\r\n\x1a\nfake sample image two",
+        ),
+        (
+            "3333333333333333333333333333333333333333",
+            "Library/SMS/Attachments/fake/photo-3.heic",
+            "photo-3.heic",
+            "image/heic",
+            b"fake sample image three",
+        ),
+    ]
+    create_fake_manifest(
+        backup_folder / "Manifest.db",
+        include_sms=True,
+        extra_files=[
+            (file_id, "HomeDomain", relative_path)
+            for file_id, relative_path, _name, _mime_type, _bytes in image_files
+        ],
+    )
+    for file_id, _relative_path, _name, _mime_type, contents in image_files:
+        source_path = backup_folder / file_id[:2] / file_id
+        source_path.parent.mkdir()
+        source_path.write_bytes(contents)
+
+    project_dir = tmp_path / "project"
+    copied_sms_db = project_dir / "data" / "imports" / "iphone" / "sms_import_20260101T120000Z.db"
+    copied_sms_db.parent.mkdir(parents=True)
+    first_image = image_files[0]
+    create_fake_sms_import_db(
+        copied_sms_db,
+        attachment_filename=f"~/{first_image[1]}",
+        transfer_name=first_image[2],
+        mime_type=first_image[3],
+        byte_size=len(first_image[4]),
+    )
+    for rowid, image_file in enumerate(image_files[1:], start=2):
+        _file_id, relative_path, transfer_name, mime_type, contents = image_file
+        add_fake_linked_attachment(
+            copied_sms_db,
+            rowid=rowid,
+            message_id=1,
+            filename=f"~/{relative_path}",
+            transfer_name=transfer_name,
+            mime_type=mime_type,
+            byte_size=len(contents),
+        )
+    archive_conn = create_archive_connection()
+
+    result = import_copied_sms_db_messages(
+        str(copied_sms_db),
+        project_dir,
+        archive_conn,
+        backup_folder_path=str(backup_folder),
+    )
+
+    attachments = archive_conn.execute(
+        """
+        SELECT original_filename, mime_type, local_path, availability_status
+        FROM attachments
+        ORDER BY original_filename
+        """
+    ).fetchall()
+    links = archive_conn.execute("SELECT COUNT(*) FROM message_attachments").fetchone()[0]
+    assert result["attachments_imported"] == 3
+    assert result["attachment_files_copied"] == 3
+    assert result["message_attachment_links_imported"] == 3
+    assert links == 3
+    assert [dict(row) for row in attachments] == [
+        {
+            "original_filename": "photo-1.jpg",
+            "mime_type": "image/jpeg",
+            "local_path": "attachments/iphone/sms_import_20260101T120000Z/1-photo-1.jpg",
+            "availability_status": "available",
+        },
+        {
+            "original_filename": "photo-2.png",
+            "mime_type": "image/png",
+            "local_path": "attachments/iphone/sms_import_20260101T120000Z/2-photo-2.png",
+            "availability_status": "available",
+        },
+        {
+            "original_filename": "photo-3.heic",
+            "mime_type": "image/heic",
+            "local_path": "attachments/iphone/sms_import_20260101T120000Z/3-photo-3.heic",
+            "availability_status": "available",
+        },
+    ]
+    for row, image_file in zip(attachments, image_files, strict=True):
+        assert (project_dir / "data" / row["local_path"]).read_bytes() == image_file[4]
+
+
 def test_attachment_copy_rejects_manifest_file_id_outside_backup(tmp_path):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -1444,6 +1550,37 @@ def add_fake_unlinked_attachment(
             VALUES (?, ?, ?, ?, NULL, x'05')
             """,
             (rowid, filename, transfer_name, mime_type),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def add_fake_linked_attachment(
+    path,
+    *,
+    rowid,
+    message_id,
+    filename,
+    transfer_name,
+    mime_type,
+    byte_size=None,
+):
+    conn = sqlite3.connect(path)
+    try:
+        conn.execute(
+            """
+            INSERT INTO attachment (id, filename, transfer_name, mime_type, total_bytes, payload_data)
+            VALUES (?, ?, ?, ?, ?, x'05')
+            """,
+            (rowid, filename, transfer_name, mime_type, byte_size),
+        )
+        conn.execute(
+            """
+            INSERT INTO message_attachment_join (message_id, attachment_id)
+            VALUES (?, ?)
+            """,
+            (message_id, rowid),
         )
         conn.commit()
     finally:
