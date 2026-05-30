@@ -1,0 +1,26 @@
+const { contextBridge, ipcRenderer } = require("electron");
+
+contextBridge.exposeInMainWorld("homeLedgerDesktop", {
+  isDesktop: true,
+  getStorageInfo() {
+    return ipcRenderer.invoke("home-ledger:get-storage-info");
+  },
+  loadData() {
+    return ipcRenderer.invoke("home-ledger:load-data");
+  },
+  saveData(data) {
+    return ipcRenderer.invoke("home-ledger:save-data", data);
+  },
+  saveDocumentFile(record) {
+    return ipcRenderer.invoke("home-ledger:save-document-file", record);
+  },
+  getDocumentFile(fileId) {
+    return ipcRenderer.invoke("home-ledger:get-document-file", fileId);
+  },
+  deleteDocumentFile(fileId) {
+    return ipcRenderer.invoke("home-ledger:delete-document-file", fileId);
+  },
+  listDocumentFiles() {
+    return ipcRenderer.invoke("home-ledger:list-document-files");
+  },
+});

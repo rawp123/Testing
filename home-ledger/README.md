@@ -15,18 +15,42 @@ It is not budgeting software, tax software, legal advice, or tax advice. Expense
 
 The app does not create an account, upload files, call third-party APIs, or use server-side storage.
 
-- Structured records are stored in this browser profile with `localStorage`.
-- Attached document files are stored in this browser profile with IndexedDB.
+- In the Mac desktop app, structured records are stored in an app-managed records file on the Mac, and attached files are copied into an app-managed documents folder.
+- In the web version, structured records are stored in the current browser profile with `localStorage`, and attached document files are stored in that browser profile with IndexedDB.
 - CSV and print exports include document metadata, not attached file contents.
 - Full backup JSON files include structured records and attached files encoded inside the backup.
 
-Browser storage is convenient, but it is not a backup. Clearing browser data, changing browser profiles, using private browsing, or browser storage cleanup can remove records and attached files.
+Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove records and attached files.
+
+## Mac Desktop App
+
+The desktop app is an Electron wrapper around the same local-first records binder. It does not add accounts, cloud sync, OCR, tax filing, or third-party storage.
+
+Install desktop dependencies:
+
+```bash
+npm install --prefix home-ledger/desktop
+```
+
+Run the Mac app in development:
+
+```bash
+npm run start:home-ledger:desktop
+```
+
+Package an unsigned local Mac build:
+
+```bash
+npm run pack:home-ledger:mac
+```
+
+The app intentionally shows friendly storage labels instead of raw local file paths. Users can download backups and exports from inside the app when they want a portable copy.
 
 ## Backup And Restore
 
 Use **Export > Download full backup** to create a private JSON backup. Keep that file somewhere you already use for important personal records.
 
-Use **Export > Restore from backup** to replace the current records in this browser profile with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this MVP.
+Use **Export > Restore from backup** to replace the current local app records with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this MVP.
 
 Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private records.
 
@@ -47,7 +71,7 @@ Backup files are plaintext JSON and can contain sensitive home, vendor, amount, 
 
 ## Manual QA Checklist
 
-Before a private beta build, verify these flows in a browser:
+Before a private beta build, verify these flows in both the Mac app and web version when practical:
 
 - Start with no saved data and confirm the onboarding state is useful.
 - Add a property.
@@ -64,6 +88,19 @@ Before a private beta build, verify these flows in a browser:
 - Restore a backup in a clean browser profile or after clearing local app records.
 - Confirm local data safety copy is visible in the export center.
 
+Useful validation commands:
+
+```bash
+node --check home-ledger/app.js
+node --check home-ledger/model.js
+node --check home-ledger/document-storage.js
+node --check home-ledger/storage-adapter.js
+node --check home-ledger/desktop/main.cjs
+node --check home-ledger/desktop/preload.cjs
+npm run smoke:home-ledger:desktop
+git diff --check
+```
+
 ## Private Beta Notes
 
-This MVP depends on browser storage and should be tested in the browser and profile the homeowner expects to use. For a more durable Mac app, the next storage step would be a real local database and a user-chosen document storage folder, while preserving the same cautious CPA-review language.
+The Mac app now stores records and document copies locally through the desktop shell. The next durability step after this MVP would be import/export migration testing, optional user-chosen backup locations, and signed/notarized distribution, while preserving the same cautious CPA-review language.

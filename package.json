@@ -5,6 +5,11 @@
   "scripts": {
     "start": "node server.js",
     "start:dev": "NODE_ENV=development node server.js",
+    "dev:home-ledger:desktop": "npm --prefix home-ledger/desktop run dev",
+    "start:home-ledger:desktop": "npm --prefix home-ledger/desktop start",
+    "smoke:home-ledger:desktop": "npm --prefix home-ledger/desktop run smoke",
+    "pack:home-ledger:mac": "npm --prefix home-ledger/desktop run pack:mac",
+    "pack:home-ledger:mac:dmg": "npm --prefix home-ledger/desktop run pack:mac:dmg",
     "dev:message-archive": "/bin/bash message-archive-utility/scripts/dev.sh",
     "dev:message-archive:desktop": "/bin/bash message-archive-utility/scripts/dev-desktop.sh",
     "build:message-archive:desktop": "/bin/bash message-archive-utility/scripts/build-desktop.sh",

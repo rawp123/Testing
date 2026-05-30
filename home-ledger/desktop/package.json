@@ -1,0 +1,89 @@
+{
+  "name": "home-basis-tracker-desktop",
+  "description": "A local-first Mac app for organizing home improvement records for CPA review.",
+  "version": "0.1.0",
+  "private": true,
+  "productName": "Home Basis Tracker",
+  "author": "Home Basis Tracker",
+  "copyright": "Copyright © 2026 Home Basis Tracker",
+  "main": "main.cjs",
+  "scripts": {
+    "dev": "env -u ELECTRON_RUN_AS_NODE electron .",
+    "start": "env -u ELECTRON_RUN_AS_NODE electron .",
+    "smoke": "env -u ELECTRON_RUN_AS_NODE HOME_LEDGER_DESKTOP_SMOKE=1 electron .",
+    "pack:mac": "electron-builder --mac --dir",
+    "pack:mac:dmg": "electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.homebasistracker.app",
+    "productName": "Home Basis Tracker",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "output": "../release/mac"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "..",
+        "to": "home-ledger",
+        "filter": [
+          "index.html",
+          "app.js",
+          "model.js",
+          "document-storage.js",
+          "storage-adapter.js",
+          "styles.css",
+          "README.md"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "icon": "icon.icns",
+      "category": "public.app-category.finance",
+      "identity": "-",
+      "extendInfo": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        },
+        "NSAudioCaptureUsageDescription": "Home Basis Tracker does not use audio capture.",
+        "NSBluetoothAlwaysUsageDescription": "Home Basis Tracker does not use Bluetooth.",
+        "NSBluetoothPeripheralUsageDescription": "Home Basis Tracker does not use Bluetooth.",
+        "NSCameraUsageDescription": "Home Basis Tracker does not use the camera.",
+        "NSMicrophoneUsageDescription": "Home Basis Tracker does not use the microphone."
+      }
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "title": "Home Basis Tracker ${version}",
+      "backgroundColor": "#f4f6f2",
+      "window": {
+        "width": 560,
+        "height": 360
+      },
+      "contents": [
+        {
+          "x": 170,
+          "y": 185
+        },
+        {
+          "x": 390,
+          "y": 185,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

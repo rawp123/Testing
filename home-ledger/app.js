@@ -38,16 +38,22 @@ import {
   saveDocumentFile,
   saveDocumentFileRecord,
 } from "./document-storage.js";
+import {
+  getStorageInfo,
+  isDesktopMode,
+  loadRecords,
+  saveRecords,
+} from "./storage-adapter.js";
 
 const EMPTY_FILTER = "all";
 const app = document.querySelector("#app");
 const MAX_BACKUP_DATA_URL_LENGTH = Math.ceil(MAX_DOCUMENT_FILE_SIZE * 1.38) + 4096;
 
-let data = loadStoredData();
+let data = EMPTY_DATA;
 let activeTab = "dashboard";
-let selectedPropertyId = data.properties[0]?.id || "";
+let selectedPropertyId = "";
 let notice = "";
-let propertyMode = data.properties.length ? "view" : "new";
+let propertyMode = "new";
 let editingProjectId;
 let editingExpenseId;
 let editingDocumentId;
@@ -55,6 +61,17 @@ let storageEstimate = {
   status: "idle",
   usage: 0,
   quota: 0,
+};
+let storageInfo = {
+  mode: isDesktopMode() ? "desktop" : "browser",
+  recordsPathLabel: isDesktopMode() ? "Mac app records file" : "Browser local storage",
+  documentsPathLabel: isDesktopMode() ? "Mac app documents folder" : "Browser IndexedDB",
+  storageDescription: isDesktopMode()
+    ? "Records and document copies are stored locally by the Mac app."
+    : "Records and document copies are stored in this browser profile.",
+  recordsBytes: 0,
+  documentBytes: 0,
+  documentCount: 0,
 };
 
 const projectFilters = {
@@ -72,11 +89,41 @@ const expenseFilters = {
   sort: "date-desc",
 };
 
-render();
-
 app.addEventListener("click", handleClick);
 app.addEventListener("submit", handleSubmit);
 app.addEventListener("change", handleChange);
+
+renderLoading();
+initializeApp();
+
+function renderLoading() {
+  app.innerHTML = `
+    <main class="workspace loading-workspace">
+      <section class="panel">
+        ${renderPanelHeader("Opening Home Basis Tracker", "Loading local records from this device.", "home")}
+      </section>
+    </main>
+  `;
+}
+
+async function initializeApp() {
+  try {
+    data = await loadRecords(STORAGE_KEY);
+  } catch {
+    data = EMPTY_DATA;
+    notice = "Unable to load local records. You can still start a new local binder.";
+  }
+  try {
+    storageInfo = await getStorageInfo();
+  } catch {
+    // Records can still load and save even if the optional storage summary is unavailable.
+  }
+
+  selectedPropertyId = data.properties[0]?.id || "";
+  propertyMode = data.properties.length ? "view" : "new";
+  resetFiltersAfterRestore();
+  render();
+}
 
 function render() {
   if (selectedPropertyId && !data.properties.some((property) => property.id === selectedPropertyId)) {
@@ -153,7 +200,7 @@ function renderDashboard() {
       ])}
 
       ${renderNotice("Home Basis Tracker helps organize records for review. It is not tax software and does not decide tax treatment. Confirm classifications and records with your CPA.")}
-      ${storedFileCount ? renderNotice(`${storedFileCount} attached file${storedFileCount === 1 ? " is" : "s are"} stored locally in this browser on this device. Keep your own backup of important records.`) : ""}
+      ${storedFileCount ? renderNotice(`${storedFileCount} attached file${storedFileCount === 1 ? " is" : "s are"} stored locally ${storageLocationShort()}. Keep your own backup of important records.`) : ""}
 
       <div class="content-grid two-columns">
         <section class="panel">
@@ -182,7 +229,7 @@ function renderOnboardingPanel() {
       <div>
         <p class="eyebrow">Start your binder</p>
         <h2>Organize home improvement records before they become hard to find.</h2>
-        <p>Track properties, projects, expenses, document status, notes, and local file attachments in this browser. Your records are saved in this browser on this device unless you export or share them.</p>
+        <p>Track properties, projects, expenses, document status, notes, and local file attachments. Your records are saved locally ${storageLocationShort()} unless you export or share them.</p>
       </div>
       <ol class="step-list">
         <li><span aria-hidden="true">⌂</span><span>Add your property</span></li>
@@ -370,7 +417,7 @@ function renderDocumentsView() {
         actions: `<button class="button button-primary" data-action="add-document" ${data.properties.length ? "" : "disabled"} type="button"><span aria-hidden="true">+</span>Add document note</button>`,
       })}
       ${renderNotice("Try to keep receipts, contractor invoices, permits, before/after photos, and payment records.")}
-      ${renderNotice("Attached files are stored only in this browser on this device. They are not uploaded by this app. Anyone with access to this browser profile may be able to view them.")}
+      ${renderNotice(`Attached files are stored only ${storageLocationShort()}. They are not uploaded by this app. Anyone with access to ${storageAccessSurface()} may be able to view them.`)}
       ${data.properties.length ? "" : renderEmpty("Add a property first", "Document notes need a property so they can be included with the right home records.")}
       ${editingDocumentId !== undefined ? `
         <section class="panel">
@@ -402,7 +449,7 @@ function renderDocumentsView() {
 
 function renderExportCenter() {
   const totals = getExpenseTotals(data.expenses);
-  requestStorageEstimate();
+  if (!isDesktopMode()) requestStorageEstimate();
 
   return `
     <div class="page-stack">
@@ -450,16 +497,16 @@ function renderDataSafetyPanel() {
       ${renderPanelHeader("About local storage", "A plain-English note on where your records live.", "home")}
       <div class="safety-list">
         <div>
-          <strong>Records stay in this browser</strong>
-          <span>Properties, projects, expenses, and document notes are saved with browser storage on this device.</span>
+          <strong>Records stay ${storageLocationShort()}</strong>
+          <span>Properties, projects, expenses, and document notes are saved with ${recordStorageLabel()}.</span>
         </div>
         <div>
-          <strong>Attached files stay in this browser profile</strong>
-          <span>Receipt and invoice files are stored locally with IndexedDB. This app does not upload them.</span>
+          <strong>Attached files stay ${storageLocationShort()}</strong>
+          <span>Receipt and invoice files are stored as ${documentStorageLabel()}. This app does not upload them.</span>
         </div>
         <div>
-          <strong>Browser cleanup can remove records</strong>
-          <span>Clearing site data, switching browser profiles, or using private browsing can remove saved records and files.</span>
+          <strong>${storageCleanupTitle()}</strong>
+          <span>${storageCleanupCopy()}</span>
         </div>
         <div>
           <strong>Full backups are private records</strong>
@@ -477,7 +524,7 @@ function renderStorageHealthPanel() {
 
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("Storage health", "Browser storage is local to this device and browser profile. It is useful, but it is not a backup.", "document")}
+      ${renderPanelHeader("Storage health", `${storageHealthCopy()} It is useful, but it is not a backup.`, "document")}
       <div class="storage-health-grid">
         ${storageMetric("Properties", data.properties.length)}
         ${storageMetric("Projects", data.projects.length)}
@@ -485,10 +532,10 @@ function renderStorageHealthPanel() {
         ${storageMetric("Document notes", data.documents.length)}
         ${storageMetric("Attached files", attachedDocuments.length)}
         ${storageMetric("Attached file size", formatFileSize(attachedFileSize))}
-        ${storageMetric("Browser storage used", estimateCopy.used)}
-        ${storageMetric("Estimated quota", estimateCopy.quota)}
+        ${storageMetric(isDesktopMode() ? "Records file size" : "Browser storage used", estimateCopy.used)}
+        ${storageMetric(isDesktopMode() ? "Stored document copies" : "Estimated quota", estimateCopy.quota)}
       </div>
-      <p class="helper-note">Large files may fail to save if browser storage is full or cleared. Keep your own backup of important records.</p>
+      <p class="helper-note">Large files may fail to save if local storage is full or removed. Keep your own backup of important records.</p>
     </section>
   `;
 }
@@ -496,7 +543,7 @@ function renderStorageHealthPanel() {
 function renderBackupRestorePanel() {
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("Backup and restore", "Create a private backup for your own records, or restore one on this browser.", "clipboard")}
+      ${renderPanelHeader("Backup and restore", `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
       <div class="backup-actions">
         <button class="button button-primary" data-action="download-full-backup" type="button">Download full backup</button>
         <button class="button button-secondary" data-action="choose-backup-file" type="button">Restore from backup</button>
@@ -517,6 +564,12 @@ function storageMetric(label, value) {
 }
 
 function getStorageEstimateCopy() {
+  if (isDesktopMode()) {
+    return {
+      used: formatFileSize(storageInfo.recordsBytes || 0),
+      quota: formatFileSize(storageInfo.documentBytes || 0),
+    };
+  }
   if (storageEstimate.status === "ready") {
     return {
       used: formatFileSize(storageEstimate.usage),
@@ -533,6 +586,42 @@ function getStorageEstimateCopy() {
     used: "Unavailable",
     quota: "Unavailable",
   };
+}
+
+function storageSurfaceName() {
+  return isDesktopMode() ? "Mac app" : "Browser";
+}
+
+function storageLocationShort() {
+  return isDesktopMode() ? "in this Mac app on this Mac" : "in this browser on this device";
+}
+
+function storageAccessSurface() {
+  return isDesktopMode() ? "this Mac user account" : "this browser profile";
+}
+
+function recordStorageLabel() {
+  return isDesktopMode() ? "an app-managed records file on this Mac" : "browser local storage on this device";
+}
+
+function documentStorageLabel() {
+  return isDesktopMode() ? "app-managed copies on this Mac" : "browser document storage in this browser profile";
+}
+
+function storageCleanupTitle() {
+  return isDesktopMode() ? "Deleting app data can remove records" : "Browser cleanup can remove records";
+}
+
+function storageCleanupCopy() {
+  return isDesktopMode()
+    ? "Deleting the app's local data folder can remove saved records and copied document files."
+    : "Clearing site data, switching browser profiles, or using private browsing can remove saved records and files.";
+}
+
+function storageHealthCopy() {
+  return isDesktopMode()
+    ? "Mac app storage is local to this Mac user account."
+    : "Browser storage is local to this device and browser profile.";
 }
 
 function renderPropertyForm(property) {
@@ -609,7 +698,7 @@ function renderDocumentForm(document) {
   const expenseOptions = data.expenses.filter((expense) => expense.propertyId === propertyId);
   const fileHelper = document?.hasFile
     ? `Current file: ${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)}). Choose a new file to replace it.`
-    : "Attached files are saved locally in this browser on this device. They are not uploaded.";
+    : `Attached files are saved locally ${storageLocationShort()}. They are not uploaded.`;
 
   return `
     <form class="form-grid" data-form="document" enctype="multipart/form-data" novalidate>
@@ -628,7 +717,7 @@ function renderDocumentForm(document) {
         <span>Attach file</span>
         <input name="file" type="file">
         <small>${escapeHtml(fileHelper)}</small>
-        <small>Browser storage is limited. Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this MVP.</small>
+        <small>${storageSurfaceName()} storage is limited. Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this MVP.</small>
       </label>
       ${textarea("Notes", "notes", document?.notes || "")}
       ${formActions("Save document note")}
@@ -818,14 +907,14 @@ async function handleClick(event) {
   } else if (action === "select-project") {
     editingProjectId = id;
   } else if (action === "delete-project") {
-    deleteProject(id);
+    await deleteProject(id);
   } else if (action === "add-expense") {
     activeTab = "expenses";
     editingExpenseId = null;
   } else if (action === "edit-expense") {
     editingExpenseId = id;
   } else if (action === "delete-expense") {
-    deleteExpense(id);
+    await deleteExpense(id);
   } else if (action === "close-expense-form") {
     editingExpenseId = undefined;
   } else if (action === "add-document") {
@@ -942,13 +1031,13 @@ async function handleSubmit(event) {
   const formData = new FormData(form);
   const values = Object.fromEntries(formData.entries());
 
-  if (formType === "property") saveProperty(values);
-  if (formType === "project") saveProject(values);
-  if (formType === "expense") saveExpense(values);
+  if (formType === "property") await saveProperty(values);
+  if (formType === "project") await saveProject(values);
+  if (formType === "expense") await saveExpense(values);
   if (formType === "document") await saveDocument(values, formData.get("file"));
 }
 
-function saveProperty(values) {
+async function saveProperty(values) {
   if (!values.name?.trim()) return showNotice("Property name is required.");
   const property = {
     id: values.id || createId("property"),
@@ -958,13 +1047,14 @@ function saveProperty(values) {
     purchasePrice: parseAmount(values.purchasePrice),
     notes: removeLocalPaths(values.notes).trim(),
   };
-  updateData({ ...data, properties: upsertById(data.properties, property) });
+  const saved = await updateData({ ...data, properties: upsertById(data.properties, property) });
+  if (!saved) return;
   selectedPropertyId = property.id;
   propertyMode = "view";
   showNotice("Property saved.");
 }
 
-function saveProject(values) {
+async function saveProject(values) {
   if (!values.propertyId) return showNotice("Property is required.");
   if (!values.name?.trim()) return showNotice("Project name is required.");
   const project = {
@@ -980,7 +1070,7 @@ function saveProject(values) {
   };
   const existingProject = data.projects.find((currentProject) => currentProject.id === project.id);
   const propertyChanged = existingProject && existingProject.propertyId !== project.propertyId;
-  updateData({
+  const saved = await updateData({
     ...data,
     projects: upsertById(data.projects, project),
     expenses: propertyChanged
@@ -990,13 +1080,14 @@ function saveProject(values) {
       ? data.documents.map((document) => document.projectId === project.id ? { ...document, propertyId: project.propertyId } : document)
       : data.documents,
   });
+  if (!saved) return;
   selectedPropertyId = project.propertyId;
   projectFilters.propertyId = project.propertyId;
   editingProjectId = undefined;
   showNotice("Project saved.");
 }
 
-function saveExpense(values) {
+async function saveExpense(values) {
   if (!values.propertyId) return showNotice("Property is required.");
   if (!values.date) return showNotice("Date is required.");
   if (!values.vendor?.trim()) return showNotice("Vendor or payee is required.");
@@ -1019,15 +1110,16 @@ function saveExpense(values) {
     documentationStatus: values.documentationStatus,
     notes: removeLocalPaths(values.notes).trim(),
   };
-  updateData({
+  const saved = await updateData({
     ...data,
     expenses: upsertById(data.expenses, expense),
     documents: data.documents.map((documentRecord) =>
       documentRecord.expenseId === expense.id
         ? { ...documentRecord, propertyId: expense.propertyId, projectId: expense.projectId }
-        : documentRecord,
+      : documentRecord,
     ),
   });
+  if (!saved) return;
   selectedPropertyId = expense.propertyId;
   expenseFilters.propertyId = expense.propertyId;
   editingExpenseId = undefined;
@@ -1043,7 +1135,7 @@ async function saveDocument(values, file) {
     return showNotice(`Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this MVP.`);
   }
   if (hasSelectedFile && !canStoreDocuments()) {
-    return showNotice("Attached file storage is not available in this browser.");
+    return showNotice(`Attached file storage is not available in this ${storageSurfaceName().toLowerCase()}.`);
   }
 
   const linkedExpense = data.expenses.find((expense) => expense.id === values.expenseId);
@@ -1123,7 +1215,7 @@ async function saveDocument(values, file) {
     );
   }
 
-  const saved = updateData({ ...data, documents: nextDocuments, expenses: nextExpenses });
+  const saved = await updateData({ ...data, documents: nextDocuments, expenses: nextExpenses });
 
   if (!saved) {
     if (newlySavedFileId) {
@@ -1144,7 +1236,7 @@ async function saveDocument(values, file) {
     try {
       await deleteDocumentFile(previousFileId);
     } catch {
-      showNotice("Document saved, but the previous stored file could not be removed from browser storage.");
+      showNotice(`Document saved, but the previous stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage.`);
       return;
     }
   }
@@ -1152,25 +1244,27 @@ async function saveDocument(values, file) {
   showNotice(documentRecord.hasFile ? "Document note and local file saved." : "Document note saved.");
 }
 
-function deleteProject(projectId) {
+async function deleteProject(projectId) {
   if (!window.confirm("Delete this project? Linked expenses will stay saved without a project.")) return;
-  updateData({
+  const saved = await updateData({
     ...data,
     projects: data.projects.filter((project) => project.id !== projectId),
     expenses: data.expenses.map((expense) => expense.projectId === projectId ? { ...expense, projectId: "" } : expense),
     documents: data.documents.map((document) => document.projectId === projectId ? { ...document, projectId: "" } : document),
   });
+  if (!saved) return;
   editingProjectId = undefined;
   showNotice("Project deleted. Linked expenses were kept.");
 }
 
-function deleteExpense(expenseId) {
+async function deleteExpense(expenseId) {
   if (!window.confirm("Delete this expense and unlink its document notes?")) return;
-  updateData({
+  const saved = await updateData({
     ...data,
     expenses: data.expenses.filter((expense) => expense.id !== expenseId),
     documents: data.documents.map((document) => document.expenseId === expenseId ? { ...document, expenseId: "" } : document),
   });
+  if (!saved) return;
   editingExpenseId = undefined;
   showNotice("Expense deleted.");
 }
@@ -1185,13 +1279,13 @@ async function deleteDocument(documentId) {
       resetStorageEstimate();
     } catch {
       editingDocumentId = undefined;
-      showNotice("The stored file could not be removed from browser storage. The document note was kept so you can try again.");
+      showNotice(`The stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage. The document note was kept so you can try again.`);
       return;
     }
   }
 
   const nextDocuments = data.documents.filter((document) => document.id !== documentId);
-  const saved = updateData({
+  const saved = await updateData({
     ...data,
     documents: nextDocuments,
     expenses: reconcileExpensesAfterDocumentFileRemoval(nextDocuments, documentRecord),
@@ -1210,7 +1304,7 @@ async function downloadDocumentAttachment(documentId) {
     const storedFile = await getDocumentFile(documentRecord.fileId || documentRecord.id);
     if (!storedFile?.blob) {
       await markDocumentFileMissing(documentRecord);
-      return showNotice("The file metadata is saved, but the stored file is missing. It may have been cleared from browser storage.");
+      return showNotice(`The file metadata is saved, but the stored file is missing. It may have been cleared from ${storageSurfaceName().toLowerCase()} storage.`);
     }
     downloadBlob(storedFile.blob, documentRecord.fileName || storedFile.name || "home-basis-document");
     showNotice("Downloading creates a separate copy outside this app.");
@@ -1245,7 +1339,7 @@ async function removeDocumentAttachment(documentId) {
       : document,
   );
 
-  const saved = updateData({
+  const saved = await updateData({
     ...data,
     documents: nextDocuments,
     expenses: reconcileExpensesAfterDocumentFileRemoval(nextDocuments, documentRecord),
@@ -1271,7 +1365,7 @@ async function markDocumentFileMissing(documentRecord) {
       : document,
   );
 
-  updateData({
+  await updateData({
     ...data,
     documents: nextDocuments,
     expenses: reconcileExpensesAfterDocumentFileRemoval(nextDocuments, documentRecord),
@@ -1311,7 +1405,7 @@ async function downloadFullBackup() {
       "application/json;charset=utf-8",
     );
     if (backup.missingFiles.length) {
-      showNotice("Backup downloaded, but some stored files were missing from browser storage.");
+      showNotice(`Backup downloaded, but some stored files were missing from ${storageSurfaceName().toLowerCase()} storage.`);
       return;
     }
     showNotice("Full backup downloaded.");
@@ -1371,7 +1465,7 @@ async function restoreFromBackupFile(file) {
   if (file.size > MAX_BACKUP_FILE_SIZE) {
     return showNotice(`Backup files over ${formatFileSize(MAX_BACKUP_FILE_SIZE)} are not accepted in this MVP.`);
   }
-  if (!window.confirm("Restore this backup? This replaces the current local records in this browser. It does not upload anything.")) return;
+  if (!window.confirm(`Restore this backup? This replaces the current local records ${storageLocationShort()}. It does not upload anything.`)) return;
 
   let backup;
   try {
@@ -1388,7 +1482,7 @@ async function restoreFromBackupFile(file) {
     return showNotice(getBackupError(error));
   }
 
-  const saved = updateData(restored.data);
+  const saved = await updateData(restored.data);
   if (!saved) {
     await deleteFilesBestEffort(restored.newFileIds);
     return;
@@ -1403,10 +1497,10 @@ async function restoreFromBackupFile(file) {
   resetFiltersAfterRestore();
   closeEditors();
   const restoreNotice = restored.skippedFiles
-    ? "Backup restored. Some attached files could not be restored in this browser."
+    ? `Backup restored. Some attached files could not be restored ${storageLocationShort()}.`
     : "Backup restored.";
   const cleanupNotice = cleanup.failed
-    ? " Some older stored files could not be removed from browser storage."
+    ? ` Some older stored files could not be removed from ${storageSurfaceName().toLowerCase()} storage.`
     : "";
   showNotice(`${restoreNotice}${cleanupNotice}`);
 }
@@ -1445,7 +1539,7 @@ async function prepareBackupRestore(backup) {
       }
       if (!canStoreDocuments()) {
         skippedFiles += 1;
-        restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File could not be restored in this browser"));
+        restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File could not be restored in this app"));
         continue;
       }
       if (isDataUrlTooLarge(backupFile.dataUrl)) {
@@ -1606,7 +1700,7 @@ function resetFiltersAfterRestore() {
 function getBackupError(error) {
   const message = error?.message || "";
   if (/quota|storage/i.test(message)) {
-    return "The backup could not be restored because browser storage may be full.";
+    return `The backup could not be restored because ${storageSurfaceName().toLowerCase()} storage may be full.`;
   }
   if (/Home Basis Tracker backup/i.test(message)) {
     return message;
@@ -1614,25 +1708,21 @@ function getBackupError(error) {
   return "The backup could not be completed. Check the file and try again.";
 }
 
-function loadStoredData() {
-  try {
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
-    return storedValue ? sanitizeData(JSON.parse(storedValue)) : EMPTY_DATA;
-  } catch {
-    return EMPTY_DATA;
-  }
-}
-
-function updateData(nextData) {
+async function updateData(nextData) {
   const previousData = data;
   data = sanitizeData(nextData);
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    data = await saveRecords(STORAGE_KEY, data);
   } catch {
     data = previousData;
-    notice = "Unable to save locally. Check browser storage settings before adding more records.";
+    notice = `Unable to save locally. Check ${storageSurfaceName()} storage settings before adding more records.`;
     render();
     return false;
+  }
+  try {
+    storageInfo = await getStorageInfo();
+  } catch {
+    // The save succeeded; keep the app responsive if storage metrics are unavailable.
   }
   render();
   return true;
@@ -1641,13 +1731,13 @@ function updateData(nextData) {
 function getDocumentStorageError(error) {
   const message = error?.message || "";
   if (/quota|storage/i.test(message)) {
-    return "The file could not be saved because browser storage may be full. Keep your own backup of important records.";
+    return `The file could not be saved because ${storageSurfaceName().toLowerCase()} storage may be full. Keep your own backup of important records.`;
   }
   if (/available|indexeddb/i.test(message)) {
-    return "Attached file storage is not available in this browser.";
+    return `Attached file storage is not available in this ${isDesktopMode() ? "Mac app" : "browser"}.`;
   }
   if (/blocked/i.test(message)) {
-    return "Document storage is blocked by another browser tab. Close other tabs for this app and try again.";
+    return `Document storage is blocked by another ${isDesktopMode() ? "app window" : "browser tab"}. Close other windows for this app and try again.`;
   }
   return "The file could not be saved locally. Keep your own backup and try again.";
 }
