@@ -41,3 +41,11 @@ export async function saveRecords(storageKey, data) {
   window.localStorage.setItem(storageKey, JSON.stringify(cleanData));
   return cleanData;
 }
+
+export async function saveBackupFile(filename, contents) {
+  if (!isDesktopMode()) return { handled: false };
+  return desktopBridge.saveBackupFile({
+    filename,
+    contents,
+  });
+}

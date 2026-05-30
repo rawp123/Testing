@@ -1,6 +1,6 @@
 # Home Basis Tracker
 
-Home Basis Tracker is a local-first records binder for homeowners. It helps organize home improvement expenses, project notes, document status, and local file attachments so a homeowner can export a clean summary for CPA review.
+Home Basis Tracker helps homeowners keep improvement receipts, contractor invoices, permits, photos, project notes, and cost records in one local app for CPA review.
 
 It is not budgeting software, tax software, legal advice, or tax advice. Expense classifications are for organization only and should be reviewed with a CPA.
 
@@ -9,7 +9,7 @@ It is not budgeting software, tax software, legal advice, or tax advice. Expense
 - Properties, including optional address, purchase date, purchase price, and notes.
 - Projects, including category, status, dates, contractor/vendor, and notes.
 - Expenses, including property, optional project, date, vendor, description, amount, classification, category, documentation status, and notes.
-- Document notes, including type, related property/project/expense, added date, notes, and optional local file attachment metadata.
+- Documents, including type, related property/project/expense, added date, notes, and optional local file attachment metadata.
 
 ## Local Storage Model
 
@@ -48,15 +48,15 @@ The app intentionally shows friendly storage labels instead of raw local file pa
 
 ## Backup And Restore
 
-Use **Export > Download full backup** to create a private JSON backup. Keep that file somewhere you already use for important personal records.
+Use **Export & backup > Download full backup** to create a private JSON backup. Keep that file somewhere you already use for important personal records.
 
-Use **Export > Restore from backup** to replace the current local app records with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this MVP.
+Use **Export & backup > Restore from backup** to replace the current local app records with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this beta.
 
 Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private records.
 
 ## Exports
 
-- **Download CSV** creates an expense ledger with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
+- **Download CSV** creates a cost record export with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
 - **Print summary** creates a printable CPA review summary.
 - Export wording should say "review with your CPA" or "share with your CPA", not tax-filing language.
 
@@ -78,7 +78,7 @@ Before a private beta build, verify these flows in both the Mac app and web vers
 - Add a project for that property.
 - Add expenses for each classification: potential basis addition, repair or maintenance, and unclear / ask CPA.
 - Filter expenses by classification, category, documentation status, and project.
-- Add a document note with and without a file attachment.
+- Add a document with and without a file attachment.
 - Confirm displayed file metadata uses a file name only, not a raw local path.
 - Download an attached file.
 - Remove an attached file and confirm the related expense returns to needs follow-up when appropriate.
@@ -97,10 +97,13 @@ node --check home-ledger/document-storage.js
 node --check home-ledger/storage-adapter.js
 node --check home-ledger/desktop/main.cjs
 node --check home-ledger/desktop/preload.cjs
+npm run check:home-ledger:model
 npm run smoke:home-ledger:desktop
+npm run pack:home-ledger:mac
+npm run check:home-ledger:mac-package
 git diff --check
 ```
 
 ## Private Beta Notes
 
-The Mac app now stores records and document copies locally through the desktop shell. The next durability step after this MVP would be import/export migration testing, optional user-chosen backup locations, and signed/notarized distribution, while preserving the same cautious CPA-review language.
+The Mac app now stores records and document copies locally through the desktop shell. The next durability step after this beta pass would be import/export migration testing, optional user-chosen backup locations, and signed/notarized distribution, while preserving the same cautious CPA-review language.

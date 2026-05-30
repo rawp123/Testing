@@ -1,39 +1,37 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const fs = require("node:fs/promises");
+const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const IS_PACKAGED = app.isPackaged;
 const PRELOAD_SCRIPT = path.join(__dirname, "preload.cjs");
-const APP_INDEX = IS_PACKAGED
-  ? path.join(process.resourcesPath, "home-ledger", "index.html")
-  : path.resolve(__dirname, "../index.html");
+const APP_DIR = IS_PACKAGED
+  ? path.join(process.resourcesPath, "home-ledger")
+  : path.resolve(__dirname, "..");
+const APP_INDEX = path.join(APP_DIR, "index.html");
 const STORAGE_VERSION = 1;
 const MAX_RECORDS_BYTES = 15 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const MAX_BACKUP_BYTES = 500 * 1024 * 1024;
 const RECORDS_FILE = "records.json";
 const ATTACHMENTS_FILE = "attachments.json";
 const DOCUMENTS_DIR = "documents";
 const IS_SMOKE_TEST = process.env.HOME_LEDGER_DESKTOP_SMOKE === "1";
+const SMOKE_USER_DATA_DIR = process.env.HOME_LEDGER_TEST_USER_DATA ||
+  path.join(os.tmpdir(), `home-basis-tracker-smoke-${process.pid}`);
 
-const PROJECT_STATUSES = ["planned", "in progress", "completed"];
-const CLASSIFICATIONS = ["potential basis addition", "repair or maintenance", "unclear / ask CPA"];
-const EXPENSE_CATEGORIES = [
-  "kitchen",
-  "bathroom",
-  "roof",
-  "HVAC",
-  "windows/doors",
-  "flooring",
-  "landscaping",
-  "addition/structural",
-  "plumbing",
-  "electrical",
-  "appliances",
-  "other",
-];
-const DOCUMENT_STATUSES = ["receipt attached", "invoice attached", "no document yet", "needs follow-up"];
-const DOCUMENT_TYPES = ["receipt", "invoice", "permit", "photo", "contract", "other"];
+let modelModulePromise;
+
+if (IS_SMOKE_TEST) {
+  app.setPath("userData", SMOKE_USER_DATA_DIR);
+}
+
+const hasSingleInstanceLock = IS_SMOKE_TEST || app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  app.quit();
+  process.exit(0);
+}
 
 function getAppDataDir() {
   return app.getPath("userData");
@@ -88,6 +86,12 @@ function createWindow() {
     },
   });
 
+  window.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
+  window.webContents.on("will-attach-webview", (event) => {
+    event.preventDefault();
+  });
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   window.webContents.on("will-navigate", (event, url) => {
     if (!isAllowedNavigation(url)) {
@@ -101,31 +105,171 @@ function createWindow() {
   });
   if (IS_SMOKE_TEST) {
     window.webContents.once("did-finish-load", () => {
-      setTimeout(async () => {
-        try {
-          const ready = await window.webContents.executeJavaScript(
-            "(async () => { const data = await window.homeLedgerDesktop?.loadData(); const info = await window.homeLedgerDesktop?.getStorageInfo(); return Boolean(info?.mode === 'desktop' && Array.isArray(data?.properties) && document.body.innerText.includes('Home Basis Tracker')); })()",
-          );
-          if (!ready) {
-            console.error("Home Basis Tracker desktop smoke failed: renderer did not expose the desktop app.");
-            app.exit(1);
-            return;
-          }
-          console.log("Home Basis Tracker desktop smoke loaded.");
-          app.quit();
-        } catch (error) {
-          console.error(`Home Basis Tracker desktop smoke failed: ${serializeError(error).message}`);
-          app.exit(1);
-        }
+      setTimeout(() => {
+        void runDesktopSmoke(window);
       }, 500);
     });
     window.webContents.once("did-fail-load", (_event, _code, description) => {
       console.error(`Home Basis Tracker desktop smoke failed: ${description}`);
-      app.exit(1);
+      void finishDesktopSmoke(1);
     });
   }
 
   window.loadURL(getStartUrl());
+}
+
+async function runDesktopSmoke(window) {
+  try {
+    const result = await window.webContents.executeJavaScript(`
+      (async () => {
+        const sleep = (ms = 75) => new Promise((resolve) => setTimeout(resolve, ms));
+        const assert = (condition, message) => {
+          if (!condition) throw new Error(message);
+        };
+        const waitFor = async (predicate, label) => {
+          for (let attempt = 0; attempt < 80; attempt += 1) {
+            if (predicate()) return;
+            await sleep();
+          }
+          throw new Error("Timed out waiting for " + label + ": " + document.body.innerText.slice(0, 800));
+        };
+        const click = async (selector) => {
+          const element = document.querySelector(selector);
+          assert(element, "Missing clickable element: " + selector);
+          element.click();
+          await sleep();
+        };
+        const setValue = async (name, value) => {
+          const element = document.querySelector('form [name="' + name + '"]');
+          assert(element, "Missing form field: " + name);
+          element.value = value;
+          element.dispatchEvent(new Event("input", { bubbles: true }));
+          element.dispatchEvent(new Event("change", { bubbles: true }));
+          await sleep();
+        };
+        const setSelect = setValue;
+        const submit = async (selector) => {
+          const form = document.querySelector(selector);
+          assert(form, "Missing form: " + selector);
+          const button = form.querySelector('button[type="submit"]');
+          assert(button, "Missing submit button for form: " + selector);
+          button.click();
+          await sleep(150);
+        };
+        const bodyIncludes = (text) => document.body.innerText.includes(text);
+
+        assert(window.homeLedgerDesktop?.isDesktop, "Desktop bridge was not available.");
+        await window.homeLedgerDesktop.saveData({ properties: [], projects: [], expenses: [], documents: [] });
+        assert(bodyIncludes("Home Basis Tracker"), "App shell did not render.");
+
+        await click('[data-action="add-property"]');
+        await setValue("name", "Smoke Test Home");
+        await setValue("address", "/Users/private/hidden-home-address");
+        await setValue("purchaseDate", "2020-05-01");
+        await setValue("purchasePrice", "425000");
+        await submit('[data-form="property"]');
+        await waitFor(() => bodyIncludes("Property saved.") && bodyIncludes("Smoke Test Home"), "property save");
+
+        await click('[data-tab="projects"]');
+        await click('[data-action="add-project"]');
+        await setValue("name", "Roof replacement");
+        await setSelect("category", "roof");
+        await setSelect("status", "completed");
+        await setValue("contractor", "Smoke Roofing LLC");
+        await submit('[data-form="project"]');
+        await waitFor(() => bodyIncludes("Project saved.") && bodyIncludes("Roof replacement"), "project save");
+
+        await click('[data-tab="expenses"]');
+        await click('[data-action="add-expense"]');
+        await setValue("date", "2024-03-15");
+        await setValue("amount", "12850.50");
+        await setValue("vendor", "Smoke Roofing LLC");
+        await setValue("description", "Full roof replacement");
+        await setSelect("classification", "potential basis addition");
+        await setSelect("category", "roof");
+        await setSelect("documentationStatus", "no document yet");
+        const projectOption = document.querySelector('[name="projectId"] option:not([value=""])');
+        if (projectOption) await setSelect("projectId", projectOption.value);
+        const expenseForm = document.querySelector('[data-form="expense"]');
+        assert(expenseForm.elements.date.value === "2024-03-15", "Expense date was not filled.");
+        assert(expenseForm.elements.amount.value === "12850.50", "Expense amount was not filled.");
+        assert(expenseForm.elements.vendor.value === "Smoke Roofing LLC", "Expense vendor was not filled.");
+        assert(expenseForm.elements.description.value === "Full roof replacement", "Expense description was not filled.");
+        await submit('[data-form="expense"]');
+        await waitFor(() => bodyIncludes("Expense saved.") && bodyIncludes("Full roof replacement"), "expense save");
+
+        await click('[data-tab="documents"]');
+        await click('[data-action="add-document"]');
+        await setValue("displayName", "Roof invoice note");
+        await setSelect("documentType", "invoice");
+        const expenseOption = document.querySelector('[name="expenseId"] option:not([value=""])');
+        if (expenseOption) await setSelect("expenseId", expenseOption.value);
+        await setValue("notes", "Stored file will be checked through desktop storage.");
+        await submit('[data-form="document"]');
+        await waitFor(() => bodyIncludes("Document saved.") && bodyIncludes("Roof invoice note"), "document save");
+
+        const payload = new TextEncoder().encode("smoke receipt file").buffer;
+        const storedFile = await window.homeLedgerDesktop.saveDocumentFile({
+          id: "file_smoke_private_beta",
+          data: payload,
+          name: "/Users/private/roof-invoice.pdf",
+          type: "application/pdf",
+          size: payload.byteLength,
+          lastModified: 1710460800000,
+          storedAt: new Date().toISOString(),
+        });
+        assert(storedFile.name === "roof-invoice.pdf", "Stored file name was not sanitized.");
+        const retrievedFile = await window.homeLedgerDesktop.getDocumentFile("file_smoke_private_beta");
+        const retrievedText = new TextDecoder().decode(retrievedFile.data);
+        assert(retrievedText === "smoke receipt file", "Stored file contents could not be read back.");
+        const storageInfo = await window.homeLedgerDesktop.getStorageInfo();
+        assert(storageInfo.documentCount === 1, "Desktop storage did not report the stored file.");
+        await window.homeLedgerDesktop.deleteDocumentFile("file_smoke_private_beta");
+        const filesAfterDelete = await window.homeLedgerDesktop.listDocumentFiles();
+        assert(!filesAfterDelete.some((fileRecord) => fileRecord.id === "file_smoke_private_beta"), "Stored file was not deleted.");
+
+        await click('[data-tab="export"]');
+        await waitFor(() => bodyIncludes("CPA review summary") && bodyIncludes("Smoke Roofing LLC"), "export summary");
+        const csvButton = document.querySelector('[data-action="download-csv"]');
+        assert(csvButton && !csvButton.disabled, "CSV export button should be enabled after adding an expense.");
+        assert(!document.body.innerText.includes("/Users/private"), "Raw local path leaked into the UI.");
+
+        const savedData = await window.homeLedgerDesktop.loadData();
+        assert(savedData.properties.length === 1, "Expected one saved property.");
+        assert(savedData.projects.length === 1, "Expected one saved project.");
+        assert(savedData.expenses.length === 1, "Expected one saved expense.");
+        assert(savedData.documents.length === 1, "Expected one saved document.");
+        assert(savedData.properties[0].address.includes("[local file path removed]"), "Local path stripping was not applied to saved data.");
+
+        return {
+          properties: savedData.properties.length,
+          projects: savedData.projects.length,
+          expenses: savedData.expenses.length,
+          documents: savedData.documents.length,
+        };
+      })()
+    `);
+    console.log(`Home Basis Tracker desktop smoke passed: ${result.properties} property, ${result.projects} project, ${result.expenses} expense, ${result.documents} document.`);
+    await finishDesktopSmoke(0);
+  } catch (error) {
+    console.error(`Home Basis Tracker desktop smoke failed: ${serializeError(error).message}`);
+    await finishDesktopSmoke(1);
+  }
+}
+
+async function finishDesktopSmoke(code) {
+  if (IS_SMOKE_TEST && !process.env.HOME_LEDGER_TEST_USER_DATA) {
+    try {
+      await fs.rm(SMOKE_USER_DATA_DIR, { recursive: true, force: true });
+    } catch {
+      // Smoke cleanup is best effort; failing cleanup should not hide the workflow result.
+    }
+  }
+  if (code === 0) {
+    app.quit();
+    return;
+  }
+  app.exit(code);
 }
 
 async function ensureStorageReady() {
@@ -189,135 +333,16 @@ async function getDocumentStorageSummary() {
   );
 }
 
-function sanitizeAppData(value) {
-  const sanitized = {
-    properties: Array.isArray(value?.properties) ? value.properties.map(sanitizeProperty) : [],
-    projects: Array.isArray(value?.projects) ? value.projects.map(sanitizeProject) : [],
-    expenses: Array.isArray(value?.expenses) ? value.expenses.map(sanitizeExpense) : [],
-    documents: Array.isArray(value?.documents) ? value.documents.map(sanitizeDocument) : [],
-  };
-  return normalizeRelationships(sanitized);
+async function getModelModule() {
+  if (!modelModulePromise) {
+    modelModulePromise = import(pathToFileURL(path.join(APP_DIR, "model.js")).toString());
+  }
+  return modelModulePromise;
 }
 
-function sanitizeProperty(property) {
-  return {
-    id: cleanText(property?.id),
-    name: removeLocalPaths(property?.name || ""),
-    address: removeLocalPaths(property?.address || ""),
-    purchaseDate: cleanDate(property?.purchaseDate),
-    purchasePrice: parseAmount(property?.purchasePrice),
-    notes: removeLocalPaths(property?.notes || ""),
-  };
-}
-
-function sanitizeProject(project) {
-  return {
-    id: cleanText(project?.id),
-    propertyId: cleanText(project?.propertyId),
-    name: removeLocalPaths(project?.name || ""),
-    category: allowedValue(EXPENSE_CATEGORIES, project?.category, "other"),
-    startDate: cleanDate(project?.startDate),
-    completionDate: cleanDate(project?.completionDate),
-    contractor: removeLocalPaths(project?.contractor || ""),
-    status: allowedValue(PROJECT_STATUSES, project?.status, "planned"),
-    notes: removeLocalPaths(project?.notes || ""),
-  };
-}
-
-function sanitizeExpense(expense) {
-  return {
-    id: cleanText(expense?.id),
-    propertyId: cleanText(expense?.propertyId),
-    projectId: cleanText(expense?.projectId),
-    date: cleanDate(expense?.date),
-    vendor: removeLocalPaths(expense?.vendor || ""),
-    description: removeLocalPaths(expense?.description || ""),
-    amount: parseAmount(expense?.amount),
-    classification: allowedValue(CLASSIFICATIONS, expense?.classification, "unclear / ask CPA"),
-    category: allowedValue(EXPENSE_CATEGORIES, expense?.category, "other"),
-    documentationStatus: allowedValue(DOCUMENT_STATUSES, expense?.documentationStatus, "no document yet"),
-    notes: removeLocalPaths(expense?.notes || ""),
-  };
-}
-
-function sanitizeDocument(document) {
-  return {
-    id: cleanText(document?.id),
-    propertyId: cleanText(document?.propertyId),
-    projectId: cleanText(document?.projectId),
-    expenseId: cleanText(document?.expenseId),
-    displayName: removeLocalPaths(document?.displayName || ""),
-    documentType: allowedValue(DOCUMENT_TYPES, document?.documentType, "other"),
-    addedDate: cleanDate(document?.addedDate),
-    notes: removeLocalPaths(document?.notes || ""),
-    hasFile: Boolean(document?.hasFile),
-    fileId: cleanText(document?.fileId),
-    fileName: document?.fileName ? getSafeFileName(document.fileName) : "",
-    mimeType: cleanText(document?.mimeType || ""),
-    fileSize: Number(document?.fileSize) || 0,
-    fileLastModified: document?.fileLastModified || null,
-    fileStoredAt: cleanText(document?.fileStoredAt || ""),
-  };
-}
-
-function normalizeRelationships(cleanData) {
-  const properties = cleanData.properties.filter((property) => property.id && property.name);
-  const propertyIds = new Set(properties.map((property) => property.id));
-  const fallbackPropertyId = properties[0]?.id || "";
-
-  const projects = cleanData.projects
-    .filter((project) => project.id && project.name)
-    .map((project) => ({
-      ...project,
-      propertyId: propertyIds.has(project.propertyId) ? project.propertyId : fallbackPropertyId,
-    }))
-    .filter((project) => project.propertyId);
-  const projectIds = new Set(projects.map((project) => project.id));
-
-  const expenses = cleanData.expenses
-    .filter((expense) => expense.id && expense.vendor && expense.description)
-    .map((expense) => {
-      const propertyId = propertyIds.has(expense.propertyId) ? expense.propertyId : fallbackPropertyId;
-      const linkedProject = projects.find((project) => project.id === expense.projectId && project.propertyId === propertyId);
-      return {
-        ...expense,
-        propertyId,
-        projectId: linkedProject?.id || "",
-      };
-    })
-    .filter((expense) => expense.propertyId);
-  const expenseIds = new Set(expenses.map((expense) => expense.id));
-
-  const documents = cleanData.documents
-    .filter((document) => document.id && document.displayName)
-    .map((document) => {
-      const linkedExpense = expenses.find((expense) => expense.id === document.expenseId);
-      if (linkedExpense) {
-        return {
-          ...document,
-          propertyId: linkedExpense.propertyId,
-          projectId: linkedExpense.projectId,
-          expenseId: linkedExpense.id,
-        };
-      }
-
-      const propertyId = propertyIds.has(document.propertyId) ? document.propertyId : fallbackPropertyId;
-      const linkedProject = projects.find((project) => project.id === document.projectId && project.propertyId === propertyId);
-      return {
-        ...document,
-        propertyId,
-        projectId: linkedProject?.id || "",
-        expenseId: expenseIds.has(document.expenseId) ? document.expenseId : "",
-      };
-    })
-    .filter((document) => document.propertyId);
-
-  return {
-    properties,
-    projects: projects.filter((project) => projectIds.has(project.id)),
-    expenses,
-    documents,
-  };
+async function sanitizeAppData(value) {
+  const { sanitizeData } = await getModelModule();
+  return sanitizeData(value);
 }
 
 function sanitizeAttachmentRecord(record) {
@@ -346,29 +371,6 @@ function cleanText(value) {
   return String(value || "").replace(/[\u0000-\u001f\u007f]/g, "").trim();
 }
 
-function removeLocalPaths(value) {
-  return String(value ?? "")
-    .replace(/file:\/\/(?:localhost)?\/[^\r\n,;)]*/gi, "[local file path removed]")
-    .replace(/\/(?:Users|Volumes|private|var|tmp|home)\/[^\r\n,;)]*/gi, "[local file path removed]")
-    .replace(/[A-Z]:\\[^\r\n,;)]*/gi, "[local file path removed]")
-    .replace(/\\\\[^\\/:*?"<>|\r\n]+\\[^\r\n,;)]*/g, "[local file path removed]");
-}
-
-function cleanDate(value) {
-  const text = String(value || "").trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
-}
-
-function parseAmount(value) {
-  const numericValue = Number(String(value ?? "").replace(/[$,\s]/g, ""));
-  if (!Number.isFinite(numericValue)) return 0;
-  return Math.round(numericValue * 100) / 100;
-}
-
-function allowedValue(options, value, fallback) {
-  return options.includes(value) ? value : fallback;
-}
-
 function toBuffer(data) {
   if (data instanceof ArrayBuffer) {
     return Buffer.from(data);
@@ -385,8 +387,16 @@ function serializeError(error) {
   };
 }
 
+function assertTrustedSender(event) {
+  const frameUrl = event?.senderFrame?.url || "";
+  if (!isAllowedNavigation(frameUrl)) {
+    throw new Error("Desktop storage request came from an unexpected app page.");
+  }
+}
+
 function registerIpcHandlers() {
-  ipcMain.handle("home-ledger:get-storage-info", async () => {
+  ipcMain.handle("home-ledger:get-storage-info", async (event) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     const documentSummary = await getDocumentStorageSummary();
     return {
@@ -399,18 +409,45 @@ function registerIpcHandlers() {
     };
   });
 
-  ipcMain.handle("home-ledger:load-data", async () => {
+  ipcMain.handle("home-ledger:load-data", async (event) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     return sanitizeAppData(await readJsonFile(getRecordsPath(), { properties: [], projects: [], expenses: [], documents: [] }));
   });
 
-  ipcMain.handle("home-ledger:save-data", async (_event, data) => {
+  ipcMain.handle("home-ledger:save-data", async (event, data) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
-    await writeJsonFile(getRecordsPath(), sanitizeAppData(data));
+    await writeJsonFile(getRecordsPath(), await sanitizeAppData(data));
     return { ok: true };
   });
 
-  ipcMain.handle("home-ledger:save-document-file", async (_event, record) => {
+  ipcMain.handle("home-ledger:save-backup-file", async (event, record) => {
+    assertTrustedSender(event);
+    const filename = getSafeFileName(record?.filename || "home-basis-tracker-backup.json");
+    const contents = String(record?.contents || "");
+    if (Buffer.byteLength(contents, "utf8") > MAX_BACKUP_BYTES) {
+      throw new Error("Backup file is too large.");
+    }
+
+    const result = await dialog.showSaveDialog({
+      title: "Save private Home Basis Tracker backup",
+      defaultPath: filename,
+      buttonLabel: "Save backup",
+      filters: [{ name: "JSON backup", extensions: ["json"] }],
+      properties: ["createDirectory", "showOverwriteConfirmation"],
+    });
+
+    if (result.canceled || !result.filePath) {
+      return { canceled: true };
+    }
+
+    await fs.writeFile(result.filePath, contents, "utf8");
+    return { canceled: false };
+  });
+
+  ipcMain.handle("home-ledger:save-document-file", async (event, record) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     const id = getSafeId(record?.id);
     if (!id) {
@@ -444,7 +481,8 @@ function registerIpcHandlers() {
     return storedRecord;
   });
 
-  ipcMain.handle("home-ledger:get-document-file", async (_event, fileId) => {
+  ipcMain.handle("home-ledger:get-document-file", async (event, fileId) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     const id = getSafeId(fileId);
     if (!id) return null;
@@ -472,7 +510,8 @@ function registerIpcHandlers() {
     }
   });
 
-  ipcMain.handle("home-ledger:delete-document-file", async (_event, fileId) => {
+  ipcMain.handle("home-ledger:delete-document-file", async (event, fileId) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     const id = getSafeId(fileId);
     if (!id) return { ok: true };
@@ -488,7 +527,8 @@ function registerIpcHandlers() {
     return { ok: true };
   });
 
-  ipcMain.handle("home-ledger:list-document-files", async () => {
+  ipcMain.handle("home-ledger:list-document-files", async (event) => {
+    assertTrustedSender(event);
     await ensureStorageReady();
     const manifest = await readAttachmentsManifest();
     return manifest.files;
@@ -511,6 +551,13 @@ app.whenReady().then(async () => {
   }
 
   createWindow();
+
+  app.on("second-instance", () => {
+    const [existingWindow] = BrowserWindow.getAllWindows();
+    if (!existingWindow) return;
+    if (existingWindow.isMinimized()) existingWindow.restore();
+    existingWindow.focus();
+  });
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

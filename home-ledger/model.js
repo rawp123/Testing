@@ -1,7 +1,7 @@
 export const STORAGE_KEY = "home-ledger:v1";
 export const BACKUP_APP_ID = "home-basis-tracker";
 export const BACKUP_VERSION = 1;
-export const MAX_BACKUP_FILE_SIZE = 100 * 1024 * 1024;
+export const MAX_BACKUP_FILE_SIZE = 500 * 1024 * 1024;
 export const MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024;
 
 export const EMPTY_DATA = {
@@ -17,7 +17,7 @@ export const TABS = [
   { id: "projects", label: "Projects" },
   { id: "expenses", label: "Expenses" },
   { id: "documents", label: "Documents" },
-  { id: "export", label: "Export" },
+  { id: "export", label: "Export & backup" },
 ];
 
 export const PROJECT_STATUSES = [
@@ -133,6 +133,7 @@ function sanitizeDocument(document) {
     hasFile: Boolean(document?.hasFile),
     fileId: cleanText(document?.fileId),
     fileName: removeLocalPaths(document?.fileName || ""),
+    fileStatusNote: removeLocalPaths(document?.fileStatusNote || ""),
     mimeType: document?.mimeType || "",
     fileSize: Number(document?.fileSize) || 0,
     fileLastModified: document?.fileLastModified || null,
@@ -304,7 +305,9 @@ export function upsertById(items, item) {
 export function removeLocalPaths(value) {
   return String(value ?? "")
     .replace(/file:\/\/(?:localhost)?\/[^\r\n,;)]*/gi, "[local file path removed]")
+    .replace(/~\/[^\r\n,;)]*/g, "[local file path removed]")
     .replace(/\/(?:Users|Volumes|private|var|tmp|home)\/[^\r\n,;)]*/gi, "[local file path removed]")
+    .replace(/[A-Z]:\/[^\r\n,;)]*/gi, "[local file path removed]")
     .replace(/[A-Z]:\\[^\r\n,;)]*/gi, "[local file path removed]")
     .replace(/\\\\[^\\/:*?"<>|\r\n]+\\[^\r\n,;)]*/g, "[local file path removed]");
 }

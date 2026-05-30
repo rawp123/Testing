@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld("homeLedgerDesktop", {
   saveData(data) {
     return ipcRenderer.invoke("home-ledger:save-data", data);
   },
+  saveBackupFile(record) {
+    return ipcRenderer.invoke("home-ledger:save-backup-file", record);
+  },
   saveDocumentFile(record) {
     return ipcRenderer.invoke("home-ledger:save-document-file", record);
   },

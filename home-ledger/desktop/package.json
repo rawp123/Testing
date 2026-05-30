@@ -12,7 +12,8 @@
     "start": "env -u ELECTRON_RUN_AS_NODE electron .",
     "smoke": "env -u ELECTRON_RUN_AS_NODE HOME_LEDGER_DESKTOP_SMOKE=1 electron .",
     "pack:mac": "electron-builder --mac --dir",
-    "pack:mac:dmg": "electron-builder --mac dmg"
+    "pack:mac:dmg": "electron-builder --mac dmg",
+    "check:package": "node scripts/check-packaged-app.cjs"
   },
   "build": {
     "appId": "com.homebasistracker.app",
@@ -22,6 +23,7 @@
     "directories": {
       "output": "../release/mac"
     },
+    "afterPack": "scripts/after-pack.cjs",
     "files": [
       "main.cjs",
       "preload.cjs",
@@ -33,6 +35,7 @@
         "to": "home-ledger",
         "filter": [
           "index.html",
+          "package.json",
           "app.js",
           "model.js",
           "document-storage.js",
