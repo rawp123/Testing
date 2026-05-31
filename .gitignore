@@ -3,6 +3,11 @@ node_modules/
 .DS_Store
 .codex
 home-ledger/release/
+car-care-log/node_modules/
+car-care-log/dist/
+car-care-log/out/
+car-care-log/release/
+car-care-log/*.tsbuildinfo
 
 # Local environments and caches
 .venv/
