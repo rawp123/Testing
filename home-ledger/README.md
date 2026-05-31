@@ -54,6 +54,8 @@ Use **Export & backup > Restore from backup** to replace the current local app r
 
 Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private records.
 
+Only restore backups you created or trust. The app skips several active or executable attachment types during restore, but a full backup can still contain private files and notes.
+
 ## Exports
 
 - **Download CSV** creates a cost record export with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
@@ -102,6 +104,15 @@ npm run smoke:home-ledger:desktop
 npm run pack:home-ledger:mac
 npm run check:home-ledger:mac-package
 git diff --check
+```
+
+From inside the `home-ledger` folder, use the equivalent local aliases:
+
+```bash
+npm run check:model
+npm run smoke:desktop
+npm run pack:mac
+npm run check:mac-package
 ```
 
 ## Private Beta Notes

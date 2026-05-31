@@ -159,12 +159,13 @@ async function runDesktopSmoke(window) {
         const bodyIncludes = (text) => document.body.innerText.includes(text);
 
         assert(window.homeLedgerDesktop?.isDesktop, "Desktop bridge was not available.");
+        window.confirm = () => true;
         await window.homeLedgerDesktop.saveData({ properties: [], projects: [], expenses: [], documents: [] });
         assert(bodyIncludes("Home Basis Tracker"), "App shell did not render.");
 
         await click('[data-action="add-property"]');
         await setValue("name", "Smoke Test Home");
-        await setValue("address", "/Users/private/hidden-home-address");
+        await setValue("address", "123 Smoke Test St, NY 10001, /Users/private/hidden-home-address");
         await setValue("purchaseDate", "2020-05-01");
         await setValue("purchasePrice", "425000");
         await submit('[data-form="property"]');
@@ -241,6 +242,17 @@ async function runDesktopSmoke(window) {
         assert(savedData.documents.length === 1, "Expected one saved document.");
         assert(savedData.properties[0].address.includes("[local file path removed]"), "Local path stripping was not applied to saved data.");
 
+        await click('[data-tab="property"]');
+        await click('[data-action="add-property"]');
+        await setValue("name", "Temporary delete test");
+        await submit('[data-form="property"]');
+        await waitFor(() => bodyIncludes("Temporary delete test"), "temporary property save");
+        await click('[data-action="delete-property"]');
+        await waitFor(() => bodyIncludes("Property deleted.") && !bodyIncludes("Temporary delete test"), "property delete");
+        const afterDeleteData = await window.homeLedgerDesktop.loadData();
+        assert(afterDeleteData.properties.length === 1, "Property delete should leave the original test property only.");
+        assert(afterDeleteData.properties[0].name === "Smoke Test Home", "Property delete removed the wrong property.");
+
         return {
           properties: savedData.properties.length,
           projects: savedData.projects.length,
@@ -273,8 +285,10 @@ async function finishDesktopSmoke(code) {
 }
 
 async function ensureStorageReady() {
-  await fs.mkdir(getAppDataDir(), { recursive: true });
-  await fs.mkdir(getDocumentsDir(), { recursive: true });
+  await fs.mkdir(getAppDataDir(), { recursive: true, mode: 0o700 });
+  await fs.mkdir(getDocumentsDir(), { recursive: true, mode: 0o700 });
+  await chmodBestEffort(getAppDataDir(), 0o700);
+  await chmodBestEffort(getDocumentsDir(), 0o700);
 }
 
 async function readJsonFile(filePath, fallback) {
@@ -283,6 +297,12 @@ async function readJsonFile(filePath, fallback) {
     return JSON.parse(text);
   } catch (error) {
     if (error.code === "ENOENT") return fallback;
+    try {
+      const backupText = await fs.readFile(`${filePath}.bak`, "utf8");
+      return JSON.parse(backupText);
+    } catch {
+      // Surface the original read/parse problem so the renderer can block unsafe writes.
+    }
     throw error;
   }
 }
@@ -294,8 +314,27 @@ async function writeJsonFile(filePath, value) {
   }
 
   const tempPath = `${filePath}.tmp`;
+  await preserveReadableJsonBackup(filePath);
   await fs.writeFile(tempPath, text, "utf8");
+  await chmodBestEffort(tempPath, 0o600);
+  await fsyncFileBestEffort(tempPath);
   await fs.rename(tempPath, filePath);
+  await chmodBestEffort(filePath, 0o600);
+  await fsyncDirectoryBestEffort(path.dirname(filePath));
+}
+
+async function preserveReadableJsonBackup(filePath) {
+  try {
+    const currentText = await fs.readFile(filePath, "utf8");
+    JSON.parse(currentText);
+    const backupPath = `${filePath}.bak`;
+    await fs.writeFile(backupPath, currentText, "utf8");
+    await chmodBestEffort(backupPath, 0o600);
+    await fsyncFileBestEffort(backupPath);
+  } catch (error) {
+    if (error.code === "ENOENT" || error instanceof SyntaxError) return;
+    throw error;
+  }
 }
 
 async function readAttachmentsManifest() {
@@ -319,6 +358,42 @@ async function getFileSize(filePath) {
   } catch (error) {
     if (error.code === "ENOENT") return 0;
     throw error;
+  }
+}
+
+async function chmodBestEffort(filePath, mode) {
+  try {
+    await fs.chmod(filePath, mode);
+  } catch {
+    // Some filesystems ignore POSIX modes; storage still works without hiding the main result.
+  }
+}
+
+async function fsyncFileBestEffort(filePath) {
+  let fileHandle;
+  try {
+    fileHandle = await fs.open(filePath, "r");
+    await fileHandle.sync();
+  } catch {
+    // Best-effort crash durability; unsupported platforms should not break normal saves.
+  } finally {
+    if (fileHandle) {
+      await fileHandle.close().catch(() => {});
+    }
+  }
+}
+
+async function fsyncDirectoryBestEffort(directoryPath) {
+  let directoryHandle;
+  try {
+    directoryHandle = await fs.open(directoryPath, "r");
+    await directoryHandle.sync();
+  } catch {
+    // Directory fsync is not available everywhere.
+  } finally {
+    if (directoryHandle) {
+      await directoryHandle.close().catch(() => {});
+    }
   }
 }
 
@@ -443,6 +518,7 @@ function registerIpcHandlers() {
     }
 
     await fs.writeFile(result.filePath, contents, "utf8");
+    await chmodBestEffort(result.filePath, 0o600);
     return { canceled: false };
   });
 
@@ -471,7 +547,11 @@ function registerIpcHandlers() {
     const documentPath = getDocumentPath(id);
     const tempPath = `${documentPath}.tmp`;
     await fs.writeFile(tempPath, buffer);
+    await chmodBestEffort(tempPath, 0o600);
+    await fsyncFileBestEffort(tempPath);
     await fs.rename(tempPath, documentPath);
+    await chmodBestEffort(documentPath, 0o600);
+    await fsyncDirectoryBestEffort(path.dirname(documentPath));
     const manifest = await readAttachmentsManifest();
     manifest.files = [
       storedRecord,

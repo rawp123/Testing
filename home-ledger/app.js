@@ -17,6 +17,7 @@ import {
   getProjectName,
   getPropertyName,
   isDocumentationGap,
+  isValidISODate,
   optionLabel,
   parseAmount,
   MAX_BACKUP_FILE_SIZE,
@@ -54,11 +55,14 @@ let data = EMPTY_DATA;
 let activeTab = "dashboard";
 let selectedPropertyId = "";
 let notice = "";
+let storageWriteBlocked = false;
 let propertyMode = "new";
 let selectedProjectId = "";
 let editingProjectId;
 let editingExpenseId;
 let editingDocumentId;
+let draftDocumentExpenseId = "";
+let documentPreview = null;
 let storageEstimate = {
   status: "idle",
   usage: 0,
@@ -91,6 +95,21 @@ const expenseFilters = {
   sort: "date-desc",
 };
 
+const documentFilters = {
+  propertyId: selectedPropertyId || EMPTY_FILTER,
+  documentType: EMPTY_FILTER,
+  fileStatus: EMPTY_FILTER,
+};
+
+const DOCUMENT_FILE_FILTERS = [
+  { value: "stored", label: "Stored file" },
+  { value: "needs-follow-up", label: "Needs follow-up" },
+  { value: "no-file", label: "No file" },
+];
+
+const BLOCKED_BACKUP_FILE_EXTENSIONS = [".app", ".bat", ".cmd", ".command", ".exe", ".js", ".jse", ".msi", ".ps1", ".scr", ".sh", ".vbs", ".wsf"];
+const BLOCKED_BACKUP_MIME_PREFIXES = ["application/x-ms", "application/x-sh", "text/javascript"];
+
 app.addEventListener("click", handleClick);
 app.addEventListener("submit", handleSubmit);
 app.addEventListener("change", handleChange);
@@ -114,9 +133,11 @@ function renderLoading() {
 async function initializeApp() {
   try {
     data = await loadRecords(STORAGE_KEY);
+    storageWriteBlocked = false;
   } catch {
     data = EMPTY_DATA;
-    notice = "Unable to load local records. You can still start a new local binder.";
+    storageWriteBlocked = true;
+    notice = "Unable to load local records. To protect existing data, new saves are paused until you restore a backup or reopen the app.";
   }
   try {
     storageInfo = await getStorageInfo();
@@ -158,10 +179,11 @@ function render() {
       </nav>
     </header>
     <main class="workspace">
-      ${notice ? `<div class="toast" role="status">${escapeHtml(notice)}</div>` : ""}
+      ${renderToast()}
       <section class="tab-panel" id="${activeTab}-panel" role="tabpanel" aria-labelledby="${activeTab}-tab">
         ${renderActiveTab()}
       </section>
+      ${renderDocumentPreview()}
     </main>
   `;
 }
@@ -190,7 +212,7 @@ function renderDashboard() {
       ${hasRecords ? renderPageIntro({
         eyebrow: "Overview",
         title: "Your home records binder",
-        description: "A local-first summary of projects, expenses, documentation gaps, and records to review with your CPA.",
+        description: "A local-first summary of projects, expenses, documentation follow-ups, and records to review with your CPA.",
         actions: `
           <button class="button button-secondary" data-action="add-expense" type="button"><span aria-hidden="true">+</span>Add expense</button>
           <button class="button button-primary" data-action="open-export" type="button"><span aria-hidden="true">↓</span>Export & backup</button>
@@ -202,7 +224,7 @@ function renderDashboard() {
         ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
         ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
         ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
-        ["Documentation gaps", String(totals.documentationGaps), "blue"],
+        ["Documentation follow-ups", String(getDocumentationAttentionExpenses(data.expenses).length), "blue"],
       ])}
 
       ${renderNotice("Home Basis Tracker helps organize records for review. It is not tax software and does not decide tax treatment. Confirm classifications and records with your CPA.")}
@@ -251,6 +273,7 @@ function renderPropertyView() {
   const selectedProperty = data.properties.find((property) => property.id === selectedPropertyId);
   const propertyProjects = data.projects.filter((project) => project.propertyId === selectedPropertyId);
   const propertyExpenses = data.expenses.filter((expense) => expense.propertyId === selectedPropertyId);
+  const propertyDocuments = data.documents.filter((document) => document.propertyId === selectedPropertyId);
   const totals = getExpenseTotals(propertyExpenses);
 
   return `
@@ -261,6 +284,7 @@ function renderPropertyView() {
         description: "Create a home profile, then connect projects and expenses to that property.",
         actions: `
           ${data.properties.length ? `<button class="button button-secondary" data-action="edit-property" type="button">Edit selected</button>` : ""}
+          ${selectedProperty ? `<button class="button button-danger" data-action="delete-property" data-id="${escapeAttr(selectedProperty.id)}" type="button">Delete selected</button>` : ""}
           <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add property</button>
         `,
       })}
@@ -283,6 +307,7 @@ function renderPropertyView() {
                   ${detailItem("Purchase price", selectedProperty.purchasePrice ? formatCurrency(selectedProperty.purchasePrice) : "Not added")}
                   ${detailItem("Projects", propertyProjects.length)}
                   ${detailItem("Tracked expenses", formatCurrency(totals.total))}
+                  ${detailItem("Documents", propertyDocuments.length)}
                 </dl>
                 ${selectedProperty.notes ? `<p class="notes-block">${escapeHtml(selectedProperty.notes)}</p>` : ""}
               </div>
@@ -291,7 +316,7 @@ function renderPropertyView() {
         </section>
         <section class="panel">
           ${renderPanelHeader(propertyMode === "edit" ? "Edit property" : "Add property", "Only the property name is required. You can fill in purchase details later.", "clipboard")}
-          ${propertyMode === "view" && selectedProperty ? renderEmpty("Property saved", "Use Edit selected to update this property profile.") : renderPropertyForm(propertyMode === "edit" ? selectedProperty : null)}
+          ${propertyMode === "view" && selectedProperty ? renderPropertyNextSteps(selectedProperty) : renderPropertyForm(propertyMode === "edit" ? selectedProperty : null)}
         </section>
       </div>
     </div>
@@ -426,7 +451,19 @@ function renderExpensesView() {
 }
 
 function renderDocumentsView() {
-  const documentationGaps = data.expenses.filter(isDocumentationGap);
+  const documentationGaps = getDocumentationAttentionExpenses(data.expenses).filter((expense) => {
+    if (documentFilters.propertyId !== EMPTY_FILTER && expense.propertyId !== documentFilters.propertyId) return false;
+    return true;
+  });
+  const filteredDocuments = data.documents.filter((document) => {
+    if (documentFilters.propertyId !== EMPTY_FILTER && document.propertyId !== documentFilters.propertyId) return false;
+    if (documentFilters.documentType !== EMPTY_FILTER && document.documentType !== documentFilters.documentType) return false;
+    if (documentFilters.fileStatus !== EMPTY_FILTER && getDocumentFileStatus(document) !== documentFilters.fileStatus) return false;
+    return true;
+  });
+  const hasDocumentsForCurrentProperty = data.documents.some((document) =>
+    documentFilters.propertyId === EMPTY_FILTER || document.propertyId === documentFilters.propertyId
+  );
   const editingDocument = editingDocumentId === null ? null : data.documents.find((document) => document.id === editingDocumentId);
 
   return `
@@ -448,19 +485,26 @@ function renderDocumentsView() {
       ` : ""}
       <div class="content-grid two-columns">
         <section class="panel">
-          ${renderPanelHeader("Missing documentation", "Expenses marked no document yet or needs follow-up.", "alert")}
+          ${renderPanelHeader("Documentation follow-up", "Expenses missing documents or marked attached without a linked stored receipt/invoice.", "alert")}
           ${documentationGaps.length
             ? renderDocumentationGapsTable(documentationGaps)
             : data.properties.length
-              ? renderEmpty("No open documentation gaps", "Expenses with missing document status will appear here.")
+              ? renderEmpty("No open documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")
               : renderEmpty("No property yet", "Add a property, then track expenses to build the checklist.")}
         </section>
         <section class="panel">
           ${renderPanelHeader("Documents", "", "document")}
-          ${data.documents.length
-            ? renderDocumentList()
+          <div class="filter-bar document-filters">
+            ${renderFilter("Property", "document.propertyId", documentFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
+            ${renderFilter("Type", "document.documentType", documentFilters.documentType, DOCUMENT_TYPES)}
+            ${renderFilter("File", "document.fileStatus", documentFilters.fileStatus, DOCUMENT_FILE_FILTERS)}
+          </div>
+          ${filteredDocuments.length
+            ? renderDocumentList(filteredDocuments)
             : data.properties.length
-              ? renderEmpty("No documents yet", "Add a simple record for receipts, invoices, permits, photos, or contracts.")
+              ? data.documents.length && hasDocumentsForCurrentProperty
+                ? renderEmpty("No matching documents", "Adjust the document filters to see more records.")
+                : renderEmpty("No documents yet", "Add a simple record for receipts, invoices, permits, photos, or contracts.")
               : renderEmpty("No property yet", "Add a property before attaching documents.")}
         </section>
       </div>
@@ -470,20 +514,17 @@ function renderDocumentsView() {
 
 function renderExportCenter() {
   const totals = getExpenseTotals(data.expenses);
+  const documentationGaps = sortByDateDesc(getDocumentationAttentionExpenses(data.expenses));
   if (!isDesktopMode()) requestStorageEstimate();
 
   return `
     <div class="page-stack">
       ${renderPageIntro({
         eyebrow: "Export & backup",
-        title: "Share a clean records summary with your CPA",
-        description: "Create a CSV of saved expenses and print a summary view for professional review.",
-        actions: `
-          <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
-          <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>Download CSV</button>
-        `,
+        title: "Export records and keep backups",
+        description: "Create CPA review files from saved records, then keep a separate private backup for yourself.",
       })}
-      ${renderNotice("CSV and print include record details only. Full backup includes records and may include attached files. Review exports before sharing.", "print-hidden")}
+      ${renderCpaExportPanel()}
       ${renderStorageHealthPanel()}
       ${renderBackupRestorePanel()}
       ${renderDataSafetyPanel()}
@@ -503,6 +544,10 @@ function renderExportCenter() {
         <div class="export-section">
           <h3>Expense detail</h3>
           ${data.expenses.length ? renderExportExpensesTable() : renderEmpty("No expenses to export", "Add expense records to build the CSV and review summary.")}
+        </div>
+        <div class="export-section">
+          <h3>Documentation follow-ups</h3>
+          ${documentationGaps.length ? renderExportDocumentationGapsTable(documentationGaps) : renderEmpty("No open documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")}
         </div>
         <div class="export-section">
           <h3>Documents</h3>
@@ -539,6 +584,19 @@ function renderDataSafetyPanel() {
   `;
 }
 
+function renderCpaExportPanel() {
+  return `
+    <section class="panel print-hidden">
+      ${renderPanelHeader("For CPA review", "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
+      <div class="backup-actions">
+        <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
+        <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>Download expense CSV</button>
+      </div>
+      <p class="helper-note">Review exports before sharing. Classifications are for organization and CPA discussion only.</p>
+    </section>
+  `;
+}
+
 function renderStorageHealthPanel() {
   const attachedDocuments = data.documents.filter((document) => document.hasFile);
   const attachedFileSize = attachedDocuments.reduce((total, document) => total + (Number(document.fileSize) || 0), 0);
@@ -565,7 +623,7 @@ function renderStorageHealthPanel() {
 function renderBackupRestorePanel() {
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("Backup and restore", `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
+      ${renderPanelHeader("For your backup", `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
       <div class="backup-actions">
         <button class="button button-primary" data-action="download-full-backup" type="button">${isDesktopMode() ? "Save full backup" : "Download full backup"}</button>
         <button class="button button-secondary" data-action="choose-backup-file" type="button">Restore from backup</button>
@@ -662,6 +720,20 @@ function renderPropertyForm(property) {
   `;
 }
 
+function renderPropertyNextSteps(property) {
+  return `
+    <div class="next-step-panel">
+      <strong>${escapeHtml(property.name)} is ready.</strong>
+      <span>Add projects first if you want to group related costs, or enter expenses directly and organize them later.</span>
+      <div class="next-step-actions">
+        <button class="button button-primary" data-action="add-project" type="button"><span aria-hidden="true">+</span>Add project</button>
+        <button class="button button-secondary" data-action="add-expense" type="button"><span aria-hidden="true">+</span>Add expense</button>
+        <button class="button button-secondary" data-action="add-document" type="button"><span aria-hidden="true">+</span>Add document</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderProjectForm(project) {
   return `
     <form class="form-grid" data-form="project" novalidate>
@@ -706,6 +778,7 @@ function renderExpenseForm(expense) {
         ${selectField("Review type", "classification", expense?.classification || "unclear / ask CPA", CLASSIFICATIONS, false)}
         ${selectField("Category", "category", expense?.category || "other", EXPENSE_CATEGORIES, false)}
       </div>
+      <p class="helper-note">Examples: roof replacement or an addition might be a potential basis addition; a service visit or small repair might be repair/maintenance. Use unclear when you want your CPA to decide.</p>
       ${selectField("Documentation status", "documentationStatus", expense?.documentationStatus || "no document yet", DOCUMENT_STATUSES, false)}
       <p class="helper-note">Use your best guess for sorting only. Your CPA should make the final call.</p>
       ${textarea("Notes", "notes", expense?.notes || "")}
@@ -715,9 +788,13 @@ function renderExpenseForm(expense) {
 }
 
 function renderDocumentForm(document) {
-  const propertyId = document?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
+  const draftExpense = !document && draftDocumentExpenseId
+    ? data.expenses.find((expense) => expense.id === draftDocumentExpenseId)
+    : null;
+  const propertyId = draftExpense?.propertyId || document?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
   const projectOptions = data.projects.filter((project) => project.propertyId === propertyId);
   const expenseOptions = data.expenses.filter((expense) => expense.propertyId === propertyId);
+  const selectedExpenseId = document?.expenseId || draftExpense?.id || "";
   const fileHelper = document?.hasFile
     ? `Current file: ${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)}). Choose a new file to replace it.`
     : `Attached files are saved locally ${storageLocationShort()}. They are not uploaded.`;
@@ -725,15 +802,14 @@ function renderDocumentForm(document) {
   return `
     <form class="form-grid" data-form="document" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="id" value="${escapeAttr(document?.id || "")}">
+      ${selectField("Related expense", "expenseId", selectedExpenseId, expenseOptions.map((expense) => ({ value: expense.id, label: `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}` })))}
+      <p class="helper-note">Choosing an expense sets the property and project for this document.</p>
       <div class="form-row">
         ${selectField("Property", "propertyId", propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })), false)}
         ${selectField("Document type", "documentType", document?.documentType || "receipt", DOCUMENT_TYPES, false)}
       </div>
       ${field("Display name", "displayName", document?.displayName || "", { required: true })}
-      <div class="form-row">
-        ${selectField("Project", "projectId", document?.projectId || "", projectOptions.map((project) => ({ value: project.id, label: project.name })))}
-        ${selectField("Related expense", "expenseId", document?.expenseId || "", expenseOptions.map((expense) => ({ value: expense.id, label: `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}` })))}
-      </div>
+      ${selectField("Project", "projectId", draftExpense?.projectId || document?.projectId || "", projectOptions.map((project) => ({ value: project.id, label: project.name })))}
       ${field("Added date", "addedDate", document?.addedDate || todayISO(), { type: "date", required: true })}
       <label class="field file-field">
         <span>Attach file</span>
@@ -783,18 +859,22 @@ function renderExpensesTable(expenses) {
 }
 
 function renderDocumentationGapsTable(expenses) {
-  return table(["Date", "Expense", "Status", "Amount"], expenses.map((expense) => [
+  return table(["Date", "Expense", "Status", "Amount", "Actions"], expenses.map((expense) => [
     formatDate(expense.date),
     `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
-    documentationPill(expense.documentationStatus),
+    `${documentationPill(expense.documentationStatus)}<span>${escapeHtml(getExpenseDocumentationIssue(expense))}</span>`,
     `<span class="money">${formatCurrency(expense.amount)}</span>`,
+    `<div class="row-actions text-actions">
+      <button class="text-action" data-action="add-document-for-expense" data-id="${escapeAttr(expense.id)}" type="button">Add document</button>
+      <button class="text-action" data-action="edit-expense" data-id="${escapeAttr(expense.id)}" type="button">Edit</button>
+    </div>`,
   ]));
 }
 
-function renderDocumentList() {
+function renderDocumentList(documents = data.documents) {
   return `
     <div class="document-list">
-      ${data.documents.map((document) => `
+      ${documents.map((document) => `
         <article class="document-card">
           <div>
             <h3>${escapeHtml(document.displayName)}</h3>
@@ -805,6 +885,7 @@ function renderDocumentList() {
           </div>
           <div class="document-actions">
             ${document.hasFile ? `
+              <button class="button button-primary" data-action="preview-document-file" data-id="${escapeAttr(document.id)}" type="button">Preview</button>
               <button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(document.id)}" type="button">Download file</button>
               <button class="button button-secondary" data-action="remove-document-file" data-id="${escapeAttr(document.id)}" type="button">Remove file</button>
             ` : ""}
@@ -814,6 +895,35 @@ function renderDocumentList() {
       `).join("")}
     </div>
   `;
+}
+
+function getDocumentFileStatus(document) {
+  if (document.hasFile) return "stored";
+  if (document.fileStatusNote) return "needs-follow-up";
+  return "no-file";
+}
+
+function getDocumentationAttentionExpenses(expenses) {
+  return expenses.filter((expense) => Boolean(getExpenseDocumentationIssue(expense)));
+}
+
+function getExpenseDocumentationIssue(expense) {
+  if (isDocumentationGap(expense)) {
+    return "Needs a receipt, invoice, or follow-up note.";
+  }
+  if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) {
+    return "";
+  }
+
+  const expectedType = expense.documentationStatus === "invoice attached" ? "invoice" : "receipt";
+  const hasLinkedStoredDocument = data.documents.some((document) =>
+    document.expenseId === expense.id &&
+    document.hasFile &&
+    document.documentType === expectedType
+  );
+  if (hasLinkedStoredDocument) return "";
+
+  return `Marked ${optionLabel(DOCUMENT_STATUSES, expense.documentationStatus).toLowerCase()}, but no linked stored ${expectedType} is in this binder.`;
 }
 
 function renderDocumentFileMeta(document) {
@@ -831,6 +941,79 @@ function renderDocumentFileMeta(document) {
       <span class="file-meta">${escapeHtml(document.fileName || "Attached file")} / ${escapeHtml(type)} / ${formatFileSize(document.fileSize)}</span>
     </p>
   `;
+}
+
+function renderDocumentPreview() {
+  if (!documentPreview) return "";
+
+  const documentRecord = data.documents.find((document) => document.id === documentPreview.documentId);
+  if (!documentRecord) return "";
+
+  const title = documentRecord.displayName || documentPreview.fileName || "Document preview";
+  const canPreview = documentPreview.status === "ready" && isPreviewableStoredFile(documentRecord, documentPreview.mimeType);
+  const canRunOcr = documentPreview.status === "ready" && canOcrStoredFile(documentRecord, documentPreview.mimeType);
+  const isPdf = canPreview && isPdfFile(documentRecord, documentPreview.mimeType);
+  const isImage = canPreview && isImageFile(documentRecord, documentPreview.mimeType);
+  const ocrCopy = getOcrStatusCopy();
+
+  return `
+    <div class="modal-backdrop" role="presentation">
+      <section class="document-preview-modal" role="dialog" aria-modal="true" aria-labelledby="document-preview-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Document preview</p>
+            <h2 id="document-preview-title">${escapeHtml(title)}</h2>
+            <p>${escapeHtml(documentPreview.fileName || documentRecord.fileName || "Attached file")} / ${escapeHtml(documentPreview.mimeType || documentRecord.mimeType || "Unknown type")}</p>
+          </div>
+          <button class="icon-button" data-action="close-document-preview" type="button" aria-label="Close">×</button>
+        </div>
+
+        <div class="document-preview-grid">
+          <div class="document-preview-frame">
+            ${documentPreview.status === "loading" ? `<div class="preview-empty">Loading stored file...</div>` : ""}
+            ${documentPreview.status === "error" ? `<div class="preview-empty">${escapeHtml(documentPreview.error || "The stored file could not be opened.")}</div>` : ""}
+            ${documentPreview.status === "ready" && isImage ? `<img src="${escapeAttr(documentPreview.objectUrl)}" alt="${escapeAttr(title)}">` : ""}
+            ${documentPreview.status === "ready" && isPdf ? `<iframe title="${escapeAttr(title)}" src="${escapeAttr(documentPreview.objectUrl)}"></iframe>` : ""}
+            ${documentPreview.status === "ready" && !canPreview ? `
+              <div class="preview-empty">
+                <strong>Preview unavailable</strong>
+                <span>This file type cannot be previewed in the app. You can still download the stored copy.</span>
+              </div>
+            ` : ""}
+          </div>
+
+          <form class="preview-side-panel" data-form="document-preview-notes" novalidate>
+            <input type="hidden" name="id" value="${escapeAttr(documentRecord.id)}">
+            ${textarea("Document notes", "notes", documentRecord.notes || "")}
+            <label class="field">
+              <span>Local OCR text</span>
+              <textarea name="ocrText" rows="8">${escapeHtml(documentRecord.ocrText || documentPreview.ocrText || "")}</textarea>
+            </label>
+            ${ocrCopy ? `<p class="helper-note">${escapeHtml(ocrCopy)}</p>` : ""}
+            <div class="form-actions preview-actions">
+              <button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(documentRecord.id)}" type="button">Download file</button>
+              <button class="button button-secondary" data-action="run-document-ocr" data-id="${escapeAttr(documentRecord.id)}" ${canRunOcr && documentPreview.ocrStatus !== "running" ? "" : "disabled"} type="button">Run local OCR</button>
+              <button class="button button-primary" type="submit">Save notes</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function getOcrStatusCopy() {
+  if (!documentPreview) return "";
+  const documentRecord = data.documents.find((document) => document.id === documentPreview.documentId);
+  if (documentPreview.ocrStatus === "running") {
+    return `Reading image locally... ${Math.round((documentPreview.ocrProgress || 0) * 100)}%`;
+  }
+  if (documentPreview.ocrStatus === "done") return "OCR text saved locally with this document record.";
+  if (documentPreview.ocrStatus === "error") return documentPreview.ocrError || "OCR could not read this file.";
+  if (documentPreview.status === "ready" && !canOcrStoredFile(documentRecord, documentPreview.mimeType)) {
+    return "Local OCR is available for image files in this version. PDF OCR can be added later.";
+  }
+  return "OCR runs locally in this app. It does not upload the file.";
 }
 
 function renderProjectDetail(project) {
@@ -888,6 +1071,18 @@ function renderExportExpensesTable() {
   ]));
 }
 
+function renderExportDocumentationGapsTable(expenses) {
+  return table(["Date", "Property", "Project", "Expense", "Status", "Issue", "Amount"], expenses.map((expense) => [
+    escapeHtml(formatDate(expense.date)),
+    escapeHtml(getPropertyName(data, expense.propertyId)),
+    escapeHtml(getProjectName(data, expense.projectId)),
+    `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
+    escapeHtml(optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)),
+    escapeHtml(getExpenseDocumentationIssue(expense)),
+    `<span class="money">${formatCurrency(expense.amount)}</span>`,
+  ]));
+}
+
 function renderExportDocumentsTable() {
   return table(["Document", "Property", "Project", "Related expense", "Type", "Stored file", "Added"], data.documents.map((document) => {
     const relatedExpense = data.expenses.find((expense) => expense.id === document.expenseId);
@@ -923,6 +1118,8 @@ async function handleClick(event) {
     propertyMode = "new";
   } else if (action === "edit-property") {
     propertyMode = "edit";
+  } else if (action === "delete-property") {
+    await deleteProperty(id);
   } else if (action === "add-project") {
     activeTab = "projects";
     editingProjectId = null;
@@ -939,6 +1136,7 @@ async function handleClick(event) {
     activeTab = "expenses";
     editingExpenseId = null;
   } else if (action === "edit-expense") {
+    activeTab = "expenses";
     editingExpenseId = id;
   } else if (action === "delete-expense") {
     await deleteExpense(id);
@@ -947,16 +1145,33 @@ async function handleClick(event) {
   } else if (action === "add-document") {
     activeTab = "documents";
     editingDocumentId = null;
+    draftDocumentExpenseId = "";
+  } else if (action === "add-document-for-expense") {
+    activeTab = "documents";
+    editingDocumentId = null;
+    draftDocumentExpenseId = id;
   } else if (action === "edit-document") {
     editingDocumentId = id;
+    draftDocumentExpenseId = "";
   } else if (action === "delete-document") {
     await deleteDocument(id);
+  } else if (action === "preview-document-file") {
+    await openDocumentPreview(id);
+    return;
+  } else if (action === "close-document-preview") {
+    closeDocumentPreview();
+    render();
+    return;
+  } else if (action === "run-document-ocr") {
+    await runDocumentOcr(id);
+    return;
   } else if (action === "download-document-file") {
     await downloadDocumentAttachment(id);
   } else if (action === "remove-document-file") {
     await removeDocumentAttachment(id);
   } else if (action === "close-document-form") {
     editingDocumentId = undefined;
+    draftDocumentExpenseId = "";
   } else if (action === "open-export") {
     activeTab = "export";
   } else if (action === "download-csv") {
@@ -999,12 +1214,16 @@ function handleChange(event) {
     projectFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
     expenseFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
     expenseFilters.projectId = EMPTY_FILTER;
+    documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
   } else if (filter.startsWith("project.")) {
     projectFilters[filter.replace("project.", "")] = control.value;
   } else if (filter.startsWith("expense.")) {
     const key = filter.replace("expense.", "");
     expenseFilters[key] = control.value;
     if (key === "propertyId") expenseFilters.projectId = EMPTY_FILTER;
+  } else if (filter.startsWith("document.")) {
+    const key = filter.replace("document.", "");
+    documentFilters[key] = control.value;
   }
 
   render();
@@ -1076,10 +1295,16 @@ async function handleSubmit(event) {
   if (formType === "project") await saveProject(values);
   if (formType === "expense") await saveExpense(values);
   if (formType === "document") await saveDocument(values, formData.get("file"));
+  if (formType === "document-preview-notes") await saveDocumentPreviewNotes(values);
 }
 
 async function saveProperty(values) {
-  if (!values.name?.trim()) return showNotice("Property name is required.");
+  const form = app.querySelector('[data-form="property"]');
+  if (!values.name?.trim()) return showFormNotice(form, "name", "Property name is required.");
+  const addressNotice = getAddressSanityNotice(values.address);
+  if (addressNotice) return showFormNotice(form, "address", addressNotice);
+  if (values.purchaseDate && !isValidISODate(values.purchaseDate)) return showFormNotice(form, "purchaseDate", "Enter a valid purchase date.");
+  if (values.purchasePrice && parseAmount(values.purchasePrice) < 0) return showFormNotice(form, "purchasePrice", "Purchase price cannot be negative.");
   const property = {
     id: values.id || createId("property"),
     name: removeLocalPaths(values.name).trim(),
@@ -1095,9 +1320,49 @@ async function saveProperty(values) {
   showNotice("Property saved.");
 }
 
+function getAddressSanityNotice(value) {
+  const address = removeLocalPaths(value || "").trim();
+  if (!address) return "";
+
+  const compactAddress = address.replace(/\s+/g, " ");
+  const lowerAddress = compactAddress.toLowerCase();
+  const hasLetter = /[a-z]/i.test(compactAddress);
+  const hasStreetNumber = /\b\d{1,8}[a-z]?\b/i.test(compactAddress);
+  const hasPostalCode = /\b\d{5}(?:-\d{4})?\b/.test(compactAddress);
+  const hasPoBox = /\b(?:p\.?\s*o\.?\s*box|post office box)\s+\d+/i.test(compactAddress);
+  const hasRuralRoute = /\b(?:rr|rural route|route|highway|hwy)\s+\d+/i.test(compactAddress);
+  const hasSeparator = /[,#\n]/.test(address);
+  const hasStreetWord = /\b(?:aly|alley|ave|avenue|blvd|boulevard|cir|circle|ct|court|cv|cove|dr|drive|hwy|highway|ln|lane|loop|pkwy|parkway|pl|place|rd|road|sq|square|st|street|ter|terrace|trl|trail|way)\b\.?/i.test(compactAddress);
+  const hasStateAndZip = /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(compactAddress);
+
+  if (compactAddress.length < 8 || !hasLetter) {
+    return "Enter a recognizable property address, or leave the address blank for now.";
+  }
+  if (/^(.)\1{7,}$/.test(compactAddress.replace(/\s/g, ""))) {
+    return "Enter a recognizable property address, or leave the address blank for now.";
+  }
+  if (/(?:https?:\/\/|www\.|@)/i.test(compactAddress)) {
+    return "Enter the property address only. Web links and email addresses do not belong in this field.";
+  }
+  if (!hasPoBox && !hasRuralRoute && !(hasStreetNumber && (hasStreetWord || hasSeparator || hasPostalCode))) {
+    return "Include a street number and street name, or leave the address blank for now.";
+  }
+  if (lowerAddress.includes("test") && !hasPostalCode && !hasStateAndZip) {
+    return "Use the real property address, or leave the address blank for now.";
+  }
+
+  return "";
+}
+
 async function saveProject(values) {
-  if (!values.propertyId) return showNotice("Property is required.");
-  if (!values.name?.trim()) return showNotice("Project name is required.");
+  const form = app.querySelector('[data-form="project"]');
+  if (!values.propertyId) return showFormNotice(form, "propertyId", "Property is required.");
+  if (!values.name?.trim()) return showFormNotice(form, "name", "Project name is required.");
+  if (values.startDate && !isValidISODate(values.startDate)) return showFormNotice(form, "startDate", "Enter a valid start date.");
+  if (values.completionDate && !isValidISODate(values.completionDate)) return showFormNotice(form, "completionDate", "Enter a valid completion date.");
+  if (values.startDate && values.completionDate && values.completionDate < values.startDate) {
+    return showFormNotice(form, "completionDate", "Completion date cannot be before the start date.");
+  }
   const project = {
     id: values.id || createId("project"),
     propertyId: values.propertyId,
@@ -1133,11 +1398,13 @@ async function saveProject(values) {
 }
 
 async function saveExpense(values) {
-  if (!values.propertyId) return showNotice("Property is required.");
-  if (!values.date) return showNotice("Date is required.");
-  if (!values.vendor?.trim()) return showNotice("Vendor or payee is required.");
-  if (!values.description?.trim()) return showNotice("Description is required.");
-  if (parseAmount(values.amount) <= 0) return showNotice("Enter an amount greater than zero.");
+  const form = app.querySelector('[data-form="expense"]');
+  if (!values.propertyId) return showFormNotice(form, "propertyId", "Property is required.");
+  if (!values.date) return showFormNotice(form, "date", "Date is required.");
+  if (!isValidISODate(values.date)) return showFormNotice(form, "date", "Enter a valid expense date.");
+  if (!values.vendor?.trim()) return showFormNotice(form, "vendor", "Vendor or payee is required.");
+  if (!values.description?.trim()) return showFormNotice(form, "description", "Description is required.");
+  if (parseAmount(values.amount) <= 0) return showFormNotice(form, "amount", "Enter an amount greater than zero.");
 
   const projectId = data.projects.some((project) => project.id === values.projectId && project.propertyId === values.propertyId)
     ? values.projectId
@@ -1173,14 +1440,16 @@ async function saveExpense(values) {
 
 async function saveDocument(values, file) {
   const hasSelectedFile = file && file.size > 0;
-  if (!values.propertyId) return showNotice("Property is required.");
-  if (!values.displayName?.trim()) return showNotice("Display name is required.");
-  if (!values.addedDate) return showNotice("Added date is required.");
+  const form = app.querySelector('[data-form="document"]');
+  if (!values.propertyId) return showFormNotice(form, "propertyId", "Property is required.");
+  if (!values.displayName?.trim()) return showFormNotice(form, "displayName", "Display name is required.");
+  if (!values.addedDate) return showFormNotice(form, "addedDate", "Added date is required.");
+  if (!isValidISODate(values.addedDate)) return showFormNotice(form, "addedDate", "Enter a valid added date.");
   if (hasSelectedFile && file.size > MAX_DOCUMENT_FILE_SIZE) {
-    return showNotice(`Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this beta.`);
+    return showFormNotice(form, "file", `Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this beta.`);
   }
   if (hasSelectedFile && !canStoreDocuments()) {
-    return showNotice(`Attached file storage is not available in this ${storageSurfaceName().toLowerCase()}.`);
+    return showFormNotice(form, "file", `Attached file storage is not available in this ${storageSurfaceName().toLowerCase()}.`);
   }
 
   const linkedExpense = data.expenses.find((expense) => expense.id === values.expenseId);
@@ -1225,7 +1494,7 @@ async function saveDocument(values, file) {
         fileStoredAt: storedFile.storedAt,
       };
     } catch (error) {
-      return showNotice(getDocumentStorageError(error));
+      return showFormNotice(form, "file", getDocumentStorageError(error));
     }
   }
 
@@ -1238,6 +1507,7 @@ async function saveDocument(values, file) {
     documentType: values.documentType,
     addedDate: values.addedDate,
     notes: removeLocalPaths(values.notes).trim(),
+    ocrText: existingDocument?.ocrText || "",
     ...fileMetadata,
   };
 
@@ -1278,6 +1548,7 @@ async function saveDocument(values, file) {
 
   selectedPropertyId = documentRecord.propertyId;
   editingDocumentId = undefined;
+  draftDocumentExpenseId = "";
   resetStorageEstimate();
 
   if (newlySavedFileId && previousFileId && previousFileId !== newlySavedFileId) {
@@ -1290,6 +1561,242 @@ async function saveDocument(values, file) {
   }
 
   showNotice(documentRecord.hasFile ? "Document and local file saved." : "Document saved.");
+}
+
+async function openDocumentPreview(documentId) {
+  const documentRecord = data.documents.find((document) => document.id === documentId);
+  if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
+
+  closeDocumentPreview({ renderAfterClose: false });
+  documentPreview = {
+    documentId,
+    status: "loading",
+    objectUrl: "",
+    fileName: documentRecord.fileName || "",
+    mimeType: documentRecord.mimeType || "",
+    ocrStatus: "idle",
+    ocrProgress: 0,
+    ocrText: documentRecord.ocrText || "",
+  };
+  render();
+
+  try {
+    const storedFile = await getDocumentFile(documentRecord.fileId || documentRecord.id);
+    if (!storedFile?.blob) {
+      await markDocumentFileMissing(documentRecord);
+      documentPreview = {
+        ...documentPreview,
+        status: "error",
+        error: `The file metadata is saved, but the stored file is missing. It may have been cleared from ${storageSurfaceName().toLowerCase()} storage.`,
+      };
+      render();
+      return;
+    }
+
+    documentPreview = {
+      ...documentPreview,
+      status: "ready",
+      objectUrl: URL.createObjectURL(storedFile.blob),
+      fileName: documentRecord.fileName || storedFile.name || "Attached file",
+      mimeType: documentRecord.mimeType || storedFile.type || storedFile.blob.type || "application/octet-stream",
+      fileSize: documentRecord.fileSize || storedFile.size || storedFile.blob.size || 0,
+    };
+    render();
+  } catch (error) {
+    documentPreview = {
+      ...documentPreview,
+      status: "error",
+      error: getDocumentStorageError(error),
+    };
+    render();
+  }
+}
+
+function closeDocumentPreview({ renderAfterClose = false } = {}) {
+  if (documentPreview?.objectUrl) {
+    URL.revokeObjectURL(documentPreview.objectUrl);
+  }
+  documentPreview = null;
+  if (renderAfterClose) render();
+}
+
+async function saveDocumentPreviewNotes(values) {
+  const documentId = values.id || documentPreview?.documentId || "";
+  const documentRecord = data.documents.find((document) => document.id === documentId);
+  if (!documentRecord) return showNotice("Document was not found.");
+
+  const saved = await updateData({
+    ...data,
+    documents: data.documents.map((document) =>
+      document.id === documentId
+        ? {
+            ...document,
+            notes: removeLocalPaths(values.notes || "").trim(),
+            ocrText: removeLocalPaths(values.ocrText || "").trim(),
+          }
+        : document,
+    ),
+  });
+  if (!saved) return;
+  if (documentPreview?.documentId === documentId) {
+    documentPreview = {
+      ...documentPreview,
+      ocrText: removeLocalPaths(values.ocrText || "").trim(),
+      ocrStatus: documentPreview.ocrStatus === "running" ? "running" : "idle",
+    };
+  }
+  showNotice("Document notes saved.");
+}
+
+async function runDocumentOcr(documentId) {
+  const documentRecord = data.documents.find((document) => document.id === documentId);
+  if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
+  if (!canOcrStoredFile(documentRecord, documentPreview?.mimeType)) {
+    return showNotice("Local OCR is available for image files in this version.");
+  }
+
+  if (!documentPreview || documentPreview.documentId !== documentId) {
+    await openDocumentPreview(documentId);
+  }
+  if (!documentPreview || documentPreview.status !== "ready") return;
+
+  documentPreview = {
+    ...documentPreview,
+    ocrStatus: "running",
+    ocrProgress: 0,
+    ocrError: "",
+  };
+  render();
+
+  try {
+    const storedFile = await getDocumentFile(documentRecord.fileId || documentRecord.id);
+    if (!storedFile?.blob) throw new Error("The stored file is missing.");
+    const text = await recognizeDocumentText(storedFile.blob, (progress) => {
+      if (!documentPreview || documentPreview.documentId !== documentId) return;
+      documentPreview = {
+        ...documentPreview,
+        ocrProgress: progress,
+      };
+      syncOcrStatusCopy();
+    });
+    const cleanText = removeLocalPaths(text || "").trim();
+    const saved = await updateData({
+      ...data,
+      documents: data.documents.map((document) =>
+        document.id === documentId ? { ...document, ocrText: cleanText } : document,
+      ),
+    });
+    if (!saved) return;
+    documentPreview = {
+      ...documentPreview,
+      ocrStatus: "done",
+      ocrProgress: 1,
+      ocrText: cleanText,
+    };
+    showNotice(cleanText ? "OCR text saved with this document." : "OCR finished, but no text was found.");
+  } catch (error) {
+    documentPreview = {
+      ...documentPreview,
+      ocrStatus: "error",
+      ocrError: getOcrError(error),
+    };
+    showNotice(documentPreview.ocrError);
+  }
+}
+
+async function recognizeDocumentText(blob, onProgress) {
+  const { createWorker } = await import("./node_modules/tesseract.js/dist/tesseract.esm.min.js");
+  const worker = await createWorker("eng", 1, {
+    workerPath: new URL("./node_modules/tesseract.js/dist/worker.min.js", import.meta.url).href,
+    corePath: new URL("./node_modules/tesseract.js-core", import.meta.url).href,
+    langPath: new URL("./node_modules/@tesseract.js-data/eng/4.0.0", import.meta.url).href,
+    workerBlobURL: false,
+    cacheMethod: "none",
+    logger(message) {
+      if (message.status === "recognizing text") {
+        onProgress?.(Math.max(0, Math.min(1, Number(message.progress) || 0)));
+      }
+    },
+  });
+
+  try {
+    const result = await worker.recognize(blob);
+    return result?.data?.text || "";
+  } finally {
+    await worker.terminate();
+  }
+}
+
+function syncOcrStatusCopy() {
+  const statusElement = app.querySelector(".preview-side-panel .helper-note");
+  if (statusElement) statusElement.textContent = getOcrStatusCopy();
+}
+
+function getOcrError(error) {
+  const message = String(error?.message || "");
+  if (/worker|wasm|fetch|load/i.test(message)) {
+    return "Local OCR could not start. Reopen the app and try again.";
+  }
+  return "OCR could not read this image.";
+}
+
+function isPreviewableStoredFile(documentRecord, mimeType = "") {
+  return isImageFile(documentRecord, mimeType) || isPdfFile(documentRecord, mimeType);
+}
+
+function canOcrStoredFile(documentRecord, mimeType = "") {
+  return isImageFile(documentRecord, mimeType);
+}
+
+function isImageFile(documentRecord, mimeType = "") {
+  const type = String(mimeType || documentRecord?.mimeType || "").toLowerCase();
+  const name = String(documentRecord?.fileName || "").toLowerCase();
+  return type.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif|tiff?)$/.test(name);
+}
+
+function isPdfFile(documentRecord, mimeType = "") {
+  const type = String(mimeType || documentRecord?.mimeType || "").toLowerCase();
+  const name = String(documentRecord?.fileName || "").toLowerCase();
+  return type === "application/pdf" || name.endsWith(".pdf");
+}
+
+async function deleteProperty(propertyId) {
+  const property = data.properties.find((currentProperty) => currentProperty.id === propertyId);
+  if (!property) return;
+
+  const linkedProjects = data.projects.filter((project) => project.propertyId === propertyId);
+  const linkedExpenses = data.expenses.filter((expense) => expense.propertyId === propertyId);
+  const linkedDocuments = data.documents.filter((document) => document.propertyId === propertyId);
+  const fileIdsToDelete = linkedDocuments
+    .filter((document) => document.hasFile)
+    .map((document) => document.fileId || document.id)
+    .filter(Boolean);
+
+  const confirmation = [
+    `Delete ${property.name} from this app?`,
+    `This removes ${linkedProjects.length} project(s), ${linkedExpenses.length} expense(s), ${linkedDocuments.length} document record(s), and stored document copies for this property.`,
+    "Original files on your computer and any exported backups are not deleted.",
+  ].join("\n\n");
+  if (!window.confirm(confirmation)) return;
+
+  const remainingProperties = data.properties.filter((currentProperty) => currentProperty.id !== propertyId);
+  const saved = await updateData({
+    ...data,
+    properties: remainingProperties,
+    projects: data.projects.filter((project) => project.propertyId !== propertyId),
+    expenses: data.expenses.filter((expense) => expense.propertyId !== propertyId),
+    documents: data.documents.filter((document) => document.propertyId !== propertyId),
+  });
+  if (!saved) return;
+
+  selectedPropertyId = remainingProperties[0]?.id || "";
+  propertyMode = selectedPropertyId ? "view" : "new";
+  resetFiltersAfterRestore();
+  resetStorageEstimate();
+  const cleanup = await deleteFilesBestEffort(fileIdsToDelete);
+  showNotice(cleanup.failed
+    ? "Property deleted. Some stored document files could not be removed from local storage."
+    : "Property deleted.");
 }
 
 async function deleteProject(projectId) {
@@ -1321,7 +1828,9 @@ async function deleteExpense(expenseId) {
 
 async function deleteDocument(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
+  if (!documentRecord) return;
   if (!window.confirm("Delete this document from this app? This removes the stored copy and its note here, but does not delete the original file from your computer or any copies you downloaded.")) return;
+  if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
   const nextDocuments = data.documents.filter((document) => document.id !== documentId);
   const saved = await updateData({
@@ -1366,6 +1875,7 @@ async function removeDocumentAttachment(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
   if (!window.confirm("Remove the stored file from this app? The document record will stay, and this will not delete the original file from your computer or any copies you downloaded.")) return;
+  if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
   const nextDocuments = data.documents.map((document) =>
     document.id === documentId
@@ -1531,7 +2041,7 @@ async function restoreFromBackupFile(file) {
   if (file.size > MAX_BACKUP_FILE_SIZE) {
     return showNotice(`Backup files over ${formatFileSize(MAX_BACKUP_FILE_SIZE)} are not accepted in this beta.`);
   }
-  if (!window.confirm(`Restore this backup and replace all current records ${storageLocationShort()}? This does not upload anything. Download a backup first if you want to keep what is here.`)) return;
+  if (!window.confirm(`Restore this backup and replace all current records ${storageLocationShort()}? Only restore backups you created or trust. This does not upload anything. Download a backup first if you want to keep what is here.`)) return;
 
   let backup;
   try {
@@ -1548,7 +2058,7 @@ async function restoreFromBackupFile(file) {
     return showNotice(getBackupError(error));
   }
 
-  const saved = await updateData(restored.data);
+  const saved = await updateData(restored.data, { allowBlockedWrite: true });
   if (!saved) {
     await deleteFilesBestEffort(restored.newFileIds);
     return;
@@ -1608,6 +2118,11 @@ async function prepareBackupRestore(backup) {
         restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File could not be restored in this app"));
         continue;
       }
+      if (isBlockedBackupAttachment(backupFile)) {
+        skippedFiles += 1;
+        restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File type skipped during restore"));
+        continue;
+      }
       if (isDataUrlTooLarge(backupFile.dataUrl)) {
         skippedFiles += 1;
         restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File too large to restore"));
@@ -1646,6 +2161,7 @@ async function prepareBackupRestore(backup) {
     }
 
     restoredData.documents = restoredDocuments;
+    restoredData.expenses = reconcileRestoredExpenseDocumentation(restoredData.expenses, restoredDocuments);
   } catch (error) {
     await deleteFilesBestEffort(newFileIds);
     throw error;
@@ -1670,6 +2186,37 @@ function stripDocumentFileMetadata(documentRecord, reason) {
     fileLastModified: null,
     fileStoredAt: "",
   };
+}
+
+function reconcileRestoredExpenseDocumentation(expenses, documents) {
+  return expenses.map((expense) => {
+    if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) {
+      return expense;
+    }
+
+    const attachedDocuments = documents.filter((document) =>
+      document.expenseId === expense.id &&
+      document.hasFile &&
+      ["receipt", "invoice"].includes(document.documentType)
+    );
+
+    if (attachedDocuments.some((document) => document.documentType === "invoice")) {
+      return { ...expense, documentationStatus: "invoice attached" };
+    }
+    if (attachedDocuments.some((document) => document.documentType === "receipt")) {
+      return { ...expense, documentationStatus: "receipt attached" };
+    }
+    return { ...expense, documentationStatus: "needs follow-up" };
+  });
+}
+
+function isBlockedBackupAttachment(fileRecord) {
+  const fileName = String(fileRecord?.fileName || "").toLowerCase();
+  const mimeType = String(fileRecord?.mimeType || "").toLowerCase();
+  return (
+    BLOCKED_BACKUP_FILE_EXTENSIONS.some((extension) => fileName.endsWith(extension)) ||
+    BLOCKED_BACKUP_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix))
+  );
 }
 
 async function getExistingDocumentFileIds() {
@@ -1763,6 +2310,9 @@ function normalizeSelectionsAndFilters() {
   if (expenseFilters.propertyId !== EMPTY_FILTER && !propertyIds.has(expenseFilters.propertyId)) {
     expenseFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
   }
+  if (documentFilters.propertyId !== EMPTY_FILTER && !propertyIds.has(documentFilters.propertyId)) {
+    documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+  }
 
   const projectIds = new Set(data.projects.map((project) => project.id));
   if (selectedProjectId && !projectIds.has(selectedProjectId)) {
@@ -1793,6 +2343,9 @@ function resetFiltersAfterRestore() {
   expenseFilters.category = EMPTY_FILTER;
   expenseFilters.documentationStatus = EMPTY_FILTER;
   expenseFilters.sort = "date-desc";
+  documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+  documentFilters.documentType = EMPTY_FILTER;
+  documentFilters.fileStatus = EMPTY_FILTER;
   selectedProjectId = "";
 }
 
@@ -1807,11 +2360,17 @@ function getBackupError(error) {
   return "The backup could not be completed. Check the file and try again.";
 }
 
-async function updateData(nextData) {
+async function updateData(nextData, options = {}) {
+  if (storageWriteBlocked && !options.allowBlockedWrite) {
+    notice = "Saves are paused because local records could not be loaded safely. Restore a backup or reopen the app before making changes.";
+    render();
+    return false;
+  }
   const previousData = data;
   data = sanitizeData(nextData);
   try {
     data = await saveRecords(STORAGE_KEY, data);
+    storageWriteBlocked = false;
   } catch {
     data = previousData;
     notice = `Unable to save locally. Check ${storageSurfaceName()} storage settings before adding more records.`;
@@ -1841,20 +2400,67 @@ function getDocumentStorageError(error) {
   return "The file could not be saved locally. Keep your own backup and try again.";
 }
 
-function showNotice(message) {
+function renderToast() {
+  return notice ? `<div class="toast" role="status">${escapeHtml(notice)}</div>` : "";
+}
+
+function syncNoticeToast() {
+  const workspace = app.querySelector(".workspace");
+  if (!workspace) return;
+
+  const existingToast = workspace.querySelector(".toast");
+  if (!notice) {
+    existingToast?.remove();
+    return;
+  }
+
+  if (existingToast) {
+    existingToast.textContent = notice;
+    return;
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.setAttribute("role", "status");
+  toast.textContent = notice;
+  workspace.prepend(toast);
+}
+
+function showNotice(message, options = {}) {
+  const shouldRender = options.render !== false;
   notice = message;
   window.clearTimeout(showNotice.timer);
   showNotice.timer = window.setTimeout(() => {
     notice = "";
-    render();
+    if (shouldRender) {
+      render();
+    } else {
+      syncNoticeToast();
+    }
   }, 2800);
-  render();
+  if (shouldRender) {
+    render();
+  } else {
+    syncNoticeToast();
+  }
+}
+
+function showFormNotice(form, fieldName, message) {
+  showNotice(message, { render: false });
+  window.requestAnimationFrame(() => {
+    const fieldControl = form?.querySelector(`[name="${fieldName}"]`) || app.querySelector(`[name="${fieldName}"]`);
+    if (!fieldControl) return;
+    fieldControl.focus();
+    fieldControl.setAttribute("aria-invalid", "true");
+    window.setTimeout(() => fieldControl.removeAttribute("aria-invalid"), 2800);
+  });
 }
 
 function closeEditors() {
   editingProjectId = undefined;
   editingExpenseId = undefined;
   editingDocumentId = undefined;
+  draftDocumentExpenseId = "";
   if (data.properties.length && propertyMode !== "view") propertyMode = "view";
 }
 
@@ -1900,7 +2506,7 @@ function renderMetrics(items, className = "") {
 }
 
 function renderNotice(text, className = "") {
-  return `<div class="notice-card ${className}"><span aria-hidden="true">!</span><p>${escapeHtml(text)}</p></div>`;
+  return `<div class="notice-card ${className}"><p>${escapeHtml(text)}</p></div>`;
 }
 
 function renderEmpty(title, text) {
@@ -1990,7 +2596,7 @@ function table(headers, rows) {
           ${rows.map((row) => {
             const rowClass = row[row.length - 1] === "is-selected" ? " class=\"is-selected\"" : "";
             const cells = rowClass ? row.slice(0, -1) : row;
-            return `<tr${rowClass}>${cells.map((cell, index) => `<td class="${index >= cells.length - 2 ? "align-right" : ""}">${cell}</td>`).join("")}</tr>`;
+            return `<tr${rowClass}>${cells.map((cell, index) => `<td class="${index >= cells.length - 2 ? "align-right" : ""}" data-label="${escapeAttr(headers[index] || "")}">${cell}</td>`).join("")}</tr>`;
           }).join("")}
         </tbody>
       </table>
@@ -2009,12 +2615,12 @@ function classificationPill(value) {
 
 function documentationPill(value) {
   const hasDocument = ["receipt attached", "invoice attached"].includes(value);
-  return `<span class="pill ${hasDocument ? "tone-green" : "tone-amber"}">${hasDocument ? "✓" : "!"} ${escapeHtml(optionLabel(DOCUMENT_STATUSES, value))}</span>`;
+  return `<span class="pill ${hasDocument ? "tone-green" : "tone-amber"}">${hasDocument ? "✓ " : ""}${escapeHtml(optionLabel(DOCUMENT_STATUSES, value))}</span>`;
 }
 
 function iconSymbol(name) {
   const symbols = {
-    alert: "!",
+    alert: "△",
     clipboard: "▤",
     document: "◇",
     edit: "✎",

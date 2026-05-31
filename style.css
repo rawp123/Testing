@@ -691,7 +691,7 @@ body[data-page="message-archive-utility"]{
   --mau-border-strong:#d8cfc1;
   --mau-text:#161715;
   --mau-text-body:#4b4a46;
-  --mau-muted:#716a60;
+  --mau-muted:#5f574d;
   --mau-accent:#45625d;
   --mau-accent-strong:#31524d;
   --mau-accent-soft:#f3efe7;
@@ -754,7 +754,7 @@ body[data-page="message-archive-utility"] .container{
   padding:6px 11px;
   border:1px solid transparent;
   border-radius:999px;
-  color:#625b52;
+  color:#514b43;
   text-decoration:none;
   font-size:.84rem;
   font-weight:760;
@@ -792,7 +792,7 @@ body[data-page="message-archive-utility"] .container{
 }
 .mau-kicker{
   margin:0 0 6px;
-  color:#776f65;
+  color:#625a50;
   font-size:11px;
   font-weight:800;
   letter-spacing:.04em;
@@ -872,6 +872,34 @@ body[data-page="message-archive-utility"] .container{
 .mau-badges li{
   padding:5px 8px;
 }
+.mau-proof-strip{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  max-width:620px;
+  margin:6px 0 0;
+}
+.mau-proof-strip div{
+  min-width:0;
+  padding:10px 11px;
+  border:1px solid var(--mau-border);
+  border-radius:12px;
+  background:rgba(255,255,255,.72);
+}
+.mau-proof-strip dt{
+  margin:0;
+  color:var(--mau-text);
+  font-size:.9rem;
+  font-weight:800;
+  line-height:1.2;
+}
+.mau-proof-strip dd{
+  margin:4px 0 0;
+  color:var(--mau-muted);
+  font-size:.75rem;
+  font-weight:750;
+  line-height:1.25;
+}
 .mau-section{
   padding-top:34px;
   padding-bottom:8px;
@@ -907,6 +935,42 @@ body[data-page="message-archive-utility"] .container{
 .mau-faq-grid{
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:12px;
+}
+.mau-offer-layout{
+  display:grid;
+  grid-template-columns:minmax(280px,.48fr) minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+}
+.mau-offer-card{
+  display:grid;
+  align-content:start;
+  gap:12px;
+  padding:18px;
+  border:1px solid var(--mau-border);
+  border-radius:14px;
+  background:linear-gradient(180deg,#ffffff 0%,var(--mau-surface-tint) 100%);
+  box-shadow:var(--mau-shadow-sm);
+}
+.mau-offer-card h3{
+  margin:0;
+  color:var(--mau-text);
+  font-size:clamp(1.22rem,1.8vw,1.55rem);
+  line-height:1.12;
+}
+.mau-offer-card p{
+  margin:0;
+  color:var(--mau-muted);
+  font-weight:650;
+  line-height:1.58;
+}
+.mau-offer-layout .mau-promise-grid{
+  grid-template-columns:1fr;
+}
+.mau-philosophy-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:12px;
 }
 .mau-panel,
@@ -1485,11 +1549,175 @@ body[data-page="message-archive-utility"] .container{
   font-weight:650;
   line-height:1.6;
 }
+.mau-status-card .btn{
+  margin-top:14px;
+}
+.mau-purchase-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,.48fr);
+  gap:14px;
+  padding-top:18px;
+  padding-bottom:18px;
+}
+.mau-purchase-summary,
+.mau-purchase-card{
+  border:1px solid var(--mau-border);
+  border-radius:16px;
+  background:rgba(255,255,255,.84);
+  box-shadow:var(--mau-shadow-sm);
+  padding:22px;
+}
+.mau-purchase-summary{
+  display:grid;
+  align-content:start;
+  gap:12px;
+  background:linear-gradient(180deg,#ffffff 0%,var(--mau-surface-tint) 100%);
+}
+.mau-purchase-summary h2,
+.mau-purchase-card h2{
+  margin:0;
+  color:var(--mau-text);
+  font-size:clamp(1.22rem,2vw,1.72rem);
+  line-height:1.12;
+}
+.mau-purchase-summary p,
+.mau-purchase-card p{
+  margin:0;
+  color:var(--mau-muted);
+  font-weight:650;
+  line-height:1.58;
+}
+.mau-purchase-card{
+  display:grid;
+  gap:14px;
+}
+.mau-placeholder-price{
+  display:grid;
+  gap:3px;
+  border:1px solid var(--mau-border);
+  border-radius:12px;
+  background:#ffffff;
+  padding:12px;
+}
+.mau-placeholder-price span{
+  color:var(--mau-muted);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.mau-placeholder-price strong{
+  color:var(--mau-text);
+  font-size:1.2rem;
+  line-height:1.2;
+}
+.mau-purchase-flow{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.mau-purchase-flow li{
+  display:grid;
+  gap:12px;
+  align-content:start;
+  border:1px solid var(--mau-border);
+  border-radius:14px;
+  background:rgba(255,255,255,.84);
+  box-shadow:var(--mau-shadow-sm);
+  padding:18px;
+}
+.mau-purchase-flow > li > span{
+  display:inline-grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border:1px solid rgba(69,98,93,.16);
+  border-radius:10px;
+  background:var(--mau-accent-soft);
+  color:var(--mau-accent-strong);
+  font-size:13px;
+  font-weight:800;
+}
+.mau-purchase-flow h3{
+  margin:0 0 5px;
+  color:var(--mau-text);
+  font-size:1rem;
+  line-height:1.25;
+}
+.mau-purchase-flow p{
+  margin:0;
+  color:var(--mau-muted);
+  font-size:.92rem;
+  font-weight:600;
+  line-height:1.5;
+}
+.mau-release-note{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:18px;
+}
+.mau-release-card{
+  display:grid;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+  padding:20px;
+  border:1px solid var(--mau-border);
+  border-radius:16px;
+  background:linear-gradient(180deg,#ffffff 0%,var(--mau-surface-tint) 100%);
+  box-shadow:var(--mau-shadow-sm);
+}
+.mau-release-card h2{
+  margin:0 0 10px;
+  color:var(--mau-text);
+  font-size:clamp(1.22rem,2vw,1.72rem);
+  line-height:1.12;
+}
+.mau-release-card p{
+  margin:0;
+  color:var(--mau-muted);
+  font-weight:650;
+  line-height:1.58;
+}
+.mau-release-list{
+  display:grid;
+  gap:8px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.mau-release-list li{
+  display:grid;
+  gap:3px;
+  padding:11px 12px;
+  border:1px solid var(--mau-border);
+  border-radius:12px;
+  background:#ffffff;
+}
+.mau-release-list strong{
+  color:var(--mau-text);
+  font-size:.94rem;
+  line-height:1.25;
+}
+.mau-release-list span{
+  color:var(--mau-muted);
+  font-size:.86rem;
+  font-weight:650;
+  line-height:1.35;
+}
 
 body[data-page="message-archive-utility"] .container,
 .mau-site-header,
 .mau-brand,
 .mau-nav,
+.mau-proof-strip,
+.mau-offer-layout,
+.mau-offer-card,
+.mau-philosophy-grid,
 .mau-panel,
 .mau-format,
 .mau-backup-flow,
@@ -1510,7 +1738,13 @@ body[data-page="message-archive-utility"] .container,
 .mau-process-list,
 .mau-note-panel,
 .mau-availability-layout,
-.mau-status-card{
+.mau-status-card,
+.mau-purchase-layout,
+.mau-purchase-summary,
+.mau-purchase-card,
+.mau-purchase-flow,
+.mau-release-card,
+.mau-release-list{
   min-width:0;
 }
 
@@ -1550,6 +1784,14 @@ body[data-page="message-archive-utility"] .btn.ghost{
 }
 body[data-page="message-archive-utility"] .btn:hover{
   transform:none;
+}
+body[data-page="message-archive-utility"] .btn.is-disabled,
+body[data-page="message-archive-utility"] .btn:disabled{
+  border-color:#d6cec2;
+  background:#ede7df;
+  color:#8a8278;
+  box-shadow:none;
+  cursor:not-allowed;
 }
 body[data-page="message-archive-utility"] .site-footer{
   background:var(--mau-bg);
@@ -1809,6 +2051,8 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
   .mau-promise-grid,
   .mau-format-grid,
   .mau-faq-grid,
+  .mau-offer-layout,
+  .mau-philosophy-grid,
   .mau-steps,
   .mau-backup-flow,
   .mau-split,
@@ -1821,7 +2065,11 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
   .mau-export-grid,
   .mau-use-case-grid,
   .mau-how-layout,
-  .mau-availability-layout{
+  .mau-availability-layout,
+  .mau-purchase-layout,
+  .mau-purchase-flow,
+  .mau-release-card,
+  .mau-release-note{
     grid-template-columns:1fr;
   }
   .mau-before-card{
@@ -1909,6 +2157,10 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
   .mau-actions .btn{
     width:100%;
   }
+  .mau-proof-strip{
+    grid-template-columns:1fr;
+    gap:6px;
+  }
   .mau-section{
     padding-top:30px;
   }
@@ -1924,7 +2176,11 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
   .mau-before-card,
   .mau-process-list li,
   .mau-note-panel,
-  .mau-status-card{
+  .mau-status-card,
+  .mau-purchase-summary,
+  .mau-purchase-card,
+  .mau-purchase-flow li,
+  .mau-release-card{
     border-radius:12px;
     padding:16px;
   }
@@ -2035,7 +2291,11 @@ body[data-page="message-archive-utility"] .site-footer > :first-child{
   .mau-before-card,
   .mau-process-list li,
   .mau-note-panel,
-  .mau-status-card{
+  .mau-status-card,
+  .mau-purchase-summary,
+  .mau-purchase-card,
+  .mau-purchase-flow li,
+  .mau-release-card{
     padding:14px;
   }
   .mau-export-preview{

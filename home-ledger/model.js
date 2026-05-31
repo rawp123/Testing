@@ -3,6 +3,8 @@ export const BACKUP_APP_ID = "home-basis-tracker";
 export const BACKUP_VERSION = 1;
 export const MAX_BACKUP_FILE_SIZE = 500 * 1024 * 1024;
 export const MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024;
+const MAX_RECORDS_PER_TYPE = 5000;
+const MAX_TEXT_LENGTH = 5000;
 
 export const EMPTY_DATA = {
   properties: [],
@@ -71,10 +73,10 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 
 export function sanitizeData(value) {
   const sanitized = {
-    properties: Array.isArray(value?.properties) ? value.properties.map(sanitizeProperty) : [],
-    projects: Array.isArray(value?.projects) ? value.projects.map(sanitizeProject) : [],
-    expenses: Array.isArray(value?.expenses) ? value.expenses.map(sanitizeExpense) : [],
-    documents: Array.isArray(value?.documents) ? value.documents.map(sanitizeDocument) : [],
+    properties: Array.isArray(value?.properties) ? value.properties.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeProperty) : [],
+    projects: Array.isArray(value?.projects) ? value.projects.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeProject) : [],
+    expenses: Array.isArray(value?.expenses) ? value.expenses.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeExpense) : [],
+    documents: Array.isArray(value?.documents) ? value.documents.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeDocument) : [],
   };
   return normalizeRelationships(sanitized);
 }
@@ -82,11 +84,11 @@ export function sanitizeData(value) {
 function sanitizeProperty(property) {
   return {
     id: cleanText(property?.id),
-    name: removeLocalPaths(property?.name || ""),
-    address: removeLocalPaths(property?.address || ""),
+    name: cleanDisplayText(property?.name),
+    address: cleanDisplayText(property?.address),
     purchaseDate: cleanDate(property?.purchaseDate),
-    purchasePrice: parseAmount(property?.purchasePrice),
-    notes: removeLocalPaths(property?.notes || ""),
+    purchasePrice: Math.max(0, parseAmount(property?.purchasePrice)),
+    notes: cleanDisplayText(property?.notes),
   };
 }
 
@@ -94,13 +96,13 @@ function sanitizeProject(project) {
   return {
     id: cleanText(project?.id),
     propertyId: cleanText(project?.propertyId),
-    name: removeLocalPaths(project?.name || ""),
+    name: cleanDisplayText(project?.name),
     category: allowedOptionValue(EXPENSE_CATEGORIES, project?.category, "other"),
     startDate: cleanDate(project?.startDate),
     completionDate: cleanDate(project?.completionDate),
-    contractor: removeLocalPaths(project?.contractor || ""),
+    contractor: cleanDisplayText(project?.contractor),
     status: allowedOptionValue(PROJECT_STATUSES, project?.status, "planned"),
-    notes: removeLocalPaths(project?.notes || ""),
+    notes: cleanDisplayText(project?.notes),
   };
 }
 
@@ -110,13 +112,13 @@ function sanitizeExpense(expense) {
     propertyId: cleanText(expense?.propertyId),
     projectId: cleanText(expense?.projectId),
     date: cleanDate(expense?.date),
-    vendor: removeLocalPaths(expense?.vendor || ""),
-    description: removeLocalPaths(expense?.description || ""),
-    amount: parseAmount(expense?.amount),
+    vendor: cleanDisplayText(expense?.vendor),
+    description: cleanDisplayText(expense?.description),
+    amount: Math.max(0, parseAmount(expense?.amount)),
     classification: allowedOptionValue(CLASSIFICATIONS, expense?.classification, "unclear / ask CPA"),
     category: allowedOptionValue(EXPENSE_CATEGORIES, expense?.category, "other"),
     documentationStatus: allowedOptionValue(DOCUMENT_STATUSES, expense?.documentationStatus, "no document yet"),
-    notes: removeLocalPaths(expense?.notes || ""),
+    notes: cleanDisplayText(expense?.notes),
   };
 }
 
@@ -126,18 +128,19 @@ function sanitizeDocument(document) {
     propertyId: cleanText(document?.propertyId),
     projectId: cleanText(document?.projectId),
     expenseId: cleanText(document?.expenseId),
-    displayName: removeLocalPaths(document?.displayName || ""),
+    displayName: cleanDisplayText(document?.displayName),
     documentType: allowedOptionValue(DOCUMENT_TYPES, document?.documentType, "other"),
     addedDate: cleanDate(document?.addedDate),
-    notes: removeLocalPaths(document?.notes || ""),
+    notes: cleanDisplayText(document?.notes),
+    ocrText: cleanDisplayText(document?.ocrText),
     hasFile: Boolean(document?.hasFile),
     fileId: cleanText(document?.fileId),
-    fileName: removeLocalPaths(document?.fileName || ""),
-    fileStatusNote: removeLocalPaths(document?.fileStatusNote || ""),
-    mimeType: document?.mimeType || "",
+    fileName: cleanDisplayText(document?.fileName),
+    fileStatusNote: cleanDisplayText(document?.fileStatusNote),
+    mimeType: cleanText(document?.mimeType),
     fileSize: Number(document?.fileSize) || 0,
     fileLastModified: document?.fileLastModified || null,
-    fileStoredAt: document?.fileStoredAt || "",
+    fileStoredAt: cleanText(document?.fileStoredAt),
   };
 }
 
@@ -202,12 +205,28 @@ function normalizeRelationships(cleanData) {
 }
 
 function cleanText(value) {
-  return removeLocalPaths(value).trim();
+  return removeLocalPaths(value).trim().slice(0, MAX_TEXT_LENGTH);
+}
+
+function cleanDisplayText(value) {
+  return removeLocalPaths(value || "").trim().slice(0, MAX_TEXT_LENGTH);
 }
 
 function cleanDate(value) {
   const text = String(value || "").trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
+  return isValidISODate(text) ? text : "";
+}
+
+export function isValidISODate(value) {
+  const text = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+  const [year, month, day] = text.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
 }
 
 export function createId(prefix) {
@@ -306,7 +325,8 @@ export function removeLocalPaths(value) {
   return String(value ?? "")
     .replace(/file:\/\/(?:localhost)?\/[^\r\n,;)]*/gi, "[local file path removed]")
     .replace(/~\/[^\r\n,;)]*/g, "[local file path removed]")
-    .replace(/\/(?:Users|Volumes|private|var|tmp|home)\/[^\r\n,;)]*/gi, "[local file path removed]")
+    .replace(/\/(?:Applications|Library|System|Users|Volumes|bin|dev|etc|home|opt|private|sbin|tmp|usr|var)\/[^\r\n,;)]*/gi, "[local file path removed]")
+    .replace(/\.\.?\/(?:[^/\r\n,;)]+\/)*[^/\r\n,;)]*/g, "[local file path removed]")
     .replace(/[A-Z]:\/[^\r\n,;)]*/gi, "[local file path removed]")
     .replace(/[A-Z]:\\[^\r\n,;)]*/gi, "[local file path removed]")
     .replace(/\\\\[^\\/:*?"<>|\r\n]+\\[^\r\n,;)]*/g, "[local file path removed]");
@@ -343,7 +363,7 @@ export function buildExpensesCsv(data) {
     "Notes",
   ];
 
-  const rows = data.expenses.map((expense) => [
+  const rows = sortByDateDesc(data.expenses).map((expense) => [
     getPropertyName(data, expense.propertyId),
     getProjectName(data, expense.projectId),
     expense.category,

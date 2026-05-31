@@ -9,7 +9,9 @@ const rawData = {
     id: "property_1",
     name: "Main home",
     address: "~/Documents/private-address",
-    notes: "See /Users/person/receipt.pdf and C:/Users/person/file.pdf",
+    purchaseDate: "2024-02-31",
+    purchasePrice: "-1",
+    notes: "See /Users/person/receipt.pdf, /Applications/App.app, ../relative/file.pdf, and C:/Users/person/file.pdf",
   }],
   projects: [{
     id: "project_1",
@@ -25,7 +27,7 @@ const rawData = {
     date: "2024-04-02",
     vendor: "=Formula Vendor",
     description: "Cabinets",
-    amount: "1200.50",
+    amount: "-1200.50",
     classification: "potential basis addition",
     category: "kitchen",
     documentationStatus: "receipt attached",
@@ -50,9 +52,12 @@ assert.equal(cleanData.properties.length, 1);
 assert.equal(cleanData.projects.length, 1);
 assert.equal(cleanData.expenses.length, 1);
 assert.equal(cleanData.documents.length, 1);
+assert.equal(cleanData.properties[0].purchaseDate, "");
+assert.equal(cleanData.properties[0].purchasePrice, 0);
+assert.equal(cleanData.expenses[0].amount, 0);
 
 const serializedData = JSON.stringify(cleanData);
-for (const forbidden of ["/Users/", "~/", "C:/", "\\\\Server"]) {
+for (const forbidden of ["/Users/", "~/", "C:/", "\\\\Server", "/Applications/", "../relative"]) {
   assert.equal(serializedData.includes(forbidden), false, `raw path survived sanitizer: ${forbidden}`);
 }
 

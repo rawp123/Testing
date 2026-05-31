@@ -24,6 +24,13 @@ const requiredResources = [
   "document-storage.js",
   "storage-adapter.js",
   "styles.css",
+  "node_modules/tesseract.js/dist/tesseract.esm.min.js",
+  "node_modules/tesseract.js/dist/worker.min.js",
+  "node_modules/tesseract.js-core/tesseract-core.wasm.js",
+  "node_modules/tesseract.js-core/tesseract-core-simd.wasm.js",
+  "node_modules/tesseract.js-core/tesseract-core-lstm.wasm.js",
+  "node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js",
+  "node_modules/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz",
 ];
 const resourcesDir = path.resolve(
   __dirname,

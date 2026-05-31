@@ -43,6 +43,28 @@
           "styles.css",
           "README.md"
         ]
+      },
+      {
+        "from": "../node_modules/tesseract.js/dist",
+        "to": "home-ledger/node_modules/tesseract.js/dist",
+        "filter": [
+          "tesseract.esm.min.js",
+          "worker.min.js"
+        ]
+      },
+      {
+        "from": "../node_modules/tesseract.js-core",
+        "to": "home-ledger/node_modules/tesseract.js-core",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../node_modules/@tesseract.js-data/eng/4.0.0",
+        "to": "home-ledger/node_modules/@tesseract.js-data/eng/4.0.0",
+        "filter": [
+          "eng.traineddata.gz"
+        ]
       }
     ],
     "mac": {

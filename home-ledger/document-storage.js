@@ -128,9 +128,22 @@ function openDatabase() {
         }
       };
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error || new Error("Could not open document storage."));
-      request.onblocked = () => reject(new Error("Document storage is blocked by another open app window or browser tab."));
+      request.onsuccess = () => {
+        const database = request.result;
+        database.onversionchange = () => {
+          database.close();
+          databasePromise = undefined;
+        };
+        resolve(database);
+      };
+      request.onerror = () => {
+        databasePromise = undefined;
+        reject(request.error || new Error("Could not open document storage."));
+      };
+      request.onblocked = () => {
+        databasePromise = undefined;
+        reject(new Error("Document storage is blocked by another open app window or browser tab."));
+      };
     });
   }
 
