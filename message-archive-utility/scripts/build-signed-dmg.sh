@@ -4,7 +4,18 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DESKTOP_DIR="$PROJECT_DIR/desktop"
 APP_VERSION="$(node -p "require(process.argv[1]).version" "$DESKTOP_DIR/package.json")"
-APP_ARCH="$(uname -m)"
+MACHINE_ARCH="$(uname -m)"
+case "$MACHINE_ARCH" in
+  x86_64)
+    APP_ARCH="x64"
+    ;;
+  arm64)
+    APP_ARCH="arm64"
+    ;;
+  *)
+    APP_ARCH="$MACHINE_ARCH"
+    ;;
+esac
 DMG_PATH="$PROJECT_DIR/release/mac/Message Archive Utility-$APP_VERSION-$APP_ARCH.dmg"
 
 has_api_key_notary_credentials() {

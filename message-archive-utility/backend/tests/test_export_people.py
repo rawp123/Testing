@@ -46,7 +46,7 @@ def test_csv_person_export_includes_messages_with_that_person(tmp_path, monkeypa
     response = main.export_csv(contact_id=ids["ada_id"])
 
     assert response.status_code == 200
-    assert response.media_type == "text/csv"
+    assert response.media_type == "text/csv; charset=utf-8"
     assert response.headers["content-disposition"] == "attachment; filename=messages-with-Ada-Lovelace.csv"
     assert "Greenland plan" in response.body.decode("utf-8")
     assert "Local reply to Ada" in response.body.decode("utf-8")

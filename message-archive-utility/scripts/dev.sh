@@ -10,25 +10,7 @@ BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-DEFAULT_IPHONE_BACKUP_PATH="${VITE_DEFAULT_IPHONE_BACKUP_PATH:-}"
-
-if [[ -z "$DEFAULT_IPHONE_BACKUP_PATH" ]]; then
-  if [[ -n "${MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS:-}" ]]; then
-    DEFAULT_IPHONE_BACKUP_PATH="${MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS%%:*}"
-  else
-    MOBILESYNC_BACKUP_DIR="$HOME/Library/Application Support/MobileSync/Backup"
-    if [[ -d "$MOBILESYNC_BACKUP_DIR" ]]; then
-      for manifest_path in "$MOBILESYNC_BACKUP_DIR"/*/Manifest.db; do
-        if [[ -f "$manifest_path" ]]; then
-          DEFAULT_IPHONE_BACKUP_PATH="$(dirname "$manifest_path")"
-          break
-        fi
-      done
-    fi
-  fi
-fi
-
-IPHONE_BACKUP_PATHS="${MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS:-$DEFAULT_IPHONE_BACKUP_PATH}"
+IPHONE_BACKUP_PATHS="${MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS:-}"
 
 BACKEND_PID=""
 FRONTEND_PID=""
@@ -79,7 +61,6 @@ printf 'Starting frontend on http://localhost:%s\n' "$FRONTEND_PORT"
 (
   cd "$FRONTEND_DIR"
   VITE_API_PROXY_TARGET="http://$BACKEND_HOST:$BACKEND_PORT" \
-    VITE_DEFAULT_IPHONE_BACKUP_PATH="$DEFAULT_IPHONE_BACKUP_PATH" \
     npm run dev -- --port "$FRONTEND_PORT"
 ) &
 FRONTEND_PID="$!"

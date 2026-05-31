@@ -16,6 +16,7 @@ const APP_TABS = [
   { id: "import-messages", label: "Import Messages" },
   { id: "browse-archive", label: "Browse Archive" },
 ];
+const CONVERSATION_MESSAGE_PAGE_SIZE = 200;
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(null);
@@ -31,6 +32,7 @@ export default function App() {
   const [conversationSort, setConversationSort] = useState("lastMessageDesc");
   const [isLoading, setIsLoading] = useState(true);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
+  const [isOlderMessagesLoading, setIsOlderMessagesLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [isSearchSummaryLoading, setIsSearchSummaryLoading] = useState(false);
@@ -74,11 +76,17 @@ export default function App() {
       setIsConversationLoading(true);
       setError(null);
       try {
-        const data = await request(`/conversations/${selectedId}/messages`);
+        const data = await request(buildConversationMessagesPath(selectedId, {
+          limit: CONVERSATION_MESSAGE_PAGE_SIZE,
+          offset: 0,
+        }));
         if (!isCurrent) return;
         setSelectedConversation({
           ...data.conversation,
           messages: data.messages || [],
+          totalMessageCount: data.total_message_count ?? (data.messages || []).length,
+          hasMoreMessages: Boolean(data.has_more_messages),
+          nextMessageOffset: data.next_offset ?? (data.messages || []).length,
         });
       } catch (requestError) {
         if (isCurrent) setError(toUserFacingError(requestError));
@@ -92,6 +100,40 @@ export default function App() {
       isCurrent = false;
     };
   }, [selectedId]);
+
+  async function loadOlderMessages() {
+    if (!selectedConversation || isOlderMessagesLoading || !selectedConversation.hasMoreMessages) return;
+    const conversationId = selectedConversation.id;
+    const offset = selectedConversation.nextMessageOffset ?? selectedConversation.messages?.length ?? 0;
+    setIsOlderMessagesLoading(true);
+    setError(null);
+    try {
+      const data = await request(buildConversationMessagesPath(conversationId, {
+        limit: CONVERSATION_MESSAGE_PAGE_SIZE,
+        offset,
+      }));
+      setSelectedConversation((current) => {
+        if (!current || current.id !== conversationId) return current;
+        const currentMessages = current.messages || [];
+        const nextMessages = data.messages || [];
+        const seenIds = new Set(currentMessages.map((message) => message.id));
+        return {
+          ...current,
+          messages: [
+            ...currentMessages,
+            ...nextMessages.filter((message) => !seenIds.has(message.id)),
+          ],
+          totalMessageCount: data.total_message_count ?? current.totalMessageCount ?? currentMessages.length,
+          hasMoreMessages: Boolean(data.has_more_messages),
+          nextMessageOffset: data.next_offset ?? currentMessages.length + nextMessages.length,
+        };
+      });
+    } catch (requestError) {
+      setError(toUserFacingError(requestError));
+    } finally {
+      setIsOlderMessagesLoading(false);
+    }
+  }
 
   useEffect(() => {
     const normalizedQuery = query.trim();
@@ -183,7 +225,7 @@ export default function App() {
   const hasArchiveData = conversations.length > 0 || (archiveStats?.messages?.total || 0) > 0;
   const isSearching = query.trim().length > 0;
   const sidebarError = getVisibleSidebarError(error, hasArchiveData);
-  const resolvedActiveTab = activeTab || (hasArchiveData ? "browse-archive" : "get-started");
+  const resolvedActiveTab = activeTab || (isLoading ? "browse-archive" : hasArchiveData ? "browse-archive" : "get-started");
   const selectedConversationSummary = conversations.find((conversation) => conversation.id === selectedId) || null;
   const isRefreshingArchive = isLoading || isStatsLoading;
 
@@ -354,6 +396,8 @@ export default function App() {
                 apiBaseUrl={API_BASE_URL}
                 conversation={selectedConversation}
                 isLoading={isConversationLoading}
+                isLoadingOlder={isOlderMessagesLoading}
+                onLoadOlder={loadOlderMessages}
               />
             </section>
           </div>
@@ -439,7 +483,11 @@ function SearchResultsPanel({
       <header className="search-results-header">
         <div>
           <p className="eyebrow">Search results</p>
-          <h2>{formatSidebarNumber(resolvedTotalMatches)} matching {resolvedTotalMatches === 1 ? "message" : "messages"}</h2>
+          <h2>
+            {isSearchLoading && !showSummary
+              ? "Searching messages"
+              : `${formatSidebarNumber(resolvedTotalMatches)} matching ${resolvedTotalMatches === 1 ? "message" : "messages"}`}
+          </h2>
           <p>{normalizedQuery ? `Showing messages that match "${normalizedQuery}".` : "Search your archive."}</p>
         </div>
         <div className="search-result-actions">
@@ -450,7 +498,7 @@ function SearchResultsPanel({
           ) : (
             <button className="secondary-button" type="button" onClick={onShowSummary}>
               <BarChart3 size={16} aria-hidden="true" />
-              Show counts
+              Show summary
             </button>
           )}
           <button
@@ -781,7 +829,7 @@ function SidebarArchiveSummary({ stats, isLoading }) {
         <span>Threads</span>
         <strong>{formatSidebarNumber(conversations)}</strong>
       </div>
-      <p>{isLoading ? "Updating archive summary..." : `Latest ${formatSidebarDate(latest)}`}</p>
+      <p>{isLoading ? "Updating archive summary..." : latest ? `Latest ${formatSidebarDate(latest)}` : "No messages yet"}</p>
       {isLoading && (
         <LoadingStatus
           compact
@@ -836,6 +884,13 @@ function formatMonthYear(value) {
 
 function buildSearchExportUrl(apiBaseUrl, query) {
   return `${apiBaseUrl}/export/messages.csv?q=${encodeURIComponent(query)}`;
+}
+
+function buildConversationMessagesPath(conversationId, { limit, offset }) {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  params.set("offset", String(offset));
+  return `/conversations/${conversationId}/messages?${params.toString()}`;
 }
 
 function buildSearchSummaryExportUrl(apiBaseUrl, query) {

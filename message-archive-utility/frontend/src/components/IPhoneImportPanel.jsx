@@ -80,6 +80,7 @@ export default function IPhoneImportPanel({
   onOpenArchive,
 }) {
   const [backupFolderPath, setBackupFolderPath] = useState(DEFAULT_BACKUP_FOLDER_PATH);
+  const [backupCandidateId, setBackupCandidateId] = useState("");
   const [copiedSmsDbPath, setCopiedSmsDbPath] = useState("");
   const [activeStep, setActiveStep] = useState("");
   const [status, setStatus] = useState("");
@@ -95,11 +96,11 @@ export default function IPhoneImportPanel({
   const [isFindingBackups, setIsFindingBackups] = useState(false);
   const [isRefreshingPreparedFiles, setIsRefreshingPreparedFiles] = useState(false);
 
-  const canUseBackupPath = backupFolderPath.trim().length > 0;
+  const canUseBackupPath = backupCandidateId.trim().length > 0 || backupFolderPath.trim().length > 0;
   const canUseCopiedPath = copiedSmsDbPath.trim().length > 0;
   const isBusy = activeStep.length > 0 || isFindingBackups || isRefreshingPreparedFiles;
   const shouldShowImportTools = !hasArchiveData || isImportToolsOpen;
-  const selectedBackupCandidate = backupCandidates.find((candidate) => candidate.path === backupFolderPath);
+  const selectedBackupCandidate = backupCandidates.find((candidate) => candidate.id === backupCandidateId);
   const selectedCopiedSmsDbCandidate = copiedSmsDbCandidates.find((candidate) => candidate.path === copiedSmsDbPath);
   const importableBackupCandidate = backupCandidates.find((candidate) => (
     candidate.sms_db_copyable || candidate.manifest_readable
@@ -121,6 +122,13 @@ export default function IPhoneImportPanel({
   const hasBackupSearchFeedback = backupCandidateStatus.trim().length > 0;
   const shouldShowBackupLocator = shouldShowImportTools && (hasDetectedBackup || hasBackupSearchFeedback);
   const shouldOpenManualBackupEntry = hasBackupSearchFeedback && !hasDetectedBackup;
+
+  function buildBackupRequestBody() {
+    if (backupCandidateId.trim()) {
+      return { backup_candidate_id: backupCandidateId.trim() };
+    }
+    return { backup_folder_path: backupFolderPath.trim() };
+  }
 
   useEffect(() => {
     setIsImportToolsOpen(!hasArchiveData);
@@ -231,6 +239,17 @@ export default function IPhoneImportPanel({
 
   function updateBackupFolderPath(value) {
     setBackupFolderPath(value);
+    setBackupCandidateId("");
+    setBackupCandidateStatus("");
+    setError("");
+    setStatus("");
+    setResult(null);
+    setCompletedSteps((current) => removeSteps(current, ["locate", "copy"]));
+  }
+
+  function updateBackupCandidateId(value) {
+    setBackupCandidateId(value);
+    setBackupFolderPath("");
     setBackupCandidateStatus("");
     setError("");
     setStatus("");
@@ -251,7 +270,7 @@ export default function IPhoneImportPanel({
     const data = await runStep("diagnostics", () =>
       request("/import/iphone-backup/diagnostics", {
         method: "POST",
-        body: JSON.stringify({ backup_folder_path: backupFolderPath.trim() }),
+        body: JSON.stringify(buildBackupRequestBody()),
       }),
     );
 
@@ -272,10 +291,10 @@ export default function IPhoneImportPanel({
       if (!isCurrent()) return;
       const candidates = data.candidates || [];
       setBackupCandidates(candidates);
-      if (!backupFolderPath.trim()) {
-        setBackupFolderPath(data.default_path || candidates[0]?.path || "");
+      if (!backupCandidateId.trim() && !backupFolderPath.trim()) {
+        setBackupCandidateId(data.default_candidate_id || candidates[0]?.id || "");
       }
-      if (candidates.length && !data.default_path) {
+      if (candidates.length && !data.default_candidate_id) {
         setBackupCandidateStatus("A backup was detected, but it may need review before import.");
       } else if (showStatus) {
         setBackupCandidateStatus(
@@ -338,7 +357,7 @@ export default function IPhoneImportPanel({
     const data = await runStep("locate", () =>
       request("/import/iphone-backup/dry-run", {
         method: "POST",
-        body: JSON.stringify({ backup_folder_path: backupFolderPath.trim() }),
+        body: JSON.stringify(buildBackupRequestBody()),
       }),
     );
 
@@ -362,7 +381,7 @@ export default function IPhoneImportPanel({
     const data = await runStep("copy", () =>
       request("/import/iphone-backup/copy-sms-db", {
         method: "POST",
-        body: JSON.stringify({ backup_folder_path: backupFolderPath.trim() }),
+        body: JSON.stringify(buildBackupRequestBody()),
       }),
     );
 
@@ -398,7 +417,7 @@ export default function IPhoneImportPanel({
   async function importMessages() {
     const body = {
       copied_sms_db_path: copiedSmsDbPath.trim(),
-      ...(canUseBackupPath ? { backup_folder_path: backupFolderPath.trim() } : {}),
+      ...(canUseBackupPath ? buildBackupRequestBody() : {}),
     };
     const data = await runStep("import", () =>
       request("/import/iphone-backup/import-messages", {
@@ -416,9 +435,7 @@ export default function IPhoneImportPanel({
   }
 
   async function importDetectedBackup() {
-    const body = backupFolderPath.trim()
-      ? { backup_folder_path: backupFolderPath.trim() }
-      : {};
+    const body = canUseBackupPath ? buildBackupRequestBody() : {};
     const data = await runStep("auto-import", () =>
       request("/import/iphone-backup/import-detected", {
         method: "POST",
@@ -427,7 +444,6 @@ export default function IPhoneImportPanel({
     );
 
     if (!data) return;
-    setBackupFolderPath(data.backup_folder_path || backupFolderPath);
     setCopiedSmsDbPath(data.copied_sms_db_path || data.destination_path || "");
     setCompletedSteps(new Set(STEP_ORDER));
     const copiedText = data.attachment_files_copied
@@ -556,9 +572,11 @@ export default function IPhoneImportPanel({
                 activeStep={activeStep}
                 backupCandidates={backupCandidates}
                 backupCandidateStatus={backupCandidateStatus}
+                backupCandidateId={backupCandidateId}
                 backupFolderPath={backupFolderPath}
                 canUseBackupPath={canUseBackupPath}
                 isBusy={isBusy}
+                onBackupCandidateIdChange={updateBackupCandidateId}
                 onBackupFolderPathChange={updateBackupFolderPath}
                 onCheckBackup={runBackupDiagnostics}
                 onFindBackups={stepActions.backup.onClick}
@@ -653,13 +671,13 @@ export default function IPhoneImportPanel({
                   <span>iPhone backup</span>
                   {backupCandidates.length > 0 && (
                     <select
-                      value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
-                      onChange={(event) => updateBackupFolderPath(event.target.value)}
+                      value={backupCandidates.some((candidate) => candidate.id === backupCandidateId) ? backupCandidateId : ""}
+                      onChange={(event) => updateBackupCandidateId(event.target.value)}
                       aria-label="Detected backup folders"
                     >
                       <option value="">Choose detected backup</option>
                       {backupCandidates.map((candidate) => (
-                        <option key={candidate.path} value={candidate.path}>
+                        <option key={candidate.id} value={candidate.id}>
                           {formatBackupCandidateName(candidate)} - {formatBackupCandidateStatus(candidate)}
                         </option>
                       ))}
@@ -796,9 +814,11 @@ function BackupLocatorPanel({
   activeStep,
   backupCandidates,
   backupCandidateStatus,
+  backupCandidateId,
   backupFolderPath,
   canUseBackupPath,
   isBusy,
+  onBackupCandidateIdChange,
   onBackupFolderPathChange,
   onCheckBackup,
   onFindBackups,
@@ -806,7 +826,7 @@ function BackupLocatorPanel({
   selectedBackupCandidate,
 }) {
   const hasCandidates = backupCandidates.length > 0;
-  const hasBackupLocation = backupFolderPath.trim().length > 0;
+  const hasBackupLocation = backupCandidateId.trim().length > 0 || backupFolderPath.trim().length > 0;
   const title = hasCandidates || hasBackupLocation ? "Backup selected" : "Choose a backup";
   const detail = getBackupLocatorDetail({
     backupCandidateStatus,
@@ -826,12 +846,12 @@ function BackupLocatorPanel({
         <label className="backup-locator-field">
           <span>Detected backup</span>
           <select
-            value={backupCandidates.some((candidate) => candidate.path === backupFolderPath) ? backupFolderPath : ""}
-            onChange={(event) => onBackupFolderPathChange(event.target.value)}
+            value={backupCandidates.some((candidate) => candidate.id === backupCandidateId) ? backupCandidateId : ""}
+            onChange={(event) => onBackupCandidateIdChange(event.target.value)}
           >
             <option value="">Choose detected backup</option>
             {backupCandidates.map((candidate) => (
-              <option key={candidate.path} value={candidate.path}>
+              <option key={candidate.id} value={candidate.id}>
                 {formatBackupCandidateName(candidate)} - {formatBackupCandidateStatus(candidate)}
               </option>
             ))}

@@ -22,6 +22,7 @@ def export_messages_csv(
             "direction",
             "body",
             "service",
+            "attachment_count",
         ],
     )
     writer.writeheader()
@@ -69,10 +70,16 @@ def export_messages_csv(
           contacts.handle AS sender_handle,
           messages.direction,
           messages.body,
-          messages.service
+          messages.service,
+          COALESCE(attachment_counts.attachment_count, 0) AS attachment_count
         FROM messages
         JOIN conversations ON conversations.id = messages.conversation_id
         LEFT JOIN contacts ON contacts.id = messages.sender_contact_id
+        LEFT JOIN (
+          SELECT message_id, COUNT(*) AS attachment_count
+          FROM message_attachments
+          GROUP BY message_id
+        ) attachment_counts ON attachment_counts.message_id = messages.id
         {where_clause}
         ORDER BY messages.sent_at ASC
         """,

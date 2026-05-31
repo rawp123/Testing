@@ -1,5 +1,5 @@
 import { Download } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LoadingStatus from "./LoadingStatus.jsx";
 import { API_BASE_URL, apiFetch } from "../utils/apiAuth.js";
 import { downloadFile } from "../utils/downloadFile.js";
@@ -65,8 +65,8 @@ export default function ConversationView({
   }
 
   const messages = conversation.messages || [];
-  const dateRange = formatDateRange(messages);
-  const messageCount = messages.length;
+  const dateRange = formatDateRangeFromBounds(conversation.first_message_at, conversation.last_message_at) || formatDateRange(messages);
+  const messageCount = conversation.totalMessageCount || messages.length;
   const canExportConversation = Boolean(conversation.id && messageCount > 0);
   const exportUrl = canExportConversation
     ? buildConversationExportUrl(apiBaseUrl, conversation.id, selectedFormat)
@@ -127,7 +127,7 @@ export default function ConversationView({
         </div>
       </header>
       <p className="conversation-export-note">
-        Conversation exports include message text and attachment references.
+        Conversation exports include message text. Attachment files are not included.
       </p>
       {isExporting && (
         <LoadingStatus
@@ -142,19 +142,21 @@ export default function ConversationView({
   );
 }
 
-export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API_BASE_URL }) {
-  const [visibleMessageCount, setVisibleMessageCount] = useState(INITIAL_VISIBLE_MESSAGE_COUNT);
-
-  useEffect(() => {
-    setVisibleMessageCount(INITIAL_VISIBLE_MESSAGE_COUNT);
-  }, [conversation?.id]);
-
+export function ConversationMessages({
+  conversation,
+  isLoading,
+  apiBaseUrl = API_BASE_URL,
+  isLoadingOlder = false,
+  onLoadOlder,
+}) {
   if (isLoading || !conversation) return null;
 
   const messages = conversation.messages || [];
   const sortedMessages = sortMessagesNewestFirst(messages);
-  const displayMessages = sortedMessages.slice(0, visibleMessageCount);
-  const hasHiddenOlderMessages = sortedMessages.length > displayMessages.length;
+  const displayMessages = sortedMessages;
+  const totalMessageCount = conversation.totalMessageCount || messages.length;
+  const hasHiddenOlderMessages = Boolean(conversation.hasMoreMessages);
+  const hiddenOlderMessageCount = Math.max(totalMessageCount - displayMessages.length, 0);
 
   return (
     <section className="conversation-messages-section" aria-label={`${conversation.title} messages`}>
@@ -163,7 +165,7 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
           <p className="eyebrow">Messages</p>
           <h2>Conversation messages</h2>
         </div>
-        {messages.length > 0 && <span>{messages.length} message{messages.length === 1 ? "" : "s"}</span>}
+        {totalMessageCount > 0 && <span>{totalMessageCount} message{totalMessageCount === 1 ? "" : "s"}</span>}
       </header>
 
       <div className="timeline">
@@ -176,7 +178,7 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
           <>
             <p className="timeline-note">
               {hasHiddenOlderMessages
-                ? `Showing newest ${displayMessages.length} of ${messages.length} messages.`
+                ? `Showing newest ${displayMessages.length} of ${totalMessageCount} messages.`
                 : "Latest messages are shown first."}
             </p>
             {renderMessagesWithDateDividers(displayMessages, apiBaseUrl)}
@@ -184,9 +186,12 @@ export function ConversationMessages({ conversation, isLoading, apiBaseUrl = API
               <button
                 className="load-older-messages-button"
                 type="button"
-                onClick={() => setVisibleMessageCount((current) => current + INITIAL_VISIBLE_MESSAGE_COUNT)}
+                disabled={isLoadingOlder}
+                onClick={onLoadOlder}
               >
-                Show 200 older messages
+                {isLoadingOlder
+                  ? "Loading older messages"
+                  : `Show ${Math.min(INITIAL_VISIBLE_MESSAGE_COUNT, hiddenOlderMessageCount)} older messages`}
               </button>
             )}
           </>
@@ -230,7 +235,11 @@ function renderMessagesWithDateDividers(messages, apiBaseUrl) {
 }
 
 function sortMessagesNewestFirst(messages) {
-  return [...messages].sort((left, right) => getTimestamp(right.sent_at) - getTimestamp(left.sent_at));
+  return [...messages].sort((left, right) => {
+    const timestampComparison = getTimestamp(right.sent_at) - getTimestamp(left.sent_at);
+    if (timestampComparison !== 0) return timestampComparison;
+    return (right.id || 0) - (left.id || 0);
+  });
 }
 
 function MessageBubble({ message, startsGroup, apiBaseUrl }) {
@@ -244,7 +253,7 @@ function MessageBubble({ message, startsGroup, apiBaseUrl }) {
   return (
     <article className={`message ${message.direction} ${startsGroup ? "is-group-start" : ""}`}>
       <div className="message-meta">
-        <strong>{message.sender_name}</strong>
+        <strong>{message.sender_name || "Unknown sender"}</strong>
         <time>{formatTime(message.sent_at)}</time>
       </div>
       {displayBody ? <p>{displayBody}</p> : <p className="empty-message-body">{emptyBodyLabel}</p>}
@@ -271,9 +280,37 @@ function MessageBubble({ message, startsGroup, apiBaseUrl }) {
 function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
   const [didFail, setDidFail] = useState(false);
   const [objectUrl, setObjectUrl] = useState("");
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const previewRef = useRef(null);
   const attachmentUrl = buildAttachmentRenderUrl(apiBaseUrl, attachment.render_url);
 
   useEffect(() => {
+    const previewElement = previewRef.current;
+    if (!previewElement) {
+      setShouldLoad(true);
+      return undefined;
+    }
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoad(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(previewElement);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoad) return undefined;
+
     let isCurrent = true;
     let nextObjectUrl = "";
 
@@ -300,7 +337,7 @@ function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
       isCurrent = false;
       if (nextObjectUrl) URL.revokeObjectURL(nextObjectUrl);
     };
-  }, [attachmentUrl]);
+  }, [attachmentUrl, shouldLoad]);
 
   if (didFail) {
     return (
@@ -311,7 +348,7 @@ function ImageAttachmentPreview({ attachment, apiBaseUrl }) {
   }
 
   return (
-    <figure className="message-image-attachment">
+    <figure className="message-image-attachment" ref={previewRef}>
       {objectUrl ? (
         <img
           alt="Photo attachment"
@@ -465,8 +502,8 @@ function summarizeAttachments(attachments) {
   if (availableCount === totalCount) {
     return {
       label: attachmentLabel,
-      detail: "Saved in archive",
-      accessibleLabel: `${attachmentLabel}. Saved in this archive.`,
+      detail: "File available",
+      accessibleLabel: `${attachmentLabel}. File available in this archive.`,
       className: "is-available",
     };
   }
@@ -575,6 +612,16 @@ function formatDateRange(messages) {
   const first = formatShortDate(timestamps[0]);
   const last = formatShortDate(timestamps[timestamps.length - 1]);
   return first === last ? first : `${first} - ${last}`;
+}
+
+function formatDateRangeFromBounds(firstValue, lastValue) {
+  if (!firstValue && !lastValue) return "";
+  if (firstValue && lastValue) {
+    const first = formatShortDate(firstValue);
+    const last = formatShortDate(lastValue);
+    return first === last ? first : `${first} - ${last}`;
+  }
+  return formatShortDate(firstValue || lastValue);
 }
 
 function formatShortDate(timestamp) {

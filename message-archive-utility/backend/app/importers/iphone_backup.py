@@ -131,7 +131,7 @@ def locate_sms_db_by_known_file_id(backup_folder: Path, *, manifest_readable: bo
 
 
 def backup_file_is_present(path: Path) -> bool:
-    return path.is_file() and path.stat().st_size > 0
+    return path.is_file() and path.stat().st_size > 0 and sqlite_header_is_present(path)
 
 
 def find_sms_db_by_schema_scan(backup_folder: Path) -> Path | None:

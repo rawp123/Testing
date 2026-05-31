@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, session } = require("electron");
 const { spawn } = require("node:child_process");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -30,9 +30,22 @@ const ALLOWED_DEV_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
 ]);
+const ALLOWED_EXPORT_DOWNLOADS = new Map([
+  [".csv", new Set(["", "text/csv", "application/csv", "application/octet-stream"])],
+  [".pdf", new Set(["", "application/pdf", "application/octet-stream"])],
+  [
+    ".xlsx",
+    new Set([
+      "",
+      "application/octet-stream",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ]),
+  ],
+]);
 
 let backendProcess = null;
 let apiToken = "";
+let downloadGuardInstalled = false;
 
 function getStartTarget() {
   if (DEV_SERVER_URL) {
@@ -98,6 +111,38 @@ function createWindow() {
   });
 
   window.loadURL(getStartTarget());
+}
+
+function setupDownloadGuard() {
+  if (downloadGuardInstalled) return;
+  downloadGuardInstalled = true;
+
+  session.defaultSession.on("will-download", (event, item, webContents) => {
+    if (!isAllowedExportDownload(item, webContents)) {
+      event.preventDefault();
+      item.cancel();
+    }
+  });
+}
+
+function isAllowedExportDownload(item, webContents) {
+  if (!webContents || !isAllowedNavigation(webContents.getURL())) return false;
+
+  const filename = item.getFilename();
+  if (!isSafeExportFilename(filename)) return false;
+
+  const extension = path.extname(filename).toLowerCase();
+  const allowedMimeTypes = ALLOWED_EXPORT_DOWNLOADS.get(extension);
+  if (!allowedMimeTypes) return false;
+
+  const mimeType = (item.getMimeType() || "").toLowerCase().split(";")[0].trim();
+  return allowedMimeTypes.has(mimeType);
+}
+
+function isSafeExportFilename(filename) {
+  if (!filename || filename !== path.basename(filename)) return false;
+  if (/[\0-\x1f\x7f/\\:]/.test(filename)) return false;
+  return ALLOWED_EXPORT_DOWNLOADS.has(path.extname(filename).toLowerCase());
 }
 
 function requestBackendHealth() {
@@ -355,6 +400,7 @@ app.whenReady().then(async () => {
     return;
   }
 
+  setupDownloadGuard();
   createWindow();
 
   app.on("activate", () => {

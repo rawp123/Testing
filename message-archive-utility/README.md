@@ -1,6 +1,6 @@
 # Message Archive Utility
 
-A local-first utility for importing, organizing, searching, tagging, and exporting your own text message archives.
+A local-first utility for importing, searching, and exporting iPhone message archives.
 
 This project is designed so private message data stays on your computer. Real phone backups, message databases, attachments, exports, and imported data should never be committed to GitHub.
 
@@ -15,9 +15,15 @@ The repository should be safe to make public even if you keep it private while d
 
 ## Import Paths
 
-1. iPhone local backup import
-2. iMazing CSV import
-3. Android XML import
+Implemented:
+
+1. Fake sample CSV import for development and smoke tests
+2. iPhone local backup import
+
+Planned:
+
+1. iMazing CSV import
+2. Android XML import
 
 The current implementation includes a fake-data CSV importer and a real iPhone local-backup importer. The iPhone importer can run as a one-click detected-backup import, or as a step-by-step troubleshooting flow. It locates and copies `sms.db` from a local backup, validates and inspects the copied database, and imports contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
 
@@ -41,9 +47,8 @@ Optional ports:
 BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev:message-archive
 ```
 
-The dev command auto-detects the first iPhone backup under the local macOS
-MobileSync backup folder when one is available. To point the app at a specific
-backup folder:
+The backend checks the local macOS MobileSync backup folder through the
+token-protected import API. To point the app at a specific backup folder:
 
 ```bash
 MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$HOME/Library/Application Support/MobileSync/Backup/<backup-folder-id>" npm run dev:message-archive
@@ -173,6 +178,38 @@ npm run dev
 ```
 
 The frontend is a small React app for browsing the local archive, loading fake sample data, and running the iPhone backup import flow against the local backend.
+
+## Release Validation
+
+Release builds use the signed DMG script:
+
+```bash
+source ~/.message-archive-signing-env
+npm run pack:message-archive:mac:dmg:signed
+```
+
+The signing environment file must stay outside Git and must not be printed. The
+script builds the backend executable, builds the desktop frontend, packages the
+Mac app, signs and notarizes the app, signs and notarizes the DMG, staples the
+DMG, and validates the stapled ticket.
+
+After installing or copying the app from the DMG, run the local installed-app
+smoke test with fake sample data only:
+
+```bash
+MESSAGE_ARCHIVE_APP="/Applications/Message Archive Utility.app" npm run smoke:message-archive:installed
+```
+
+For a temporary test install, point `MESSAGE_ARCHIVE_APP` at the copied app under
+`/tmp`. The smoke test verifies bundled-backend launch, `/health`, fake import,
+search, PDF export, Excel export, CSV export, and close/reopen persistence.
+
+Optional Gatekeeper checks:
+
+```bash
+spctl --assess --type open --context context:primary-signature -vvv "release/mac/Message Archive Utility-0.1.0-arm64.dmg"
+spctl --assess --type execute -vvv "/Applications/Message Archive Utility.app"
+```
 
 ## Private Data Warning
 

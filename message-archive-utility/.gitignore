@@ -9,6 +9,11 @@ private/
 messages/
 
 *.db
+*.db-shm
+*.db-wal
+*.dmg
+*.pkg
+*.blockmap
 *.sqlite
 *.sqlite3
 sms.db

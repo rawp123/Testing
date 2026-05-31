@@ -35,6 +35,19 @@ def test_export_responses_include_private_file_headers(tmp_path, monkeypatch):
         assert response.headers["x-content-type-options"] == "nosniff"
 
 
+def test_csv_response_uses_utf8_bom_and_date_range_filename(tmp_path, monkeypatch):
+    create_test_archive(tmp_path, monkeypatch)
+
+    response = main.export_csv(start_date="2026-01-01", end_date="2026-01-31")
+
+    assert response.status_code == 200
+    assert response.media_type == "text/csv; charset=utf-8"
+    assert response.headers["content-disposition"] == "attachment; filename=date-range-messages.csv"
+    assert response.body.startswith("\ufeff".encode("utf-8"))
+    assert b"Greenland plan" in response.body
+    assert b"Iceland follow up" not in response.body
+
+
 def test_pdf_selected_conversation_export_filters_messages(tmp_path, monkeypatch):
     create_test_archive(tmp_path, monkeypatch)
 

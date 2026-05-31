@@ -66,7 +66,7 @@ def test_locates_sms_db_by_known_file_id_when_manifest_is_unreadable(tmp_path):
     (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
     source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
     source_path.parent.mkdir()
-    source_path.write_bytes(b"fake sms database bytes")
+    create_fake_sms_db(source_path, EXPECTED_SMS_TABLES)
 
     result = locate_sms_db_dry_run(str(backup_folder))
 
@@ -145,7 +145,7 @@ def test_diagnostics_endpoint_reports_usable_fake_backup(tmp_path, monkeypatch):
     create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
     source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
     source_path.parent.mkdir()
-    source_path.write_bytes(b"fake sms database bytes")
+    create_fake_sms_db(source_path, ["message"])
     monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
 
     assert route_exists("/import/iphone-backup/diagnostics", "POST")
@@ -164,9 +164,29 @@ def test_diagnostics_endpoint_reports_usable_fake_backup(tmp_path, monkeypatch):
         "sms_db_manifest_entry_exists": True,
         "sms_db_payload_exists": True,
         "sms_db_payload_nonzero": True,
-        "sms_db_payload_size_bytes": len(b"fake sms database bytes"),
+        "sms_db_payload_size_bytes": source_path.stat().st_size,
         "usable_without_import": True,
     }
+
+
+def test_diagnostics_endpoint_flags_non_sqlite_message_payload(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    source_path.write_bytes(b"not a sqlite payload")
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DB_PATH", str(tmp_path / "archive.sqlite3"))
+
+    result = app_main.iphone_backup_diagnostics(
+        app_main.IPhoneBackupDryRunRequest(backup_folder_path=str(backup_folder)),
+    )
+
+    assert result["sms_db_payload_exists"] is True
+    assert result["sms_db_payload_nonzero"] is True
+    assert result["backup_appears_encrypted"] is True
+    assert result["usable_without_import"] is False
+    assert_no_private_import_api_fields(result)
 
 
 def test_diagnostics_endpoint_returns_safe_shape_for_missing_backup(tmp_path, monkeypatch):
@@ -200,6 +220,25 @@ def test_dry_run_endpoint_omits_private_backup_paths_and_ids(tmp_path):
         "locator": "manifest",
     }
     assert_no_private_import_api_fields(result)
+
+
+def test_backup_candidates_endpoint_returns_opaque_candidate_ids(tmp_path, monkeypatch):
+    backup_folder = tmp_path / "fake-backup"
+    backup_folder.mkdir()
+    create_fake_manifest(backup_folder / "Manifest.db", include_sms=True)
+    source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
+    source_path.parent.mkdir()
+    create_fake_sms_db(source_path, ["message"])
+    monkeypatch.setenv("MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS", str(backup_folder))
+
+    result = app_main.iphone_backup_candidates()
+
+    assert result["default_candidate_id"] == "backup-1"
+    assert result["default_path"] == ""
+    assert result["candidates"][0]["id"] == "backup-1"
+    assert result["candidates"][0]["name"] == "Local iPhone backup 1"
+    assert "path" not in result["candidates"][0]
+    assert str(backup_folder) not in str(result)
 
 
 def test_copy_sms_db_endpoint_returns_safe_prepared_import_reference(tmp_path, monkeypatch):
@@ -386,7 +425,7 @@ def test_copies_known_sms_db_file_when_manifest_is_unreadable(tmp_path):
     (backup_folder / "Manifest.db").write_bytes(b"not a sqlite database")
     source_path = backup_folder / FAKE_FILE_ID[:2] / FAKE_FILE_ID
     source_path.parent.mkdir()
-    source_path.write_bytes(b"fake sms database bytes")
+    create_fake_sms_db(source_path, EXPECTED_SMS_TABLES)
     project_dir = tmp_path / "project"
 
     result = copy_sms_db_from_backup(
@@ -400,7 +439,7 @@ def test_copies_known_sms_db_file_when_manifest_is_unreadable(tmp_path):
     assert result["manifest_readable"] is False
     assert result["locator"] == "known_sms_db_file"
     assert result["source_path"] == str(source_path)
-    assert destination.read_bytes() == b"fake sms database bytes"
+    assert destination.read_bytes() == source_path.read_bytes()
 
 
 def test_copies_schema_scanned_sms_db_when_manifest_file_is_missing(tmp_path):
@@ -907,6 +946,62 @@ def test_conversation_api_omits_render_url_for_metadata_only_image_attachment(tm
     assert_no_private_attachment_api_fields(attachment)
 
 
+def test_conversation_messages_support_paginated_loading(monkeypatch):
+    archive_conn = create_archive_connection()
+    contact_id = archive_conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', 'Ada Lovelace', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = archive_conn.execute(
+        """
+        INSERT INTO conversations (source_thread_id, title)
+        VALUES ('iphone-chat:1', 'Long chat')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    archive_conn.execute(
+        "INSERT INTO conversation_participants (conversation_id, contact_id) VALUES (?, ?)",
+        (conversation_id, contact_id),
+    )
+    for index, sent_at in enumerate([
+        "2026-01-01T09:00:00+00:00",
+        "2026-01-02T09:00:00+00:00",
+        "2026-01-03T09:00:00+00:00",
+    ], start=1):
+        archive_conn.execute(
+            """
+            INSERT INTO messages (
+              conversation_id,
+              sender_contact_id,
+              source_message_id,
+              sent_at,
+              direction,
+              body,
+              service
+            )
+            VALUES (?, ?, ?, ?, 'incoming', ?, 'iMessage')
+            """,
+            (conversation_id, contact_id, f"fake-{index}", sent_at, f"Message {index}"),
+        )
+    archive_conn.commit()
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    first_page = app_main.list_conversation_messages(conversation_id, limit=2, offset=0)
+    second_page = app_main.list_conversation_messages(conversation_id, limit=2, offset=2)
+
+    assert [message["body"] for message in first_page["messages"]] == ["Message 3", "Message 2"]
+    assert first_page["total_message_count"] == 3
+    assert first_page["has_more_messages"] is True
+    assert first_page["next_offset"] == 2
+    assert [message["body"] for message in second_page["messages"]] == ["Message 1"]
+    assert second_page["has_more_messages"] is False
+    assert second_page["conversation"]["first_message_at"] == "2026-01-01T09:00:00+00:00"
+    assert second_page["conversation"]["last_message_at"] == "2026-01-03T09:00:00+00:00"
+
+
 def test_one_click_import_copies_validates_and_imports_detected_backup(tmp_path, monkeypatch):
     backup_folder = tmp_path / "fake-backup"
     backup_folder.mkdir()
@@ -1394,6 +1489,45 @@ def test_attachment_file_response_uses_private_headers_and_generic_filename(tmp_
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["content-disposition"] == 'inline; filename="attachment"'
     assert "private-photo" not in response.headers["content-disposition"]
+
+
+def test_attachment_file_response_forces_non_images_to_download(tmp_path, monkeypatch):
+    data_dir = tmp_path / "app-data"
+    attachment_path = data_dir / "attachments" / "iphone" / "fake-import" / "private-file.pdf"
+    attachment_path.parent.mkdir(parents=True)
+    attachment_path.write_bytes(b"%PDF fake")
+    monkeypatch.setenv("MESSAGE_ARCHIVE_DATA_DIR", str(data_dir))
+    archive_conn = create_archive_connection()
+    archive_conn.execute(
+        """
+        INSERT INTO attachments (
+          source_ref,
+          source_relative_path,
+          original_filename,
+          mime_type,
+          local_path,
+          byte_size,
+          availability_status
+        )
+        VALUES (
+          'iphone-attachment:1:private-file.pdf',
+          'Library/SMS/Attachments/fake/private-file.pdf',
+          'private-file.pdf',
+          'application/pdf',
+          'attachments/iphone/fake-import/private-file.pdf',
+          9,
+          'available'
+        )
+        """
+    )
+    attachment_id = archive_conn.execute("SELECT id FROM attachments").fetchone()["id"]
+    monkeypatch.setattr(app_main, "get_connection", lambda: archive_conn)
+
+    response = app_main.get_attachment_file(attachment_id)
+
+    assert response.media_type == "application/octet-stream"
+    assert response.headers["content-disposition"] == 'attachment; filename="attachment"'
+    assert "private-file" not in response.headers["content-disposition"]
 
 
 def test_attachment_copy_rejects_manifest_file_id_outside_backup(tmp_path):

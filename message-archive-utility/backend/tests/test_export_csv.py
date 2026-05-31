@@ -65,6 +65,37 @@ def test_export_messages_csv_can_export_date_range():
     assert "January message" not in date_csv
 
 
+def test_export_messages_csv_includes_attachment_count():
+    conn = create_archive_connection()
+    contact_id = conn.execute(
+        """
+        INSERT INTO contacts (handle, display_name, handle_type)
+        VALUES ('+15550001111', 'Ada Lovelace', 'iphone')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conversation_id = insert_conversation(conn, "iphone-chat:1", "Attachment chat")
+    message_id = insert_message(conn, conversation_id, contact_id, "1", "see photo")
+    attachment_id = conn.execute(
+        """
+        INSERT INTO attachments (source_ref, mime_type, availability_status)
+        VALUES ('fake-attachment', 'image/jpeg', 'metadata_only')
+        RETURNING id
+        """
+    ).fetchone()["id"]
+    conn.execute(
+        "INSERT INTO message_attachments (message_id, attachment_id) VALUES (?, ?)",
+        (message_id, attachment_id),
+    )
+    conn.commit()
+
+    csv_text = export_messages_csv(conn)
+
+    assert "attachment_count" in csv_text.splitlines()[0]
+    assert "see photo" in csv_text
+    assert ",1" in csv_text
+
+
 def test_export_messages_csv_neutralizes_spreadsheet_formulas():
     conn = create_archive_connection()
     contact_id = conn.execute(
@@ -117,7 +148,7 @@ def insert_conversation(conn, source_thread_id, title):
 
 
 def insert_message(conn, conversation_id, contact_id, source_message_id, body, *, sent_at="2026-05-13T12:00:00+00:00"):
-    conn.execute(
+    row = conn.execute(
         """
         INSERT INTO messages (
           conversation_id,
@@ -129,10 +160,12 @@ def insert_message(conn, conversation_id, contact_id, source_message_id, body, *
           service
         )
         VALUES (?, ?, ?, ?, 'incoming', ?, 'iMessage')
+        RETURNING id
         """,
         (conversation_id, contact_id, source_message_id, sent_at, body),
-    )
+    ).fetchone()
     conn.commit()
+    return row["id"]
 
 
 def create_archive_connection():

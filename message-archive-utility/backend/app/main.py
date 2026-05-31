@@ -86,7 +86,8 @@ async def require_local_api_token(request: Request, call_next):
 
 
 class IPhoneBackupDryRunRequest(BaseModel):
-    backup_folder_path: str
+    backup_folder_path: str = ""
+    backup_candidate_id: str | None = None
 
 
 class IPhoneSmsDbValidationRequest(BaseModel):
@@ -95,10 +96,12 @@ class IPhoneSmsDbValidationRequest(BaseModel):
 
 class IPhoneMessageImportRequest(IPhoneSmsDbValidationRequest):
     backup_folder_path: str | None = None
+    backup_candidate_id: str | None = None
 
 
 class IPhoneDetectedImportRequest(BaseModel):
     backup_folder_path: str | None = None
+    backup_candidate_id: str | None = None
 
 
 def get_configured_api_token() -> str:
@@ -224,6 +227,46 @@ def choose_importable_backup_candidate(candidates: list[dict]) -> dict | None:
     return None
 
 
+def build_public_backup_candidates(candidates: list[dict]) -> list[dict]:
+    return [
+        {
+            "id": build_backup_candidate_id(index),
+            "name": f"Local iPhone backup {index}",
+            "source": candidate["source"],
+            "manifest_readable": candidate["manifest_readable"],
+            "sms_db_copyable": candidate["sms_db_copyable"],
+            "detail": candidate["detail"],
+        }
+        for index, candidate in enumerate(candidates, start=1)
+    ]
+
+
+def build_backup_candidate_id(index: int) -> str:
+    return f"backup-{index}"
+
+
+def resolve_backup_candidate_path(candidate_id: str) -> str:
+    normalized_id = (candidate_id or "").strip()
+    candidates = find_iphone_backup_candidates()
+    for index, candidate in enumerate(candidates, start=1):
+        if build_backup_candidate_id(index) == normalized_id:
+            return candidate["path"]
+    raise HTTPException(status_code=404, detail="Selected backup was not found. Try finding backups again.")
+
+
+def resolve_backup_request_path(
+    *,
+    backup_folder_path: str | None,
+    backup_candidate_id: str | None,
+) -> str:
+    if backup_candidate_id and backup_candidate_id.strip():
+        return resolve_backup_candidate_path(backup_candidate_id)
+    normalized_path = (backup_folder_path or "").strip()
+    if not normalized_path:
+        raise HTTPException(status_code=400, detail="Choose a backup before continuing.")
+    return normalized_path
+
+
 def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
     size_bytes = sms_db_path.stat().st_size
     valid = False
@@ -260,6 +303,13 @@ def build_copied_sms_db_candidate(sms_db_path: Path) -> dict:
     }
 
 
+def file_has_sqlite_header(path: Path) -> bool:
+    try:
+        return path.read_bytes()[:16] == b"SQLite format 3\x00"
+    except OSError:
+        return False
+
+
 def build_backup_candidate(backup_folder: Path, source: str) -> dict:
     manifest_path = backup_folder / "Manifest.db"
     readable = False
@@ -286,7 +336,11 @@ def build_backup_candidate(backup_folder: Path, source: str) -> dict:
 
 def expected_sms_db_file_is_present(backup_folder: Path, *, allow_schema_scan: bool = True) -> bool:
     expected_sms_path = backup_folder / EXPECTED_SMS_FILE_ID[:2] / EXPECTED_SMS_FILE_ID
-    if expected_sms_path.is_file() and expected_sms_path.stat().st_size > 0:
+    if (
+        expected_sms_path.is_file()
+        and expected_sms_path.stat().st_size > 0
+        and file_has_sqlite_header(expected_sms_path)
+    ):
         return True
     if not allow_schema_scan:
         return False
@@ -381,12 +435,17 @@ def diagnose_iphone_backup_path(backup_folder_path: str) -> dict:
     if diagnostics["sms_db_payload_exists"]:
         diagnostics["sms_db_payload_size_bytes"] = sms_db_path.stat().st_size
         diagnostics["sms_db_payload_nonzero"] = diagnostics["sms_db_payload_size_bytes"] > 0
+        diagnostics["backup_appears_encrypted"] = (
+            diagnostics["sms_db_payload_nonzero"]
+            and not file_has_sqlite_header(sms_db_path)
+        )
 
     diagnostics["usable_without_import"] = (
         diagnostics["manifest_exists"]
         and diagnostics["sms_db_manifest_entry_exists"]
         and diagnostics["sms_db_payload_exists"]
         and diagnostics["sms_db_payload_nonzero"]
+        and not diagnostics["backup_appears_encrypted"]
     )
     return diagnostics
 
@@ -596,42 +655,55 @@ def import_sample() -> dict:
 @app.post("/import/iphone-backup/dry-run")
 def iphone_backup_dry_run(request: IPhoneBackupDryRunRequest) -> dict:
     try:
-        return safe_sms_db_locator_response(locate_sms_db_dry_run(request.backup_folder_path))
+        backup_folder_path = resolve_backup_request_path(
+            backup_folder_path=request.backup_folder_path,
+            backup_candidate_id=request.backup_candidate_id,
+        )
+        return safe_sms_db_locator_response(locate_sms_db_dry_run(backup_folder_path))
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Backup path was not found.") from error
     except NotADirectoryError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup is not a folder.") from error
     except PermissionError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="This app cannot access the selected backup.") from error
     except sqlite3.DatabaseError as error:
-        backup_folder = Path(request.backup_folder_path).expanduser()
+        backup_folder = Path(backup_folder_path).expanduser()
         detail = describe_unreadable_backup(backup_folder)
         raise HTTPException(status_code=400, detail=detail) from error
 
 
 @app.post("/import/iphone-backup/diagnostics")
 def iphone_backup_diagnostics(request: IPhoneBackupDryRunRequest) -> dict:
-    return diagnose_iphone_backup_path(request.backup_folder_path)
+    backup_folder_path = resolve_backup_request_path(
+        backup_folder_path=request.backup_folder_path,
+        backup_candidate_id=request.backup_candidate_id,
+    )
+    return diagnose_iphone_backup_path(backup_folder_path)
 
 
 @app.get("/import/iphone-backup/candidates")
 def iphone_backup_candidates() -> dict:
     candidates = find_iphone_backup_candidates()
     usable_candidates = [
-        candidate
-        for candidate in candidates
+        (index, candidate)
+        for index, candidate in enumerate(candidates, start=1)
         if candidate["manifest_readable"] or candidate["sms_db_copyable"]
     ]
     return {
-        "candidates": candidates,
-        "default_path": usable_candidates[0]["path"] if usable_candidates else "",
+        "candidates": build_public_backup_candidates(candidates),
+        "default_candidate_id": build_backup_candidate_id(usable_candidates[0][0]) if usable_candidates else "",
+        "default_path": "",
     }
 
 
 @app.post("/import/iphone-backup/import-detected")
 def iphone_backup_import_detected(request: IPhoneDetectedImportRequest) -> dict:
-    backup_folder_path = request.backup_folder_path.strip() if request.backup_folder_path else ""
-    if not backup_folder_path:
+    backup_folder_path = ""
+    if request.backup_candidate_id:
+        backup_folder_path = resolve_backup_candidate_path(request.backup_candidate_id)
+    elif request.backup_folder_path and request.backup_folder_path.strip():
+        backup_folder_path = request.backup_folder_path.strip()
+    else:
         candidate = choose_importable_backup_candidate(find_iphone_backup_candidates())
         if candidate is None:
             raise HTTPException(
@@ -648,11 +720,11 @@ def iphone_backup_import_detected(request: IPhoneDetectedImportRequest) -> dict:
     except SmsDbNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Backup path was not found.") from error
     except NotADirectoryError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup is not a folder.") from error
     except UnsafeBackupPathError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup path is not allowed.") from error
     except FileExistsError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     except ValueError as error:
@@ -677,16 +749,20 @@ def iphone_copied_sms_db_candidates() -> dict:
 @app.post("/import/iphone-backup/copy-sms-db")
 def iphone_backup_copy_sms_db(request: IPhoneBackupDryRunRequest) -> dict:
     try:
-        result = copy_sms_db_from_backup(request.backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
+        backup_folder_path = resolve_backup_request_path(
+            backup_folder_path=request.backup_folder_path,
+            backup_candidate_id=request.backup_candidate_id,
+        )
+        result = copy_sms_db_from_backup(backup_folder_path, PROJECT_DIR, data_dir=get_data_dir())
         return safe_sms_db_copy_response(result)
     except SmsDbNotFoundError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Backup path was not found.") from error
     except NotADirectoryError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup is not a folder.") from error
     except UnsafeBackupPathError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup path is not allowed.") from error
     except FileExistsError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     except sqlite3.DatabaseError as error:
@@ -698,9 +774,9 @@ def iphone_backup_validate_sms_db(request: IPhoneSmsDbValidationRequest) -> dict
     try:
         return validate_copied_sms_db(request.copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Prepared import was not found.") from error
     except UnsafeBackupPathError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Prepared import path is not allowed.") from error
     except sqlite3.DatabaseError as error:
         raise HTTPException(status_code=400, detail="Copied sms.db could not be read.") from error
 
@@ -710,9 +786,9 @@ def iphone_backup_inspect_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
     try:
         return inspect_copied_sms_db_metadata(request.copied_sms_db_path, PROJECT_DIR, data_dir=get_data_dir())
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Prepared import was not found.") from error
     except UnsafeBackupPathError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Prepared import path is not allowed.") from error
     except sqlite3.DatabaseError as error:
         raise HTTPException(status_code=400, detail="Copied sms.db could not be read.") from error
 
@@ -720,20 +796,26 @@ def iphone_backup_inspect_sms_db(request: IPhoneSmsDbValidationRequest) -> dict:
 @app.post("/import/iphone-backup/import-messages")
 def iphone_backup_import_messages(request: IPhoneMessageImportRequest) -> dict:
     try:
+        backup_folder_path = None
+        if request.backup_candidate_id or request.backup_folder_path:
+            backup_folder_path = resolve_backup_request_path(
+                backup_folder_path=request.backup_folder_path,
+                backup_candidate_id=request.backup_candidate_id,
+            )
         with get_connection() as conn:
             return import_copied_sms_db_messages(
                 request.copied_sms_db_path,
                 PROJECT_DIR,
                 conn,
-                backup_folder_path=request.backup_folder_path,
+                backup_folder_path=backup_folder_path,
                 data_dir=get_data_dir(),
             )
     except FileNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+        raise HTTPException(status_code=404, detail="Backup path was not found.") from error
     except NotADirectoryError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup is not a folder.") from error
     except UnsafeBackupPathError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+        raise HTTPException(status_code=400, detail="Selected backup path is not allowed.") from error
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except sqlite3.DatabaseError as error:
@@ -759,7 +841,10 @@ def list_conversations() -> dict:
             LEFT JOIN contacts ON contacts.id = conversation_participants.contact_id
             GROUP BY conversations.id
             HAVING COUNT(DISTINCT messages.id) > 0
-            ORDER BY last_message_at DESC
+            ORDER BY
+              CASE WHEN NULLIF(last_message_at, 'unavailable') IS NULL THEN 1 ELSE 0 END,
+              NULLIF(last_message_at, 'unavailable') DESC,
+              conversations.id DESC
             """
         ).fetchall()
 
@@ -782,17 +867,26 @@ def list_conversations() -> dict:
 
 
 @app.get("/conversations/{conversation_id}/messages")
-def list_conversation_messages(conversation_id: int) -> dict:
+def list_conversation_messages(
+    conversation_id: int,
+    limit: int | None = None,
+    offset: int = 0,
+) -> dict:
+    safe_limit = normalize_message_page_limit(limit)
+    safe_offset = max(offset, 0)
     with get_connection() as conn:
         conversation = conn.execute(
             """
             SELECT
               conversations.id,
               conversations.title,
+              MIN(messages.sent_at) AS first_message_at,
+              MAX(messages.sent_at) AS last_message_at,
               GROUP_CONCAT(DISTINCT contacts.display_name) AS participants
             FROM conversations
             LEFT JOIN conversation_participants
               ON conversation_participants.conversation_id = conversations.id
+            LEFT JOIN messages ON messages.conversation_id = conversations.id
             LEFT JOIN contacts ON contacts.id = conversation_participants.contact_id
             WHERE conversations.id = ?
             GROUP BY conversations.id
@@ -802,8 +896,11 @@ def list_conversation_messages(conversation_id: int) -> dict:
         if conversation is None:
             raise HTTPException(status_code=404, detail="Conversation not found")
 
-        messages = conn.execute(
-            """
+        total_message_count = conn.execute(
+            "SELECT COUNT(*) FROM messages WHERE conversation_id = ?",
+            (conversation_id,),
+        ).fetchone()[0]
+        message_query = """
             SELECT
               messages.id,
               messages.sent_at,
@@ -815,26 +912,30 @@ def list_conversation_messages(conversation_id: int) -> dict:
             FROM messages
             LEFT JOIN contacts ON contacts.id = messages.sender_contact_id
             WHERE messages.conversation_id = ?
-            ORDER BY messages.sent_at ASC
-            """,
-            (conversation_id,),
-        ).fetchall()
-        attachment_rows = conn.execute(
+        """
+        message_params: list[object] = [conversation_id]
+        if safe_limit is None:
+            message_query += """
+            ORDER BY
+              CASE WHEN NULLIF(messages.sent_at, 'unavailable') IS NULL THEN 1 ELSE 0 END,
+              NULLIF(messages.sent_at, 'unavailable') ASC,
+              messages.id ASC
             """
-            SELECT
-              message_attachments.message_id,
-              attachments.id,
-              attachments.mime_type,
-              attachments.local_path,
-              attachments.availability_status
-            FROM message_attachments
-            JOIN attachments ON attachments.id = message_attachments.attachment_id
-            JOIN messages ON messages.id = message_attachments.message_id
-            WHERE messages.conversation_id = ?
-            ORDER BY message_attachments.message_id, attachments.id
-            """,
-            (conversation_id,),
+        else:
+            message_query += """
+            ORDER BY
+              CASE WHEN NULLIF(messages.sent_at, 'unavailable') IS NULL THEN 1 ELSE 0 END,
+              NULLIF(messages.sent_at, 'unavailable') DESC,
+              messages.id DESC
+            LIMIT ? OFFSET ?
+            """
+            message_params.extend([safe_limit, safe_offset])
+        messages = conn.execute(
+            message_query,
+            tuple(message_params),
         ).fetchall()
+        message_ids = [message["id"] for message in messages]
+        attachment_rows = fetch_attachment_rows_for_messages(conn, conversation_id, message_ids)
 
     attachments_by_message_id: dict[int, list[dict]] = {}
     for attachment in attachment_rows:
@@ -851,6 +952,8 @@ def list_conversation_messages(conversation_id: int) -> dict:
                 clean_participant_names(split_participants(conversation["participants"])),
             ),
             "participants": clean_participant_names(split_participants(conversation["participants"])),
+            "first_message_at": conversation["first_message_at"],
+            "last_message_at": conversation["last_message_at"],
         },
         "messages": [
             {
@@ -859,7 +962,47 @@ def list_conversation_messages(conversation_id: int) -> dict:
             }
             for message in messages
         ],
+        "total_message_count": int(total_message_count or 0),
+        "has_more_messages": (
+            False
+            if safe_limit is None
+            else safe_offset + len(messages) < int(total_message_count or 0)
+        ),
+        "next_offset": safe_offset + len(messages),
     }
+
+
+def normalize_message_page_limit(limit: int | None) -> int | None:
+    if limit is None:
+        return None
+    return min(max(int(limit), 1), 500)
+
+
+def fetch_attachment_rows_for_messages(
+    conn: sqlite3.Connection,
+    conversation_id: int,
+    message_ids: list[int],
+) -> list[sqlite3.Row]:
+    if not message_ids:
+        return []
+    placeholders = ",".join("?" for _ in message_ids)
+    return conn.execute(
+        f"""
+        SELECT
+          message_attachments.message_id,
+          attachments.id,
+          attachments.mime_type,
+          attachments.local_path,
+          attachments.availability_status
+        FROM message_attachments
+        JOIN attachments ON attachments.id = message_attachments.attachment_id
+        JOIN messages ON messages.id = message_attachments.message_id
+        WHERE messages.conversation_id = ?
+          AND messages.id IN ({placeholders})
+        ORDER BY message_attachments.message_id, attachments.id
+        """,
+        (conversation_id, *message_ids),
+    ).fetchall()
 
 
 @app.get("/search")
@@ -976,11 +1119,13 @@ def export_csv(
         filename = f"{safe_filename_part(f'messages-with-{contact_label}')}.csv"
     elif q and q.strip():
         filename = "search-results-messages.csv"
+    elif start_date or end_date:
+        filename = "date-range-messages.csv"
     else:
         filename = f"conversation-{conversation_id}-messages.csv" if conversation_id else "messages.csv"
     return Response(
-        content=csv_text,
-        media_type="text/csv",
+        content=f"\ufeff{csv_text}",
+        media_type="text/csv; charset=utf-8",
         headers=private_response_headers({"Content-Disposition": f"attachment; filename={filename}"}),
     )
 
@@ -1091,11 +1236,12 @@ def get_attachment_file(attachment_id: int, download: bool = False) -> FileRespo
         raise HTTPException(status_code=404, detail="Attachment file is not available.")
 
     file_path = resolve_private_attachment_path(row["local_path"])
-    content_disposition_type = "attachment" if download else "inline"
+    safe_inline = not download and is_safe_inline_image_mime_type(row["mime_type"])
+    content_disposition_type = "inline" if safe_inline else "attachment"
     response_filename = "attachment" if not download else "message-attachment"
     return FileResponse(
         file_path,
-        media_type=row["mime_type"] or "application/octet-stream",
+        media_type=row["mime_type"] if safe_inline else "application/octet-stream",
         filename=response_filename,
         content_disposition_type=content_disposition_type,
         headers=private_response_headers(),
@@ -1109,7 +1255,19 @@ def split_participants(value: str | None) -> list[str]:
 
 
 def is_image_mime_type(value: str | None) -> bool:
-    return bool(value and value.lower().startswith("image/"))
+    return is_safe_inline_image_mime_type(value)
+
+
+def is_safe_inline_image_mime_type(value: str | None) -> bool:
+    return (value or "").lower() in {
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "image/heic",
+        "image/heif",
+    }
 
 
 def build_safe_attachment_display_metadata(attachment: sqlite3.Row) -> dict:

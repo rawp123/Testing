@@ -6,8 +6,8 @@ import { downloadFile } from "../utils/downloadFile.js";
 
 const SCOPE_OPTIONS = [
   { id: "fullArchive", label: "Full archive", detail: "Every message in this archive." },
-  { id: "dateRange", label: "Date range", detail: "Messages between two dates." },
-  { id: "person", label: "Contact or person", detail: "Messages with one person." },
+  { id: "dateRange", label: "Date range", detail: "Messages after, before, or between dates." },
+  { id: "person", label: "Person", detail: "Messages with one person." },
 ];
 
 const FORMAT_OPTIONS = [
@@ -156,7 +156,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
           {scopeOptions.map((option) => (
             <button
               className={`export-option ${selectedScope === option.id ? "is-selected" : ""}`}
-              disabled={!option.enabled && option.id !== "dateRange"}
+              disabled={!option.enabled}
               key={option.id}
               onClick={() => setSelectedScope(option.id)}
               type="button"
@@ -195,6 +195,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
+              disabled={!hasArchiveData}
             />
           </label>
           <label>
@@ -203,6 +204,7 @@ export default function ExportPanel({ apiBaseUrl, hasArchiveData = false }) {
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
+              disabled={!hasArchiveData}
             />
           </label>
           {hasDateRangeOrderError && (
@@ -305,7 +307,7 @@ function getPersonStatus({ canChoosePerson, hasArchiveData, peopleStatus, select
   if (!hasArchiveData) return "Import first";
   if (peopleStatus === "loading") return "Loading contacts";
   if (peopleStatus === "error") return "Could not load contacts";
-  if (!canChoosePerson) return "No contacts found";
+  if (!canChoosePerson) return "No people found";
   if (!selectedPersonId) return "Choose a person";
   return "Available";
 }
@@ -314,13 +316,13 @@ function getPersonPlaceholder({ hasArchiveData, peopleStatus, hasPeople }) {
   if (!hasArchiveData) return "Import messages first.";
   if (peopleStatus === "loading") return "Loading contacts";
   if (peopleStatus === "error") return "Could not load contacts";
-  if (!hasPeople) return "No contacts found yet.";
+  if (!hasPeople) return "No people found in this archive.";
   return "Choose a person";
 }
 
 function getExportNoteText({ peopleStatus, hasPeople }) {
   if (peopleStatus === "error") return "Exports are created on this computer. Contacts could not be loaded right now.";
-  if (!hasPeople) return "Exports are created on this computer. No contacts found yet.";
+  if (!hasPeople) return "Exports are created on this computer. No people found in this archive.";
   return "Exports are created on this computer. Attachment files are not included.";
 }
 
