@@ -135,9 +135,9 @@ Notarization credential options:
 
 - Keychain profile: `APPLE_NOTARIZE_KEYCHAIN_PROFILE` and optional `APPLE_NOTARIZE_KEYCHAIN`
 - Legacy keychain profile: `APPLE_KEYCHAIN_PROFILE` and optional `APPLE_KEYCHAIN`
-- App Store Connect API key: `APPLE_API_KEY` as a local `.p8` file path, plus `APPLE_API_KEY_ID` and `APPLE_API_ISSUER`
+- App Store Connect API key: `APPLE_API_KEY` as a local `.p8` file path, plus `APPLE_API_KEY_ID`; set `APPLE_API_ISSUER` for Team API keys
 - Apple ID app-specific password: `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`
-- Developer ID signing identity: `CSC_NAME`, for example `Developer ID Application: Your Name (TEAMID)`
+- Developer ID signing identity: `CSC_NAME`, for example `Your Name (TEAMID)` or `Developer ID Application: Your Name (TEAMID)`
 
 Set `APPLE_NOTARIZE=1` in CI when notarization is required; the build will fail if no complete credential set is available.
 
@@ -199,7 +199,7 @@ npm run package:mac:signed
 
 Keep signing credentials outside git. The signed release script preserves the app ID `com.carcarelog.app`, requires `CSC_NAME`, requires one complete notarization credential set, submits the app through Electron Builder's `afterSign` hook, signs and notarizes the DMG, staples the DMG, validates runtime assets, runs the packaged smoke check, and runs `codesign`, `xcrun stapler validate`, and `spctl` checks.
 
-The same Apple Developer signing credentials used by the sibling Message Archive Utility release can be reused for this app. This machine currently has the expected Developer ID Application identity available in Keychain, and `~/.message-archive-signing-env` provides a working App Store Connect API key credential set. You can either source that file directly or create a separate `~/.car-care-log-signing-env` with the same Apple credential variables. See `.env.example` for the supported variable names.
+The same Apple Developer signing credentials used by the sibling apps can be reused for this app. This machine currently has the expected Developer ID Application identity available in Keychain. Keep product-specific shell files such as `~/.car-care-log-signing-env` outside Git, and see `.env.example` for the supported variable names.
 
 Packaged startup smoke check:
 

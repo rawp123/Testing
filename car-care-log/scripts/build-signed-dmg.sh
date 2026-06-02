@@ -21,7 +21,7 @@ APP_NAME="Car Care Log"
 DMG_PATH="$PROJECT_DIR/release/Car-Care-Log-$APP_VERSION-$APP_ARCH.dmg"
 
 has_api_key_notary_credentials() {
-  [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" && -n "${APPLE_API_ISSUER:-}" ]]
+  [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" ]]
 }
 
 has_apple_id_notary_credentials() {
@@ -51,16 +51,21 @@ find_packaged_app() {
 if [[ -z "${CSC_NAME:-}" ]]; then
   cat >&2 <<'EOF'
 Set CSC_NAME to your Developer ID Application signing identity before building a signed DMG.
-Example value format: Developer ID Application: Your Name (TEAMID)
+Example value formats:
+- Your Name (TEAMID)
+- Developer ID Application: Your Name (TEAMID)
 EOF
   exit 1
 fi
+
+ELECTRON_BUILDER_IDENTITY="$CSC_NAME"
+ELECTRON_BUILDER_IDENTITY="${ELECTRON_BUILDER_IDENTITY#Developer ID Application: }"
 
 if ! has_api_key_notary_credentials && ! has_apple_id_notary_credentials && ! has_keychain_notary_credentials; then
   cat >&2 <<'EOF'
 Set notarization credentials before building a signed DMG.
 Use one of:
-- APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER
+- APPLE_API_KEY and APPLE_API_KEY_ID, with APPLE_API_ISSUER for Team API keys
 - APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
 - APPLE_NOTARIZE_KEYCHAIN_PROFILE, with optional APPLE_NOTARIZE_KEYCHAIN
 - Legacy APPLE_KEYCHAIN_PROFILE, with optional APPLE_KEYCHAIN
@@ -74,7 +79,7 @@ npm run icon:generate
 npm run build
 
 APPLE_NOTARIZE=1 npx electron-builder --config electron-builder.config.cjs --mac --publish never \
-  -c.mac.identity="$CSC_NAME"
+  -c.mac.identity="$ELECTRON_BUILDER_IDENTITY"
 
 if [[ ! -f "$DMG_PATH" ]]; then
   echo "Expected signed DMG was not created: $DMG_PATH" >&2
@@ -94,10 +99,12 @@ codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 codesign --force --sign "$CSC_NAME" --timestamp "$DMG_PATH"
 
 if has_api_key_notary_credentials; then
+  api_key_args=(--key "$APPLE_API_KEY" --key-id "$APPLE_API_KEY_ID")
+  if [[ -n "${APPLE_API_ISSUER:-}" ]]; then
+    api_key_args+=(--issuer "$APPLE_API_ISSUER")
+  fi
   xcrun notarytool submit "$DMG_PATH" \
-    --key "$APPLE_API_KEY" \
-    --key-id "$APPLE_API_KEY_ID" \
-    --issuer "$APPLE_API_ISSUER" \
+    "${api_key_args[@]}" \
     --wait
 elif has_apple_id_notary_credentials; then
   xcrun notarytool submit "$DMG_PATH" \

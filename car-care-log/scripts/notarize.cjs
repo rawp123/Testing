@@ -14,13 +14,13 @@ function notarizationOptions(appPath) {
     };
   }
 
-  if (process.env.APPLE_API_KEY && process.env.APPLE_API_KEY_ID && process.env.APPLE_API_ISSUER) {
+  if (process.env.APPLE_API_KEY && process.env.APPLE_API_KEY_ID) {
     return {
       appPath,
       tool: 'notarytool',
       appleApiKey: process.env.APPLE_API_KEY,
       appleApiKeyId: process.env.APPLE_API_KEY_ID,
-      appleApiIssuer: process.env.APPLE_API_ISSUER
+      appleApiIssuer: process.env.APPLE_API_ISSUER || undefined
     };
   }
 
