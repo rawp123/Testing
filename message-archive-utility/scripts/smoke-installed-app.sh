@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_PATH="${1:-${MESSAGE_ARCHIVE_APP:-/Applications/Message Archive Utility.app}}"
+APP_PATH_INPUT="${1:-${MESSAGE_ARCHIVE_APP:-/Applications/Message Archive Utility.app}}"
+APP_PATH="$(cd "$(dirname "$APP_PATH_INPUT")" && pwd -P)/$(basename "$APP_PATH_INPUT")"
 APP_NAME="Message Archive Utility"
 APP_EXECUTABLE="$APP_PATH/Contents/MacOS/$APP_NAME"
 APP_BACKEND_EXECUTABLE="$APP_PATH/Contents/Resources/backend/message-archive-backend"

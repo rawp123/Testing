@@ -12,6 +12,14 @@ fixtures/private-documents/
 
 The folder is ignored by git. Prefer redacted copies when possible.
 
+Run the private document QA harness when private fixtures are available:
+
+```bash
+npm run qa:private-documents
+```
+
+The harness loads the actual app locally, attaches each supported file, runs local text reading when available, and prints only file-relative names, MIME type, byte size, read status, and extracted text length. It does not print or snapshot extracted document text.
+
 ## Documents To Test
 
 - Contractor invoice PDF.

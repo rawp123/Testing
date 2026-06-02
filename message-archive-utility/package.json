@@ -9,12 +9,16 @@
     "dev:desktop": "scripts/dev-desktop.sh",
     "build:desktop": "scripts/build-desktop.sh",
     "build:backend": "scripts/build-backend-executable.sh",
+    "test": ".venv/bin/python -m pytest backend/tests",
+    "check:syntax": "bash -n scripts/*.sh && node --check desktop/main.cjs && node --check desktop/preload.cjs && node --check frontend/vite.config.js && node --check scripts/check-packaged-app.cjs && node --check scripts/patch-mac-info-plist.cjs && node --check website/server.cjs && .venv/bin/python -m compileall -q backend",
     "start:desktop": "scripts/launch-desktop.sh",
     "install:shortcut": "scripts/install-desktop-shortcut.sh",
     "pack:mac": "npm --prefix desktop run pack:mac",
     "pack:mac:dmg": "npm --prefix desktop run pack:mac:dmg",
     "pack:mac:dmg:signed": "npm --prefix desktop run pack:mac:dmg:signed",
     "check:mac-package": "node scripts/check-packaged-app.cjs",
-    "smoke:installed": "scripts/smoke-installed-app.sh"
+    "smoke:installed": "scripts/smoke-installed-app.sh",
+    "smoke:packaged": "MESSAGE_ARCHIVE_APP=\"release/mac/mac-arm64/Message Archive Utility.app\" scripts/smoke-installed-app.sh",
+    "smoke:dmg": "scripts/smoke-dmg-app.sh"
   }
 }

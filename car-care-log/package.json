@@ -18,6 +18,7 @@
     "verify:runtime-assets": "node scripts/verify-runtime-assets.mjs",
     "smoke:fresh-user": "vitest run tests/freshUserSmoke.test.ts",
     "smoke:packaged": "node scripts/smoke-packaged-app.mjs",
+    "smoke:dmg": "node scripts/smoke-dmg-app.mjs",
     "qa:private-ocr": "node scripts/run-private-ocr-qa.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint .",

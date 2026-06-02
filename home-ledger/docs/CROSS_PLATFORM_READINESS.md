@@ -11,6 +11,7 @@ The product website is separate from the app runtime.
 
 - App-managed records and document storage.
 - Desktop smoke test.
+- Packaged-app and mounted-DMG smoke scripts.
 - Unsigned local packaging.
 - Signed/notarized DMG packaging path.
 - Private file permissions and atomic record/backup writes where supported.

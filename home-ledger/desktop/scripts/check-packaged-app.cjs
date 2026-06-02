@@ -21,6 +21,7 @@ const requiredResources = [
   "frontend/index.html",
   "frontend/app.js",
   "frontend/styles.css",
+  "backend/domain/backup.js",
   "backend/domain/model.js",
   "backend/storage/document-storage.js",
   "backend/storage/records-storage.js",

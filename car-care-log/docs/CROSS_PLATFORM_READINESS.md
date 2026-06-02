@@ -15,6 +15,7 @@ Car Care Log is allowed to ship its beta and first download as a macOS build. Th
 - Attachment original filenames are normalized across `/` and `\` so imported metadata does not leak source folders.
 - Restore logic is covered for non-regular attachment files and legacy Windows-style stored attachment names.
 - Fresh-user smoke coverage exercises database creation, attachment copy, CSV export, backup, restore, and restart/read-back against a temporary user data directory.
+- Mounted-DMG smoke coverage verifies the macOS distribution image can expose a runnable app with packaged runtime assets.
 - Migration coverage verifies an older local database schema upgrades without losing vehicle, service, attachment, or OCR text records.
 - Backup hardening coverage includes missing manifest data, corrupted databases, oversized backup attachments, non-regular files, traversal-style names, and Windows-style separators.
 - OCR PDF fallback behavior is explicit: native preview fallback is only allowed on macOS.

@@ -119,8 +119,11 @@ npm test
 npm run check:syntax
 npm run check:model
 npm run smoke:desktop
+npm run smoke:packaged
+npm run smoke:dmg
 npm run qa:render
 npm run qa:beta
+npm run qa:private-documents
 npm run pack:mac
 npm run check:mac-package
 git diff --check

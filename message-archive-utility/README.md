@@ -20,6 +20,8 @@ The repository should be safe to make public even if you keep it private while d
 - `backend/`: FastAPI backend, importers, exports, database schema, and tests.
 - `desktop/`: Electron shell and packaging metadata.
 - `scripts/`: product-local development, build, launch, and smoke-test scripts.
+- `docs/`: architecture, privacy/security, import, QA, and Mac release notes.
+- `fixtures/`: optional QA fixture guidance. Private message archives belong in ignored subfolders.
 
 Message Archive Utility is standalone inside `message-archive-utility/`. It does not import app or website files from Home Basis Tracker, Car Care Log, or the root workspace.
 
@@ -197,6 +199,17 @@ The frontend is a small React app for browsing the local archive, loading fake s
 
 ## Release Validation
 
+Useful validation commands from `message-archive-utility/`:
+
+```bash
+npm test
+npm run check:syntax
+npm run pack:mac
+npm run check:mac-package
+npm run smoke:packaged
+git diff --check
+```
+
 Release builds use the signed DMG script:
 
 ```bash
@@ -216,6 +229,12 @@ smoke test with fake sample data only:
 MESSAGE_ARCHIVE_APP="/Applications/Message Archive Utility.app" npm run smoke:installed
 ```
 
+To smoke-test the current mounted DMG artifact with fake sample data:
+
+```bash
+npm run smoke:dmg
+```
+
 For unsigned local package verification before distribution:
 
 ```bash
@@ -226,6 +245,9 @@ npm run check:mac-package
 The package check verifies the bundled backend executable, frontend bundle,
 local-only network permissions, defensive privacy descriptions, and expected app
 identifier.
+
+See `docs/HUMAN_REVIEW_CHECKLIST.md`, `docs/MAC_RELEASE_CHECKLIST.md`, and
+`docs/REAL_DATA_QA.md` for the full release and real-data QA checklists.
 
 For a temporary test install, point `MESSAGE_ARCHIVE_APP` at the copied app under
 `/tmp`. The smoke test verifies bundled-backend launch, `/health`, fake import,

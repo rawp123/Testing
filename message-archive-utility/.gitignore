@@ -7,6 +7,7 @@
 /attachments/
 /private/
 /messages/
+/fixtures/private-archives/
 
 *.db
 *.db-shm

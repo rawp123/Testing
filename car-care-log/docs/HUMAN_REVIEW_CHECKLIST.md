@@ -37,6 +37,7 @@ Use this checklist after the engineering validation suite passes. Keep real docu
 - Run `APPLE_NOTARIZE=1 npm run package:mac`.
 - Run `npm run package:mac:signed` for a distribution DMG when `CSC_NAME` and notarization credentials are available.
 - Run `npm run smoke:packaged -- --app "release/mac-arm64/Car Care Log.app"` after packaging.
+- Run `npm run smoke:dmg` against the final mounted DMG.
 - Validate the app and DMG with `codesign`, `xcrun stapler validate`, and `spctl`.
 - Install the notarized DMG on a clean Mac user profile.
 

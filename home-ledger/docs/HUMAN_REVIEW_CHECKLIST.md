@@ -11,6 +11,7 @@ npm test
 npm run check:model
 npm run check:syntax
 npm run smoke:desktop
+npm run smoke:packaged
 npm run qa:render
 npm run qa:beta
 npm run pack:mac
@@ -23,6 +24,7 @@ Run signed/notarized packaging only when distribution credentials are configured
 ```bash
 source ~/.home-basis-tracker-signing-env
 npm run pack:mac:dmg:signed
+npm run smoke:dmg
 ```
 
 ## Product Review
@@ -42,6 +44,7 @@ npm run pack:mac:dmg:signed
 - Add documents with and without files.
 - Preview supported attachments.
 - Run local text reading on at least one image, one PDF, and one text file.
+- Run `npm run qa:private-documents` when ignored private fixtures are available.
 - Download CSV.
 - Print summary.
 - Download full backup.

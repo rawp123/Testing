@@ -25,6 +25,7 @@ This project is standalone inside `car-care-log/` and does not import from or de
 - `shared/`: product-local contracts, sample data, parser logic, CSV helpers, safe errors, and shared types.
 - `tests/`: product-local Vitest coverage.
 - `docs/CROSS_PLATFORM_READINESS.md`: current Mac-beta boundary, cross-platform guardrails, and deferred packaging work.
+- `docs/MAC_RELEASE_CHECKLIST.md`: signed DMG, clean-install, and website-download release checklist.
 
 Run the product website locally:
 
@@ -173,6 +174,8 @@ npm test
 npm run build
 npm run verify:runtime-assets
 npm run smoke:fresh-user
+npm run smoke:packaged -- --skip-missing
+npm run smoke:dmg -- --skip-missing
 ```
 
 Preview the built app:
@@ -186,6 +189,7 @@ Package the current desktop build:
 ```bash
 npm run package:mac
 npm run verify:runtime-assets -- --app "release/mac-arm64/Car Care Log.app"
+npm run smoke:packaged -- --app "release/mac-arm64/Car Care Log.app"
 ```
 
 The directory app is used for smoke testing. The DMG and ZIP are distribution candidates after notarization is configured.
@@ -195,6 +199,7 @@ Package a signed and notarized distribution DMG:
 ```bash
 source ~/.car-care-log-signing-env
 npm run package:mac:signed
+npm run smoke:dmg
 ```
 
 Keep signing credentials outside git. The signed release script preserves the app ID `com.carcarelog.app`, requires `CSC_NAME`, requires one complete notarization credential set, submits the app through Electron Builder's `afterSign` hook, signs and notarizes the DMG, staples the DMG, validates runtime assets, runs the packaged smoke check, and runs `codesign`, `xcrun stapler validate`, and `spctl` checks.
@@ -215,6 +220,12 @@ Or use the packaged smoke helper:
 
 ```bash
 npm run smoke:packaged -- --app "release/mac-arm64/Car Care Log.app"
+```
+
+Mounted-DMG smoke check:
+
+```bash
+npm run smoke:dmg
 ```
 
 Private OCR QA, using ignored files under `fixtures/private-documents/`:

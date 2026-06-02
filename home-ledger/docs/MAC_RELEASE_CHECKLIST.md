@@ -19,6 +19,7 @@ npm test
 npm run check:model
 npm run check:syntax
 npm run smoke:desktop
+npm run smoke:packaged
 npm run qa:render
 npm run qa:beta
 npm run pack:mac
@@ -29,6 +30,7 @@ npm run check:mac-package
 
 ```bash
 npm run pack:mac:dmg:signed
+npm run smoke:dmg
 ```
 
 The script is expected to sign the app, build the DMG, notarize it, staple the ticket, and run Gatekeeper assessment.
