@@ -47,7 +47,7 @@ npm run dev:website
 
 ## Mac Desktop App
 
-The desktop app is an Electron wrapper around the same local-first records binder. It does not add accounts, cloud sync, OCR, tax filing, or third-party storage.
+The desktop app is an Electron wrapper around the same local-first records binder. It does not add accounts, cloud sync, tax filing, or third-party storage. Document text extraction runs locally for supported files.
 
 Install desktop dependencies:
 
@@ -99,7 +99,7 @@ Only restore backups you created or trust. The app skips several active or execu
 - Cloud sync.
 - User accounts or authentication.
 - Payment or subscription flows.
-- OCR or external AI/document processing APIs.
+- Cloud OCR or external AI/document processing APIs.
 - Tax filing, tax forms, or tax/legal advice.
 - Unsupported claims about expense eligibility, savings, or acceptance by a tax authority.
 

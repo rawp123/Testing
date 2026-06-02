@@ -31,6 +31,12 @@ const requiredResources = [
   "node_modules/tesseract.js-core/tesseract-core-lstm.wasm.js",
   "node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js",
   "node_modules/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz",
+  "node_modules/pdfjs-dist/build/pdf.mjs",
+  "node_modules/pdfjs-dist/build/pdf.worker.mjs",
+  "node_modules/pdfjs-dist/cmaps/H.bcmap",
+  "node_modules/pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf",
+  "node_modules/pdfjs-dist/wasm/openjpeg.wasm",
+  "node_modules/pdfjs-dist/image_decoders/pdf.image_decoders.mjs",
 ];
 const resourcesDir = path.resolve(
   __dirname,

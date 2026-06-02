@@ -109,6 +109,25 @@ const DOCUMENT_FILE_FILTERS = [
 
 const BLOCKED_BACKUP_FILE_EXTENSIONS = [".app", ".bat", ".cmd", ".command", ".exe", ".js", ".jse", ".msi", ".ps1", ".scr", ".sh", ".vbs", ".wsf"];
 const BLOCKED_BACKUP_MIME_PREFIXES = ["application/x-ms", "application/x-sh", "text/javascript"];
+const DOCUMENT_TEXT_FILE_SIZE_LIMIT = 2 * 1024 * 1024;
+const PDF_TEXT_MAX_PAGES = 25;
+const PDF_RENDER_MAX_PIXELS = 12_000_000;
+const PDF_RENDER_MAX_SCALE = 3;
+const PDF_RENDER_MIN_SCALE = 0.65;
+const PDF_TEXT_CONTENT_MIN_LENGTH = 12;
+const PLAIN_TEXT_EXTENSIONS = /\.(csv|json|log|md|text|tsv|txt|xml)$/;
+const PLAIN_TEXT_MIME_TYPES = new Set([
+  "application/json",
+  "application/xml",
+  "text/csv",
+  "text/markdown",
+  "text/plain",
+  "text/tab-separated-values",
+  "text/xml",
+]);
+
+let tesseractModulePromise;
+let pdfJsModulePromise;
 
 app.addEventListener("click", handleClick);
 app.addEventListener("submit", handleSubmit);
@@ -951,7 +970,7 @@ function renderDocumentPreview() {
 
   const title = documentRecord.displayName || documentPreview.fileName || "Document preview";
   const canPreview = documentPreview.status === "ready" && isPreviewableStoredFile(documentRecord, documentPreview.mimeType);
-  const canRunOcr = documentPreview.status === "ready" && canOcrStoredFile(documentRecord, documentPreview.mimeType);
+  const canReadText = documentPreview.status === "ready" && canReadStoredFileText(documentRecord, documentPreview.mimeType);
   const isPdf = canPreview && isPdfFile(documentRecord, documentPreview.mimeType);
   const isImage = canPreview && isImageFile(documentRecord, documentPreview.mimeType);
   const ocrCopy = getOcrStatusCopy();
@@ -986,13 +1005,13 @@ function renderDocumentPreview() {
             <input type="hidden" name="id" value="${escapeAttr(documentRecord.id)}">
             ${textarea("Document notes", "notes", documentRecord.notes || "")}
             <label class="field">
-              <span>Local OCR text</span>
+              <span>Local document text</span>
               <textarea name="ocrText" rows="8">${escapeHtml(documentRecord.ocrText || documentPreview.ocrText || "")}</textarea>
             </label>
             ${ocrCopy ? `<p class="helper-note">${escapeHtml(ocrCopy)}</p>` : ""}
             <div class="form-actions preview-actions">
               <button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(documentRecord.id)}" type="button">Download file</button>
-              <button class="button button-secondary" data-action="run-document-ocr" data-id="${escapeAttr(documentRecord.id)}" ${canRunOcr && documentPreview.ocrStatus !== "running" ? "" : "disabled"} type="button">Run local OCR</button>
+              <button class="button button-secondary" data-action="run-document-ocr" data-id="${escapeAttr(documentRecord.id)}" ${canReadText && documentPreview.ocrStatus !== "running" ? "" : "disabled"} type="button">Read text locally</button>
               <button class="button button-primary" type="submit">Save notes</button>
             </div>
           </form>
@@ -1006,14 +1025,18 @@ function getOcrStatusCopy() {
   if (!documentPreview) return "";
   const documentRecord = data.documents.find((document) => document.id === documentPreview.documentId);
   if (documentPreview.ocrStatus === "running") {
-    return `Reading image locally... ${Math.round((documentPreview.ocrProgress || 0) * 100)}%`;
+    return documentPreview.ocrStatusCopy || `Reading document locally... ${Math.round((documentPreview.ocrProgress || 0) * 100)}%`;
   }
-  if (documentPreview.ocrStatus === "done") return "OCR text saved locally with this document record.";
-  if (documentPreview.ocrStatus === "error") return documentPreview.ocrError || "OCR could not read this file.";
-  if (documentPreview.status === "ready" && !canOcrStoredFile(documentRecord, documentPreview.mimeType)) {
-    return "Local OCR is available for image files in this version. PDF OCR can be added later.";
+  if (documentPreview.ocrStatus === "done") return "Text saved locally with this document record.";
+  if (documentPreview.ocrStatus === "error") return documentPreview.ocrError || "This file could not be read locally.";
+  if (documentPreview.status === "ready") {
+    const processor = getDocumentTextProcessor(documentRecord, documentPreview.mimeType);
+    if (!processor) {
+      return "Local text reading is available for images, PDFs, and plain text files in this version.";
+    }
+    return processor.readyCopy;
   }
-  return "OCR runs locally in this app. It does not upload the file.";
+  return "Text reading runs locally in this app. It does not upload the file.";
 }
 
 function renderProjectDetail(project) {
@@ -1651,35 +1674,43 @@ async function saveDocumentPreviewNotes(values) {
 async function runDocumentOcr(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
-  if (!canOcrStoredFile(documentRecord, documentPreview?.mimeType)) {
-    return showNotice("Local OCR is available for image files in this version.");
-  }
 
   if (!documentPreview || documentPreview.documentId !== documentId) {
     await openDocumentPreview(documentId);
   }
   if (!documentPreview || documentPreview.status !== "ready") return;
 
+  const processor = getDocumentTextProcessor(documentRecord, documentPreview.mimeType);
+  if (!processor) {
+    return showNotice("Local text reading is available for images, PDFs, and plain text files in this version.");
+  }
+
+  const setProgress = (progress, statusCopy = "") => {
+    if (!documentPreview || documentPreview.documentId !== documentId) return;
+    documentPreview = {
+      ...documentPreview,
+      ocrProgress: Math.max(0, Math.min(1, Number(progress) || 0)),
+      ocrStatusCopy: statusCopy || documentPreview.ocrStatusCopy || "",
+    };
+    syncOcrStatusCopy();
+  };
+
   documentPreview = {
     ...documentPreview,
     ocrStatus: "running",
     ocrProgress: 0,
     ocrError: "",
+    ocrStatusCopy: processor.startCopy,
   };
   render();
 
   try {
     const storedFile = await getDocumentFile(documentRecord.fileId || documentRecord.id);
     if (!storedFile?.blob) throw new Error("The stored file is missing.");
-    const text = await recognizeDocumentText(storedFile.blob, (progress) => {
-      if (!documentPreview || documentPreview.documentId !== documentId) return;
-      documentPreview = {
-        ...documentPreview,
-        ocrProgress: progress,
-      };
-      syncOcrStatusCopy();
+    const result = await processor.read(storedFile.blob, documentRecord, {
+      onProgress: setProgress,
     });
-    const cleanText = removeLocalPaths(text || "").trim();
+    const cleanText = removeLocalPaths(result.text || "").trim();
     const saved = await updateData({
       ...data,
       documents: data.documents.map((document) =>
@@ -1692,20 +1723,134 @@ async function runDocumentOcr(documentId) {
       ocrStatus: "done",
       ocrProgress: 1,
       ocrText: cleanText,
+      ocrStatusCopy: "",
     };
-    showNotice(cleanText ? "OCR text saved with this document." : "OCR finished, but no text was found.");
+    const noticeSuffix = result.notice ? ` ${result.notice}` : "";
+    showNotice(cleanText ? `Text saved with this document.${noticeSuffix}` : `Text reading finished, but no text was found.${noticeSuffix}`);
   } catch (error) {
     documentPreview = {
       ...documentPreview,
       ocrStatus: "error",
       ocrError: getOcrError(error),
+      ocrStatusCopy: "",
     };
     showNotice(documentPreview.ocrError);
   }
 }
 
-async function recognizeDocumentText(blob, onProgress) {
-  const { createWorker } = await import("../node_modules/tesseract.js/dist/tesseract.esm.min.js");
+async function readImageDocumentText(blob, _documentRecord, { onProgress } = {}) {
+  const worker = await createOcrWorker((progress) => {
+    onProgress?.(progress, `Reading image locally... ${Math.round(progress * 100)}%`);
+  });
+  try {
+    const text = await recognizeBlobWithWorker(worker, blob);
+    return { text };
+  } finally {
+    await terminateWorker(worker);
+  }
+}
+
+async function readPdfDocumentText(blob, _documentRecord, { onProgress } = {}) {
+  const pdfjsLib = await loadPdfJs();
+  onProgress?.(0.01, "Opening PDF locally...");
+
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(await blob.arrayBuffer()),
+    cMapPacked: true,
+    cMapUrl: new URL("../node_modules/pdfjs-dist/cmaps/", import.meta.url).href,
+    standardFontDataUrl: new URL("../node_modules/pdfjs-dist/standard_fonts/", import.meta.url).href,
+    wasmUrl: new URL("../node_modules/pdfjs-dist/wasm/", import.meta.url).href,
+  });
+
+  const pdf = await loadingTask.promise;
+  const pagesToRead = Math.min(pdf.numPages, PDF_TEXT_MAX_PAGES);
+  const skippedPages = Math.max(0, pdf.numPages - pagesToRead);
+  const pageTexts = [];
+  let ocrWorker;
+  let ocrPages = 0;
+  let failedPages = 0;
+  let lastPageError;
+
+  if (!pagesToRead) {
+    await pdf.destroy?.();
+    return { text: "" };
+  }
+
+  try {
+    for (let pageNumber = 1; pageNumber <= pagesToRead; pageNumber += 1) {
+      const pageStartProgress = (pageNumber - 1) / pagesToRead;
+      const pageEndProgress = pageNumber / pagesToRead;
+      let page;
+
+      try {
+        onProgress?.(pageStartProgress, `Checking PDF page ${pageNumber} of ${pdf.numPages}...`);
+        page = await pdf.getPage(pageNumber);
+
+        const embeddedText = await extractPdfPageText(page);
+        if (hasUsefulPdfText(embeddedText)) {
+          pageTexts.push(formatPdfPageText(pageNumber, embeddedText));
+          onProgress?.(pageEndProgress, `Read PDF page ${pageNumber} of ${pdf.numPages}.`);
+          continue;
+        }
+
+        onProgress?.(pageStartProgress + (pageEndProgress - pageStartProgress) * 0.25, `Rendering scanned PDF page ${pageNumber} of ${pdf.numPages}...`);
+        const pageImage = await renderPdfPageToBlob(page);
+        ocrWorker ||= await createOcrWorker((progress) => {
+          const pageProgress = pageStartProgress + (pageEndProgress - pageStartProgress) * (0.35 + (progress * 0.65));
+          onProgress?.(pageProgress, `Reading scanned PDF page ${pageNumber} of ${pdf.numPages}... ${Math.round(progress * 100)}%`);
+        });
+        const pageText = await recognizeBlobWithWorker(ocrWorker, pageImage);
+        ocrPages += 1;
+        if (pageText.trim()) {
+          pageTexts.push(formatPdfPageText(pageNumber, pageText));
+        }
+        onProgress?.(pageEndProgress, `Read PDF page ${pageNumber} of ${pdf.numPages}.`);
+      } catch (error) {
+        failedPages += 1;
+        lastPageError = error;
+      } finally {
+        page?.cleanup?.();
+      }
+    }
+  } finally {
+    await terminateWorker(ocrWorker);
+    await pdf.destroy?.();
+  }
+
+  const noticeParts = [];
+  if (ocrPages) noticeParts.push(`${ocrPages} scanned PDF page${ocrPages === 1 ? "" : "s"} processed with local OCR.`);
+  if (skippedPages) noticeParts.push(`Only the first ${PDF_TEXT_MAX_PAGES} pages were read.`);
+  if (failedPages) noticeParts.push(`${failedPages} PDF page${failedPages === 1 ? "" : "s"} could not be read.`);
+
+  const text = pageTexts.join("\n\n");
+  if (!text.trim() && failedPages === pagesToRead && lastPageError) {
+    throw lastPageError;
+  }
+
+  return {
+    text,
+    notice: noticeParts.join(" "),
+  };
+}
+
+async function readPlainTextDocument(blob, _documentRecord, { onProgress } = {}) {
+  if (blob.size > DOCUMENT_TEXT_FILE_SIZE_LIMIT) {
+    throw new Error(`Text files over ${formatFileSize(DOCUMENT_TEXT_FILE_SIZE_LIMIT)} are too large to read locally in this beta.`);
+  }
+  onProgress?.(0.25, "Reading text file locally...");
+  const text = cleanExtractedDocumentText(await blob.text());
+  onProgress?.(1, "Text file read locally.");
+  return { text };
+}
+
+async function loadTesseract() {
+  tesseractModulePromise ||= import("../node_modules/tesseract.js/dist/tesseract.esm.min.js").then((module) => module.createWorker ? module : module.default);
+  return tesseractModulePromise;
+}
+
+async function createOcrWorker(onProgress) {
+  const { createWorker } = await loadTesseract();
+  if (typeof createWorker !== "function") throw new Error("Local OCR worker could not be loaded.");
   const worker = await createWorker("eng", 1, {
     workerPath: new URL("../node_modules/tesseract.js/dist/worker.min.js", import.meta.url).href,
     corePath: new URL("../node_modules/tesseract.js-core", import.meta.url).href,
@@ -1719,12 +1864,115 @@ async function recognizeDocumentText(blob, onProgress) {
     },
   });
 
+  return worker;
+}
+
+async function recognizeBlobWithWorker(worker, blob) {
+  const result = await worker.recognize(blob);
+  return cleanExtractedDocumentText(result?.data?.text || "");
+}
+
+async function terminateWorker(worker) {
+  if (!worker) return;
   try {
-    const result = await worker.recognize(blob);
-    return result?.data?.text || "";
-  } finally {
     await worker.terminate();
+  } catch {
+    // A failed teardown should not hide the text extraction result.
   }
+}
+
+async function loadPdfJs() {
+  pdfJsModulePromise ||= import("../node_modules/pdfjs-dist/build/pdf.mjs").then((pdfjsLib) => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("../node_modules/pdfjs-dist/build/pdf.worker.mjs", import.meta.url).href;
+    return pdfjsLib;
+  });
+  return pdfJsModulePromise;
+}
+
+async function extractPdfPageText(page) {
+  const content = await page.getTextContent();
+  const text = (content.items || []).map((item) => {
+    const value = typeof item.str === "string" ? item.str : "";
+    return item.hasEOL ? `${value}\n` : value;
+  }).join(" ");
+  return cleanExtractedDocumentText(text);
+}
+
+function hasUsefulPdfText(text) {
+  return cleanExtractedDocumentText(text).replace(/\s/g, "").length >= PDF_TEXT_CONTENT_MIN_LENGTH;
+}
+
+async function renderPdfPageToBlob(page) {
+  const unitViewport = page.getViewport({ scale: 1 });
+  const unitPixels = Math.max(1, unitViewport.width * unitViewport.height);
+  const scale = Math.max(PDF_RENDER_MIN_SCALE, Math.min(PDF_RENDER_MAX_SCALE, Math.sqrt(PDF_RENDER_MAX_PIXELS / unitPixels)));
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.ceil(viewport.width));
+  canvas.height = Math.max(1, Math.ceil(viewport.height));
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("The PDF page could not be rendered for OCR.");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  try {
+    await page.render({
+      canvasContext: context,
+      viewport,
+    }).promise;
+    prepareCanvasForOcr(canvas, context);
+    return await canvasToBlob(canvas, "image/png");
+  } finally {
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+}
+
+function prepareCanvasForOcr(canvas, context) {
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const { data: pixels } = imageData;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const alpha = pixels[index + 3] / 255;
+    const red = (pixels[index] * alpha) + (255 * (1 - alpha));
+    const green = (pixels[index + 1] * alpha) + (255 * (1 - alpha));
+    const blue = (pixels[index + 2] * alpha) + (255 * (1 - alpha));
+    const brightness = (red * 0.299) + (green * 0.587) + (blue * 0.114);
+    const contrasted = Math.max(0, Math.min(255, ((brightness - 128) * 1.45) + 128));
+
+    pixels[index] = contrasted;
+    pixels[index + 1] = contrasted;
+    pixels[index + 2] = contrasted;
+    pixels[index + 3] = 255;
+  }
+
+  context.putImageData(imageData, 0, 0);
+}
+
+function canvasToBlob(canvas, mimeType) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("The PDF page could not be rendered for OCR."));
+      }
+    }, mimeType);
+  });
+}
+
+function formatPdfPageText(pageNumber, text) {
+  return `Page ${pageNumber}\n${cleanExtractedDocumentText(text)}`;
+}
+
+function cleanExtractedDocumentText(text) {
+  return String(text || "")
+    .replace(/\u0000/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function syncOcrStatusCopy() {
@@ -1734,18 +1982,45 @@ function syncOcrStatusCopy() {
 
 function getOcrError(error) {
   const message = String(error?.message || "");
+  if (/too large/i.test(message)) return message;
   if (/worker|wasm|fetch|load/i.test(message)) {
-    return "Local OCR could not start. Reopen the app and try again.";
+    return "Local text reading could not start. Reopen the app and try again.";
   }
-  return "OCR could not read this image.";
+  if (/pdf/i.test(message)) return "This PDF could not be read locally.";
+  return "This file could not be read locally.";
 }
 
 function isPreviewableStoredFile(documentRecord, mimeType = "") {
   return isImageFile(documentRecord, mimeType) || isPdfFile(documentRecord, mimeType);
 }
 
-function canOcrStoredFile(documentRecord, mimeType = "") {
-  return isImageFile(documentRecord, mimeType);
+function canReadStoredFileText(documentRecord, mimeType = "") {
+  return Boolean(getDocumentTextProcessor(documentRecord, mimeType));
+}
+
+function getDocumentTextProcessor(documentRecord, mimeType = "") {
+  if (isImageFile(documentRecord, mimeType)) {
+    return {
+      readyCopy: "OCR runs locally in this app. It does not upload the image.",
+      startCopy: "Reading image locally... 0%",
+      read: readImageDocumentText,
+    };
+  }
+  if (isPdfFile(documentRecord, mimeType)) {
+    return {
+      readyCopy: "PDF pages are read locally. Searchable PDFs are fast; scanned PDFs can take a while.",
+      startCopy: "Opening PDF locally...",
+      read: readPdfDocumentText,
+    };
+  }
+  if (isPlainTextFile(documentRecord, mimeType)) {
+    return {
+      readyCopy: "Text files are read locally in this app. They are not uploaded.",
+      startCopy: "Reading text file locally...",
+      read: readPlainTextDocument,
+    };
+  }
+  return null;
 }
 
 function isImageFile(documentRecord, mimeType = "") {
@@ -1758,6 +2033,12 @@ function isPdfFile(documentRecord, mimeType = "") {
   const type = String(mimeType || documentRecord?.mimeType || "").toLowerCase();
   const name = String(documentRecord?.fileName || "").toLowerCase();
   return type === "application/pdf" || name.endsWith(".pdf");
+}
+
+function isPlainTextFile(documentRecord, mimeType = "") {
+  const type = String(mimeType || documentRecord?.mimeType || "").toLowerCase().split(";")[0];
+  const name = String(documentRecord?.fileName || "").toLowerCase();
+  return type.startsWith("text/") || PLAIN_TEXT_MIME_TYPES.has(type) || PLAIN_TEXT_EXTENSIONS.test(name);
 }
 
 async function deleteProperty(propertyId) {

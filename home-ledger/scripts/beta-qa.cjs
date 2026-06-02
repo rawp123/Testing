@@ -125,6 +125,92 @@ async function seedRecordsWithAttachment(window) {
         await sleep(200);
       };
       const bodyIncludes = (text) => document.body.innerText.includes(text);
+      const waitForSlow = async (predicate, label) => {
+        for (let attempt = 0; attempt < 240; attempt += 1) {
+          if (predicate()) return;
+          await sleep(250);
+        }
+        const records = JSON.parse(localStorage.getItem("home-ledger:v1") || "{}");
+        const localText = records.documents?.[0]?.ocrText || "";
+        const previewText = document.querySelector(".document-preview-modal")?.innerText || "";
+        throw new Error(
+          "Timed out waiting for " + label +
+          ": savedText=" + JSON.stringify(localText).slice(0, 500) +
+          " preview=" + JSON.stringify(previewText).slice(0, 700) +
+          " body=" + document.body.innerText.slice(0, 1200)
+        );
+      };
+      const encodeAscii = (value) => new TextEncoder().encode(value);
+      const concatBytes = (...chunks) => {
+        const totalLength = chunks.reduce((total, chunk) => total + chunk.length, 0);
+        const combined = new Uint8Array(totalLength);
+        let offset = 0;
+        chunks.forEach((chunk) => {
+          combined.set(chunk, offset);
+          offset += chunk.length;
+        });
+        return combined;
+      };
+      const base64ToBytes = (value) => Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
+      const makePdfObject = (number, body) => concatBytes(
+        encodeAscii(number + " 0 obj\\n"),
+        typeof body === "string" ? encodeAscii(body) : body,
+        encodeAscii("\\nendobj\\n"),
+      );
+      const buildScannedPdfBytes = async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 900;
+        canvas.height = 260;
+        const context = canvas.getContext("2d");
+        assert(context, "Missing canvas context for QA PDF.");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#111111";
+        context.font = "700 68px Arial";
+        context.fillText("BETA PDF OCR", 92, 125);
+        context.font = "600 34px Arial";
+        context.fillText("INVOICE 3487", 270, 185);
+
+        const jpegBytes = base64ToBytes(canvas.toDataURL("image/jpeg", 0.95).split(",")[1]);
+        const contentStream = "q\\n" + canvas.width + " 0 0 " + canvas.height + " 0 0 cm\\n/Im0 Do\\nQ\\n";
+        const objects = [
+          "<< /Type /Catalog /Pages 2 0 R >>",
+          "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+          "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + canvas.width + " " + canvas.height + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>",
+          concatBytes(
+            encodeAscii("<< /Type /XObject /Subtype /Image /Width " + canvas.width + " /Height " + canvas.height + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + jpegBytes.length + " >>\\nstream\\n"),
+            jpegBytes,
+            encodeAscii("\\nendstream"),
+          ),
+          "<< /Length " + encodeAscii(contentStream).length + " >>\\nstream\\n" + contentStream + "endstream",
+        ];
+
+        const header = encodeAscii("%PDF-1.4\\n");
+        const chunks = [header];
+        const offsets = [];
+        let byteOffset = header.length;
+        objects.forEach((body, index) => {
+          offsets.push(byteOffset);
+          const objectBytes = makePdfObject(index + 1, body);
+          chunks.push(objectBytes);
+          byteOffset += objectBytes.length;
+        });
+
+        const xrefOffset = byteOffset;
+        const xref = [
+          "xref",
+          "0 " + (objects.length + 1),
+          "0000000000 65535 f ",
+          ...offsets.map((offset) => String(offset).padStart(10, "0") + " 00000 n "),
+          "trailer",
+          "<< /Size " + (objects.length + 1) + " /Root 1 0 R >>",
+          "startxref",
+          String(xrefOffset),
+          "%%EOF",
+          "",
+        ].join("\\n");
+        return concatBytes(...chunks, encodeAscii(xref));
+      };
 
       window.confirm = () => true;
 
@@ -170,8 +256,9 @@ async function seedRecordsWithAttachment(window) {
       const fileInput = document.querySelector('[data-form="document"] input[name="file"]');
       assert(fileInput, "Missing document file input.");
       const dataTransfer = new DataTransfer();
+      const pdfBytes = await buildScannedPdfBytes();
       dataTransfer.items.add(new File(
-        ["beta qa invoice file contents"],
+        [pdfBytes],
         "/Users/private/countertop-invoice.pdf",
         { type: "application/pdf", lastModified: 1739836800000 },
       ));
@@ -179,8 +266,26 @@ async function seedRecordsWithAttachment(window) {
       fileInput.dispatchEvent(new Event("change", { bubbles: true }));
       await submit('[data-form="document"]');
       await waitFor(() => bodyIncludes("Document and local file saved.") && bodyIncludes("Countertop invoice"), "document save");
+      await waitFor(() => {
+        const savedRecords = JSON.parse(localStorage.getItem("home-ledger:v1"));
+        return savedRecords.documents.length === 1 && savedRecords.documents[0].hasFile;
+      }, "document persistence");
+      let records = JSON.parse(localStorage.getItem("home-ledger:v1"));
+      const savedDocumentId = records.documents[0].id;
 
-      const records = JSON.parse(localStorage.getItem("home-ledger:v1"));
+      await click('[data-action="preview-document-file"][data-id="' + savedDocumentId + '"]');
+      await waitFor(() => {
+        const button = document.querySelector('.document-preview-modal [data-action="run-document-ocr"]');
+        return button && !button.disabled;
+      }, "document preview");
+      await click('[data-action="run-document-ocr"]');
+      await waitForSlow(() => {
+        const records = JSON.parse(localStorage.getItem("home-ledger:v1"));
+        const ocrText = records.documents[0]?.ocrText || "";
+        return /BETA|PDF|OCR|INVOICE|3487/i.test(ocrText);
+      }, "PDF local text extraction");
+
+      records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       assert(records.properties.length === 1, "Expected one property.");
       assert(records.projects.length === 1, "Expected one project.");
       assert(records.expenses.length === 1, "Expected one expense.");
@@ -188,6 +293,7 @@ async function seedRecordsWithAttachment(window) {
       const documentRecord = records.documents[0];
       assert(documentRecord.hasFile, "Document should have a stored file.");
       assert(documentRecord.fileName === "countertop-invoice.pdf", "File name should be sanitized.");
+      assert(/BETA|PDF|OCR|INVOICE|3487/i.test(documentRecord.ocrText || ""), "PDF OCR text was not saved with the document.");
       assert(!JSON.stringify(records).includes("/Users/private"), "Raw local path leaked into stored records.");
       const database = await new Promise((resolve, reject) => {
         const request = indexedDB.open("home-ledger-documents", 1);
@@ -200,12 +306,15 @@ async function seedRecordsWithAttachment(window) {
         request.onerror = () => reject(request.error);
       });
       assert(storedFile?.blob, "Stored attachment blob was missing.");
-      assert(await storedFile.blob.text() === "beta qa invoice file contents", "Stored attachment contents did not match.");
+      assert(storedFile.blob.type === "application/pdf", "Stored attachment type should be application/pdf.");
+      assert(storedFile.blob.size > 1000, "Stored PDF attachment was unexpectedly small.");
+      assert((await storedFile.blob.text()).startsWith("%PDF-1.4"), "Stored attachment was not a PDF.");
       database.close();
 
       return {
         documentFileId: documentRecord.fileId,
         documentFileName: documentRecord.fileName,
+        ocrText: documentRecord.ocrText,
       };
     })()
   `);
@@ -232,6 +341,7 @@ async function downloadBackup(window) {
       const backup = JSON.parse(backupText);
       assert(backup.app === "home-basis-tracker", "Backup app id did not match.");
       assert(backup.data.documents.length === 1, "Backup should include one document.");
+      assert(/BETA|PDF|OCR|INVOICE|3487/i.test(backup.data.documents[0].ocrText || ""), "Backup should include local PDF text.");
       assert(backup.files.length === 1, "Backup should include one attachment file.");
       assert(backup.files[0].dataUrl.startsWith("data:application/pdf"), "Backup attachment should be encoded as a PDF data URL.");
       return { backupPath, backupText, backup };
@@ -282,6 +392,7 @@ async function restoreBackup(window, backupText) {
       const documentRecord = records.documents[0];
       assert(documentRecord.hasFile, "Restored document should have an attached file.");
       assert(documentRecord.fileName === "countertop-invoice.pdf", "Restored file name should stay sanitized.");
+      assert(/BETA|PDF|OCR|INVOICE|3487/i.test(documentRecord.ocrText || ""), "Restored document should keep local PDF text.");
       assert(records.expenses[0].documentationStatus === "invoice attached", "Restored expense should be marked invoice attached.");
       assert(!JSON.stringify(records).includes("/Users/private"), "Raw local path leaked after restore.");
 
@@ -296,7 +407,9 @@ async function restoreBackup(window, backupText) {
         request.onerror = () => reject(request.error);
       });
       assert(storedFile?.blob, "Restored attachment blob was missing.");
-      assert(await storedFile.blob.text() === "beta qa invoice file contents", "Restored attachment contents did not match.");
+      assert(storedFile.blob.type === "application/pdf", "Restored attachment type should be application/pdf.");
+      assert(storedFile.blob.size > 1000, "Restored PDF attachment was unexpectedly small.");
+      assert((await storedFile.blob.text()).startsWith("%PDF-1.4"), "Restored attachment was not a PDF.");
       database.close();
 
       return {
@@ -305,6 +418,7 @@ async function restoreBackup(window, backupText) {
         expenses: records.expenses.length,
         documents: records.documents.length,
         restoredFileName: documentRecord.fileName,
+        ocrText: documentRecord.ocrText,
       };
     })()
   `);
@@ -321,6 +435,7 @@ async function main() {
     console.log(`Home Basis Tracker browser beta QA passed: ${restored.properties} property, ${restored.projects} project, ${restored.expenses} expense, ${restored.documents} document, restored ${restored.restoredFileName}.`);
     console.log(`Backup verified: ${backupResult.backupPath}`);
     assert(seeded.documentFileName === restored.restoredFileName, "Restored file name changed unexpectedly.");
+    assert(seeded.ocrText === restored.ocrText, "Restored local document text changed unexpectedly.");
   } finally {
     window.destroy();
   }

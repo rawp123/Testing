@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const outputDir = path.resolve(process.env.QA_OUTPUT_DIR || path.join(__dirname, "..", "release", "qa"));
 const appUrl = process.env.QA_APP_URL || "http://127.0.0.1:3102";
-const websiteUrl = process.env.QA_WEBSITE_URL || "http://127.0.0.1:3105";
+const websiteUrl = process.env.QA_WEBSITE_URL || "http://127.0.0.1:3104";
 const userDataDir = path.join(os.tmpdir(), `home-basis-tracker-render-qa-${process.pid}`);
 
 app.setPath("userData", userDataDir);
