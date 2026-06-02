@@ -115,15 +115,16 @@ elif has_apple_id_notary_credentials; then
 else
   KEYCHAIN_PROFILE="${APPLE_NOTARIZE_KEYCHAIN_PROFILE:-${APPLE_KEYCHAIN_PROFILE:-}}"
   KEYCHAIN_PATH="${APPLE_NOTARIZE_KEYCHAIN:-${APPLE_KEYCHAIN:-}}"
-  keychain_args=()
   if [[ -n "$KEYCHAIN_PATH" ]]; then
-    keychain_args+=(--keychain "$KEYCHAIN_PATH")
+    xcrun notarytool submit "$DMG_PATH" \
+      --keychain "$KEYCHAIN_PATH" \
+      --keychain-profile "$KEYCHAIN_PROFILE" \
+      --wait
+  else
+    xcrun notarytool submit "$DMG_PATH" \
+      --keychain-profile "$KEYCHAIN_PROFILE" \
+      --wait
   fi
-
-  xcrun notarytool submit "$DMG_PATH" \
-    "${keychain_args[@]}" \
-    --keychain-profile "$KEYCHAIN_PROFILE" \
-    --wait
 fi
 
 xcrun stapler staple "$DMG_PATH"
