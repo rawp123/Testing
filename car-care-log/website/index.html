@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Car Care Log is a private desktop app for vehicle service records, receipts, mileage, costs, notes, OCR, export, and local backup."
+    />
+    <title>Car Care Log</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Car Care Log home">
+        <span class="app-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <rect width="48" height="48" rx="12"></rect>
+            <path d="M14 29h20l-2.2-8.2A5 5 0 0 0 27 17h-6a5 5 0 0 0-4.8 3.8L14 29Z"></path>
+            <path d="M13 29h22v8H13z"></path>
+            <path d="M18 37a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
+            <path d="M18 24h12"></path>
+          </svg>
+        </span>
+        <span>Car Care Log</span>
+      </a>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#faq">FAQ</a>
+        <a href="#support">Support</a>
+      </nav>
+      <a class="button button-primary header-cta" href="#download">Download</a>
+    </header>
+
+    <main>
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Private. Local. Yours.</p>
+          <h1>Keep a private service history for your car.</h1>
+          <p class="hero-lede">
+            Track repairs, receipts, mileage, shops, costs, notes, and maintenance records locally on your computer. No
+            account. No cloud sync.
+          </p>
+          <div class="button-row">
+            <a class="button button-primary" href="#download">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path>
+              </svg>
+              Download
+            </a>
+            <a class="button button-secondary" href="#screenshots">See how it works</a>
+          </div>
+          <ul class="trust-row" aria-label="Privacy highlights">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"></path>
+              </svg>
+              No account
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 18a4 4 0 0 0-1-7.9A6 6 0 0 0 6.7 8.2 4.5 4.5 0 0 0 7.5 17H19Z"></path>
+                <path d="m8 8 8 10"></path>
+              </svg>
+              No cloud sync
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 11V8a6 6 0 0 1 12 0v3"></path>
+                <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+              </svg>
+              Records stay on your device
+            </li>
+          </ul>
+        </div>
+
+        <div class="device-preview" aria-label="Car Care Log app preview">
+          <div class="screen">
+            <div class="window-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="privacy-pill">Local record</span>
+            </div>
+            <div class="app-layout">
+              <aside class="vehicle-sidebar">
+                <p>Vehicles</p>
+                <button class="vehicle-item selected">2016 Subaru Outback</button>
+                <button class="vehicle-item">2010 Toyota Highlander</button>
+                <button class="vehicle-item">2005 Jeep Wrangler</button>
+                <button class="add-vehicle">+ Add Vehicle</button>
+              </aside>
+              <section class="vehicle-panel">
+                <div class="panel-heading">
+                  <div>
+                    <strong>2016 Subaru Outback</strong>
+                    <span>Service Records</span>
+                  </div>
+                  <div class="mileage-stat">
+                    <strong>87,420 mi</strong>
+                    <span>Current mileage</span>
+                  </div>
+                </div>
+                <table class="mini-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Service</th>
+                      <th>Mileage</th>
+                      <th>Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Apr 2, 2024</td>
+                      <td>Oil change</td>
+                      <td>87,420 mi</td>
+                      <td>$64.98</td>
+                    </tr>
+                    <tr>
+                      <td>Jan 15, 2024</td>
+                      <td>Brake pads &amp; rotors</td>
+                      <td>84,215 mi</td>
+                      <td>$426.16</td>
+                    </tr>
+                    <tr>
+                      <td>Oct 13, 2023</td>
+                      <td>Transmission fluid</td>
+                      <td>80,640 mi</td>
+                      <td>$192.50</td>
+                    </tr>
+                    <tr>
+                      <td>Aug 12, 2023</td>
+                      <td>Tires</td>
+                      <td>77,091 mi</td>
+                      <td>$612.45</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="attachment-list">
+                  <h3>Recent Attachments</h3>
+                  <div><span class="file-chip">PDF</span> Receipt_OilChange.pdf <em>Apr 2, 2024</em></div>
+                  <div><span class="file-chip">IMG</span> Invoice_Brakes.jpg <em>Jan 15, 2024</em></div>
+                </div>
+              </section>
+              <aside class="details-panel">
+                <h2>Service Details</h2>
+                <dl>
+                  <div><dt>Service</dt><dd>Oil change</dd></div>
+                  <div><dt>Date</dt><dd>Apr 2, 2024</dd></div>
+                  <div><dt>Shop</dt><dd>Falls Church Auto Service</dd></div>
+                  <div><dt>Category</dt><dd>Maintenance</dd></div>
+                  <div><dt>Cost</dt><dd>$64.98</dd></div>
+                </dl>
+                <h3>OCR Text</h3>
+                <p class="ocr-box">Falls Church Auto Service<br />Oil Change<br />5W-30 Full Synthetic<br />$64.98</p>
+              </aside>
+            </div>
+          </div>
+          <div class="laptop-base"></div>
+        </div>
+      </section>
+
+      <section id="features" class="feature-strip">
+        <div class="section-shell">
+          <h2>Everything you need to manage your service history.</h2>
+          <div class="feature-grid" aria-label="Feature list">
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 17h14l-1.5-6A4 4 0 0 0 13.6 8H10a4 4 0 0 0-3.9 3L5 17Z"></path>
+                  <path d="M7 17v2m10-2v2M8 13h8"></path>
+                </svg>
+              </span>
+              <h3>Vehicles</h3>
+              <p>Keep separate records for one or multiple vehicles.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5h9v14H7a2 2 0 0 1-2-2V8a3 3 0 0 1 3-3Z"></path>
+                  <path d="M9 9h6M9 13h6"></path>
+                </svg>
+              </span>
+              <h3>Service Records</h3>
+              <p>Track maintenance and repairs with date, mileage, shop, category, cost, notes, and attachments.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m12 5 6 6-7 7a4.2 4.2 0 0 1-6-6l8-8a3 3 0 0 1 4.2 4.2L9 16.5"></path>
+                </svg>
+              </span>
+              <h3>Attachments</h3>
+              <p>Attach receipts, invoices, photos, PDFs, text files, and CSV files.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 3H4v4m16 0V3h-3M4 17v4h3m10 0h3v-4"></path>
+                  <path d="M8 12h8m-4-4v8"></path>
+                </svg>
+              </span>
+              <h3>OCR &amp; Search</h3>
+              <p>Use local OCR to make receipts and documents searchable.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 8.5-4.7-4.7"></path>
+                  <path d="M15 11h5v5"></path>
+                </svg>
+              </span>
+              <h3>Related History</h3>
+              <p>See related prior services before scheduling similar work.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 19V9m7 10V5m7 14v-7"></path>
+                  <path d="M3 19h18"></path>
+                </svg>
+              </span>
+              <h3>Costs &amp; Mileage</h3>
+              <p>Review service costs and mileage history over time.</p>
+            </article>
+            <article>
+              <span class="line-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path>
+                </svg>
+              </span>
+              <h3>Export &amp; Backup</h3>
+              <p>Export CSV, print summaries, and back up or restore locally.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="screenshots" class="section-shell split-section history-section">
+        <div class="table-preview panel-card" aria-label="Service history table preview">
+          <div class="mock-toolbar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <div class="mock-search">Search records...</div>
+          </div>
+          <div class="filter-row">
+            <span>All Vehicles</span>
+            <span>All Categories</span>
+            <span>All Shops</span>
+            <span>Any Date</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Service</th>
+                <th>Vehicle</th>
+                <th>Mileage</th>
+                <th>Shop</th>
+                <th>Cost</th>
+                <th>Attachments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Apr 2, 2024</td>
+                <td>Oil change</td>
+                <td>2016 Subaru Outback</td>
+                <td>87,420 mi</td>
+                <td>Falls Church Auto</td>
+                <td>$64.98</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Jan 15, 2024</td>
+                <td>Brake pads and rotors</td>
+                <td>2016 Subaru Outback</td>
+                <td>84,215 mi</td>
+                <td>Falls Church Auto</td>
+                <td>$426.16</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Oct 13, 2023</td>
+                <td>Transmission fluid</td>
+                <td>2016 Subaru Outback</td>
+                <td>80,640 mi</td>
+                <td>Main Street Service</td>
+                <td>$192.50</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Aug 12, 2023</td>
+                <td>Tires</td>
+                <td>2016 Subaru Outback</td>
+                <td>77,091 mi</td>
+                <td>Tire World</td>
+                <td>$612.45</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>May 18, 2023</td>
+                <td>Battery replacement</td>
+                <td>2016 Subaru Outback</td>
+                <td>74,210 mi</td>
+                <td>Auto Care Center</td>
+                <td>$189.95</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Mar 4, 2023</td>
+                <td>Coolant flush</td>
+                <td>2016 Subaru Outback</td>
+                <td>70,880 mi</td>
+                <td>Main Street Service</td>
+                <td>$157.35</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Dec 10, 2022</td>
+                <td>Spark plugs</td>
+                <td>2016 Subaru Outback</td>
+                <td>68,340 mi</td>
+                <td>Main Street Service</td>
+                <td>$192.34</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="section-copy">
+          <h2>See the full history at a glance.</h2>
+          <p>
+            Car Care Log organizes your service records in a clear, searchable timeline so you can see what was done,
+            when, where, at what mileage, and how much it cost.
+          </p>
+          <ul class="check-list">
+            <li>Filter by vehicle, category, shop, date, mileage, and more</li>
+            <li>Open attachments and OCR text from the related record</li>
+            <li>Keep notes with each service record</li>
+            <li>Quickly find what you need</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-shell card-trio">
+        <article class="panel-card ocr-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 3H4v4m16 0V3h-3M4 17v4h3m10 0h3v-4"></path>
+              <path d="M8 12h8m-4-4v8"></path>
+            </svg>
+          </div>
+          <h2>Search receipts and documents.</h2>
+          <p>
+            Local OCR reads receipts and documents on your computer so you can search for service details later. Nothing is
+            sent to a cloud OCR service.
+          </p>
+          <div class="receipt-visual" aria-label="Receipt and OCR text preview">
+            <div class="receipt-paper">
+              <strong>Receipt</strong>
+              <span>Falls Church Auto Service</span>
+              <span>Oil Change</span>
+              <span>5W-30 Full Synthetic</span>
+              <span>$64.98</span>
+            </div>
+            <div class="ocr-text">
+              <strong>OCR Text</strong>
+              <p>Falls Church Auto Service<br />Oil Change<br />5W-30 Full Synthetic<br />$64.98</p>
+            </div>
+          </div>
+          <p class="note">OCR quality depends on the document image. You can review and edit details manually.</p>
+        </article>
+
+        <article class="panel-card related-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 8v5l3 2"></path>
+              <path d="M21 12a9 9 0 1 1-3-6.7"></path>
+              <path d="M21 3v6h-6"></path>
+            </svg>
+          </div>
+          <h2>See related work before you pay again.</h2>
+          <p>
+            Car Care Log can show related prior services to help you review history before scheduling similar work. It
+            does not diagnose your vehicle or determine what your car needs.
+          </p>
+          <div class="related-list">
+            <h3>Related Prior Services</h3>
+            <div>
+              <span class="file-chip">Oil</span>
+              Transmission fluid service<br />
+              <em>Oct 13, 2023 at 80,640 mi</em>
+            </div>
+            <div>
+              <span class="file-chip">Oil</span>
+              Transmission flush<br />
+              <em>May 3, 2022 at 62,310 mi</em>
+            </div>
+          </div>
+          <ul class="quiet-list">
+            <li>Related prior service context</li>
+            <li>Helps avoid overlooked duplicates</li>
+            <li>You stay in control</li>
+          </ul>
+        </article>
+
+        <article class="panel-card export-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path>
+            </svg>
+          </div>
+          <h2>Export, print, backup, and restore.</h2>
+          <p>
+            Keep useful copies outside the app with CSV export, printable service summaries, local backup folder export,
+            and local restore.
+          </p>
+          <div class="export-options">
+            <span>CSV Export</span>
+            <span>Printable Service History</span>
+            <span>Local Backup Folder</span>
+            <span>Local Restore</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="section-shell export-summary">
+        <div class="section-copy">
+          <h2>Useful copies outside the app.</h2>
+          <p>Send records to a spreadsheet, create a readable summary, or keep a backup folder you control.</p>
+          <div class="export-detail-grid">
+            <article>
+              <h3>CSV Export</h3>
+              <p>Send records to a spreadsheet.</p>
+            </article>
+            <article>
+              <h3>Printable Service History</h3>
+              <p>Create a readable service summary.</p>
+            </article>
+            <article>
+              <h3>Local Backup Folder</h3>
+              <p>Export a backup folder you control.</p>
+            </article>
+            <article>
+              <h3>Local Restore</h3>
+              <p>Restore your records from your backup folder.</p>
+            </article>
+          </div>
+        </div>
+        <div class="summary-sheet" aria-label="Printable service summary preview">
+          <p class="sheet-kicker">Service History Summary</p>
+          <div class="sheet-header">
+            <strong>2016 Subaru Outback</strong>
+            <span>Total records: 18</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Service</th>
+                <th>Mileage</th>
+                <th>Shop</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Apr 2, 2024</td><td>Oil change</td><td>87,420 mi</td><td>Falls Church Auto</td><td>$64.98</td></tr>
+              <tr><td>Jan 15, 2024</td><td>Brake pads</td><td>84,215 mi</td><td>Falls Church Auto</td><td>$426.16</td></tr>
+              <tr><td>Oct 13, 2023</td><td>Transmission fluid</td><td>80,640 mi</td><td>Main Street Service</td><td>$192.50</td></tr>
+              <tr><td>Aug 12, 2023</td><td>Tires</td><td>77,091 mi</td><td>Tire World</td><td>$612.45</td></tr>
+              <tr><td>May 18, 2023</td><td>Battery</td><td>74,210 mi</td><td>Auto Care Center</td><td>$189.95</td></tr>
+            </tbody>
+          </table>
+          <p class="sheet-note">Records are owner-provided information.</p>
+        </div>
+      </section>
+
+      <section id="privacy" class="section-shell privacy-band">
+        <div class="privacy-copy">
+          <div class="big-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 11V8a6 6 0 0 1 12 0v3"></path>
+              <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+            </svg>
+          </div>
+          <div>
+            <h2>Private by design.</h2>
+            <p>
+              Car Care Log is a local-first desktop app. Your records, attachments, and OCR text stay on your device. No
+              account, no cloud sync, no telemetry, no analytics, and no cloud OCR.
+            </p>
+          </div>
+        </div>
+        <ul class="privacy-checks">
+          <li>No account required</li>
+          <li>No cloud sync</li>
+          <li>No telemetry or analytics</li>
+          <li>No cloud OCR</li>
+          <li>No VIN lookup</li>
+          <li>No OBD or diagnostics</li>
+        </ul>
+      </section>
+
+      <section id="download" class="section-shell pricing-panel">
+        <div class="pricing-icon app-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <rect width="48" height="48" rx="12"></rect>
+            <path d="M14 29h20l-2.2-8.2A5 5 0 0 0 27 17h-6a5 5 0 0 0-4.8 3.8L14 29Z"></path>
+            <path d="M13 29h22v8H13z"></path>
+            <path d="M18 37a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
+            <path d="M18 24h12"></path>
+          </svg>
+        </div>
+        <div>
+          <h2>Car Care Log</h2>
+          <p>A private service history for your vehicles.</p>
+          <p class="price"><strong>$19.99</strong> one-time purchase (planned)</p>
+          <a class="button button-primary large-download" href="#download">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path>
+            </svg>
+            Download
+          </a>
+          <p class="small-print">No account required. Records stay on your device.</p>
+        </div>
+        <div class="includes">
+          <h3>Includes:</h3>
+          <ul class="check-list">
+            <li>Vehicle and service record tracking</li>
+            <li>Receipts and document attachments</li>
+            <li>Local OCR and search</li>
+            <li>CSV export</li>
+            <li>Printable service history summary</li>
+            <li>Local backup and restore</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="faq" class="section-shell faq-section">
+        <h2>Frequently asked questions</h2>
+        <div class="faq-grid">
+          <article>
+            <h3>Is this a desktop app?</h3>
+            <p>Yes. Car Care Log is a desktop app built around local records.</p>
+          </article>
+          <article>
+            <h3>Do I need an account?</h3>
+            <p>No. There is no account required.</p>
+          </article>
+          <article>
+            <h3>Are my records uploaded?</h3>
+            <p>No. Your records and attachments stay local on your device.</p>
+          </article>
+          <article>
+            <h3>Does OCR happen in the cloud?</h3>
+            <p>No. OCR is handled locally.</p>
+          </article>
+          <article>
+            <h3>Does it look up service intervals?</h3>
+            <p>No. Car Care Log does not include service interval lookup.</p>
+          </article>
+          <article>
+            <h3>Can it tell me what service I need?</h3>
+            <p>No. It helps you organize and review your records. It does not diagnose your vehicle or determine required service.</p>
+          </article>
+          <article>
+            <h3>Does it connect to mechanics?</h3>
+            <p>No. You add records manually and attach your own documents.</p>
+          </article>
+          <article>
+            <h3>Can I export my data?</h3>
+            <p>Yes. CSV export, printable summaries, local backup folder export, and local restore are included.</p>
+          </article>
+          <article>
+            <h3>Can I use it for more than one car?</h3>
+            <p>Yes. You can track multiple vehicles in separate records.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="support" class="section-shell final-cta">
+        <div>
+          <h2>Stop digging through emails and folders.</h2>
+          <p>Build a service history you can trust.</p>
+        </div>
+        <div class="final-actions">
+          <a class="button button-primary" href="#download">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path>
+            </svg>
+            Download
+          </a>
+          <a class="button button-ghost" href="#screenshots">See Screenshots</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; 2024 Car Care Log. All rights reserved.</p>
+      <nav aria-label="Footer navigation">
+        <a href="#privacy">Privacy Policy</a>
+        <a href="#support">Terms of Use</a>
+        <a href="#support">Support</a>
+      </nav>
+      <p>Local-first desktop app</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+node_modules/
+dist/
+out/
+release/
+coverage/
+.DS_Store
+*.tsbuildinfo
+
+# Local app data
+data/*.sqlite
+data/*.sqlite-*
+data/attachments/
+data/backups/
+data/exports/
+data/intake/
+
+# Private local QA material
+fixtures/private-documents/
+fixtures/real-world-documents/
+
+# Generated desktop artifacts
+assets/app-icon.iconset/
+*.dmg
+*.app
+*.zip
+
+# Local environment
+.env
+.env.local
+npm-debug.log*
+*.log

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node", "vitest"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "electron.vite.config.ts",
+    "backend/**/*.ts",
+    "desktop/preload/**/*.ts",
+    "shared/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "eslint.config.js"
+  ]
+}

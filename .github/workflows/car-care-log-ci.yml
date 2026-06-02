@@ -1,0 +1,53 @@
+name: Car Care Log CI
+
+on:
+  pull_request:
+    paths:
+      - "car-care-log/**"
+      - ".github/workflows/car-care-log-ci.yml"
+  push:
+    paths:
+      - "car-care-log/**"
+      - ".github/workflows/car-care-log-ci.yml"
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    defaults:
+      run:
+        working-directory: car-care-log
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: car-care-log/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Verify runtime assets
+        run: npm run verify:runtime-assets
+
+      - name: Fresh-user smoke
+        run: npm run smoke:fresh-user
+
+      - name: Test
+        run: npm test
