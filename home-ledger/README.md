@@ -30,6 +30,9 @@ Local app storage is convenient, but it is not a backup. Deleting the app's loca
 - `backend/storage/`: browser storage and desktop bridge adapters for records and document files.
 - `desktop/`: Electron shell, private desktop storage, packaging, and desktop smoke tests.
 - `scripts/`: product-local validation and development helpers.
+- `tests/`: focused Node tests for domain, backup, and desktop storage helper behavior.
+- `docs/`: architecture, data safety, release, real-document QA, and cross-platform notes.
+- `fixtures/`: optional QA fixtures. Private real-world documents belong in ignored subfolders.
 
 Home Basis Tracker is standalone inside `home-ledger/`. It does not import app or website files from Message Archive Utility, Car Care Log, or the root website workspace.
 
@@ -88,6 +91,8 @@ Backup files are plaintext JSON and can contain sensitive home, vendor, amount, 
 
 Only restore backups you created or trust. The app skips several active or executable attachment types during restore, but a full backup can still contain private files and notes.
 
+See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardrails.
+
 ## Exports
 
 - **Download CSV** creates a cost record export with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
@@ -103,36 +108,24 @@ Only restore backups you created or trust. The app skips several active or execu
 - Tax filing, tax forms, or tax/legal advice.
 - Unsupported claims about expense eligibility, savings, or acceptance by a tax authority.
 
-## Manual QA Checklist
+## QA And Review
 
-Before a private beta build, verify these flows in both the Mac app and web version when practical:
+Before a private beta build, verify the app flows in both the Mac app and web version when practical. The detailed human checklist lives in `docs/HUMAN_REVIEW_CHECKLIST.md`, and real-document guidance lives in `docs/REAL_WORLD_DOCUMENT_QA.md`.
 
-- Start with no saved data and confirm the onboarding state is useful.
-- Add a property.
-- Add a project for that property.
-- Add expenses for each classification: potential basis addition, repair or maintenance, and unclear / ask CPA.
-- Filter expenses by classification, category, documentation status, and project.
-- Add a document with and without a file attachment.
-- Confirm displayed file metadata uses a file name only, not a raw local path.
-- Download an attached file.
-- Remove an attached file and confirm the related expense returns to needs follow-up when appropriate.
-- Download the CSV and confirm expected columns.
-- Print the summary and confirm storage/backup controls are hidden.
-- Download a full backup.
-- Restore a backup in a clean browser profile or after clearing local app records.
-- Confirm local data safety copy is visible in the export center.
-
-Useful validation commands:
+Useful validation commands from `home-ledger/`:
 
 ```bash
+npm test
 npm run check:syntax
 npm run check:model
 npm run smoke:desktop
+npm run qa:render
+npm run qa:beta
 npm run pack:mac
 npm run check:mac-package
 git diff --check
 ```
 
-## Private Beta Notes
+## Release Notes
 
-The Mac app now stores records and document copies locally through the desktop shell. The next durability step after this beta pass would be import/export migration testing, optional user-chosen backup locations, and signed/notarized distribution, while preserving the same cautious CPA-review language.
+The Mac app stores records and document copies locally through the desktop shell, and a signed/notarized DMG packaging path is available. Remaining release-readiness work is clean-install distribution QA, import/export migration testing, optional user-chosen backup locations, and continued CPA-review wording checks.

@@ -1,6 +1,4 @@
 import {
-  BACKUP_APP_ID,
-  BACKUP_VERSION,
   buildExpensesCsv,
   CLASSIFICATIONS,
   createId,
@@ -32,6 +30,16 @@ import {
   upsertById,
 } from "../backend/domain/model.js";
 import {
+  createBackupEnvelope,
+  findBackupFileForDocument,
+  getSafeRestoredFileName,
+  isBackupDataUrlTooLarge,
+  isBlockedBackupAttachment,
+  reconcileRestoredExpenseDocumentation,
+  stripDocumentFileMetadata,
+  validateBackupEnvelope,
+} from "../backend/domain/backup.js";
+import {
   canStoreDocuments,
   deleteDocumentFile,
   getDocumentFile,
@@ -49,7 +57,6 @@ import {
 
 const EMPTY_FILTER = "all";
 const app = document.querySelector("#app");
-const MAX_BACKUP_DATA_URL_LENGTH = Math.ceil(MAX_DOCUMENT_FILE_SIZE * 1.38) + 4096;
 
 let data = EMPTY_DATA;
 let activeTab = "dashboard";
@@ -107,8 +114,6 @@ const DOCUMENT_FILE_FILTERS = [
   { value: "no-file", label: "No file" },
 ];
 
-const BLOCKED_BACKUP_FILE_EXTENSIONS = [".app", ".bat", ".cmd", ".command", ".exe", ".js", ".jse", ".msi", ".ps1", ".scr", ".sh", ".vbs", ".wsf"];
-const BLOCKED_BACKUP_MIME_PREFIXES = ["application/x-ms", "application/x-sh", "text/javascript"];
 const DOCUMENT_TEXT_FILE_SIZE_LIMIT = 2 * 1024 * 1024;
 const PDF_TEXT_MAX_PAGES = 25;
 const PDF_RENDER_MAX_PIXELS = 12_000_000;
@@ -2113,6 +2118,16 @@ async function deleteDocument(documentId) {
   if (!window.confirm("Delete this document from this app? This removes the stored copy and its note here, but does not delete the original file from your computer or any copies you downloaded.")) return;
   if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
+  if (documentRecord?.hasFile) {
+    try {
+      await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
+      resetStorageEstimate();
+    } catch {
+      showNotice(`The document was not deleted because the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage.`);
+      return;
+    }
+  }
+
   const nextDocuments = data.documents.filter((document) => document.id !== documentId);
   const saved = await updateData({
     ...data,
@@ -2122,16 +2137,6 @@ async function deleteDocument(documentId) {
   if (!saved) return;
 
   editingDocumentId = undefined;
-  if (documentRecord?.hasFile) {
-    try {
-      await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
-      resetStorageEstimate();
-    } catch {
-      showNotice(`Document removed from records, but the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage.`);
-      return;
-    }
-  }
-
   showNotice("Document deleted.");
 }
 
@@ -2158,6 +2163,13 @@ async function removeDocumentAttachment(documentId) {
   if (!window.confirm("Remove the stored file from this app? The document record will stay, and this will not delete the original file from your computer or any copies you downloaded.")) return;
   if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
+  try {
+    await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
+  } catch (error) {
+    showNotice(`The document was not updated because the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage. ${getDocumentStorageError(error)}`);
+    return;
+  }
+
   const nextDocuments = data.documents.map((document) =>
     document.id === documentId
       ? {
@@ -2182,13 +2194,6 @@ async function removeDocumentAttachment(documentId) {
   if (!saved) return;
 
   resetStorageEstimate();
-  try {
-    await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
-  } catch (error) {
-    showNotice(`Document updated, but the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage. ${getDocumentStorageError(error)}`);
-    return;
-  }
-
   showNotice("Stored file removed. The document record was kept.");
 }
 
@@ -2288,6 +2293,7 @@ async function buildFullBackup() {
         continue;
       }
 
+      const dataUrl = await blobToDataUrl(storedFile.blob);
       files.push({
         documentId: documentRecord.id,
         fileId: documentRecord.fileId || documentRecord.id,
@@ -2296,7 +2302,8 @@ async function buildFullBackup() {
         fileSize: documentRecord.fileSize || storedFile.size || storedFile.blob.size || 0,
         fileLastModified: documentRecord.fileLastModified || storedFile.lastModified || null,
         fileStoredAt: documentRecord.fileStoredAt || storedFile.storedAt || "",
-        dataUrl: await blobToDataUrl(storedFile.blob),
+        sha256: await hashBlob(storedFile.blob),
+        dataUrl,
       });
     } catch {
       missingFiles.push({
@@ -2307,14 +2314,7 @@ async function buildFullBackup() {
     }
   }
 
-  return {
-    app: BACKUP_APP_ID,
-    backupVersion: BACKUP_VERSION,
-    createdAt: new Date().toISOString(),
-    data: backupData,
-    files,
-    missingFiles,
-  };
+  return createBackupEnvelope(backupData, files, missingFiles);
 }
 
 async function restoreFromBackupFile(file) {
@@ -2363,15 +2363,7 @@ async function restoreFromBackupFile(file) {
 }
 
 async function prepareBackupRestore(backup) {
-  if (!backup || backup.app !== BACKUP_APP_ID || !backup.data) {
-    throw new Error("This does not look like a Home Basis Tracker backup.");
-  }
-  if (Number(backup.backupVersion || 1) > BACKUP_VERSION) {
-    throw new Error("This backup was created by a newer version of Home Basis Tracker.");
-  }
-
-  const restoredData = sanitizeData(backup.data);
-  const backupFiles = Array.isArray(backup.files) ? backup.files : [];
+  const { data: restoredData, files: backupFiles } = validateBackupEnvelope(backup);
   const newFileIds = [];
   let skippedFiles = 0;
 
@@ -2384,10 +2376,7 @@ async function prepareBackupRestore(backup) {
         continue;
       }
 
-      const backupFile = backupFiles.find((fileRecord) =>
-        fileRecord.documentId === documentRecord.id ||
-        fileRecord.fileId === documentRecord.fileId
-      );
+      const backupFile = findBackupFileForDocument(backupFiles, documentRecord);
 
       if (!backupFile?.dataUrl) {
         skippedFiles += 1;
@@ -2404,7 +2393,7 @@ async function prepareBackupRestore(backup) {
         restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File type skipped during restore"));
         continue;
       }
-      if (isDataUrlTooLarge(backupFile.dataUrl)) {
+      if (isBackupDataUrlTooLarge(backupFile.dataUrl)) {
         skippedFiles += 1;
         restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File too large to restore"));
         continue;
@@ -2414,6 +2403,11 @@ async function prepareBackupRestore(backup) {
       if (blob.size > MAX_DOCUMENT_FILE_SIZE) {
         skippedFiles += 1;
         restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File too large to restore"));
+        continue;
+      }
+      if (!await backupFileChecksumMatches(blob, backupFile.sha256)) {
+        skippedFiles += 1;
+        restoredDocuments.push(stripDocumentFileMetadata(documentRecord, "File checksum did not match backup"));
         continue;
       }
 
@@ -2433,7 +2427,7 @@ async function prepareBackupRestore(backup) {
         ...documentRecord,
         hasFile: true,
         fileId,
-        fileName: removeLocalPaths(storedFile.name).trim() || "Attached file",
+        fileName: getSafeRestoredFileName(storedFile.name),
         mimeType: storedFile.type,
         fileSize: storedFile.size,
         fileLastModified: storedFile.lastModified,
@@ -2453,51 +2447,6 @@ async function prepareBackupRestore(backup) {
     newFileIds,
     skippedFiles,
   };
-}
-
-function stripDocumentFileMetadata(documentRecord, reason) {
-  return {
-    ...documentRecord,
-    hasFile: false,
-    fileId: "",
-    fileName: reason,
-    fileStatusNote: reason,
-    mimeType: "",
-    fileSize: 0,
-    fileLastModified: null,
-    fileStoredAt: "",
-  };
-}
-
-function reconcileRestoredExpenseDocumentation(expenses, documents) {
-  return expenses.map((expense) => {
-    if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) {
-      return expense;
-    }
-
-    const attachedDocuments = documents.filter((document) =>
-      document.expenseId === expense.id &&
-      document.hasFile &&
-      ["receipt", "invoice"].includes(document.documentType)
-    );
-
-    if (attachedDocuments.some((document) => document.documentType === "invoice")) {
-      return { ...expense, documentationStatus: "invoice attached" };
-    }
-    if (attachedDocuments.some((document) => document.documentType === "receipt")) {
-      return { ...expense, documentationStatus: "receipt attached" };
-    }
-    return { ...expense, documentationStatus: "needs follow-up" };
-  });
-}
-
-function isBlockedBackupAttachment(fileRecord) {
-  const fileName = String(fileRecord?.fileName || "").toLowerCase();
-  const mimeType = String(fileRecord?.mimeType || "").toLowerCase();
-  return (
-    BLOCKED_BACKUP_FILE_EXTENSIONS.some((extension) => fileName.endsWith(extension)) ||
-    BLOCKED_BACKUP_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix))
-  );
 }
 
 async function getExistingDocumentFileIds() {
@@ -2536,6 +2485,22 @@ function blobToDataUrl(blob) {
   });
 }
 
+async function hashBlob(blob) {
+  if (!window.crypto?.subtle) return "";
+  const buffer = await blob.arrayBuffer();
+  const digest = await window.crypto.subtle.digest("SHA-256", buffer);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function backupFileChecksumMatches(blob, expectedHash) {
+  const hash = String(expectedHash || "").trim().toLowerCase();
+  if (!hash) return true;
+  if (!/^[a-f0-9]{64}$/.test(hash) || !window.crypto?.subtle) return false;
+  return await hashBlob(blob) === hash;
+}
+
 async function dataUrlToBlob(dataUrl) {
   if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
     throw new Error("Backup file data is not in the expected format.");
@@ -2543,10 +2508,6 @@ async function dataUrlToBlob(dataUrl) {
   const response = await fetch(dataUrl);
   if (!response.ok) throw new Error("Could not read a file stored in the backup.");
   return response.blob();
-}
-
-function isDataUrlTooLarge(dataUrl) {
-  return typeof dataUrl !== "string" || dataUrl.length > MAX_BACKUP_DATA_URL_LENGTH;
 }
 
 function requestStorageEstimate() {

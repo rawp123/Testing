@@ -1,0 +1,20 @@
+node_modules/
+release/
+dist/
+out/
+.DS_Store
+npm-debug.log*
+*.log
+
+# Private local QA material
+fixtures/private-documents/
+fixtures/real-world-documents/
+
+# Generated desktop artifacts
+*.dmg
+*.app
+*.zip
+
+# Local environments
+.env
+.env.local

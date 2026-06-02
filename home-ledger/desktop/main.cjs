@@ -3,6 +3,13 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const {
+  cleanText,
+  getSafeFileName,
+  getSafeId,
+  requireSafeId,
+  toBuffer,
+} = require("./storage-helpers.cjs");
 
 const IS_PACKAGED = app.isPackaged;
 const PRELOAD_SCRIPT = path.join(__dirname, "preload.cjs");
@@ -50,7 +57,7 @@ function getDocumentsDir() {
 }
 
 function getDocumentPath(fileId) {
-  return path.join(getDocumentsDir(), `${getSafeId(fileId)}.blob`);
+  return path.join(getDocumentsDir(), `${requireSafeId(fileId)}.blob`);
 }
 
 function getStartUrl() {
@@ -310,18 +317,11 @@ async function readJsonFile(filePath, fallback) {
 
 async function writeJsonFile(filePath, value) {
   const text = `${JSON.stringify(value, null, 2)}\n`;
-  if (Buffer.byteLength(text, "utf8") > MAX_RECORDS_BYTES) {
-    throw new Error("The local records file is too large to save.");
-  }
-
-  const tempPath = `${filePath}.tmp`;
   await preserveReadableJsonBackup(filePath);
-  await fs.writeFile(tempPath, text, "utf8");
-  await chmodBestEffort(tempPath, 0o600);
-  await fsyncFileBestEffort(tempPath);
-  await fs.rename(tempPath, filePath);
-  await chmodBestEffort(filePath, 0o600);
-  await fsyncDirectoryBestEffort(path.dirname(filePath));
+  await writeUtf8FileAtomic(filePath, text, {
+    maxBytes: MAX_RECORDS_BYTES,
+    tooLargeMessage: "The local records file is too large to save.",
+  });
 }
 
 async function preserveReadableJsonBackup(filePath) {
@@ -351,6 +351,29 @@ async function writeAttachmentsManifest(manifest) {
     version: STORAGE_VERSION,
     files: Array.isArray(manifest.files) ? manifest.files.map(sanitizeAttachmentRecord).filter(Boolean) : [],
   });
+}
+
+async function writeUtf8FileAtomic(filePath, contents, options = {}) {
+  const text = String(contents || "");
+  const maxBytes = Number(options.maxBytes) || 0;
+  if (maxBytes && Buffer.byteLength(text, "utf8") > maxBytes) {
+    throw new Error(options.tooLargeMessage || "The file is too large to save.");
+  }
+
+  const directory = path.dirname(filePath);
+  const baseName = path.basename(filePath);
+  const tempPath = path.join(directory, `.${baseName}.${process.pid}.${Date.now()}.tmp`);
+  try {
+    await fs.writeFile(tempPath, text, "utf8");
+    await chmodBestEffort(tempPath, 0o600);
+    await fsyncFileBestEffort(tempPath);
+    await fs.rename(tempPath, filePath);
+    await chmodBestEffort(filePath, 0o600);
+    await fsyncDirectoryBestEffort(directory);
+  } catch (error) {
+    await fs.rm(tempPath, { force: true }).catch(() => {});
+    throw error;
+  }
 }
 
 async function getFileSize(filePath) {
@@ -434,29 +457,6 @@ function sanitizeAttachmentRecord(record) {
   };
 }
 
-function getSafeId(value) {
-  return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 120);
-}
-
-function getSafeFileName(name) {
-  const fileName = String(name || "").split(/[\\/]/).filter(Boolean).pop();
-  return cleanText(fileName || "Attached file").slice(0, 180) || "Attached file";
-}
-
-function cleanText(value) {
-  return String(value || "").replace(/[\u0000-\u001f\u007f]/g, "").trim();
-}
-
-function toBuffer(data) {
-  if (data instanceof ArrayBuffer) {
-    return Buffer.from(data);
-  }
-  if (ArrayBuffer.isView(data)) {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-  }
-  throw new Error("Document data was not in the expected format.");
-}
-
 function serializeError(error) {
   return {
     message: error?.message || "Unknown desktop storage error.",
@@ -518,8 +518,10 @@ function registerIpcHandlers() {
       return { canceled: true };
     }
 
-    await fs.writeFile(result.filePath, contents, "utf8");
-    await chmodBestEffort(result.filePath, 0o600);
+    await writeUtf8FileAtomic(result.filePath, contents, {
+      maxBytes: MAX_BACKUP_BYTES,
+      tooLargeMessage: "Backup file is too large.",
+    });
     return { canceled: false };
   });
 
