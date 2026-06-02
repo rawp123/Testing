@@ -30,7 +30,7 @@ import {
   TABS,
   todayISO,
   upsertById,
-} from "./model.js";
+} from "../backend/domain/model.js";
 import {
   canStoreDocuments,
   deleteDocumentFile,
@@ -38,14 +38,14 @@ import {
   listDocumentFiles,
   saveDocumentFile,
   saveDocumentFileRecord,
-} from "./document-storage.js";
+} from "../backend/storage/document-storage.js";
 import {
   getStorageInfo,
   isDesktopMode,
   loadRecords,
   saveBackupFile,
   saveRecords,
-} from "./storage-adapter.js";
+} from "../backend/storage/records-storage.js";
 
 const EMPTY_FILTER = "all";
 const app = document.querySelector("#app");
@@ -1705,11 +1705,11 @@ async function runDocumentOcr(documentId) {
 }
 
 async function recognizeDocumentText(blob, onProgress) {
-  const { createWorker } = await import("./node_modules/tesseract.js/dist/tesseract.esm.min.js");
+  const { createWorker } = await import("../node_modules/tesseract.js/dist/tesseract.esm.min.js");
   const worker = await createWorker("eng", 1, {
-    workerPath: new URL("./node_modules/tesseract.js/dist/worker.min.js", import.meta.url).href,
-    corePath: new URL("./node_modules/tesseract.js-core", import.meta.url).href,
-    langPath: new URL("./node_modules/@tesseract.js-data/eng/4.0.0", import.meta.url).href,
+    workerPath: new URL("../node_modules/tesseract.js/dist/worker.min.js", import.meta.url).href,
+    corePath: new URL("../node_modules/tesseract.js-core", import.meta.url).href,
+    langPath: new URL("../node_modules/@tesseract.js-data/eng/4.0.0", import.meta.url).href,
     workerBlobURL: false,
     cacheMethod: "none",
     logger(message) {

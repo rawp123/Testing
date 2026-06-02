@@ -1,4 +1,4 @@
-import { sanitizeData } from "./model.js";
+import { sanitizeData } from "../domain/model.js";
 
 const desktopBridge = typeof window !== "undefined" ? window.homeLedgerDesktop : null;
 

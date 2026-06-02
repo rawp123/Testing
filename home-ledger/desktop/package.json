@@ -13,6 +13,7 @@
     "smoke": "env -u ELECTRON_RUN_AS_NODE HOME_LEDGER_DESKTOP_SMOKE=1 electron .",
     "pack:mac": "electron-builder --mac --dir",
     "pack:mac:dmg": "electron-builder --mac dmg",
+    "pack:mac:dmg:signed": "../scripts/build-signed-dmg.sh",
     "check:package": "node scripts/check-packaged-app.cjs"
   },
   "build": {
@@ -34,13 +35,9 @@
         "from": "..",
         "to": "home-ledger",
         "filter": [
-          "index.html",
           "package.json",
-          "app.js",
-          "model.js",
-          "document-storage.js",
-          "storage-adapter.js",
-          "styles.css",
+          "frontend/**/*",
+          "backend/**/*",
           "README.md"
         ]
       },

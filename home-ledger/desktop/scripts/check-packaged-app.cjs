@@ -18,12 +18,12 @@ if (/<key>NSAllowsArbitraryLoads<\/key>\s*<true\/>/.test(plist)) {
 }
 
 const requiredResources = [
-  "index.html",
-  "app.js",
-  "model.js",
-  "document-storage.js",
-  "storage-adapter.js",
-  "styles.css",
+  "frontend/index.html",
+  "frontend/app.js",
+  "frontend/styles.css",
+  "backend/domain/model.js",
+  "backend/storage/document-storage.js",
+  "backend/storage/records-storage.js",
   "node_modules/tesseract.js/dist/tesseract.esm.min.js",
   "node_modules/tesseract.js/dist/worker.min.js",
   "node_modules/tesseract.js-core/tesseract-core.wasm.js",
@@ -39,7 +39,7 @@ const resourcesDir = path.resolve(
 const missingResources = requiredResources.filter((fileName) => !fs.existsSync(path.join(resourcesDir, fileName)));
 
 if (missingResources.length) {
-  console.error(`Packaged app is missing Home Ledger resources: ${missingResources.join(", ")}`);
+  console.error(`Packaged app is missing Home Basis Tracker resources: ${missingResources.join(", ")}`);
   process.exit(1);
 }
 

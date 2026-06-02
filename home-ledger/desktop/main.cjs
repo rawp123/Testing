@@ -9,7 +9,7 @@ const PRELOAD_SCRIPT = path.join(__dirname, "preload.cjs");
 const APP_DIR = IS_PACKAGED
   ? path.join(process.resourcesPath, "home-ledger")
   : path.resolve(__dirname, "..");
-const APP_INDEX = path.join(APP_DIR, "index.html");
+const APP_INDEX = path.join(APP_DIR, "frontend", "index.html");
 const STORAGE_VERSION = 1;
 const MAX_RECORDS_BYTES = 15 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
@@ -140,7 +140,8 @@ async function runDesktopSmoke(window) {
           await sleep();
         };
         const setValue = async (name, value) => {
-          const element = document.querySelector('form [name="' + name + '"]');
+          const fields = Array.from(document.querySelectorAll('form [name="' + name + '"]'));
+          const element = fields.find((field) => field.closest("form")?.offsetParent !== null) || fields.at(-1);
           assert(element, "Missing form field: " + name);
           element.value = value;
           element.dispatchEvent(new Event("input", { bubbles: true }));
@@ -410,7 +411,7 @@ async function getDocumentStorageSummary() {
 
 async function getModelModule() {
   if (!modelModulePromise) {
-    modelModulePromise = import(pathToFileURL(path.join(APP_DIR, "model.js")).toString());
+    modelModulePromise = import(pathToFileURL(path.join(APP_DIR, "backend", "domain", "model.js")).toString());
   }
   return modelModulePromise;
 }

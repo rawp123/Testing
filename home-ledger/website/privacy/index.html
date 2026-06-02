@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <meta
+      name="description"
+      content="Home Basis Tracker privacy and local storage details: no account, no cloud sync, no uploads, no telemetry, and local backups."
+    />
+    <title>Privacy | Home Basis Tracker</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Home Basis Tracker home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 11.5 12 4l9 7.5"></path>
+            <path d="M5.5 10.5V20h13v-9.5"></path>
+            <path d="M9.5 20v-6h5v6"></path>
+          </svg>
+        </span>
+        <span>Home Basis Tracker</span>
+      </a>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="/">Home Basis Tracker</a>
+        <a href="/how-it-works/">How It Works</a>
+        <a href="/privacy/" aria-current="page">Privacy</a>
+        <a href="/faq/">FAQ</a>
+      </nav>
+      <a class="button button-primary header-cta" href="/download/">Download</a>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="section-shell">
+          <p class="eyebrow">Privacy</p>
+          <h1>Your records stay local.</h1>
+          <p>
+            Home Basis Tracker is designed as a local record binder. It does not create an account, upload records, sync
+            to a cloud service, add telemetry, or call third-party APIs for your records.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-shell content-grid">
+          <div class="content-stack">
+            <article class="content-card">
+              <h2>Mac desktop app</h2>
+              <p>
+                In the Mac app, structured records are stored in app-managed local storage. Attached files are copied into
+                an app-managed documents folder so the app can keep them connected to your property, project, and expense
+                records.
+              </p>
+            </article>
+            <article class="content-card">
+              <h2>Browser version</h2>
+              <p>
+                In the browser version, structured records use the current browser profile with localStorage. Attached
+                document files are stored in that browser profile with IndexedDB.
+              </p>
+            </article>
+            <article class="content-card" id="backups">
+              <h2>Backups are your responsibility</h2>
+              <p>
+                Local storage is private and convenient, but it is not a backup by itself. Deleting app data, clearing
+                browser data, changing browser profiles, or using private browsing can remove records and attachments.
+              </p>
+              <p>
+                Full backup files can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document
+                contents. Treat them like private records and store them somewhere you trust.
+              </p>
+            </article>
+          </div>
+          <aside class="download-panel">
+            <h2>What the app does not add</h2>
+            <ul class="check-list">
+              <li>No account requirement.</li>
+              <li>No cloud sync workflow.</li>
+              <li>No record upload workflow.</li>
+              <li>No telemetry or analytics code.</li>
+              <li>No third-party APIs for your records.</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-shell footer-bottom">
+        <span>&copy; 2026 Home Basis Tracker.</span>
+        <a href="/faq/">Read FAQ</a>
+      </div>
+    </footer>
+  </body>
+</html>

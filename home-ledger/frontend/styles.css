@@ -1029,6 +1029,12 @@ td > span:not(.pill, .money) {
     flex-wrap: nowrap;
     justify-content: flex-start;
     overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .app-tabs button {

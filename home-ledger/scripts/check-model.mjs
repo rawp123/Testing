@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   buildExpensesCsv,
   sanitizeData,
-} from "../model.js";
+} from "../backend/domain/model.js";
 
 const rawData = {
   properties: [{
@@ -65,4 +65,4 @@ const csv = buildExpensesCsv(cleanData);
 assert.match(csv, /'=Formula Vendor/);
 assert.match(csv, /Potential basis addition|potential basis addition/);
 
-console.log("Home Ledger model checks passed.");
+console.log("Home Basis Tracker model checks passed.");

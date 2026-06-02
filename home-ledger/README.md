@@ -22,6 +22,29 @@ The app does not create an account, upload files, call third-party APIs, or use 
 
 Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove records and attached files.
 
+## Product Layout
+
+- `website/`: standalone product website and support pages.
+- `frontend/`: browser UI, HTML entry point, and visual styles.
+- `backend/domain/`: local data model, validation, sanitization, CSV export, backup shaping, and shared constants.
+- `backend/storage/`: browser storage and desktop bridge adapters for records and document files.
+- `desktop/`: Electron shell, private desktop storage, packaging, and desktop smoke tests.
+- `scripts/`: product-local validation and development helpers.
+
+Home Basis Tracker is standalone inside `home-ledger/`. It does not import app or website files from Message Archive Utility, Car Care Log, or the root website workspace.
+
+Run the browser app locally:
+
+```bash
+npm run dev
+```
+
+Run the product website locally:
+
+```bash
+npm run dev:website
+```
+
 ## Mac Desktop App
 
 The desktop app is an Electron wrapper around the same local-first records binder. It does not add accounts, cloud sync, OCR, tax filing, or third-party storage.
@@ -29,20 +52,29 @@ The desktop app is an Electron wrapper around the same local-first records binde
 Install desktop dependencies:
 
 ```bash
-npm install --prefix home-ledger/desktop
+npm install --prefix desktop
 ```
 
 Run the Mac app in development:
 
 ```bash
-npm run start:home-ledger:desktop
+npm --prefix desktop start
 ```
 
 Package an unsigned local Mac build:
 
 ```bash
-npm run pack:home-ledger:mac
+npm run pack:mac
 ```
+
+Package a signed and notarized Mac DMG:
+
+```bash
+source ~/.message-archive-signing-env
+npm run pack:mac:dmg:signed
+```
+
+The signing environment file must stay outside Git and must not be printed. The signed DMG script uses `CSC_NAME` for the Developer ID Application identity, accepts Apple API key, Apple ID, or keychain-profile notarization credentials, signs and notarizes the DMG, staples the notarization ticket, and runs a Gatekeeper assessment.
 
 The app intentionally shows friendly storage labels instead of raw local file paths. Users can download backups and exports from inside the app when they want a portable copy.
 
@@ -93,26 +125,12 @@ Before a private beta build, verify these flows in both the Mac app and web vers
 Useful validation commands:
 
 ```bash
-node --check home-ledger/app.js
-node --check home-ledger/model.js
-node --check home-ledger/document-storage.js
-node --check home-ledger/storage-adapter.js
-node --check home-ledger/desktop/main.cjs
-node --check home-ledger/desktop/preload.cjs
-npm run check:home-ledger:model
-npm run smoke:home-ledger:desktop
-npm run pack:home-ledger:mac
-npm run check:home-ledger:mac-package
-git diff --check
-```
-
-From inside the `home-ledger` folder, use the equivalent local aliases:
-
-```bash
+npm run check:syntax
 npm run check:model
 npm run smoke:desktop
 npm run pack:mac
 npm run check:mac-package
+git diff --check
 ```
 
 ## Private Beta Notes

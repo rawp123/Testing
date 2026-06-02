@@ -3,9 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev:website": "node website/server.cjs",
+    "start:website": "node website/server.cjs",
+    "dev": "node scripts/serve-frontend.mjs",
+    "start": "node scripts/serve-frontend.mjs",
+    "check:syntax": "bash -n scripts/build-signed-dmg.sh && node --check frontend/app.js && node --check backend/domain/model.js && node --check backend/storage/document-storage.js && node --check backend/storage/records-storage.js && node --check desktop/main.cjs && node --check desktop/preload.cjs && node --check scripts/serve-frontend.mjs && node --check scripts/render-qa.cjs && node --check scripts/beta-qa.cjs && node --check website/server.cjs",
     "check:model": "node scripts/check-model.mjs",
+    "qa:render": "env -u ELECTRON_RUN_AS_NODE ./desktop/node_modules/.bin/electron scripts/render-qa.cjs",
+    "qa:beta": "env -u ELECTRON_RUN_AS_NODE ./desktop/node_modules/.bin/electron scripts/beta-qa.cjs",
     "smoke:desktop": "npm --prefix desktop run smoke",
     "pack:mac": "npm --prefix desktop run pack:mac",
+    "pack:mac:dmg:signed": "npm --prefix desktop run pack:mac:dmg:signed",
     "check:mac-package": "npm --prefix desktop run check:package"
   },
   "dependencies": {
