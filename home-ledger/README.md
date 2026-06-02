@@ -70,11 +70,11 @@ npm run pack:mac
 Package a signed and notarized Mac DMG:
 
 ```bash
-source ~/.message-archive-signing-env
+source ~/.home-basis-tracker-signing-env
 npm run pack:mac:dmg:signed
 ```
 
-The signing environment file must stay outside Git and must not be printed. The signed DMG script uses `CSC_NAME` for the Developer ID Application identity, accepts Apple API key, Apple ID, or keychain-profile notarization credentials, signs and notarizes the DMG, staples the notarization ticket, and runs a Gatekeeper assessment.
+The signing environment file must stay outside Git and must not be printed. The signed DMG script uses `CSC_NAME` for the Developer ID Application identity, accepts Apple API key, Apple ID, or keychain-profile notarization credentials, signs and notarizes the DMG, staples the notarization ticket, and runs a Gatekeeper assessment. For `CSC_NAME`, use `Your Name (TEAMID)` or the full `Developer ID Application: Your Name (TEAMID)` certificate name.
 
 The app intentionally shows friendly storage labels instead of raw local file paths. Users can download backups and exports from inside the app when they want a portable copy.
 
