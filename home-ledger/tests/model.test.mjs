@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildCpaReviewPacket,
   buildExpensesCsv,
   formatFileSize,
+  getProjectReviewSummaries,
+  getPropertyReviewSummaries,
+  getReviewReadiness,
   parseAmount,
   removeLocalPaths,
   sanitizeData,
@@ -23,7 +27,9 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
       propertyId: "missing_property",
       name: "Kitchen",
       category: "not-real",
+      permitNumber: "/Users/private/permit.pdf",
       status: "mystery",
+      scopeSummary: "See ~/private/scope.txt",
     }],
     expenses: [{
       id: "expense_1",
@@ -59,6 +65,8 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
   assert.equal(cleanData.projects[0].propertyId, "property_1");
   assert.equal(cleanData.projects[0].category, "other");
   assert.equal(cleanData.projects[0].status, "planned");
+  assert.equal(cleanData.projects[0].permitNumber, "[local file path removed]");
+  assert.equal(cleanData.projects[0].scopeSummary, "See [local file path removed]");
   assert.equal(cleanData.expenses[0].classification, "unclear / ask CPA");
   assert.equal(cleanData.expenses[0].category, "other");
   assert.equal(cleanData.expenses[0].documentationStatus, "no document yet");
@@ -109,6 +117,76 @@ test("buildExpensesCsv neutralizes spreadsheet formulas and quotes values", () =
   assert.match(csv, /,'@Vendor,/);
   assert.match(csv, /"Line one\nLine two"/);
   assert.match(csv, /"Main, Home"/);
+});
+
+test("review readiness and CPA packet summarize professional review gaps", () => {
+  const cleanData = sanitizeData({
+    properties: [{
+      id: "property_1",
+      name: "Main home",
+      address: "123 Maple Street",
+      purchaseDate: "2020-01-15",
+      purchasePrice: 450000,
+    }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Kitchen remodel",
+      category: "kitchen",
+      status: "completed",
+      startDate: "2024-01-01",
+      completionDate: "2024-03-01",
+      contractor: "Builder Co.",
+      permitNumber: "PR-123",
+      scopeSummary: "Cabinets and electrical upgrades.",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-02-01",
+      vendor: "Builder Co.",
+      description: "Cabinet installation",
+      amount: 1200,
+      classification: "potential basis addition",
+      category: "kitchen",
+      documentationStatus: "invoice attached",
+    }],
+    documents: [{
+      id: "document_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      expenseId: "expense_1",
+      displayName: "Cabinet invoice",
+      documentType: "invoice",
+      addedDate: "2024-02-02",
+      hasFile: true,
+      fileName: "invoice.pdf",
+      fileSize: 2048,
+    }],
+  });
+
+  const readiness = getReviewReadiness(cleanData);
+  const properties = getPropertyReviewSummaries(cleanData);
+  const projects = getProjectReviewSummaries(cleanData);
+  const packet = buildCpaReviewPacket(cleanData);
+
+  assert.equal(readiness.expensesMissingLinkedEvidence.length, 0);
+  assert.equal(readiness.score, 100);
+  assert.equal(properties[0].readinessScore, 100);
+  assert.equal(projects[0].hasPermit, true);
+  assert.match(packet, /Home Basis Tracker CPA Review Packet/);
+  assert.match(packet, /Kitchen remodel/);
+  assert.match(packet, /Cabinet invoice/);
+  assert.match(packet, /does not calculate taxes/);
+});
+
+test("review readiness starts at zero for an empty binder", () => {
+  const readiness = getReviewReadiness(sanitizeData());
+
+  assert.equal(readiness.score, 0);
+  assert.equal(readiness.completedChecks, 0);
+  assert.ok(readiness.followUps.some((item) => /property/i.test(item)));
 });
 
 test("amount, file-size, and path helpers handle edge cases", () => {

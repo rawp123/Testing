@@ -1,4 +1,5 @@
 import {
+  buildCpaReviewPacket,
   buildExpensesCsv,
   CLASSIFICATIONS,
   createId,
@@ -12,8 +13,11 @@ import {
   formatCurrency,
   formatDate,
   getExpenseTotals,
+  getProjectReviewSummaries,
   getProjectName,
+  getPropertyReviewSummaries,
   getPropertyName,
+  getReviewReadiness,
   isDocumentationGap,
   isValidISODate,
   optionLabel,
@@ -79,6 +83,7 @@ let editingExpenseId;
 let editingDocumentId;
 let draftDocumentExpenseId = "";
 let documentPreview = null;
+let lastBackupCreatedAt = "";
 let storageEstimate = {
   status: "idle",
   usage: 0,
@@ -241,6 +246,8 @@ function renderActiveTab() {
 
 function renderDashboard() {
   const totals = getExpenseTotals(data.expenses);
+  const readiness = getReviewReadiness(data);
+  const propertySummaries = getPropertyReviewSummaries(data);
   const recentExpenses = sortByDateDesc(data.expenses).slice(0, 6);
   const hasRecords = data.properties.length || data.projects.length || data.expenses.length || data.documents.length;
   const storedFileCount = data.documents.filter((document) => document.hasFile).length;
@@ -266,11 +273,14 @@ function renderDashboard() {
         ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
         ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
         ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
-        ["Documentation follow-ups", String(getDocumentationAttentionExpenses(data.expenses).length), "blue"],
+        ["Review readiness", `${readiness.score}%`, readiness.score >= 80 ? "green" : readiness.score >= 50 ? "amber" : "rust"],
       ])}
 
       ${renderNotice("Home Basis Tracker helps organize records for review. It is not tax software and does not decide tax treatment. Confirm classifications and records with your CPA.")}
       ${storedFileCount ? renderNotice(`${storedFileCount} attached file${storedFileCount === 1 ? " is" : "s are"} stored locally ${storageLocationShort()}. Keep your own backup of important records.`) : ""}
+
+      ${hasRecords ? renderReviewReadinessPanel(readiness) : ""}
+      ${propertySummaries.length ? renderPropertyDashboardCards(propertySummaries) : ""}
 
       <div class="content-grid two-columns">
         <section class="panel">
@@ -309,6 +319,72 @@ function renderOnboardingPanel() {
       <div class="onboarding-actions">
         <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add your property</button>
         <button class="button button-secondary" data-action="start-tutorial" type="button">Open tutorial</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderReviewReadinessPanel(readiness) {
+  const followUps = readiness.followUps.slice(0, 6);
+  const readyItems = readiness.readyItems.slice(0, 4);
+
+  return `
+    <section class="panel review-readiness-panel">
+      ${renderPanelHeader("Review readiness", "A practical checklist for getting this binder ready to share with a CPA.", "clipboard", `
+        <button class="button button-secondary" data-action="open-export" type="button">Open review packet</button>
+      `)}
+      <div class="readiness-layout">
+        <div class="readiness-score ${readiness.score >= 80 ? "tone-green" : readiness.score >= 50 ? "tone-amber" : "tone-rust"}">
+          <strong>${readiness.score}%</strong>
+          <span>${readiness.completedChecks} of ${readiness.totalChecks} readiness checks complete</span>
+        </div>
+        <div class="readiness-columns">
+          <div>
+            <h3>Ready</h3>
+            ${readyItems.length ? `
+              <ul class="check-list">
+                ${readyItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ul>
+            ` : `<p class="helper-note">Add a property, expenses, and documents to begin building readiness.</p>`}
+          </div>
+          <div>
+            <h3>Follow up</h3>
+            ${followUps.length ? `
+              <ul class="followup-list">
+                ${followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ul>
+            ` : `<p class="helper-note">No open readiness follow-ups recorded.</p>`}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderPropertyDashboardCards(propertySummaries) {
+  return `
+    <section class="panel">
+      ${renderPanelHeader("Property dashboards", "Each property shows spend, documents, and review gaps at a glance.", "home")}
+      <div class="property-dashboard-grid">
+        ${propertySummaries.map((summary) => `
+          <article class="property-dashboard-card">
+            <div>
+              <h3>${escapeHtml(summary.property.name)}</h3>
+              <p>${escapeHtml(summary.property.address || "Address not added")}</p>
+            </div>
+            <dl class="mini-detail-list">
+              ${detailItem("Spend", formatCurrency(summary.totals.total))}
+              ${detailItem("Potential basis", formatCurrency(summary.totals.potential))}
+              ${detailItem("Projects", summary.projects.length)}
+              ${detailItem("Open projects", summary.openProjects.length)}
+              ${detailItem("Documents", `${summary.documents.length} (${summary.storedFiles} files)`)}
+              ${detailItem("Follow-ups", summary.missingDocuments)}
+            </dl>
+            <div class="readiness-meter" aria-label="Review readiness ${summary.readinessScore}%">
+              <span style="width: ${summary.readinessScore}%"></span>
+            </div>
+          </article>
+        `).join("")}
       </div>
     </section>
   `;
@@ -600,6 +676,7 @@ function renderExpensesView() {
 }
 
 function renderDocumentsView() {
+  const readiness = getReviewReadiness(data);
   const documentationGaps = getDocumentationAttentionExpenses(data.expenses).filter((expense) => {
     if (documentFilters.propertyId !== EMPTY_FILTER && expense.propertyId !== documentFilters.propertyId) return false;
     return true;
@@ -626,6 +703,7 @@ function renderDocumentsView() {
       ${renderNotice("Try to keep receipts, contractor invoices, permits, before/after photos, and payment records.")}
       ${renderNotice(`Attached files are stored only ${storageLocationShort()}. They are not uploaded by this app. Anyone with access to ${storageAccessSurface()} may be able to view them.`)}
       ${data.properties.length ? "" : renderEmpty("Add a property first", "Documents need a property so they can be included with the right home records.")}
+      ${data.properties.length ? renderDocumentCenterSummary(readiness) : ""}
       ${editingDocumentId !== undefined ? `
         <section class="panel">
           ${renderPanelHeader(editingDocument ? "Edit document" : "Add document", "Save a display name, document type, and optional local file. Local file paths are removed from notes.", "edit", `<button class="icon-button" data-action="close-document-form" type="button" aria-label="Close">×</button>`)}
@@ -661,8 +739,38 @@ function renderDocumentsView() {
   `;
 }
 
+function renderDocumentCenterSummary(readiness) {
+  const documentTypeCounts = DOCUMENT_TYPES.map((type) => ({
+    ...type,
+    count: data.documents.filter((document) => document.documentType === type.value).length,
+  })).filter((type) => type.count > 0);
+  const linkedDocumentCount = data.documents.filter((document) => document.expenseId || document.projectId).length;
+
+  return `
+    <section class="panel document-center-panel">
+      ${renderPanelHeader("Document center", "Coverage, linked records, and missing evidence.", "document")}
+      <div class="document-center-grid">
+        ${storageMetric("Stored files", readiness.storedDocuments.length)}
+        ${storageMetric("Document records", data.documents.length)}
+        ${storageMetric("Linked records", linkedDocumentCount)}
+        ${storageMetric("Needs file follow-up", readiness.documentsWithoutFiles.length)}
+        ${storageMetric("Expense evidence gaps", readiness.expensesMissingLinkedEvidence.length)}
+        ${storageMetric("Document types", documentTypeCounts.length || 0)}
+      </div>
+      ${documentTypeCounts.length ? `
+        <div class="document-type-list" aria-label="Document type counts">
+          ${documentTypeCounts.map((type) => `
+            <span>${escapeHtml(type.label)} <strong>${type.count}</strong></span>
+          `).join("")}
+        </div>
+      ` : `<p class="helper-note">Add receipts, invoices, permits, photos, warranties, contracts, payment records, appraisals, or inspections as you collect them.</p>`}
+    </section>
+  `;
+}
+
 function renderExportCenter() {
   const totals = getExpenseTotals(data.expenses);
+  const readiness = getReviewReadiness(data);
   const documentationGaps = sortByDateDesc(getDocumentationAttentionExpenses(data.expenses));
   if (!isDesktopMode() && !isTutorialMode()) requestStorageEstimate();
 
@@ -687,8 +795,16 @@ function renderExportCenter() {
           ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
         ], "compact")}
         <div class="export-section">
+          <h3>Review readiness</h3>
+          ${renderExportReadinessChecklist(readiness)}
+        </div>
+        <div class="export-section">
           <h3>Properties</h3>
           ${data.properties.length ? renderExportPropertiesTable() : renderEmpty("No properties to export", "Add a property before preparing a full summary.")}
+        </div>
+        <div class="export-section">
+          <h3>Projects</h3>
+          ${data.projects.length ? renderExportProjectsTable() : renderEmpty("No projects to export", "Add project records to group related expenses and documents.")}
         </div>
         <div class="export-section">
           <h3>Expense detail</h3>
@@ -741,6 +857,7 @@ function renderCpaExportPanel() {
         : "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
       <div class="backup-actions">
         <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
+        <button class="button button-secondary" data-action="download-cpa-packet" ${data.properties.length || data.expenses.length || data.documents.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial review packet" : "Download CPA review packet"}</button>
         <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial CSV" : "Download expense CSV"}</button>
       </div>
       <p class="helper-note">Review exports before sharing. Classifications are for organization and CPA discussion only.</p>
@@ -782,11 +899,26 @@ function renderBackupRestorePanel() {
         <button class="button button-secondary" data-action="choose-backup-file" type="button">${isTutorialMode() ? "Restore into tutorial" : "Restore from backup"}</button>
         <input class="restore-input" data-restore-input type="file" accept="application/json,.json">
       </div>
+      <div class="backup-status-row">
+        <span>Backup status</span>
+        <strong>${lastBackupCreatedAt ? `Created this session ${formatBackupTimestamp(lastBackupCreatedAt)}` : "No backup created in this app session"}</strong>
+      </div>
       <p class="helper-note">${isTutorialMode()
         ? "Tutorial restores replace the sample workspace only. Exit tutorial to return to your real records."
         : "Full backups include app records and may include receipts, invoices, photos, and notes encoded inside the JSON file. They are private records, not tax filing documents."}</p>
     </section>
   `;
+}
+
+function formatBackupTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "recently";
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function storageMetric(label, value) {
@@ -913,7 +1045,11 @@ function renderProjectForm(project) {
         ${field("Start date", "startDate", project?.startDate || "", { type: "date" })}
         ${field("Completion date", "completionDate", project?.completionDate || "", { type: "date" })}
       </div>
-      ${field("Contractor/vendor", "contractor", project?.contractor || "")}
+      <div class="form-row">
+        ${field("Contractor/vendor", "contractor", project?.contractor || "")}
+        ${field("Permit number", "permitNumber", project?.permitNumber || "", { placeholder: "Optional permit or approval number" })}
+      </div>
+      ${textarea("Scope summary", "scopeSummary", project?.scopeSummary || "")}
       ${textarea("Notes", "notes", project?.notes || "")}
       ${formActions("Save project")}
     </form>
@@ -1221,8 +1357,10 @@ function renderProjectDetail(project) {
       ${detailItem("Start", formatDate(project.startDate))}
       ${detailItem("Completed", formatDate(project.completionDate))}
       ${detailItem("Vendor/contractor", project.contractor || "Not added")}
+      ${detailItem("Permit number", project.permitNumber || "Not added")}
       ${detailItem("Linked expense total", formatCurrency(totals.total))}
     </dl>
+    ${project.scopeSummary ? `<p class="notes-block"><strong>Scope:</strong> ${escapeHtml(project.scopeSummary)}</p>` : ""}
     ${project.notes ? `<p class="notes-block">${escapeHtml(project.notes)}</p>` : ""}
     <div class="linked-list">
       <h3>Linked expenses</h3>
@@ -1249,6 +1387,33 @@ function renderExportPropertiesTable() {
       `<span class="money">${formatCurrency(propertyTotal)}</span>`,
     ];
   }));
+}
+
+function renderExportProjectsTable() {
+  return table(["Project", "Property", "Status", "Dates", "Contractor", "Permit", "Spend", "Documents"], getProjectReviewSummaries(data).map((summary) => [
+    `<strong>${escapeHtml(summary.project.name)}</strong><span>${summary.project.scopeSummary ? escapeHtml(summary.project.scopeSummary) : "Scope not added"}</span>`,
+    escapeHtml(getPropertyName(data, summary.project.propertyId)),
+    escapeHtml(optionLabel(PROJECT_STATUSES, summary.project.status)),
+    escapeHtml(summary.dateRange),
+    escapeHtml(summary.project.contractor || "Not added"),
+    escapeHtml(summary.project.permitNumber || (summary.hasPermit ? "Permit record attached" : "Not added")),
+    `<span class="money">${formatCurrency(summary.totals.total)}</span>`,
+    escapeHtml(`${summary.documents.length} (${summary.missingDocuments} follow-ups)`),
+  ]));
+}
+
+function renderExportReadinessChecklist(readiness) {
+  return `
+    <div class="export-readiness">
+      <strong>${readiness.score}% ready</strong>
+      <span>${readiness.completedChecks} of ${readiness.totalChecks} readiness checks complete.</span>
+    </div>
+    ${readiness.followUps.length ? `
+      <ul class="followup-list export-followups">
+        ${readiness.followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    ` : `<p class="helper-note">No open readiness follow-ups recorded.</p>`}
+  `;
 }
 
 function renderExportExpensesTable() {
@@ -1390,6 +1555,11 @@ async function handleClick(event) {
       ? `home-basis-tracker-tutorial-expenses-${todayISO()}.csv`
       : `home-basis-tracker-expenses-${todayISO()}.csv`;
     downloadTextFile(buildExpensesCsv(data), filename, "text/csv;charset=utf-8");
+  } else if (action === "download-cpa-packet") {
+    const filename = isTutorialMode()
+      ? `home-basis-tracker-tutorial-cpa-review-${todayISO()}.txt`
+      : `home-basis-tracker-cpa-review-${todayISO()}.txt`;
+    downloadTextFile(buildCpaReviewPacket(data), filename, "text/plain;charset=utf-8");
   } else if (action === "download-full-backup") {
     await downloadFullBackup();
   } else if (action === "choose-backup-file") {
@@ -1642,7 +1812,9 @@ async function saveProject(values) {
     startDate: values.startDate,
     completionDate: values.completionDate,
     contractor: removeLocalPaths(values.contractor).trim(),
+    permitNumber: removeLocalPaths(values.permitNumber).trim(),
     status: values.status,
+    scopeSummary: removeLocalPaths(values.scopeSummary).trim(),
     notes: removeLocalPaths(values.notes).trim(),
   };
   const existingProject = data.projects.find((currentProject) => currentProject.id === project.id);
@@ -2545,9 +2717,11 @@ async function downloadFullBackup() {
       );
     }
     if (backup.missingFiles.length) {
+      lastBackupCreatedAt = new Date().toISOString();
       showNotice(`Backup saved, but some stored files were missing from ${storageSurfaceName().toLowerCase()} storage.`);
       return;
     }
+    lastBackupCreatedAt = new Date().toISOString();
     showNotice(isTutorialMode() ? "Tutorial backup saved with sample records only." : "Full backup saved.");
   } catch (error) {
     showNotice(getBackupError(error));

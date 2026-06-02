@@ -26,7 +26,9 @@ export const TABS = [
 export const PROJECT_STATUSES = [
   { value: "planned", label: "Planned" },
   { value: "in progress", label: "In progress" },
+  { value: "blocked", label: "Blocked / waiting" },
   { value: "completed", label: "Completed" },
+  { value: "archived", label: "Archived" },
 ];
 
 export const CLASSIFICATIONS = [
@@ -61,8 +63,13 @@ export const DOCUMENT_TYPES = [
   { value: "receipt", label: "Receipt" },
   { value: "invoice", label: "Invoice" },
   { value: "permit", label: "Permit" },
+  { value: "warranty", label: "Warranty" },
   { value: "photo", label: "Photo" },
   { value: "contract", label: "Contract" },
+  { value: "payment record", label: "Payment record" },
+  { value: "appraisal", label: "Appraisal" },
+  { value: "inspection", label: "Inspection" },
+  { value: "plan or drawing", label: "Plan or drawing" },
   { value: "other", label: "Other" },
 ];
 
@@ -102,7 +109,9 @@ function sanitizeProject(project) {
     startDate: cleanDate(project?.startDate),
     completionDate: cleanDate(project?.completionDate),
     contractor: cleanDisplayText(project?.contractor),
+    permitNumber: cleanDisplayText(project?.permitNumber),
     status: allowedOptionValue(PROJECT_STATUSES, project?.status, "planned"),
+    scopeSummary: cleanDisplayText(project?.scopeSummary),
     notes: cleanDisplayText(project?.notes),
   };
 }
@@ -305,6 +314,230 @@ export function getExpenseTotals(expenses) {
     },
     { total: 0, potential: 0, repair: 0, unclear: 0, documentationGaps: 0 },
   );
+}
+
+export function getPropertyReviewSummaries(data) {
+  return data.properties.map((property) => {
+    const projects = data.projects.filter((project) => project.propertyId === property.id);
+    const expenses = data.expenses.filter((expense) => expense.propertyId === property.id);
+    const documents = data.documents.filter((document) => document.propertyId === property.id);
+    const totals = getExpenseTotals(expenses);
+    const openProjects = projects.filter((project) => !["completed", "archived"].includes(project.status));
+    const storedFiles = documents.filter((document) => document.hasFile).length;
+    const missingDocuments = expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense)).length;
+
+    return {
+      property,
+      projects,
+      expenses,
+      documents,
+      totals,
+      openProjects,
+      storedFiles,
+      missingDocuments,
+      readinessScore: calculateReadinessScore({
+        propertyHasPurchaseDetails: Boolean(property.purchaseDate && property.purchasePrice),
+        expenseCount: expenses.length,
+        documentCount: documents.length,
+        missingDocuments,
+        unclearCount: expenses.filter((expense) => expense.classification === "unclear / ask CPA").length,
+      }),
+    };
+  });
+}
+
+export function getProjectReviewSummaries(data) {
+  return data.projects.map((project) => {
+    const expenses = data.expenses.filter((expense) => expense.projectId === project.id);
+    const documents = data.documents.filter((document) => document.projectId === project.id);
+    const totals = getExpenseTotals(expenses);
+    const missingDocuments = expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense)).length;
+
+    return {
+      project,
+      expenses,
+      documents,
+      totals,
+      missingDocuments,
+      hasPermit: documents.some((document) => document.documentType === "permit") || Boolean(project.permitNumber),
+      hasContract: documents.some((document) => document.documentType === "contract"),
+      hasPhoto: documents.some((document) => document.documentType === "photo"),
+      dateRange: getProjectDateRange(project, expenses),
+    };
+  });
+}
+
+export function getReviewReadiness(data) {
+  const propertiesMissingPurchaseDetails = data.properties.filter((property) =>
+    !property.purchaseDate || !property.purchasePrice
+  );
+  const expensesMissingLinkedEvidence = data.expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense));
+  const unclearExpenses = data.expenses.filter((expense) => expense.classification === "unclear / ask CPA");
+  const projectsMissingDates = data.projects.filter((project) =>
+    !project.startDate || (project.status === "completed" && !project.completionDate)
+  );
+  const projectsMissingScope = data.projects.filter((project) => !project.scopeSummary && !project.notes);
+  const documentsWithoutFiles = data.documents.filter((document) => !document.hasFile);
+  const storedDocuments = data.documents.filter((document) => document.hasFile);
+  const totalChecks = 6;
+  const completedChecks = [
+    data.properties.length > 0,
+    data.expenses.length > 0,
+    data.documents.length > 0,
+    data.properties.length > 0 && propertiesMissingPurchaseDetails.length === 0,
+    data.expenses.length > 0 && expensesMissingLinkedEvidence.length === 0,
+    data.expenses.length > 0 && unclearExpenses.length === 0,
+  ].filter(Boolean).length;
+
+  return {
+    score: Math.round((completedChecks / totalChecks) * 100),
+    completedChecks,
+    totalChecks,
+    propertiesMissingPurchaseDetails,
+    expensesMissingLinkedEvidence,
+    unclearExpenses,
+    projectsMissingDates,
+    projectsMissingScope,
+    documentsWithoutFiles,
+    storedDocuments,
+    readyItems: [
+      data.properties.length ? "Property record created" : "",
+      data.projects.length ? "Projects grouped" : "",
+      storedDocuments.length ? "Stored document files attached" : "",
+      data.expenses.some((expense) => expense.classification === "potential basis addition") ? "Potential basis additions flagged" : "",
+    ].filter(Boolean),
+    followUps: [
+      data.properties.length ? "" : "Add at least one property.",
+      data.expenses.length ? "" : "Add expense records before preparing a CPA packet.",
+      data.documents.length ? "" : "Add supporting document records.",
+      propertiesMissingPurchaseDetails.length ? "Add purchase date and purchase price where available." : "",
+      expensesMissingLinkedEvidence.length ? "Link stored receipts or invoices to documented expenses." : "",
+      unclearExpenses.length ? "Review unclear classifications with your CPA." : "",
+      projectsMissingDates.length ? "Add missing project start/completion dates." : "",
+      projectsMissingScope.length ? "Add project scope notes for context." : "",
+    ].filter(Boolean),
+  };
+}
+
+export function buildCpaReviewPacket(data) {
+  const cleanData = sanitizeData(data);
+  const totals = getExpenseTotals(cleanData.expenses);
+  const readiness = getReviewReadiness(cleanData);
+  const propertySummaries = getPropertyReviewSummaries(cleanData);
+  const projectSummaries = getProjectReviewSummaries(cleanData);
+  const lines = [
+    "Home Basis Tracker CPA Review Packet",
+    `Prepared: ${formatDate(todayISO())}`,
+    "",
+    "Important note",
+    "Home Basis Tracker organizes records for review. It does not calculate taxes, determine basis, or provide legal or tax advice.",
+    "",
+    "Overall totals",
+    `Total tracked spend: ${formatCurrency(totals.total)}`,
+    `Marked potential basis additions: ${formatCurrency(totals.potential)}`,
+    `Repair/maintenance: ${formatCurrency(totals.repair)}`,
+    `Unclear / ask CPA: ${formatCurrency(totals.unclear)}`,
+    `Documentation follow-ups: ${readiness.expensesMissingLinkedEvidence.length}`,
+    `Review readiness: ${readiness.score}% (${readiness.completedChecks}/${readiness.totalChecks} checks)`,
+    "",
+    "Readiness follow-ups",
+    ...(readiness.followUps.length ? readiness.followUps.map((item) => `- ${item}`) : ["- No open readiness follow-ups recorded."]),
+    "",
+    "Properties",
+    ...(propertySummaries.length ? propertySummaries.flatMap((summary) => [
+      `${summary.property.name}`,
+      `Address: ${summary.property.address || "Not added"}`,
+      `Purchase date: ${formatDate(summary.property.purchaseDate)}`,
+      `Purchase price: ${summary.property.purchasePrice ? formatCurrency(summary.property.purchasePrice) : "Not added"}`,
+      `Tracked spend: ${formatCurrency(summary.totals.total)}`,
+      `Potential basis additions: ${formatCurrency(summary.totals.potential)}`,
+      `Projects: ${summary.projects.length}`,
+      `Documents: ${summary.documents.length} (${summary.storedFiles} stored files)`,
+      `Documentation follow-ups: ${summary.missingDocuments}`,
+      summary.property.notes ? `Notes: ${summary.property.notes}` : "Notes: None",
+      "",
+    ]) : ["No property records.", ""]),
+    "Projects",
+    ...(projectSummaries.length ? projectSummaries.flatMap((summary) => [
+      `${summary.project.name} (${getPropertyName(cleanData, summary.project.propertyId)})`,
+      `Status: ${optionLabel(PROJECT_STATUSES, summary.project.status)}`,
+      `Category: ${optionLabel(EXPENSE_CATEGORIES, summary.project.category)}`,
+      `Dates: ${summary.dateRange}`,
+      `Contractor/vendor: ${summary.project.contractor || "Not added"}`,
+      `Permit number: ${summary.project.permitNumber || "Not added"}`,
+      `Tracked spend: ${formatCurrency(summary.totals.total)}`,
+      `Documents: ${summary.documents.length}`,
+      `Coverage: ${[
+        summary.hasPermit ? "permit" : "",
+        summary.hasContract ? "contract" : "",
+        summary.hasPhoto ? "photos" : "",
+      ].filter(Boolean).join(", ") || "No permit/contract/photo records"}`,
+      summary.project.scopeSummary ? `Scope: ${summary.project.scopeSummary}` : "",
+      summary.project.notes ? `Notes: ${summary.project.notes}` : "",
+      "",
+    ]) : ["No project records.", ""]),
+    "Expense detail",
+    ...(cleanData.expenses.length ? sortByDateDesc(cleanData.expenses).flatMap((expense) => [
+      `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}`,
+      `Property: ${getPropertyName(cleanData, expense.propertyId)}`,
+      `Project: ${getProjectName(cleanData, expense.projectId)}`,
+      `Description: ${expense.description}`,
+      `Category: ${optionLabel(EXPENSE_CATEGORIES, expense.category)}`,
+      `Classification: ${optionLabel(CLASSIFICATIONS, expense.classification)}`,
+      `Documentation: ${optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)}`,
+      isExpenseMissingLinkedEvidence(cleanData, expense) ? "Follow-up: linked stored receipt/invoice evidence should be reviewed." : "Follow-up: none recorded.",
+      expense.notes ? `Notes: ${expense.notes}` : "Notes: None",
+      "",
+    ]) : ["No expense records.", ""]),
+    "Document index",
+    ...(cleanData.documents.length ? cleanData.documents.map((document) => {
+      const linkedExpense = cleanData.expenses.find((expense) => expense.id === document.expenseId);
+      return [
+        `${document.displayName}`,
+        `Type: ${optionLabel(DOCUMENT_TYPES, document.documentType)}`,
+        `Property: ${getPropertyName(cleanData, document.propertyId)}`,
+        `Project: ${getProjectName(cleanData, document.projectId)}`,
+        `Related expense: ${linkedExpense ? `${linkedExpense.vendor} / ${linkedExpense.description}` : "None"}`,
+        `Stored file: ${document.hasFile ? `${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)})` : document.fileStatusNote || "No file attached"}`,
+        document.notes ? `Notes: ${document.notes}` : "Notes: None",
+        "",
+      ].join("\n");
+    }) : ["No document records."]),
+  ];
+
+  return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}\n`;
+}
+
+function isExpenseMissingLinkedEvidence(data, expense) {
+  if (isDocumentationGap(expense)) return true;
+  if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) return false;
+
+  const expectedType = expense.documentationStatus === "invoice attached" ? "invoice" : "receipt";
+  return !data.documents.some((document) =>
+    document.expenseId === expense.id &&
+    document.hasFile &&
+    document.documentType === expectedType
+  );
+}
+
+function getProjectDateRange(project, expenses) {
+  const expenseDates = expenses.map((expense) => expense.date).filter(Boolean).sort();
+  const start = project.startDate || expenseDates[0] || "";
+  const end = project.completionDate || expenseDates.at(-1) || "";
+  if (start && end && start !== end) return `${formatDate(start)} - ${formatDate(end)}`;
+  if (start) return formatDate(start);
+  return "Not set";
+}
+
+function calculateReadinessScore({ propertyHasPurchaseDetails, expenseCount, documentCount, missingDocuments, unclearCount }) {
+  const checks = [
+    propertyHasPurchaseDetails,
+    expenseCount > 0,
+    documentCount > 0,
+    missingDocuments === 0,
+    unclearCount === 0,
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 export function isDocumentationGap(expense) {

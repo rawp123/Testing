@@ -14,12 +14,16 @@ test("tutorial workspace data covers the main Home Basis workflows", () => {
 
   assert.ok(tutorialData.projects.some((project) => project.status === "completed"));
   assert.ok(tutorialData.projects.some((project) => project.status === "in progress"));
+  assert.ok(tutorialData.projects.some((project) => project.status === "blocked"));
+  assert.ok(tutorialData.projects.some((project) => project.permitNumber || project.scopeSummary));
   assert.ok(tutorialData.expenses.some((expense) => expense.classification === "potential basis addition"));
   assert.ok(tutorialData.expenses.some((expense) => expense.classification === "repair or maintenance"));
   assert.ok(tutorialData.expenses.some((expense) => expense.classification === "unclear / ask CPA"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "receipt"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "invoice"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "permit"));
+  assert.ok(tutorialData.documents.some((document) => document.documentType === "payment record"));
+  assert.ok(tutorialData.documents.some((document) => document.documentType === "warranty"));
   assert.ok(TUTORIAL_STEPS.some((step) => /backup/i.test(`${step.title} ${step.summary}`)));
   assert.ok(TUTORIAL_STEPS.some((step) => /CPA|export/i.test(`${step.title} ${step.summary}`)));
 });
