@@ -9,12 +9,12 @@ This inventory records the current signed, notarized, stapled macOS ARM64 releas
 | Product | Version | DMG | Size | SHA-256 | Apple Notarization ID |
 | --- | --- | --- | --- | --- | --- |
 | Message Archive Utility | 0.1.0 | `message-archive-utility/release/mac/Message Archive Utility-0.1.0-arm64.dmg` | 128M | `b6379c5f043dbe0e80ae2298eca0932a9b99d2ee6e975a536f2fb39f5ea57bb9` | `eb43f5e7-6f26-439a-8633-526440538eb1` |
-| Home Basis Tracker | 0.1.0 | `home-ledger/release/mac/Home Basis Tracker-0.1.0-arm64.dmg` | 139M | `b69f8aadb7dabe502935a7b09c31bd05a9c71eec464e3736070399e76febaa42` | `689fc85e-8eba-4084-bc42-5c4d8c00faf7` |
+| Home Basis Tracker | 0.1.0 | `home-ledger/release/mac/Home Basis Tracker-0.1.0-arm64.dmg` | 139M | `024c825dd03576ec762309abdfd0636aea2df76b8a1c2206eb4bcfb8ff9904d3` | `414a6b61-384e-45b9-ac51-8b3b1bf78cb3` |
 | Car Care Log | 0.1.0 | `car-care-log/release/Car-Care-Log-0.1.0-arm64.dmg` | 169M | `cc26e5a7247fb95b559b5922f6d92f6ad33b0042fcde2a6ad0e6844c78c11668` | `d3c05d3f-176e-4d2c-81f3-932686fbdfec` |
 
 ## Automated Validation Completed
 
-All three products passed:
+Message Archive Utility and Car Care Log retain the validation recorded in the previous inventory commit. Home Basis Tracker was rebuilt after the storage/backup hardening pass at `34cdc2a` and passed:
 
 - Apple app notarization.
 - Apple DMG notarization.
@@ -22,15 +22,16 @@ All three products passed:
 - Gatekeeper assessment as `Notarized Developer ID`.
 - App bundle `codesign --verify --deep --strict`.
 - `hdiutil verify` on the final DMG.
-- Packaged app smoke testing.
-- Mounted-DMG app smoke testing.
 - Product-specific package/resource checks.
+- Workspace desktop smoke testing.
 
 Additional product QA completed:
 
 - Message Archive Utility: backend tests, package check, installed-app smoke, website route smoke.
 - Home Basis Tracker: syntax check, model check, desktop smoke, render QA, beta QA, package resource check.
 - Car Care Log: typecheck, lint, test suite, runtime asset verification, packaged smoke, website route smoke.
+
+Home Basis Tracker packaged-app and mounted-DMG smoke attempts were not counted for the `34cdc2a` rebuild because an already-running installed app instance caused launch contention during direct binary smoke. Clean-install Finder launch remains in the manual QA section below.
 
 ## Current Release Commits
 
@@ -41,6 +42,7 @@ Additional product QA completed:
 - `4c154fb` Add Home Ledger local document text extraction
 - `303a3fa` Fix Home Ledger signed DMG identity handling
 - `e90026f` Fix Car Care Log signed DMG identity handling
+- `34cdc2a` Harden Home Basis Tracker storage and backup
 
 ## Remaining Manual QA
 
@@ -77,4 +79,3 @@ Suggested tag:
 ```bash
 git tag release-three-products-notarized-2026-06-02
 ```
-
