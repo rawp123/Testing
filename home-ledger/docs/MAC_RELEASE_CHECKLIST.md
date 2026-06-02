@@ -40,6 +40,9 @@ The script is expected to sign the app, build the DMG, notarize it, staple the t
 - Install the DMG on a clean Mac user profile.
 - Launch the app from `/Applications`.
 - Confirm no Gatekeeper warning appears for an unidentified developer.
+- Confirm the real app starts without sample records.
+- Open Tutorial Workspace, practice the sample property/project/expense/document/export/backup flows, reset it, and exit.
+- Confirm the real app still has no sample records after exiting the tutorial.
 - Add a property, project, expense, and document.
 - Attach a small PDF or image.
 - Download a full backup.

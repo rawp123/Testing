@@ -15,6 +15,7 @@ export const EMPTY_DATA = {
 
 export const TABS = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "tutorial", label: "Tutorial" },
   { id: "property", label: "Property" },
   { id: "projects", label: "Projects" },
   { id: "expenses", label: "Expenses" },

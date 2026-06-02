@@ -36,10 +36,13 @@ The signed DMG script is expected to build the backend executable, build the fro
 - Install the DMG on a clean Mac user profile.
 - Launch the app from `/Applications`.
 - Confirm no Gatekeeper warning appears for an unidentified developer.
-- Import fake sample data.
-- Search messages.
-- Export CSV, PDF, and XLSX.
-- Quit and relaunch to confirm persistence.
+- Confirm the real archive does not show sample conversations or messages by default.
+- Open Tutorial Workspace, load the sample tutorial archive, search messages, use filters, create a tutorial export, reset, and exit.
+- Confirm the real archive remains empty after tutorial reset and exit unless a real import has been run.
+- Import a private or redacted real iPhone backup fixture when available.
+- Search real imported messages.
+- Export CSV, PDF, and XLSX from the real archive.
+- Quit and relaunch to confirm real archive persistence.
 - Confirm app name, icon, bundle id, and version.
 
 ## Website Download

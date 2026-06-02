@@ -32,6 +32,15 @@ class MemoryStorage implements Storage {
 }
 
 describe('browser preview API boundaries', () => {
+  it('starts empty and does not expose sample loading into preview storage', async () => {
+    const api = createBrowserPreviewApi(new MemoryStorage());
+    const snapshot = await api.getSnapshot();
+
+    expect(snapshot.vehicles).toHaveLength(0);
+    expect(snapshot.services).toHaveLength(0);
+    expect('loadSampleData' in api).toBe(false);
+  });
+
   it('keeps document OCR unavailable with a clear desktop-app message', async () => {
     const api = createBrowserPreviewApi(new MemoryStorage());
 

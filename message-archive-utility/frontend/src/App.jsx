@@ -7,12 +7,13 @@ import ExportPanel from "./components/ExportPanel.jsx";
 import IPhoneImportPanel from "./components/IPhoneImportPanel.jsx";
 import LoadingStatus from "./components/LoadingStatus.jsx";
 import SearchBar from "./components/SearchBar.jsx";
+import TutorialWorkspace from "./components/TutorialWorkspace.jsx";
 import { API_BASE_URL, apiFetch } from "./utils/apiAuth.js";
 import { downloadFile } from "./utils/downloadFile.js";
 
-const SHOW_SAMPLE_ARCHIVE = import.meta.env.VITE_ENABLE_SAMPLE_ARCHIVE === "true";
 const APP_TABS = [
   { id: "get-started", label: "Get Started" },
+  { id: "tutorial", label: "Tutorial" },
   { id: "import-messages", label: "Import Messages" },
   { id: "browse-archive", label: "Browse Archive" },
 ];
@@ -271,6 +272,21 @@ export default function App() {
           hasArchiveData={hasArchiveData}
           onBrowseArchive={() => setActiveTab("browse-archive")}
           onImportMessages={() => setActiveTab("import-messages")}
+          onOpenTutorial={() => setActiveTab("tutorial")}
+        />
+      </section>
+
+      <section
+        aria-labelledby="tutorial-tab"
+        className="tab-panel"
+        hidden={resolvedActiveTab !== "tutorial"}
+        id="tutorial-panel"
+        role="tabpanel"
+      >
+        <TutorialWorkspace
+          hasArchiveData={hasArchiveData}
+          onExitTutorial={() => setActiveTab(hasArchiveData ? "browse-archive" : "get-started")}
+          onStartRealImport={() => setActiveTab("import-messages")}
         />
       </section>
 
@@ -302,9 +318,14 @@ export default function App() {
           <div className="browse-empty-state empty-panel">
             <strong>No archive loaded yet</strong>
             <span>Import messages first, then browse conversations, search your archive, and export a copy.</span>
-            <button className="primary-button" type="button" onClick={() => setActiveTab("import-messages")}>
-              Import Messages
-            </button>
+            <div className="browse-empty-actions">
+              <button className="primary-button" type="button" onClick={() => setActiveTab("import-messages")}>
+                Import Messages
+              </button>
+              <button className="secondary-button" type="button" onClick={() => setActiveTab("tutorial")}>
+                Open Tutorial
+              </button>
+            </div>
           </div>
         ) : (
           <div className="archive-browser">
@@ -316,11 +337,6 @@ export default function App() {
                     <button className="secondary-button" type="button" onClick={() => refreshArchive()} disabled={isRefreshingArchive}>
                       {isRefreshingArchive ? "Refreshing" : "Refresh"}
                     </button>
-                    {!hasArchiveData && SHOW_SAMPLE_ARCHIVE && (
-                      <button className="ghost-button" type="button" onClick={loadSampleArchive}>
-                        Demo archive
-                      </button>
-                    )}
                   </div>
                 </div>
                 <SearchBar value={query} onChange={setQuery} disabled={!hasArchiveData} />
@@ -409,19 +425,6 @@ export default function App() {
   async function handleArchiveChanged() {
     await refreshArchive();
     setActiveTab("browse-archive");
-  }
-
-  async function loadSampleArchive() {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await request("/import/dummy-csv", { method: "POST" });
-      await refreshArchive();
-      setActiveTab("browse-archive");
-    } catch (requestError) {
-      setError(toUserFacingError(requestError));
-      setIsLoading(false);
-    }
   }
 
   async function loadArchiveStats() {
@@ -731,7 +734,7 @@ function SearchSummarySection({ title, emptyText, children }) {
   );
 }
 
-function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) {
+function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages, onOpenTutorial }) {
   return (
     <section className="get-started-panel" aria-label="Get started">
       <div className="get-started-copy">
@@ -762,6 +765,9 @@ function GetStartedPanel({ hasArchiveData, onBrowseArchive, onImportMessages }) 
           <div className="get-started-actions">
             <button className="primary-button" type="button" onClick={onImportMessages}>
               {hasArchiveData ? "Import More Messages" : "Start Import"}
+            </button>
+            <button className="secondary-button" type="button" onClick={onOpenTutorial}>
+              Open Tutorial
             </button>
             {hasArchiveData && (
               <button className="secondary-button" type="button" onClick={onBrowseArchive}>

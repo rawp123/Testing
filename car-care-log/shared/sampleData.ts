@@ -1,9 +1,23 @@
-import type { ServiceRecordInput, VehicleInput } from './types';
+import type { AppSnapshot, Attachment, ServiceRecord, ServiceRecordInput, Vehicle, VehicleInput } from './types';
 
 export interface SampleVehicleBundle {
   vehicle: VehicleInput;
   services: Omit<ServiceRecordInput, 'vehicleId'>[];
 }
+
+interface SampleAttachmentSeed {
+  label: string;
+  type: Attachment['type'];
+  fileType: string;
+  mimeType: string;
+  sizeBytes: number;
+  ocrStatus: Attachment['ocrStatus'];
+  ocrText: string;
+  ocrError: string;
+}
+
+const TUTORIAL_TIMESTAMP = '2026-05-01T16:00:00.000Z';
+export const TUTORIAL_SETTINGS = { duplicateMileageThreshold: 15000 };
 
 export const SAMPLE_DATA: SampleVehicleBundle[] = [
   {
@@ -218,3 +232,159 @@ export const SAMPLE_DATA: SampleVehicleBundle[] = [
     ]
   }
 ];
+
+const TUTORIAL_ATTACHMENTS: Record<string, SampleAttachmentSeed[]> = {
+  '0:1': [
+    {
+      label: 'Oil change receipt',
+      type: 'receipt',
+      fileType: 'PDF',
+      mimeType: 'application/pdf',
+      sizeBytes: 184_220,
+      ocrStatus: 'extracted',
+      ocrText: [
+        'Honda Service Center',
+        'Invoice Date 07/09/2025',
+        'Vehicle 2018 Honda CR-V',
+        'Mileage 47,610',
+        'Full synthetic oil and filter change',
+        'Total $86.42',
+        'Next service due 01/09/2026 or 53,610 miles'
+      ].join('\n'),
+      ocrError: ''
+    }
+  ],
+  '0:3': [
+    {
+      label: 'Coolant invoice scan',
+      type: 'invoice',
+      fileType: 'JPG',
+      mimeType: 'image/jpeg',
+      sizeBytes: 932_480,
+      ocrStatus: 'partial',
+      ocrText: [
+        'Northside Auto',
+        'RO Closed 03/12/2026',
+        'Mileage 54,820',
+        'Coolant service noted during annual visit',
+        'Cooling system pressure check',
+        'Total $189.40'
+      ].join('\n'),
+      ocrError: 'Only the first page was readable in this tutorial scan.'
+    }
+  ],
+  '1:2': [
+    {
+      label: 'Filter invoice',
+      type: 'invoice',
+      fileType: 'PDF',
+      mimeType: 'application/pdf',
+      sizeBytes: 246_980,
+      ocrStatus: 'not_run',
+      ocrText: '',
+      ocrError: ''
+    }
+  ],
+  '2:2': [
+    {
+      label: 'Tire warranty document',
+      type: 'warranty document',
+      fileType: 'PDF',
+      mimeType: 'application/pdf',
+      sizeBytes: 512_600,
+      ocrStatus: 'extracted',
+      ocrText: [
+        'Downtown Tire',
+        'Completed 01/27/2026',
+        'Mileage 44,910',
+        'Four all-terrain tires installed',
+        'Road hazard warranty included',
+        'Total $1,184.64',
+        'Rotate at 50,910 miles'
+      ].join('\n'),
+      ocrError: ''
+    }
+  ],
+  '3:0': [
+    {
+      label: 'Battery receipt photo',
+      type: 'receipt',
+      fileType: 'PNG',
+      mimeType: 'image/png',
+      sizeBytes: 1_420_300,
+      ocrStatus: 'failed',
+      ocrText: '',
+      ocrError: 'The photo is too dark in this tutorial example. Retake or enter the details manually.'
+    }
+  ]
+};
+
+function tutorialId(prefix: string, bundleIndex: number, itemIndex?: number): string {
+  return itemIndex === undefined ? `${prefix}-${bundleIndex + 1}` : `${prefix}-${bundleIndex + 1}-${itemIndex + 1}`;
+}
+
+function tutorialTimestamp(offsetMinutes: number): string {
+  return new Date(Date.parse(TUTORIAL_TIMESTAMP) + offsetMinutes * 60_000).toISOString();
+}
+
+function createTutorialAttachment(seed: SampleAttachmentSeed, serviceId: string, bundleIndex: number, serviceIndex: number, attachmentIndex: number): Attachment {
+  const timestamp = tutorialTimestamp(bundleIndex * 30 + serviceIndex * 4 + attachmentIndex);
+  return {
+    id: tutorialId('tutorial-attachment', bundleIndex, serviceIndex * 10 + attachmentIndex),
+    serviceRecordId: serviceId,
+    label: seed.label,
+    type: seed.type,
+    addedDate: timestamp,
+    fileType: seed.fileType,
+    mimeType: seed.mimeType,
+    sizeBytes: seed.sizeBytes,
+    ocrStatus: seed.ocrStatus,
+    ocrText: seed.ocrText,
+    ocrError: seed.ocrError,
+    ocrRunAt: seed.ocrStatus === 'not_run' ? '' : timestamp,
+    createdAt: timestamp,
+    updatedAt: timestamp
+  };
+}
+
+export function createTutorialSnapshot(): AppSnapshot {
+  const vehicles: Vehicle[] = [];
+  const services: ServiceRecord[] = [];
+
+  SAMPLE_DATA.forEach((bundle, bundleIndex) => {
+    const vehicleId = tutorialId('tutorial-vehicle', bundleIndex);
+    const vehicleTimestamp = tutorialTimestamp(bundleIndex);
+    vehicles.push({
+      ...bundle.vehicle,
+      id: vehicleId,
+      createdAt: vehicleTimestamp,
+      updatedAt: vehicleTimestamp
+    });
+
+    bundle.services.forEach((service, serviceIndex) => {
+      const serviceId = tutorialId('tutorial-service', bundleIndex, serviceIndex);
+      const serviceTimestamp = tutorialTimestamp(bundleIndex * 30 + serviceIndex);
+      const attachmentSeeds = TUTORIAL_ATTACHMENTS[`${bundleIndex}:${serviceIndex}`] ?? [];
+      services.push({
+        ...service,
+        id: serviceId,
+        vehicleId,
+        createdAt: serviceTimestamp,
+        updatedAt: serviceTimestamp,
+        attachments: attachmentSeeds.map((seed, attachmentIndex) =>
+          createTutorialAttachment(seed, serviceId, bundleIndex, serviceIndex, attachmentIndex)
+        )
+      });
+    });
+  });
+
+  return {
+    vehicles,
+    services: services.sort((left, right) => {
+      const byDate = right.serviceDate.localeCompare(left.serviceDate);
+      if (byDate !== 0) return byDate;
+      return (right.mileage ?? 0) - (left.mileage ?? 0);
+    }),
+    settings: TUTORIAL_SETTINGS
+  };
+}

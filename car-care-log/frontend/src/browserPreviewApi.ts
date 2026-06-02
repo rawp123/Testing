@@ -1,6 +1,5 @@
 import type { CarCareLogApi } from '../../shared/api';
 import { buildServicesCsv } from '../../shared/csv';
-import { SAMPLE_DATA } from '../../shared/sampleData';
 import type {
   AppSnapshot,
   Attachment,
@@ -132,21 +131,6 @@ export function createBrowserPreviewApi(storage: Storage = window.localStorage):
   return {
     async getSnapshot() {
       return sortSnapshot(readSnapshot(storage));
-    },
-
-    async loadSampleData() {
-      const vehicles: Vehicle[] = [];
-      const services: ServiceRecord[] = [];
-
-      SAMPLE_DATA.forEach((bundle) => {
-        const vehicle = makeVehicle(bundle.vehicle);
-        vehicles.push(vehicle);
-        bundle.services.forEach((service) => {
-          services.push(makeService({ ...service, vehicleId: vehicle.id }));
-        });
-      });
-
-      return writeSnapshot(storage, sortSnapshot({ vehicles, services, settings: DEFAULT_SETTINGS }));
     },
 
     async createVehicle(input: VehicleInput) {

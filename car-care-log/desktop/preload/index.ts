@@ -21,7 +21,6 @@ import type {
 
 const api: CarCareLogApi = {
   getSnapshot: (): Promise<AppSnapshot> => ipcRenderer.invoke('app:snapshot'),
-  loadSampleData: (): Promise<AppSnapshot> => ipcRenderer.invoke('sample:load'),
 
   createVehicle: (input: VehicleInput): Promise<Vehicle> => ipcRenderer.invoke('vehicles:create', input),
   updateVehicle: (id: string, input: VehicleInput): Promise<Vehicle> => ipcRenderer.invoke('vehicles:update', id, input),

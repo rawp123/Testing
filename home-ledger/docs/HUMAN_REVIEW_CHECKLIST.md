@@ -32,12 +32,18 @@ npm run smoke:dmg
 - Confirm app copy consistently says CPA review, not tax filing.
 - Confirm the app does not imply it calculates basis, deductions, tax savings, or eligibility.
 - Confirm local-first wording is accurate for both desktop and browser versions.
+- Confirm fresh real records start empty and do not show sample properties, expenses, or documents by default.
+- Confirm the Tutorial Workspace is visibly separate from the real records workspace.
+- Confirm tutorial sample records can be edited, exported, backed up, restored, reset, and exited without changing real records.
 - Confirm website copy matches the current app behavior and signed DMG availability.
 - Confirm export and backup wording explains that backup files are private plaintext JSON.
 
 ## App Workflow Review
 
 - Start with no saved data.
+- Open Tutorial Workspace.
+- Review sample property, project, expense, document, CPA summary/export, backup, restore, reset, and exit flows.
+- Exit Tutorial Workspace and confirm the real workspace is still empty.
 - Add a property.
 - Add a project.
 - Add expenses for each classification.

@@ -19,7 +19,6 @@ import type {
 
 export interface CarCareLogApi {
   getSnapshot: () => Promise<AppSnapshot>;
-  loadSampleData: () => Promise<AppSnapshot>;
 
   createVehicle: (input: VehicleInput) => Promise<Vehicle>;
   updateVehicle: (id: string, input: VehicleInput) => Promise<Vehicle>;

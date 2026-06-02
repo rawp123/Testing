@@ -2,7 +2,7 @@
 
 FastAPI backend for the local-first message archive utility.
 
-This backend uses SQLite for a local-first message archive. It supports fake sample data and a partial real iPhone local-backup import flow.
+This backend uses SQLite for a local-first message archive. It supports a fake sample-data endpoint for development and smoke tests, plus a partial real iPhone local-backup import flow.
 
 ## Layout
 
@@ -30,7 +30,7 @@ uvicorn server.main:app --reload
 ## Endpoints
 
 - `GET /health`
-- `POST /import/dummy-csv`
+- `POST /import/dummy-csv` for development and smoke tests
 - `GET /conversations`
 - `GET /conversations/{conversation_id}/messages`
 - `GET /search?q=hello`
@@ -41,7 +41,7 @@ uvicorn server.main:app --reload
 - `POST /import/iphone-backup/inspect-sms-db`
 - `POST /import/iphone-backup/import-messages`
 
-The sample importer is limited to the fake fixture at `tests/fixtures/sample_messages.csv`.
+The sample importer is limited to the fake fixture at `tests/fixtures/sample_messages.csv`. The user-facing Tutorial Workspace does not call this endpoint; it uses static frontend sample data so tutorial records do not enter the real archive database.
 The iPhone dry-run endpoint reads `Manifest.db` metadata and locates the backup file for `Library/SMS/sms.db`.
 The iPhone copy endpoint copies only the resolved backup file into ignored `data/imports/iphone/`.
 The schema validation endpoint checks copied SQLite table names only. It does not read message contents.

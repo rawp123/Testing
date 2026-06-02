@@ -115,6 +115,23 @@ assert_api_auth_required() {
   curl_auth "http://127.0.0.1:$SMOKE_PORT/archive/stats" >/dev/null
 }
 
+assert_initial_archive_empty() {
+  python3 - "$SMOKE_ROOT/initial-stats.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    stats = json.load(handle)
+
+messages = stats.get("messages", {}).get("total")
+conversations = stats.get("conversations", {}).get("total")
+if messages != 0:
+    raise SystemExit(f"expected fresh archive to start with 0 messages, got {messages!r}")
+if conversations != 0:
+    raise SystemExit(f"expected fresh archive to start with 0 conversations, got {conversations!r}")
+PY
+}
+
 launch_app() {
   APP_PID=""
   env -u ELECTRON_RUN_AS_NODE \
@@ -239,6 +256,8 @@ printf 'Smoke exports: %s\n' "$SMOKE_EXPORT_DIR"
 printf 'Smoke backend port: %s\n' "$SMOKE_PORT"
 
 launch_app
+curl_auth "http://127.0.0.1:$SMOKE_PORT/archive/stats" >"$SMOKE_ROOT/initial-stats.json"
+assert_initial_archive_empty
 run_fake_data_checks
 quit_app
 

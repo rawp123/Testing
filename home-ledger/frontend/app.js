@@ -54,11 +54,20 @@ import {
   saveBackupFile,
   saveRecords,
 } from "../backend/storage/records-storage.js";
+import {
+  createTutorialData,
+  TUTORIAL_STEPS,
+} from "../backend/domain/tutorial-data.js";
 
 const EMPTY_FILTER = "all";
+const WORKSPACE_REAL = "records";
+const WORKSPACE_TUTORIAL = "tutorial";
 const app = document.querySelector("#app");
 
 let data = EMPTY_DATA;
+let realData = EMPTY_DATA;
+let tutorialData = createTutorialData();
+let workspaceMode = WORKSPACE_REAL;
 let activeTab = "dashboard";
 let selectedPropertyId = "";
 let notice = "";
@@ -156,9 +165,11 @@ function renderLoading() {
 
 async function initializeApp() {
   try {
-    data = await loadRecords(STORAGE_KEY);
+    realData = await loadRecords(STORAGE_KEY);
+    data = realData;
     storageWriteBlocked = false;
   } catch {
+    realData = EMPTY_DATA;
     data = EMPTY_DATA;
     storageWriteBlocked = true;
     notice = "Unable to load local records. To protect existing data, new saves are paused until you restore a backup or reopen the app.";
@@ -182,28 +193,34 @@ function render() {
   normalizeSelectionsAndFilters();
 
   app.innerHTML = `
-    <header class="app-header">
+    <header class="app-header ${isTutorialMode() ? "is-tutorial-mode" : ""}">
       <div class="brand-block">
-        <p class="eyebrow">Home records</p>
+        <p class="eyebrow">${isTutorialMode() ? "Tutorial workspace" : "Home records"}</p>
         <h1>Home Basis Tracker</h1>
-        <p>Keep receipts, project notes, and home improvement records organized on this device.</p>
+        <p>${isTutorialMode()
+          ? "You are using sample records. Changes here are temporary and separate from your real binder."
+          : "Keep receipts, project notes, and home improvement records organized on this device."}</p>
       </div>
-      <nav class="app-tabs" aria-label="App sections" role="tablist">
-        ${TABS.map((tab) => `
-          <button
-            aria-controls="${tab.id}-panel"
-            aria-selected="${activeTab === tab.id}"
-            class="${activeTab === tab.id ? "is-active" : ""}"
-            data-tab="${tab.id}"
-            id="${tab.id}-tab"
-            role="tab"
-            type="button"
-          >${escapeHtml(tab.label)}</button>
-        `).join("")}
-      </nav>
+      <div class="header-actions">
+        <nav class="app-tabs" aria-label="App sections" role="tablist">
+          ${TABS.map((tab) => `
+            <button
+              aria-controls="${tab.id}-panel"
+              aria-selected="${activeTab === tab.id}"
+              class="${activeTab === tab.id ? "is-active" : ""}"
+              data-tab="${tab.id}"
+              id="${tab.id}-tab"
+              role="tab"
+              type="button"
+            >${escapeHtml(tab.label)}</button>
+          `).join("")}
+        </nav>
+        ${renderWorkspaceControls()}
+      </div>
     </header>
     <main class="workspace">
       ${renderToast()}
+      ${renderTutorialModeBanner()}
       <section class="tab-panel" id="${activeTab}-panel" role="tabpanel" aria-labelledby="${activeTab}-tab">
         ${renderActiveTab()}
       </section>
@@ -213,6 +230,7 @@ function render() {
 }
 
 function renderActiveTab() {
+  if (activeTab === "tutorial") return renderTutorialView();
   if (activeTab === "property") return renderPropertyView();
   if (activeTab === "projects") return renderProjectsView();
   if (activeTab === "expenses") return renderExpensesView();
@@ -288,8 +306,115 @@ function renderOnboardingPanel() {
         <li><span aria-hidden="true">▣</span><span>Create projects</span></li>
         <li><span aria-hidden="true">▤</span><span>Track expenses and export a CPA review summary</span></li>
       </ol>
-      <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add your property</button>
+      <div class="onboarding-actions">
+        <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add your property</button>
+        <button class="button button-secondary" data-action="start-tutorial" type="button">Open tutorial</button>
+      </div>
     </section>
+  `;
+}
+
+function renderWorkspaceControls() {
+  if (isTutorialMode()) {
+    return `
+      <div class="workspace-controls" aria-label="Tutorial workspace controls">
+        <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset tutorial</button>
+        <button class="button button-primary" data-action="exit-tutorial" type="button">Exit tutorial</button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="workspace-controls" aria-label="Tutorial workspace controls">
+      <button class="button button-secondary" data-action="start-tutorial" type="button">Tutorial workspace</button>
+    </div>
+  `;
+}
+
+function renderTutorialModeBanner() {
+  if (!isTutorialMode()) return "";
+
+  return `
+    <section class="tutorial-banner print-hidden">
+      <div>
+        <p class="eyebrow">Sample data only</p>
+        <h2>Tutorial Workspace</h2>
+        <p>These records are temporary. They do not save to your real Home Basis Tracker records, and file attachments are simulated here.</p>
+      </div>
+      <div class="tutorial-banner-actions">
+        <button class="button button-secondary" data-action="open-tutorial-step" data-tutorial-tab="tutorial" type="button">View guide</button>
+        <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset sample data</button>
+        <button class="button button-primary" data-action="exit-tutorial" type="button">Return to real records</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderTutorialView() {
+  const tutorialActions = isTutorialMode()
+    ? `
+      <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset sample data</button>
+      <button class="button button-primary" data-action="exit-tutorial" type="button">Return to real records</button>
+    `
+    : `<button class="button button-primary" data-action="start-tutorial" type="button">Start tutorial workspace</button>`;
+
+  return `
+    <div class="page-stack">
+      ${renderPageIntro({
+        eyebrow: "Tutorial Workspace",
+        title: isTutorialMode() ? "Practice with sample home records" : "Learn the app without touching real records",
+        description: isTutorialMode()
+          ? "Use the sample property, projects, expenses, documents, exports, and backup controls. Your real binder is untouched."
+          : "Open a separate sample-data workspace to learn every major workflow before entering your own records.",
+        actions: tutorialActions,
+      })}
+      ${renderNotice(isTutorialMode()
+        ? "Tutorial changes stay in memory until you exit, reset, or close this app window. They are not saved to your normal records file."
+        : "The normal app opens empty by default. Sample data appears only after you start the tutorial workspace.", "tutorial-notice")}
+      ${renderMetrics([
+        ["Sample properties", String(tutorialData.properties.length), ""],
+        ["Sample projects", String(tutorialData.projects.length), "blue"],
+        ["Sample expenses", String(tutorialData.expenses.length), "green"],
+        ["Sample documents", String(tutorialData.documents.length), "amber"],
+        ["Storage impact", isTutorialMode() ? "Temporary" : "None", "rust"],
+      ])}
+      <section class="panel">
+        ${renderPanelHeader("Guided workflow", "Open each area and try the task with sample records.", "clipboard")}
+        <div class="tutorial-step-grid">
+          ${TUTORIAL_STEPS.map((step, index) => `
+            <article class="tutorial-step-card">
+              <span>${index + 1}</span>
+              <div>
+                <h3>${escapeHtml(step.title)}</h3>
+                <p>${escapeHtml(step.summary)}</p>
+              </div>
+              <button class="button button-secondary" data-action="open-tutorial-step" data-tutorial-tab="${escapeAttr(step.tab)}" type="button">Open</button>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+      <section class="panel">
+        ${renderPanelHeader("How separation works", "The tutorial is a sandbox, not your real binder.", "home")}
+        <div class="safety-list">
+          <div>
+            <strong>Real records start empty</strong>
+            <span>Sample records are never loaded into the normal workspace on first launch.</span>
+          </div>
+          <div>
+            <strong>Edits are temporary</strong>
+            <span>Add, edit, and delete sample records freely. Reset brings the tutorial back to its starting state.</span>
+          </div>
+          <div>
+            <strong>Files are simulated</strong>
+            <span>Choosing a file in tutorial mode records sample metadata only. The file is not copied into app storage.</span>
+          </div>
+          <div>
+            <strong>Backups stay scoped</strong>
+            <span>Tutorial backups contain sample records. Restores while in tutorial replace only the tutorial workspace.</span>
+          </div>
+        </div>
+      </section>
+    </div>
   `;
 }
 
@@ -539,7 +664,7 @@ function renderDocumentsView() {
 function renderExportCenter() {
   const totals = getExpenseTotals(data.expenses);
   const documentationGaps = sortByDateDesc(getDocumentationAttentionExpenses(data.expenses));
-  if (!isDesktopMode()) requestStorageEstimate();
+  if (!isDesktopMode() && !isTutorialMode()) requestStorageEstimate();
 
   return `
     <div class="page-stack">
@@ -611,10 +736,12 @@ function renderDataSafetyPanel() {
 function renderCpaExportPanel() {
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("For CPA review", "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
+      ${renderPanelHeader("For CPA review", isTutorialMode()
+        ? "CSV and print exports use tutorial sample records only, not your real binder."
+        : "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
       <div class="backup-actions">
         <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
-        <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>Download expense CSV</button>
+        <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial CSV" : "Download expense CSV"}</button>
       </div>
       <p class="helper-note">Review exports before sharing. Classifications are for organization and CPA discussion only.</p>
     </section>
@@ -647,13 +774,17 @@ function renderStorageHealthPanel() {
 function renderBackupRestorePanel() {
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("For your backup", `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
+      ${renderPanelHeader(isTutorialMode() ? "Tutorial backup and restore" : "For your backup", isTutorialMode()
+        ? "Create or restore sample backup files inside this temporary tutorial workspace only."
+        : `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
       <div class="backup-actions">
-        <button class="button button-primary" data-action="download-full-backup" type="button">${isDesktopMode() ? "Save full backup" : "Download full backup"}</button>
-        <button class="button button-secondary" data-action="choose-backup-file" type="button">Restore from backup</button>
+        <button class="button button-primary" data-action="download-full-backup" type="button">${isTutorialMode() ? "Download tutorial backup" : isDesktopMode() ? "Save full backup" : "Download full backup"}</button>
+        <button class="button button-secondary" data-action="choose-backup-file" type="button">${isTutorialMode() ? "Restore into tutorial" : "Restore from backup"}</button>
         <input class="restore-input" data-restore-input type="file" accept="application/json,.json">
       </div>
-      <p class="helper-note">Full backups include app records and may include receipts, invoices, photos, and notes encoded inside the JSON file. They are private records, not tax filing documents.</p>
+      <p class="helper-note">${isTutorialMode()
+        ? "Tutorial restores replace the sample workspace only. Exit tutorial to return to your real records."
+        : "Full backups include app records and may include receipts, invoices, photos, and notes encoded inside the JSON file. They are private records, not tax filing documents."}</p>
     </section>
   `;
 }
@@ -693,36 +824,46 @@ function getStorageEstimateCopy() {
 }
 
 function storageSurfaceName() {
+  if (isTutorialMode()) return "Tutorial";
   return isDesktopMode() ? "Mac app" : "Browser";
 }
 
 function storageLocationShort() {
+  if (isTutorialMode()) return "inside this temporary tutorial workspace";
   return isDesktopMode() ? "in this Mac app on this Mac" : "in this browser on this device";
 }
 
 function storageAccessSurface() {
+  if (isTutorialMode()) return "this tutorial workspace";
   return isDesktopMode() ? "this Mac user account" : "this browser profile";
 }
 
 function recordStorageLabel() {
+  if (isTutorialMode()) return "temporary in-memory tutorial records";
   return isDesktopMode() ? "an app-managed records file on this Mac" : "browser local storage on this device";
 }
 
 function documentStorageLabel() {
+  if (isTutorialMode()) return "simulated tutorial document metadata";
   return isDesktopMode() ? "app-managed copies on this Mac" : "browser document storage in this browser profile";
 }
 
 function storageCleanupTitle() {
+  if (isTutorialMode()) return "Tutorial data resets on request";
   return isDesktopMode() ? "Deleting app data can remove records" : "Browser cleanup can remove records";
 }
 
 function storageCleanupCopy() {
+  if (isTutorialMode()) {
+    return "Exiting or resetting the tutorial removes sample changes and returns you to your real workspace.";
+  }
   return isDesktopMode()
     ? "Deleting the app's local data folder can remove saved records and copied document files."
     : "Clearing site data, switching browser profiles, or using private browsing can remove saved records and files.";
 }
 
 function storageHealthCopy() {
+  if (isTutorialMode()) return "Tutorial storage is temporary and separate from your real records.";
   return isDesktopMode()
     ? "Mac app storage is local to this Mac user account."
     : "Browser storage is local to this device and browser profile.";
@@ -821,7 +962,9 @@ function renderDocumentForm(document) {
   const selectedExpenseId = document?.expenseId || draftExpense?.id || "";
   const fileHelper = document?.hasFile
     ? `Current file: ${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)}). Choose a new file to replace it.`
-    : `Attached files are saved locally ${storageLocationShort()}. They are not uploaded.`;
+    : isTutorialMode()
+      ? "Choosing a file in tutorial mode records sample metadata only. No file copy is saved."
+      : `Attached files are saved locally ${storageLocationShort()}. They are not uploaded.`;
 
   return `
     <form class="form-grid" data-form="document" enctype="multipart/form-data" novalidate>
@@ -839,7 +982,7 @@ function renderDocumentForm(document) {
         <span>Attach file</span>
         <input name="file" type="file">
         <small>${escapeHtml(fileHelper)}</small>
-        <small>${storageSurfaceName()} storage is limited. Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this beta.</small>
+        <small>${isTutorialMode() ? "Use the normal workspace when you are ready to store real document copies." : `${storageSurfaceName()} storage is limited. Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this beta.`}</small>
       </label>
       ${textarea("Notes", "notes", document?.notes || "")}
       ${formActions("Save document")}
@@ -927,6 +1070,18 @@ function getDocumentFileStatus(document) {
   return "no-file";
 }
 
+function createTutorialFileId(documentId) {
+  return `tutorial-file-${documentId || createId("document")}`;
+}
+
+function isTutorialFileId(fileId) {
+  return String(fileId || "").startsWith("tutorial-file-");
+}
+
+function isTutorialDocumentFile(document) {
+  return isTutorialMode() && document?.hasFile && isTutorialFileId(document.fileId || document.id);
+}
+
 function getDocumentationAttentionExpenses(expenses) {
   return expenses.filter((expense) => Boolean(getExpenseDocumentationIssue(expense)));
 }
@@ -954,6 +1109,16 @@ function renderDocumentFileMeta(document) {
   if (!document.hasFile) {
     return `
       <p><span class="pill tone-amber">${document.fileStatusNote ? "File needs follow-up" : "No file attached"}</span></p>
+      ${document.fileStatusNote ? `<p class="file-status-note">${escapeHtml(document.fileStatusNote)}</p>` : ""}
+    `;
+  }
+
+  if (isTutorialDocumentFile(document)) {
+    return `
+      <p>
+        <span class="pill tone-blue">Tutorial metadata</span>
+        <span class="file-meta">${escapeHtml(document.fileName || "Tutorial file")} / ${escapeHtml(document.mimeType || "Unknown type")} / ${formatFileSize(document.fileSize)}</span>
+      </p>
       ${document.fileStatusNote ? `<p class="file-status-note">${escapeHtml(document.fileStatusNote)}</p>` : ""}
     `;
   }
@@ -1141,7 +1306,25 @@ async function handleClick(event) {
   if (!actionButton) return;
   const { action, id } = actionButton.dataset;
 
-  if (action === "add-property") {
+  if (action === "start-tutorial") {
+    enterTutorialWorkspace();
+    return;
+  } else if (action === "exit-tutorial") {
+    exitTutorialWorkspace();
+    return;
+  } else if (action === "reset-tutorial") {
+    resetTutorialWorkspace();
+    return;
+  } else if (action === "open-tutorial-step") {
+    if (!isTutorialMode()) {
+      enterTutorialWorkspace({ targetTab: actionButton.dataset.tutorialTab || "tutorial" });
+    } else {
+      activeTab = actionButton.dataset.tutorialTab || "tutorial";
+      closeEditors();
+      render();
+    }
+    return;
+  } else if (action === "add-property") {
     activeTab = "property";
     propertyMode = "new";
   } else if (action === "edit-property") {
@@ -1203,7 +1386,10 @@ async function handleClick(event) {
   } else if (action === "open-export") {
     activeTab = "export";
   } else if (action === "download-csv") {
-    downloadTextFile(buildExpensesCsv(data), `home-basis-tracker-expenses-${todayISO()}.csv`, "text/csv;charset=utf-8");
+    const filename = isTutorialMode()
+      ? `home-basis-tracker-tutorial-expenses-${todayISO()}.csv`
+      : `home-basis-tracker-expenses-${todayISO()}.csv`;
+    downloadTextFile(buildExpensesCsv(data), filename, "text/csv;charset=utf-8");
   } else if (action === "download-full-backup") {
     await downloadFullBackup();
   } else if (action === "choose-backup-file") {
@@ -1260,7 +1446,13 @@ function handleChange(event) {
 function handleStorageEvent(event) {
   if (event.key !== STORAGE_KEY) return;
   try {
-    data = event.newValue ? sanitizeData(JSON.parse(event.newValue)) : EMPTY_DATA;
+    realData = event.newValue ? sanitizeData(JSON.parse(event.newValue)) : EMPTY_DATA;
+    if (isTutorialMode()) {
+      notice = "Your real records changed in another browser window. Exit the tutorial to see the refreshed binder.";
+      syncNoticeToast();
+      return;
+    }
+    data = realData;
     selectedPropertyId = data.properties[0]?.id || "";
     resetFiltersAfterRestore();
     closeEditors();
@@ -1309,6 +1501,57 @@ function rebuildDocumentRelationshipOptions(form, propertyId, selectedProjectId,
 
   projectSelect.innerHTML = `${optionHtml("", "No project", selectedProjectId)}${projectOptions.map((project) => optionHtml(project.id, project.name, selectedProjectId)).join("")}`;
   expenseSelect.innerHTML = `${optionHtml("", "No expense", selectedExpenseId)}${expenseOptions.map((expense) => optionHtml(expense.id, `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}`, selectedExpenseId)).join("")}`;
+}
+
+function isTutorialMode() {
+  return workspaceMode === WORKSPACE_TUTORIAL;
+}
+
+function enterTutorialWorkspace({ targetTab = "tutorial" } = {}) {
+  if (!isTutorialMode()) {
+    realData = data;
+  }
+  workspaceMode = WORKSPACE_TUTORIAL;
+  tutorialData = sanitizeData(tutorialData);
+  data = tutorialData;
+  activeTab = targetTab;
+  selectedPropertyId = data.properties[0]?.id || "";
+  propertyMode = data.properties.length ? "view" : "new";
+  resetFiltersAfterRestore();
+  closeEditors();
+  closeDocumentPreview({ renderAfterClose: false });
+  showNotice("Tutorial workspace opened. Sample changes are temporary.");
+}
+
+function exitTutorialWorkspace() {
+  if (!isTutorialMode()) return;
+  tutorialData = sanitizeData(data);
+  workspaceMode = WORKSPACE_REAL;
+  data = realData;
+  activeTab = "dashboard";
+  selectedPropertyId = data.properties[0]?.id || "";
+  propertyMode = data.properties.length ? "view" : "new";
+  resetFiltersAfterRestore();
+  closeEditors();
+  closeDocumentPreview({ renderAfterClose: false });
+  showNotice("Returned to your real records.");
+}
+
+function resetTutorialWorkspace() {
+  if (!isTutorialMode()) {
+    enterTutorialWorkspace();
+    return;
+  }
+  if (!window.confirm("Reset the tutorial workspace back to the original sample records?")) return;
+  tutorialData = createTutorialData();
+  data = tutorialData;
+  activeTab = "tutorial";
+  selectedPropertyId = data.properties[0]?.id || "";
+  propertyMode = "view";
+  resetFiltersAfterRestore();
+  closeEditors();
+  closeDocumentPreview({ renderAfterClose: false });
+  showNotice("Tutorial sample data reset.");
 }
 
 async function handleSubmit(event) {
@@ -1476,7 +1719,7 @@ async function saveDocument(values, file) {
   if (hasSelectedFile && file.size > MAX_DOCUMENT_FILE_SIZE) {
     return showFormNotice(form, "file", `Files over ${formatFileSize(MAX_DOCUMENT_FILE_SIZE)} are not accepted in this beta.`);
   }
-  if (hasSelectedFile && !canStoreDocuments()) {
+  if (hasSelectedFile && !isTutorialMode() && !canStoreDocuments()) {
     return showFormNotice(form, "file", `Attached file storage is not available in this ${storageSurfaceName().toLowerCase()}.`);
   }
 
@@ -1508,21 +1751,34 @@ async function saveDocument(values, file) {
       };
 
   if (hasSelectedFile) {
-    try {
-      newlySavedFileId = createId("file");
-      const storedFile = await saveDocumentFile(newlySavedFileId, file);
+    if (isTutorialMode()) {
       fileMetadata = {
         hasFile: true,
-        fileId: storedFile.id,
-        fileName: removeLocalPaths(storedFile.name).trim() || "Attached file",
-        fileStatusNote: "",
-        mimeType: storedFile.type,
-        fileSize: storedFile.size,
-        fileLastModified: storedFile.lastModified,
-        fileStoredAt: storedFile.storedAt,
+        fileId: createTutorialFileId(documentId),
+        fileName: removeLocalPaths(file.name).trim() || "Tutorial file",
+        fileStatusNote: "Tutorial file metadata only. No copy was saved.",
+        mimeType: file.type || "application/octet-stream",
+        fileSize: file.size,
+        fileLastModified: file.lastModified || null,
+        fileStoredAt: new Date().toISOString(),
       };
-    } catch (error) {
-      return showFormNotice(form, "file", getDocumentStorageError(error));
+    } else {
+      try {
+        newlySavedFileId = createId("file");
+        const storedFile = await saveDocumentFile(newlySavedFileId, file);
+        fileMetadata = {
+          hasFile: true,
+          fileId: storedFile.id,
+          fileName: removeLocalPaths(storedFile.name).trim() || "Attached file",
+          fileStatusNote: "",
+          mimeType: storedFile.type,
+          fileSize: storedFile.size,
+          fileLastModified: storedFile.lastModified,
+          fileStoredAt: storedFile.storedAt,
+        };
+      } catch (error) {
+        return showFormNotice(form, "file", getDocumentStorageError(error));
+      }
     }
   }
 
@@ -1588,12 +1844,19 @@ async function saveDocument(values, file) {
     }
   }
 
-  showNotice(documentRecord.hasFile ? "Document and local file saved." : "Document saved.");
+  showNotice(documentRecord.hasFile
+    ? isTutorialMode()
+      ? "Document saved with tutorial file metadata. No file copy was stored."
+      : "Document and local file saved."
+    : "Document saved.");
 }
 
 async function openDocumentPreview(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
+  if (isTutorialDocumentFile(documentRecord)) {
+    return showNotice("Tutorial files are metadata only. Preview real files from your normal workspace.");
+  }
 
   closeDocumentPreview({ renderAfterClose: false });
   documentPreview = {
@@ -1679,6 +1942,9 @@ async function saveDocumentPreviewNotes(values) {
 async function runDocumentOcr(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
+  if (isTutorialDocumentFile(documentRecord)) {
+    return showNotice("Tutorial files are metadata only. Local text reading runs on real files in your normal workspace.");
+  }
 
   if (!documentPreview || documentPreview.documentId !== documentId) {
     await openDocumentPreview(documentId);
@@ -2079,7 +2345,9 @@ async function deleteProperty(propertyId) {
   propertyMode = selectedPropertyId ? "view" : "new";
   resetFiltersAfterRestore();
   resetStorageEstimate();
-  const cleanup = await deleteFilesBestEffort(fileIdsToDelete);
+  const cleanup = isTutorialMode()
+    ? { failed: 0 }
+    : await deleteFilesBestEffort(fileIdsToDelete);
   showNotice(cleanup.failed
     ? "Property deleted. Some stored document files could not be removed from local storage."
     : "Property deleted.");
@@ -2118,7 +2386,7 @@ async function deleteDocument(documentId) {
   if (!window.confirm("Delete this document from this app? This removes the stored copy and its note here, but does not delete the original file from your computer or any copies you downloaded.")) return;
   if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
-  if (documentRecord?.hasFile) {
+  if (documentRecord?.hasFile && !isTutorialDocumentFile(documentRecord)) {
     try {
       await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
       resetStorageEstimate();
@@ -2143,6 +2411,9 @@ async function deleteDocument(documentId) {
 async function downloadDocumentAttachment(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
+  if (isTutorialDocumentFile(documentRecord)) {
+    return showNotice("Tutorial files are metadata only. Download real stored files from your normal workspace.");
+  }
 
   try {
     const storedFile = await getDocumentFile(documentRecord.fileId || documentRecord.id);
@@ -2160,14 +2431,19 @@ async function downloadDocumentAttachment(documentId) {
 async function removeDocumentAttachment(documentId) {
   const documentRecord = data.documents.find((document) => document.id === documentId);
   if (!documentRecord?.hasFile) return showNotice("No stored file is attached to this document.");
-  if (!window.confirm("Remove the stored file from this app? The document record will stay, and this will not delete the original file from your computer or any copies you downloaded.")) return;
+  const confirmation = isTutorialDocumentFile(documentRecord)
+    ? "Remove this tutorial file metadata? The document record will stay, and no real file will be deleted."
+    : "Remove the stored file from this app? The document record will stay, and this will not delete the original file from your computer or any copies you downloaded.";
+  if (!window.confirm(confirmation)) return;
   if (documentPreview?.documentId === documentId) closeDocumentPreview({ renderAfterClose: false });
 
-  try {
-    await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
-  } catch (error) {
-    showNotice(`The document was not updated because the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage. ${getDocumentStorageError(error)}`);
-    return;
+  if (!isTutorialDocumentFile(documentRecord)) {
+    try {
+      await deleteDocumentFile(documentRecord.fileId || documentRecord.id);
+    } catch (error) {
+      showNotice(`The document was not updated because the stored file could not be removed from ${storageSurfaceName().toLowerCase()} storage. ${getDocumentStorageError(error)}`);
+      return;
+    }
   }
 
   const nextDocuments = data.documents.map((document) =>
@@ -2252,7 +2528,9 @@ async function downloadFullBackup() {
       showNotice(`This backup is over ${formatFileSize(MAX_BACKUP_FILE_SIZE)} and may be too large to restore in this beta. Remove a few large files or export the CSV and print summary separately.`);
       return;
     }
-    const filename = `home-basis-tracker-backup-${todayISO()}.json`;
+    const filename = isTutorialMode()
+      ? `home-basis-tracker-tutorial-backup-${todayISO()}.json`
+      : `home-basis-tracker-backup-${todayISO()}.json`;
     if (isDesktopMode()) {
       const result = await saveBackupFile(filename, backupText);
       if (result?.canceled) {
@@ -2270,7 +2548,7 @@ async function downloadFullBackup() {
       showNotice(`Backup saved, but some stored files were missing from ${storageSurfaceName().toLowerCase()} storage.`);
       return;
     }
-    showNotice("Full backup saved.");
+    showNotice(isTutorialMode() ? "Tutorial backup saved with sample records only." : "Full backup saved.");
   } catch (error) {
     showNotice(getBackupError(error));
   }
@@ -2280,6 +2558,22 @@ async function buildFullBackup() {
   const backupData = sanitizeData(data);
   const files = [];
   const missingFiles = [];
+
+  if (isTutorialMode()) {
+    const tutorialDocumentsWithFiles = backupData.documents.filter((document) => document.hasFile);
+    return createBackupEnvelope({
+      ...backupData,
+      documents: backupData.documents.map((documentRecord) =>
+        documentRecord.hasFile
+          ? stripDocumentFileMetadata(documentRecord, "Tutorial file metadata only. No file content was included.")
+          : documentRecord,
+      ),
+    }, files, tutorialDocumentsWithFiles.map((documentRecord) => ({
+      documentId: documentRecord.id,
+      fileName: documentRecord.fileName || "Tutorial file",
+      reason: "Tutorial file metadata only",
+    })));
+  }
 
   for (const documentRecord of backupData.documents.filter((document) => document.hasFile)) {
     try {
@@ -2322,7 +2616,10 @@ async function restoreFromBackupFile(file) {
   if (file.size > MAX_BACKUP_FILE_SIZE) {
     return showNotice(`Backup files over ${formatFileSize(MAX_BACKUP_FILE_SIZE)} are not accepted in this beta.`);
   }
-  if (!window.confirm(`Restore this backup and replace all current records ${storageLocationShort()}? Only restore backups you created or trust. This does not upload anything. Download a backup first if you want to keep what is here.`)) return;
+  const restoreMessage = isTutorialMode()
+    ? "Restore this backup into the temporary tutorial workspace only? Your real records will not be replaced."
+    : `Restore this backup and replace all current records ${storageLocationShort()}? Only restore backups you created or trust. This does not upload anything. Download a backup first if you want to keep what is here.`;
+  if (!window.confirm(restoreMessage)) return;
 
   let backup;
   try {
@@ -2331,10 +2628,12 @@ async function restoreFromBackupFile(file) {
     return showNotice("This backup file could not be read as JSON.");
   }
 
-  const oldFileIds = await getExistingDocumentFileIds();
+  const oldFileIds = isTutorialMode() ? [] : await getExistingDocumentFileIds();
   let restored;
   try {
-    restored = await prepareBackupRestore(backup);
+    restored = isTutorialMode()
+      ? prepareTutorialBackupRestore(backup)
+      : await prepareBackupRestore(backup);
   } catch (error) {
     return showNotice(getBackupError(error));
   }
@@ -2346,20 +2645,46 @@ async function restoreFromBackupFile(file) {
   }
 
   const importedFileIds = new Set(restored.newFileIds);
-  const cleanup = await deleteFilesBestEffort(oldFileIds.filter((fileId) => !importedFileIds.has(fileId)));
+  const cleanup = isTutorialMode()
+    ? { failed: 0 }
+    : await deleteFilesBestEffort(oldFileIds.filter((fileId) => !importedFileIds.has(fileId)));
   resetStorageEstimate();
 
   activeTab = "dashboard";
   selectedPropertyId = data.properties[0]?.id || "";
   resetFiltersAfterRestore();
   closeEditors();
-  const restoreNotice = restored.skippedFiles
+  const restoreNotice = isTutorialMode()
+    ? "Backup restored into the tutorial workspace only."
+    : restored.skippedFiles
     ? `Backup restored. Some attached files could not be restored ${storageLocationShort()}.`
     : "Backup restored.";
   const cleanupNotice = cleanup.failed
     ? ` Some older stored files could not be removed from ${storageSurfaceName().toLowerCase()} storage.`
     : "";
   showNotice(`${restoreNotice}${cleanupNotice}`);
+}
+
+function prepareTutorialBackupRestore(backup) {
+  const { data: restoredData } = validateBackupEnvelope(backup);
+  const restoredDocuments = restoredData.documents.map((documentRecord) =>
+    documentRecord.hasFile
+      ? stripDocumentFileMetadata(documentRecord, "File content was not restored inside the tutorial workspace")
+      : documentRecord,
+  );
+  const tutorialRestoreData = sanitizeData({
+    ...restoredData,
+    documents: restoredDocuments,
+  });
+
+  return {
+    data: {
+      ...tutorialRestoreData,
+      expenses: reconcileRestoredExpenseDocumentation(tutorialRestoreData.expenses, tutorialRestoreData.documents),
+    },
+    newFileIds: [],
+    skippedFiles: restoredData.documents.some((documentRecord) => documentRecord.hasFile) ? 1 : 0,
+  };
 }
 
 async function prepareBackupRestore(backup) {
@@ -2603,15 +2928,21 @@ function getBackupError(error) {
 }
 
 async function updateData(nextData, options = {}) {
-  if (storageWriteBlocked && !options.allowBlockedWrite) {
+  if (!isTutorialMode() && storageWriteBlocked && !options.allowBlockedWrite) {
     notice = "Saves are paused because local records could not be loaded safely. Restore a backup or reopen the app before making changes.";
     render();
     return false;
   }
   const previousData = data;
   data = sanitizeData(nextData);
+  if (isTutorialMode()) {
+    tutorialData = data;
+    render();
+    return true;
+  }
   try {
     data = await saveRecords(STORAGE_KEY, data);
+    realData = data;
     storageWriteBlocked = false;
   } catch {
     data = previousData;

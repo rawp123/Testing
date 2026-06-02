@@ -15,12 +15,15 @@ It is not budgeting software, tax software, legal advice, or tax advice. Expense
 
 The app does not create an account, upload files, call third-party APIs, or use server-side storage.
 
+- Fresh real app storage starts empty. Sample home records live only in the separate Tutorial Workspace.
 - In the Mac desktop app, structured records are stored in an app-managed records file on the Mac, and attached files are copied into an app-managed documents folder.
 - In the web version, structured records are stored in the current browser profile with `localStorage`, and attached document files are stored in that browser profile with IndexedDB.
 - CSV and print exports include document metadata, not attached file contents.
 - Full backup JSON files include structured records and attached files encoded inside the backup.
 
 Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove records and attached files.
+
+The Tutorial Workspace is a temporary sample-data sandbox. Users can practice properties, projects, expenses, documents, CPA review exports, backups, restores, reset, and exit without writing sample records into their real binder.
 
 ## Product Layout
 
@@ -91,6 +94,8 @@ Backup files are plaintext JSON and can contain sensitive home, vendor, amount, 
 
 Only restore backups you created or trust. The app skips several active or executable attachment types during restore, but a full backup can still contain private files and notes.
 
+Tutorial backups and restores are scoped to the tutorial workspace. Exiting the tutorial returns to the real app records without copying sample records over.
+
 See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardrails.
 
 ## Exports
@@ -111,6 +116,8 @@ See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardra
 ## QA And Review
 
 Before a private beta build, verify the app flows in both the Mac app and web version when practical. The detailed human checklist lives in `docs/HUMAN_REVIEW_CHECKLIST.md`, and real-document guidance lives in `docs/REAL_WORLD_DOCUMENT_QA.md`.
+
+Also verify the first-run boundary: the real app should not show sample records by default. The Tutorial Workspace should be opt-in, resettable, and visibly separate from the real records workspace.
 
 Useful validation commands from `home-ledger/`:
 

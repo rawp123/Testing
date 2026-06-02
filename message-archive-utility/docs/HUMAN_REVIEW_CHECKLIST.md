@@ -12,6 +12,7 @@ npm run check:syntax
 npm run pack:mac
 npm run check:mac-package
 npm run smoke:packaged
+npm run smoke:dmg
 git diff --check
 ```
 
@@ -23,15 +24,21 @@ npm run pack:mac:dmg:signed
 npm run smoke:dmg
 ```
 
-## Fake Data Review
+## Tutorial Workspace Review
 
-- Import fake sample data.
-- Confirm archive stats show expected message and conversation counts.
-- Search for a known fake term.
-- Export PDF.
-- Export XLSX.
-- Export CSV.
-- Quit and reopen to confirm persistence.
+- Start with a fresh app data folder or clean Mac user profile.
+- Confirm the real archive opens without sample conversations or messages.
+- Open Tutorial Workspace and load the sample tutorial archive.
+- Practice conversation browsing, search, summary, message filters, tutorial export, reset, and exit.
+- Confirm resetting the tutorial removes the sample workspace state.
+- Confirm the real Browse Archive view is still empty unless a real import has been run.
+
+## Smoke-Test Fake Data Review
+
+- Run the packaged or installed smoke script.
+- Confirm the script reports empty first launch state before importing fake test data.
+- Confirm fake test data is imported only into the temporary smoke data directory.
+- Confirm search, PDF export, XLSX export, CSV export, and close/reopen persistence pass in smoke storage.
 
 ## Real Data Review
 

@@ -35,15 +35,18 @@ npm run dev:website
 
 Implemented:
 
-1. Fake sample CSV import for development and smoke tests
+1. Fake sample CSV import for development and smoke tests only
 2. iPhone local backup import
+3. Frontend Tutorial Workspace with static sandbox sample messages
 
 Planned:
 
 1. iMazing CSV import
 2. Android XML import
 
-The current implementation includes a fake-data CSV importer and a real iPhone local-backup importer. The iPhone importer can run as a one-click detected-backup import, or as a step-by-step troubleshooting flow. It locates and copies `sms.db` from a local backup, validates and inspects the copied database, and imports contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
+The current implementation includes a fake-data CSV importer for test automation and a real iPhone local-backup importer for users. The iPhone importer can run as a one-click detected-backup import, or as a step-by-step troubleshooting flow. It locates and copies `sms.db` from a local backup, validates and inspects the copied database, and imports contacts, conversations, participants, message text, attachment metadata, and linked attachment files into the local archive database. Message text is read from `message.text` first, with a fallback for readable `attributedBody`/`payload_data` content when `message.text` is empty.
+
+The app UI also includes a separate Tutorial Workspace. It uses bundled static sample messages in browser state so users can practice import concepts, browsing, search, filters, summaries, exports, privacy/storage, reset, and exit without inserting sample records into the real SQLite archive.
 
 Linked attachment files are copied only when the backup folder is supplied during import. In browser development, copied files stay in ignored private storage under `data/attachments/iphone/`. In desktop development, copied files stay under the desktop app data folder described below.
 
@@ -185,7 +188,7 @@ uvicorn server.main:app --reload
 
 The backend uses FastAPI and SQLite. By default it creates a local database path from `MESSAGE_ARCHIVE_DB_PATH`; keep that path outside Git if you use real data.
 
-The fake CSV fixture is available through `POST /import/dummy-csv`. The iPhone backup flow is documented in `docs/iphone-backup-import.md`.
+The fake CSV fixture is available through `POST /import/dummy-csv` for development and smoke tests. It is not the user-facing tutorial path. The iPhone backup flow is documented in `docs/iphone-backup-import.md`.
 
 ## Frontend Setup
 
@@ -195,7 +198,7 @@ npm install
 npm run dev
 ```
 
-The frontend is a small React app for browsing the local archive, loading fake sample data, and running the iPhone backup import flow against the local backend.
+The frontend is a small React app for browsing the local archive, running the iPhone backup import flow against the local backend, and opening a Tutorial Workspace with isolated static sample data. Tutorial sample messages are not imported into the real archive database.
 
 ## Release Validation
 
@@ -223,13 +226,14 @@ Mac app, signs and notarizes the app, signs and notarizes the DMG, staples the
 DMG, and validates the stapled ticket.
 
 After installing or copying the app from the DMG, run the local installed-app
-smoke test with fake sample data only:
+smoke test. The smoke script first confirms a fresh temporary archive starts
+empty, then imports fake sample data into that temporary smoke database only:
 
 ```bash
 MESSAGE_ARCHIVE_APP="/Applications/Message Archive Utility.app" npm run smoke:installed
 ```
 
-To smoke-test the current mounted DMG artifact with fake sample data:
+To smoke-test the current mounted DMG artifact with the same temporary-data path:
 
 ```bash
 npm run smoke:dmg
@@ -250,8 +254,9 @@ See `docs/HUMAN_REVIEW_CHECKLIST.md`, `docs/MAC_RELEASE_CHECKLIST.md`, and
 `docs/REAL_DATA_QA.md` for the full release and real-data QA checklists.
 
 For a temporary test install, point `MESSAGE_ARCHIVE_APP` at the copied app under
-`/tmp`. The smoke test verifies bundled-backend launch, `/health`, fake import,
-search, PDF export, Excel export, CSV export, and close/reopen persistence.
+`/tmp`. The smoke test verifies bundled-backend launch, `/health`, empty first
+launch state, fake import into temporary smoke storage, search, PDF export, Excel
+export, CSV export, and close/reopen persistence.
 
 Optional Gatekeeper checks:
 

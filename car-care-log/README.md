@@ -22,7 +22,7 @@ This project is standalone inside `car-care-log/` and does not import from or de
 - `frontend/`: React renderer UI.
 - `backend/`: Electron main-process backend, local database, file handling, OCR, previews, exports, backups, and restore logic.
 - `desktop/preload/`: narrow IPC bridge exposed to the frontend.
-- `shared/`: product-local contracts, sample data, parser logic, CSV helpers, safe errors, and shared types.
+- `shared/`: product-local contracts, isolated tutorial sample data, parser logic, CSV helpers, safe errors, and shared types.
 - `tests/`: product-local Vitest coverage.
 - `docs/CROSS_PLATFORM_READINESS.md`: current Mac-beta boundary, cross-platform guardrails, and deferred packaging work.
 - `docs/MAC_RELEASE_CHECKLIST.md`: signed DMG, clean-install, and website-download release checklist.
@@ -69,7 +69,8 @@ Implemented:
 - Local restore from a backup folder
 - Hardened local restore validation for backup manifests, databases, and attachment files
 - Startup cleanup for abandoned document-intake files
-- Four sample vehicles with realistic oil change, coolant, brakes, tire, inspection, battery, and transmission records
+- Tutorial Workspace with isolated sample vehicles, service records, documents, OCR examples, duplicate-risk prompts, export/print preview, backup/restore concepts, and reset/exit controls
+- Empty real workspace on first launch; tutorial sample data is not written into normal user storage
 
 Scaffolded for later:
 
@@ -237,6 +238,8 @@ npm run qa:private-ocr
 ## Local Data
 
 In normal Electron use, records are stored under Electron's app data location for Car Care Log. During tests, temporary directories are used.
+
+Fresh real app storage starts empty. Sample records live in the in-app Tutorial Workspace and are generated as isolated tutorial data so users can explore the product without polluting their actual vehicle records, exports, or backups.
 
 Do not commit local databases, backups, exports, attachment storage, build artifacts, or packaged apps. The project `.gitignore` excludes those paths.
 

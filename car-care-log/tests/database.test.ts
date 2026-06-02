@@ -22,6 +22,13 @@ afterEach(() => {
 });
 
 describe('local database foundation', () => {
+  it('starts with empty real user records on a fresh local database', () => {
+    const snapshot = db.getSnapshot();
+
+    expect(snapshot.vehicles).toHaveLength(0);
+    expect(snapshot.services).toHaveLength(0);
+  });
+
   it('migrates an older local database without losing records', async () => {
     const paths = getStoragePaths(tempRoot);
     fs.mkdirSync(paths.dataDir, { recursive: true });
@@ -311,7 +318,7 @@ describe('local database foundation', () => {
   });
 
   it('exports CSV and restores from a local backup folder', async () => {
-    db.loadSampleData();
+    db.loadSampleDataForTests();
     const exportDir = path.join(tempRoot, 'exports');
     const backupDir = path.join(tempRoot, 'backups');
 
@@ -382,7 +389,7 @@ describe('local database foundation', () => {
   });
 
   it('rejects missing backup manifest fields without replacing current records', async () => {
-    db.loadSampleData();
+    db.loadSampleDataForTests();
     const originalVehicles = db.listVehicles().map((vehicle) => vehicle.nickname);
     const backupRoot = path.join(tempRoot, 'bad-manifest-backups');
     const backup = db.createBackup(backupRoot);
@@ -395,7 +402,7 @@ describe('local database foundation', () => {
   });
 
   it('rejects corrupted backup databases without replacing current records', async () => {
-    db.loadSampleData();
+    db.loadSampleDataForTests();
     const originalVehicleCount = db.listVehicles().length;
     const backupRoot = path.join(tempRoot, 'corrupt-backups');
     const backup = db.createBackup(backupRoot);

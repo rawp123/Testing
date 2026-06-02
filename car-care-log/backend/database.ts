@@ -576,7 +576,7 @@ export class CarCareDatabase {
     return this.getSettings();
   }
 
-  loadSampleData(): AppSnapshot {
+  loadSampleDataForTests(): AppSnapshot {
     for (const bundle of SAMPLE_DATA) {
       const vehicle = this.createVehicle(bundle.vehicle);
       for (const service of bundle.services) {

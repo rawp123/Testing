@@ -17,6 +17,8 @@ The desktop app starts a local backend on `127.0.0.1` and loads the frontend in 
 
 In development, the backend can run from the app-local Python virtual environment. In packaged builds, the desktop app uses the bundled backend executable under the app resources directory.
 
+The Tutorial Workspace is intentionally separate from this archive runtime. It uses static frontend sample messages and browser state only. Loading or resetting tutorial data does not call the import API and does not write records to SQLite.
+
 ## Data Model
 
 The backend stores archive data in SQLite. The schema and import/export contract are documented in `docs/data-schema.md`.
@@ -38,6 +40,7 @@ Implemented:
 
 - Fake sample data import for development and smoke tests.
 - iPhone local-backup import.
+- Static frontend tutorial sample data for user practice.
 
 Planned:
 
@@ -51,7 +54,7 @@ Import documentation:
 
 ## Export Paths
 
-The backend supports local export of archived messages to CSV, PDF, and XLSX. The installed-app smoke test verifies fake-data import, search, PDF export, Excel export, CSV export, and close/reopen persistence.
+The backend supports local export of archived messages to CSV, PDF, and XLSX. The Tutorial Workspace includes browser-generated practice exports that teach the flow without touching the real archive. The installed-app smoke test verifies empty first launch state, fake-data import into temporary smoke storage, search, PDF export, Excel export, CSV export, and close/reopen persistence.
 
 ## Network Posture
 

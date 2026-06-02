@@ -1,11 +1,11 @@
-import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
+import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArchiveRestore,
+  BookOpen,
   CalendarClock,
   Car,
   CheckCircle2,
   ClipboardList,
-  Database,
   Download,
   FileArchive,
   FileSearch,
@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Plus,
   Printer,
+  RotateCcw,
   Save,
   Search,
   Settings,
@@ -27,6 +28,7 @@ import {
   Wrench,
   X
 } from 'lucide-react';
+import { buildServicesCsv } from '../../shared/csv';
 import {
   ATTACHMENT_TYPES,
   COMMON_SERVICE_CATEGORIES,
@@ -34,6 +36,8 @@ import {
   type AttachmentType
 } from '../../shared/serviceCategories';
 import { findDuplicateRisk, findPriorRelatedService } from '../../shared/duplicateRisk';
+import { createTutorialSnapshot } from '../../shared/sampleData';
+import { suggestServiceFieldsFromOcr } from '../../shared/receiptParser';
 import { userSafeErrorMessage } from '../../shared/safeErrors';
 import type {
   AppSettings,
@@ -52,8 +56,9 @@ import type {
   VehicleInput
 } from '../../shared/types';
 
-type ViewKey = 'dashboard' | 'vehicles' | 'services' | 'documents' | 'export' | 'settings';
+type ViewKey = 'dashboard' | 'vehicles' | 'services' | 'documents' | 'export' | 'settings' | 'tutorial';
 type Status = { tone: 'success' | 'error' | 'info'; message: string } | null;
+type TutorialLessonKey = 'vehicles' | 'services' | 'documents' | 'duplicates' | 'exports' | 'backups' | 'reset';
 
 interface VehicleFormState {
   nickname: string;
@@ -107,7 +112,8 @@ const navItems: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
   { key: 'services', label: 'Service Log', icon: <ClipboardList size={18} /> },
   { key: 'documents', label: 'Documents', icon: <FileText size={18} /> },
   { key: 'export', label: 'Export / Backup', icon: <FileArchive size={18} /> },
-  { key: 'settings', label: 'Settings', icon: <Settings size={18} /> }
+  { key: 'settings', label: 'Settings', icon: <Settings size={18} /> },
+  { key: 'tutorial', label: 'Tutorial Workspace', icon: <BookOpen size={18} /> }
 ];
 
 function todayInput(): string {
@@ -363,6 +369,7 @@ function App(): JSX.Element {
   const browserPreview = Boolean(window.__CAR_CARE_LOG_BROWSER_PREVIEW__);
   const [activeView, setActiveView] = useState<ViewKey>('dashboard');
   const [snapshot, setSnapshot] = useState<AppSnapshot | null>(null);
+  const [tutorialSnapshot, setTutorialSnapshot] = useState<AppSnapshot>(() => createTutorialSnapshot());
   const [status, setStatus] = useState<Status>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -384,12 +391,17 @@ function App(): JSX.Element {
   const settings = snapshot?.settings ?? { duplicateMileageThreshold: 15000 };
   const selectedVehicle = vehicles.find((vehicle) => vehicle.id === selectedVehicleId) ?? vehicles[0];
   const firstRun = !loading && vehicles.length === 0 && services.length === 0;
+  const activeLabel = navItems.find((item) => item.key === activeView)?.label ?? 'Dashboard';
+  const topbarEyebrow = activeView === 'tutorial' ? 'Separate sample workspace' : 'Private service records';
 
-  async function loadSamples(): Promise<void> {
-    const next = await window.carCareLog.loadSampleData();
-    setSnapshot(next);
-    setSelectedVehicleId(next.vehicles[0]?.id ?? '');
-    setStatus({ tone: 'success', message: 'Sample vehicles and service records were added.' });
+  function openTutorial(): void {
+    setActiveView('tutorial');
+    setStatus({ tone: 'info', message: 'Tutorial records are separate from your real local storage.' });
+  }
+
+  function resetTutorial(): void {
+    setTutorialSnapshot(createTutorialSnapshot());
+    setStatus({ tone: 'success', message: 'Tutorial workspace reset. Your real records were not changed.' });
   }
 
   async function afterMutation(message: string): Promise<void> {
@@ -436,18 +448,33 @@ function App(): JSX.Element {
       <main className="content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Private service records</p>
-            <h1>{navItems.find((item) => item.key === activeView)?.label}</h1>
+            <p className="eyebrow">{topbarEyebrow}</p>
+            <h1>{activeLabel}</h1>
           </div>
           <div className="topbar-actions">
-            <button className="secondary-button" onClick={loadSamples} title="Load sample data">
-              <Database size={16} />
-              Load sample data
-            </button>
-            <button className="primary-button" onClick={() => setActiveView('vehicles')} title="Add or edit vehicles">
-              <Plus size={16} />
-              Add vehicle
-            </button>
+            {activeView === 'tutorial' ? (
+              <>
+                <button className="secondary-button" onClick={resetTutorial} title="Reset tutorial workspace">
+                  <RotateCcw size={16} />
+                  Reset tutorial
+                </button>
+                <button className="primary-button" onClick={() => setActiveView('dashboard')} title="Exit tutorial workspace">
+                  <X size={16} />
+                  Exit tutorial
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="secondary-button" onClick={openTutorial} title="Open tutorial workspace">
+                  <BookOpen size={16} />
+                  Tutorial workspace
+                </button>
+                <button className="primary-button" onClick={() => setActiveView('vehicles')} title="Add or edit vehicles">
+                  <Plus size={16} />
+                  Add vehicle
+                </button>
+              </>
+            )}
           </div>
         </header>
 
@@ -468,7 +495,7 @@ function App(): JSX.Element {
           </div>
         )}
 
-        {firstRun && <FirstRunPanel onLoadSamples={loadSamples} onAddVehicle={() => setActiveView('vehicles')} />}
+        {firstRun && activeView !== 'tutorial' && <FirstRunPanel onOpenTutorial={openTutorial} onAddVehicle={() => setActiveView('vehicles')} />}
 
         {loading && <div className="loading-state">Opening your local records...</div>}
 
@@ -525,26 +552,36 @@ function App(): JSX.Element {
         {!loading && snapshot && activeView === 'settings' && (
           <SettingsView settings={settings} onSaved={(message) => afterMutation(message)} onStatus={setStatus} />
         )}
+
+        {!loading && activeView === 'tutorial' && (
+          <TutorialWorkspaceView
+            snapshot={tutorialSnapshot}
+            onSnapshotChange={setTutorialSnapshot}
+            onReset={resetTutorial}
+            onExit={() => setActiveView('dashboard')}
+            onStatus={setStatus}
+          />
+        )}
       </main>
     </div>
   );
 }
 
 function FirstRunPanel({
-  onLoadSamples,
+  onOpenTutorial,
   onAddVehicle
 }: {
-  onLoadSamples: () => Promise<void>;
+  onOpenTutorial: () => void;
   onAddVehicle: () => void;
 }): JSX.Element {
   return (
     <section className="first-run">
       <div>
         <p className="eyebrow">First run</p>
-        <h2>Start with a vehicle or try the sample records.</h2>
+        <h2>Start with your first vehicle.</h2>
         <p>
-          Track what was done, when, where, at what mileage, and how much it cost before approving repeat
-          maintenance.
+          Your real records are empty by default. Use the tutorial workspace to explore sample records in a separate
+          sandbox, or add your first vehicle here.
         </p>
       </div>
       <div className="button-row">
@@ -552,12 +589,457 @@ function FirstRunPanel({
           <Plus size={16} />
           Add first vehicle
         </button>
-        <button className="secondary-button" onClick={onLoadSamples}>
-          <Database size={16} />
-          Load sample data
+        <button className="secondary-button" onClick={onOpenTutorial}>
+          <BookOpen size={16} />
+          Open tutorial
         </button>
       </div>
     </section>
+  );
+}
+
+const tutorialLessons: Array<{ key: TutorialLessonKey; title: string; icon: ReactNode; points: string[] }> = [
+  {
+    key: 'vehicles',
+    title: 'Vehicles',
+    icon: <Car size={18} />,
+    points: [
+      'Pick a sample vehicle and review profile details, mileage, spend, service count, and attachments.',
+      'Use this as the model for adding a real vehicle in the main workspace.'
+    ]
+  },
+  {
+    key: 'services',
+    title: 'Service records',
+    icon: <ClipboardList size={18} />,
+    points: [
+      'Search and filter sample oil changes, coolant work, brakes, tires, inspections, battery work, and transmission service.',
+      'Open the Service Log in your real workspace when you are ready to add your own records.'
+    ]
+  },
+  {
+    key: 'documents',
+    title: 'Documents and OCR',
+    icon: <FileSearch size={18} />,
+    points: [
+      'Review sample receipts, invoices, photos, warranty documents, and OCR statuses.',
+      'Try the suggested service fields below. Saving here changes only the tutorial workspace.'
+    ]
+  },
+  {
+    key: 'duplicates',
+    title: 'Duplicate checks',
+    icon: <Info size={18} />,
+    points: [
+      'The Honda CR-V coolant records show how related-service warnings appear inside the 24-month or mileage window.',
+      'Warnings are review prompts, not maintenance advice.'
+    ]
+  },
+  {
+    key: 'exports',
+    title: 'Export and print',
+    icon: <Printer size={18} />,
+    points: [
+      'Preview the CSV shape and printable service history before exporting real records.',
+      'Exports from the real workspace use your local save dialogs; this tutorial preview does not write files.'
+    ]
+  },
+  {
+    key: 'backups',
+    title: 'Backup and restore',
+    icon: <ArchiveRestore size={18} />,
+    points: [
+      'Review what a backup contains: the local database plus app-managed attachments.',
+      'The tutorial restore action simply resets the sample workspace.'
+    ]
+  },
+  {
+    key: 'reset',
+    title: 'Reset and exit',
+    icon: <RotateCcw size={18} />,
+    points: [
+      'Reset returns the sample workspace to its original state.',
+      'Exit returns to your real records without copying any sample vehicles, services, or documents.'
+    ]
+  }
+];
+
+function TutorialWorkspaceView({
+  snapshot,
+  onSnapshotChange,
+  onReset,
+  onExit,
+  onStatus
+}: {
+  snapshot: AppSnapshot;
+  onSnapshotChange: (snapshot: AppSnapshot) => void;
+  onReset: () => void;
+  onExit: () => void;
+  onStatus: (status: Status) => void;
+}): JSX.Element {
+  const [activeLesson, setActiveLesson] = useState<TutorialLessonKey>('vehicles');
+  const [selectedVehicleId, setSelectedVehicleId] = useState(snapshot.vehicles[0]?.id ?? '');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('');
+  const documentItems = useMemo(
+    () => snapshot.services.flatMap((service) => service.attachments.map((attachment) => ({ attachment, service }))),
+    [snapshot.services]
+  );
+  const reviewSource = useMemo(() => documentItems.find(({ attachment }) => attachment.ocrText) ?? documentItems[0] ?? null, [documentItems]);
+  const draftFromReviewSource = useCallback((): ServiceFormState => {
+    if (!reviewSource) return emptyServiceForm(snapshot.vehicles[0]?.id ?? '');
+    return reviewSource.attachment.ocrText
+      ? suggestedToServiceForm(suggestServiceFieldsFromOcr(reviewSource.attachment.ocrText), reviewSource.service.vehicleId)
+      : serviceToForm(reviewSource.service);
+  }, [reviewSource, snapshot.vehicles]);
+
+  const [reviewDraft, setReviewDraft] = useState<ServiceFormState>(() => draftFromReviewSource());
+  const [reviewText, setReviewText] = useState(() => reviewSource?.attachment.ocrText ?? '');
+
+  useEffect(() => {
+    setSelectedVehicleId((current) => (snapshot.vehicles.some((vehicle) => vehicle.id === current) ? current : snapshot.vehicles[0]?.id ?? ''));
+    setReviewDraft(draftFromReviewSource());
+    setReviewText(reviewSource?.attachment.ocrText ?? '');
+  }, [draftFromReviewSource, reviewSource, snapshot.vehicles]);
+
+  const selectedVehicle = snapshot.vehicles.find((vehicle) => vehicle.id === selectedVehicleId) ?? snapshot.vehicles[0];
+  const selectedServices = selectedVehicle ? snapshot.services.filter((service) => service.vehicleId === selectedVehicle.id) : [];
+  const filteredServices = snapshot.services.filter((service) => {
+    if (category && service.category !== category) return false;
+    return serviceMatchesQuery(service, snapshot.vehicles.find((vehicle) => vehicle.id === service.vehicleId), query);
+  });
+  const suggested = reviewText ? suggestServiceFieldsFromOcr(reviewText) : suggestServiceFieldsFromOcr('');
+  const duplicateRisk = findDuplicateRisk({
+    services: snapshot.services,
+    vehicleId: reviewDraft.vehicleId,
+    category: reviewDraft.category,
+    serviceDate: reviewDraft.serviceDate,
+    mileage: numberOrNull(reviewDraft.mileage),
+    mileageThreshold: snapshot.settings.duplicateMileageThreshold
+  });
+  const csvPreview = buildServicesCsv(snapshot.vehicles, snapshot.services).split('\n').slice(0, 8).join('\n');
+  const activeLessonDetail = tutorialLessons.find((lesson) => lesson.key === activeLesson) ?? tutorialLessons[0];
+  const attachmentCount = documentItems.length;
+
+  function reviewTutorialDocument(attachment: Attachment, service: ServiceRecord): void {
+    setActiveLesson('documents');
+    setReviewDraft(
+      attachment.ocrText ? suggestedToServiceForm(suggestServiceFieldsFromOcr(attachment.ocrText), service.vehicleId) : serviceToForm(service)
+    );
+    setReviewText(attachment.ocrText);
+    onStatus({ tone: 'info', message: 'Loaded sample document suggestions inside the tutorial workspace only.' });
+  }
+
+  function saveReviewInsideTutorial(): void {
+    const payload = servicePayload(reviewDraft);
+    if (!payload.vehicleId) {
+      onStatus({ tone: 'error', message: 'Choose a tutorial vehicle before saving this sample review.' });
+      return;
+    }
+    const now = new Date().toISOString();
+    const serviceId = `tutorial-service-local-${Date.now()}`;
+    const sourceAttachment = reviewSource?.attachment;
+    const attachments: Attachment[] = sourceAttachment
+      ? [
+          {
+            ...sourceAttachment,
+            id: `tutorial-attachment-local-${Date.now()}`,
+            serviceRecordId: serviceId,
+            label: `Reviewed ${sourceAttachment.label}`,
+            addedDate: now,
+            ocrRunAt: sourceAttachment.ocrStatus === 'not_run' ? '' : now,
+            createdAt: now,
+            updatedAt: now
+          }
+        ]
+      : [];
+    const service: ServiceRecord = {
+      ...payload,
+      id: serviceId,
+      attachments,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    onSnapshotChange({
+      ...snapshot,
+      services: [service, ...snapshot.services]
+    });
+    setSelectedVehicleId(payload.vehicleId);
+    onStatus({ tone: 'success', message: 'Saved in the tutorial workspace only. Your real records were not changed.' });
+  }
+
+  function previewBackup(): void {
+    onStatus({
+      tone: 'info',
+      message: `Tutorial backup preview: ${snapshot.vehicles.length} vehicles, ${snapshot.services.length} services, ${attachmentCount} documents.`
+    });
+  }
+
+  return (
+    <div className="tutorial-shell">
+      <section className="tutorial-hero">
+        <div>
+          <p className="eyebrow">Tutorial sandbox</p>
+          <h2>Sample records live here, not in your real log.</h2>
+          <p>
+            Explore every major workflow with realistic vehicle records, receipts, OCR results, duplicate prompts,
+            export previews, and backup concepts. Reset anytime.
+          </p>
+        </div>
+        <div className="tutorial-hero-actions">
+          <button className="secondary-button" onClick={onReset}>
+            <RotateCcw size={16} />
+            Reset sample workspace
+          </button>
+          <button className="primary-button" onClick={onExit}>
+            <X size={16} />
+            Exit tutorial
+          </button>
+        </div>
+      </section>
+
+      <section className="tutorial-lesson-grid" aria-label="Tutorial lessons">
+        {tutorialLessons.map((lesson) => (
+          <button
+            key={lesson.key}
+            className={`tutorial-lesson-card ${lesson.key === activeLesson ? 'active' : ''}`}
+            onClick={() => setActiveLesson(lesson.key)}
+          >
+            {lesson.icon}
+            <span>{lesson.title}</span>
+          </button>
+        ))}
+      </section>
+
+      <div className="tutorial-sandbox-grid">
+        <section className="panel">
+          <div className="section-header compact">
+            <div>
+              <p className="eyebrow">Sample vehicles</p>
+              <h2>Choose a vehicle</h2>
+            </div>
+          </div>
+          <div className="vehicle-list">
+            {snapshot.vehicles.map((vehicle) => (
+              <button
+                key={vehicle.id}
+                className={`mini-vehicle ${vehicle.id === selectedVehicle?.id ? 'active' : ''}`}
+                onClick={() => setSelectedVehicleId(vehicle.id)}
+              >
+                <Car size={16} />
+                <span>{vehicle.nickname}</span>
+              </button>
+            ))}
+          </div>
+          {selectedVehicle && (
+            <div className="detail-stack">
+              <div className="profile-strip">
+                <div>
+                  <strong>{vehicleName(selectedVehicle)}</strong>
+                  <span>{selectedVehicle.notes}</span>
+                </div>
+              </div>
+              <div className="metric-grid">
+                <Metric label="Tutorial spend" value={formatMoney(totalSpend(selectedServices))} />
+                <Metric label="Service records" value={selectedServices.length.toString()} />
+                <Metric label="Documents" value={selectedServices.reduce((count, service) => count + service.attachments.length, 0).toString()} />
+              </div>
+              <LastRecordedGrid services={selectedServices} />
+            </div>
+          )}
+        </section>
+
+        <section className="panel">
+          <div className="section-header compact">
+            <div>
+              <p className="eyebrow">Current lesson</p>
+              <h2>{activeLessonDetail.title}</h2>
+            </div>
+          </div>
+          <div className="tutorial-guide">
+            {activeLessonDetail.points.map((point) => (
+              <div className="tutorial-guide-row" key={point}>
+                <CheckCircle2 size={16} />
+                <p>{point}</p>
+              </div>
+            ))}
+          </div>
+          <div className="notice muted">
+            <ShieldCheck size={18} />
+            <p>Everything in this workspace is sample-only. Real exports, backups, and records remain untouched.</p>
+          </div>
+        </section>
+
+        <section className="panel tutorial-wide">
+          <div className="section-header">
+            <div>
+              <p className="eyebrow">Service records</p>
+              <h2>Search the tutorial history</h2>
+            </div>
+          </div>
+          <div className="filter-row">
+            <label>
+              <Search size={15} />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search sample records, documents, OCR text" />
+            </label>
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              <option value="">All categories</option>
+              {SERVICE_CATEGORIES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+            <button className="secondary-button" onClick={() => setQuery('coolant')}>
+              <Search size={16} />
+              Try coolant
+            </button>
+          </div>
+          <div className="timeline">
+            {filteredServices.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                vehicle={snapshot.vehicles.find((vehicle) => vehicle.id === service.vehicleId)}
+                allServices={snapshot.services}
+                vehicles={snapshot.vehicles}
+                mileageThreshold={snapshot.settings.duplicateMileageThreshold}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel tutorial-wide">
+          <div className="section-header">
+            <div>
+              <p className="eyebrow">Documents and OCR</p>
+              <h2>Review sample intake</h2>
+            </div>
+          </div>
+          <div className="tutorial-document-grid">
+            <div className="document-list">
+              {documentItems.map(({ attachment, service }) => (
+                <div className="document-row" key={attachment.id}>
+                  <div className="document-icon">{attachment.mimeType.startsWith('image/') ? <Image size={19} /> : <FileText size={19} />}</div>
+                  <div className="document-body">
+                    <strong>{attachment.label}</strong>
+                    <span>
+                      {attachment.type} · {attachment.fileType} · {ocrLabel(attachment)}
+                    </span>
+                    <small>
+                      {service.category} for {vehicleName(snapshot.vehicles.find((vehicle) => vehicle.id === service.vehicleId))}
+                    </small>
+                  </div>
+                  <button className="secondary-button" onClick={() => reviewTutorialDocument(attachment, service)}>
+                    <FileSearch size={16} />
+                    Review
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="tutorial-review">
+              <div className="notice muted">
+                <Info size={18} />
+                <p>Suggested fields below come from sample OCR text. Editing and saving here only updates the tutorial sandbox.</p>
+              </div>
+              {duplicateRisk.hasRisk && duplicateRisk.lastRecord && (
+                <div className="notice warning">
+                  <Info size={18} />
+                  <div>
+                    <strong>{duplicateRiskTitle(duplicateRisk, reviewDraft.category)}</strong>
+                    <p>{duplicateRiskCopy(duplicateRisk, reviewDraft.category, snapshot.settings.duplicateMileageThreshold)}</p>
+                  </div>
+                </div>
+              )}
+              <ConfidenceGrid suggested={suggested} />
+              <ServiceForm
+                draft={reviewDraft}
+                vehicles={snapshot.vehicles}
+                onChange={setReviewDraft}
+                onSubmit={(event) => event.preventDefault()}
+                submitLabel="Save to tutorial"
+                hideActions
+              />
+              <div className="review-actions">
+                <button
+                  className="secondary-button"
+                  onClick={() => {
+                    setReviewDraft(draftFromReviewSource());
+                    setReviewText(reviewSource?.attachment.ocrText ?? '');
+                  }}
+                >
+                  <RotateCcw size={16} />
+                  Reset fields
+                </button>
+                <button className="primary-button" onClick={saveReviewInsideTutorial}>
+                  <Save size={16} />
+                  Save to tutorial only
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-header compact">
+            <div>
+              <p className="eyebrow">Export and print</p>
+              <h2>Preview outputs</h2>
+            </div>
+          </div>
+          <div className="action-grid">
+            <button className="action-tile" onClick={() => onStatus({ tone: 'info', message: 'CSV preview is shown below. No tutorial file was written.' })}>
+              <Download size={22} />
+              <strong>Preview CSV</strong>
+              <span>See the columns used for real service exports.</span>
+            </button>
+            <button className="action-tile" onClick={() => window.print()}>
+              <Printer size={22} />
+              <strong>Print tutorial summary</strong>
+              <span>Practice the printable service history layout.</span>
+            </button>
+          </div>
+          <pre className="csv-preview">{csvPreview}</pre>
+        </section>
+
+        <section className="panel">
+          <div className="section-header compact">
+            <div>
+              <p className="eyebrow">Backup and restore</p>
+              <h2>Practice the boundary</h2>
+            </div>
+          </div>
+          <div className="metric-grid">
+            <Metric label="Vehicles" value={snapshot.vehicles.length.toString()} />
+            <Metric label="Services" value={snapshot.services.length.toString()} />
+            <Metric label="Documents" value={attachmentCount.toString()} />
+          </div>
+          <div className="action-grid tutorial-actions">
+            <button className="action-tile" onClick={previewBackup}>
+              <ArchiveRestore size={22} />
+              <strong>Backup preview</strong>
+              <span>Shows what a backup would contain without creating a folder.</span>
+            </button>
+            <button className="action-tile" onClick={onReset}>
+              <Upload size={22} />
+              <strong>Restore tutorial</strong>
+              <span>Resets only the tutorial data to its original sample state.</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="panel print-summary tutorial-wide">
+          <div className="section-header compact">
+            <div>
+              <p className="eyebrow">Printable tutorial summary</p>
+              <h2>Sample service history</h2>
+            </div>
+          </div>
+          <PrintableSummary vehicles={snapshot.vehicles} services={snapshot.services} />
+        </section>
+      </div>
+    </div>
   );
 }
 

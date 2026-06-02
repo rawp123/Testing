@@ -36,6 +36,7 @@ const requiredResources = [
   path.join(resourcesDir, "frontend", "styles.css"),
   path.join(resourcesDir, "backend", "domain", "backup.js"),
   path.join(resourcesDir, "backend", "domain", "model.js"),
+  path.join(resourcesDir, "backend", "domain", "tutorial-data.js"),
   path.join(resourcesDir, "backend", "storage", "document-storage.js"),
   path.join(resourcesDir, "backend", "storage", "records-storage.js"),
   path.join(resourcesDir, "node_modules", "tesseract.js", "dist", "tesseract.esm.min.js"),

@@ -243,7 +243,6 @@ async function createWindow(): Promise<void> {
 
 function registerIpcHandlers(): void {
   ipcMain.handle('app:snapshot', () => getDatabase().getSnapshot());
-  ipcMain.handle('sample:load', () => getDatabase().loadSampleData());
 
   ipcMain.handle('vehicles:create', (_event, input: VehicleInput) => getDatabase().createVehicle(input));
   ipcMain.handle('vehicles:update', (_event, id: string, input: VehicleInput) => getDatabase().updateVehicle(id, input));
