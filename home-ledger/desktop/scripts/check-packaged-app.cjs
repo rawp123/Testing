@@ -1,13 +1,22 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const asar = require("@electron/asar");
 
 const plistPath = path.resolve(
   __dirname,
   "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Info.plist",
 );
+const appAsarPath = path.resolve(
+  __dirname,
+  "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Resources/app.asar",
+);
 
 if (!fs.existsSync(plistPath)) {
   console.error("Packaged Home Basis Tracker app was not found. Run npm run pack:mac first.");
+  process.exit(1);
+}
+if (!fs.existsSync(appAsarPath)) {
+  console.error("Packaged Home Basis Tracker app.asar was not found. Run npm run pack:mac first.");
   process.exit(1);
 }
 
@@ -39,6 +48,19 @@ const requiredResources = [
   "node_modules/pdfjs-dist/wasm/openjpeg.wasm",
   "node_modules/pdfjs-dist/image_decoders/pdf.image_decoders.mjs",
 ];
+const requiredAsarFiles = [
+  "/main.cjs",
+  "/preload.cjs",
+  "/storage-helpers.cjs",
+  "/package.json",
+];
+const appAsarFiles = new Set(asar.listPackage(appAsarPath));
+const missingAsarFiles = requiredAsarFiles.filter((fileName) => !appAsarFiles.has(fileName));
+if (missingAsarFiles.length) {
+  console.error(`Packaged app.asar is missing desktop files: ${missingAsarFiles.join(", ")}`);
+  process.exit(1);
+}
+
 const resourcesDir = path.resolve(
   __dirname,
   "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Resources/home-ledger",

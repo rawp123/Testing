@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
+const asar = require("../desktop/node_modules/@electron/asar");
 
 function argValue(name) {
   const index = process.argv.indexOf(name);
@@ -37,11 +41,22 @@ const requiredResources = [
   path.join(resourcesDir, "node_modules", "tesseract.js", "dist", "tesseract.esm.min.js"),
   path.join(resourcesDir, "node_modules", "pdfjs-dist", "build", "pdf.mjs"),
 ];
+const requiredAsarFiles = [
+  "/main.cjs",
+  "/preload.cjs",
+  "/storage-helpers.cjs",
+  "/package.json",
+];
 
 for (const resourcePath of requiredResources) {
   if (!fs.existsSync(resourcePath)) {
     throw new Error(`Packaged smoke missing required resource: ${resourcePath}`);
   }
+}
+const appAsarFiles = new Set(asar.listPackage(appAsar));
+const missingAsarFiles = requiredAsarFiles.filter((fileName) => !appAsarFiles.has(fileName));
+if (missingAsarFiles.length) {
+  throw new Error(`Packaged app.asar missing required desktop file(s): ${missingAsarFiles.join(", ")}`);
 }
 
 const { sanitizeData } = await import(pathToFileURL(path.join(resourcesDir, "backend", "domain", "model.js")).toString());
