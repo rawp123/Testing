@@ -53,7 +53,7 @@ printf 'Starting backend on http://%s:%s\n' "$BACKEND_HOST" "$BACKEND_PORT"
   cd "$BACKEND_DIR"
   MESSAGE_ARCHIVE_DB_PATH="${MESSAGE_ARCHIVE_DB_PATH:-data/message-archive.sqlite3}" \
     MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$IPHONE_BACKUP_PATHS" \
-    "$BACKEND_VENV_DIR/bin/uvicorn" app.main:app --reload --host "$BACKEND_HOST" --port "$BACKEND_PORT"
+    "$BACKEND_VENV_DIR/bin/uvicorn" server.main:app --reload --host "$BACKEND_HOST" --port "$BACKEND_PORT"
 ) &
 BACKEND_PID="$!"
 

@@ -10,7 +10,7 @@ from xml.sax.saxutils import escape
 from zipfile import ZIP_DEFLATED, ZipFile
 from zoneinfo import ZoneInfo
 
-from app.services.export_pdf import (
+from server.services.export_pdf import (
     ATTACHMENT_NOTE,
     PRIVACY_NOTE,
     build_scope_description,
@@ -19,7 +19,7 @@ from app.services.export_pdf import (
     parse_datetime,
     safe_filename_part,
 )
-from app.services.search import build_search_summary, count_keyword_occurrences
+from server.services.search import build_search_summary, count_keyword_occurrences
 
 EXCEL_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 MAX_CELL_LENGTH = 32767

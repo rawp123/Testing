@@ -27,7 +27,7 @@ has_apple_id_notary_credentials() {
 }
 
 has_keychain_notary_credentials() {
-  [[ -n "${APPLE_KEYCHAIN:-}" && -n "${APPLE_KEYCHAIN_PROFILE:-}" ]]
+  [[ -n "${APPLE_NOTARIZE_KEYCHAIN_PROFILE:-}" || -n "${APPLE_KEYCHAIN_PROFILE:-}" ]]
 }
 
 if [[ -z "${CSC_NAME:-}" ]]; then
@@ -44,7 +44,8 @@ Set notarization credentials before building a signed DMG.
 Use one of:
 - APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER
 - APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
-- APPLE_KEYCHAIN, APPLE_KEYCHAIN_PROFILE
+- APPLE_NOTARIZE_KEYCHAIN_PROFILE, with optional APPLE_NOTARIZE_KEYCHAIN
+- Legacy APPLE_KEYCHAIN_PROFILE, with optional APPLE_KEYCHAIN
 EOF
   exit 1
 fi
@@ -80,9 +81,15 @@ elif has_apple_id_notary_credentials; then
     --team-id "$APPLE_TEAM_ID" \
     --wait
 else
+  KEYCHAIN_PROFILE="${APPLE_NOTARIZE_KEYCHAIN_PROFILE:-${APPLE_KEYCHAIN_PROFILE:-}}"
+  KEYCHAIN_PATH="${APPLE_NOTARIZE_KEYCHAIN:-${APPLE_KEYCHAIN:-}}"
+  keychain_args=()
+  if [[ -n "$KEYCHAIN_PATH" ]]; then
+    keychain_args+=(--keychain "$KEYCHAIN_PATH")
+  fi
   xcrun notarytool submit "$DMG_PATH" \
-    --keychain "$APPLE_KEYCHAIN" \
-    --keychain-profile "$APPLE_KEYCHAIN_PROFILE" \
+    "${keychain_args[@]}" \
+    --keychain-profile "$KEYCHAIN_PROFILE" \
     --wait
 fi
 

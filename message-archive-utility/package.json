@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev:website": "node website/server.cjs",
+    "start:website": "node website/server.cjs",
     "dev": "scripts/dev.sh",
-    "dev:message-archive": "scripts/dev.sh",
-    "dev:message-archive:desktop": "scripts/dev-desktop.sh",
-    "build:message-archive:desktop": "scripts/build-desktop.sh",
-    "build:message-archive:backend": "scripts/build-backend-executable.sh",
-    "pack:message-archive:mac": "npm --prefix desktop run pack:mac",
-    "pack:message-archive:mac:dmg": "npm --prefix desktop run pack:mac:dmg",
-    "pack:message-archive:mac:dmg:signed": "npm --prefix desktop run pack:mac:dmg:signed",
-    "smoke:message-archive:installed": "scripts/smoke-installed-app.sh"
+    "dev:desktop": "scripts/dev-desktop.sh",
+    "build:desktop": "scripts/build-desktop.sh",
+    "build:backend": "scripts/build-backend-executable.sh",
+    "start:desktop": "scripts/launch-desktop.sh",
+    "install:shortcut": "scripts/install-desktop-shortcut.sh",
+    "pack:mac": "npm --prefix desktop run pack:mac",
+    "pack:mac:dmg": "npm --prefix desktop run pack:mac:dmg",
+    "pack:mac:dmg:signed": "npm --prefix desktop run pack:mac:dmg:signed",
+    "check:mac-package": "node scripts/check-packaged-app.cjs",
+    "smoke:installed": "scripts/smoke-installed-app.sh"
   }
 }

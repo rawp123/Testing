@@ -14,4 +14,4 @@ The SQLite schema is normalized around conversations and messages.
 - `message_tags`: Join table between messages and tags.
 - `saved_searches`: Named queries and filter state.
 
-The canonical schema lives in `backend/app/db/schema.sql`.
+The canonical schema lives in `backend/server/db/schema.sql`.

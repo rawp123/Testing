@@ -4,12 +4,18 @@ FastAPI backend for the local-first message archive utility.
 
 This backend uses SQLite for a local-first message archive. It supports fake sample data and a partial real iPhone local-backup import flow.
 
+## Layout
+
+- `server/`: FastAPI server package, route handlers, importers, export services, search helpers, and database schema.
+- `tests/`: backend unit and integration tests.
+- `desktop_server.py`: packaged backend entry point used by the Electron desktop app.
+
 ## Run
 
-From the repository root, you can start the backend and frontend together:
+From the `message-archive-utility` product folder, you can start the backend and frontend together:
 
 ```bash
-npm run dev:message-archive
+npm run dev
 ```
 
 To run only the backend:
@@ -18,7 +24,7 @@ To run only the backend:
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn server.main:app --reload
 ```
 
 ## Endpoints

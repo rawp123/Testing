@@ -1,15 +1,26 @@
-# Message Archive Utility
+# Product Workspace
 
-This repository contains the Message Archive Utility website, desktop app workspace, and legacy supporting experiments.
+This repository contains several independent product workspaces plus older static experiments and utilities.
 
-## Project layout
+## Independent Products
 
-- `server.js`: local Express server for the static site
-- `src/config/site-pages.json`: central page registry for navigation and online/offline status
-- `src/js/`: shared client-side behavior
-- `src/css/`: page-specific stylesheets
-- `src/partials/`: reusable HTML fragments such as the shared site header
-- `message-archive-utility/`: desktop app, backend, packaging, and release scripts
-- `scripts/`: supporting utility scripts
+- `message-archive-utility/`: Message Archive Utility website, React frontend, FastAPI backend, Electron desktop shell, packaging, and release scripts.
+- `home-ledger/`: Home Basis Tracker website, browser frontend, local data services, Electron desktop shell, packaging, and validation scripts.
+- `car-care-log/`: Car Care Log website, Electron/React frontend, local desktop backend, shared product contracts, packaging, and tests.
 
-See `docs/site-structure-and-offline-pages.md` for the current page/data layout, where raw podcast transcripts belong, and how to take a page offline without hand-editing navigation in multiple places.
+Each product should be developed from inside its own folder. The root package is only for the remaining root-level static site and utility scripts; it no longer owns product app commands.
+
+## Root Static Site
+
+- `server.js`: local Express server for root-level static pages and legacy experiments.
+- `src/config/site-pages.json`: page registry for root navigation and online/offline status.
+- `src/js/`, `src/css/`, `src/partials/`: root static-site assets.
+- `scripts/`: root-only utility scripts such as scrapers and podcast-data tooling.
+
+Run the root static site:
+
+```bash
+npm run start:dev
+```
+
+For product development commands, open the relevant product README.

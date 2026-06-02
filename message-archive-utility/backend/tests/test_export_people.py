@@ -3,8 +3,8 @@ import logging
 import sqlite3
 import zipfile
 
-from app import main
-from app.services.export_xlsx import EXCEL_MEDIA_TYPE
+from server import main
+from server.services.export_xlsx import EXCEL_MEDIA_TYPE
 
 
 def test_export_people_lists_contacts_with_message_counts(tmp_path, monkeypatch):

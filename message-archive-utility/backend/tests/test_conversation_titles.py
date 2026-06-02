@@ -1,5 +1,5 @@
-from app.main import build_conversation_display_title, split_participants
-from app.services.contact_display import clean_participant_names, format_contact_display_name
+from server.main import build_conversation_display_title, split_participants
+from server.services.contact_display import clean_participant_names, format_contact_display_name
 
 
 def test_generated_chat_title_uses_participants_without_me():

@@ -28,7 +28,7 @@ mkdir -p "$DIST_DIR" "$BUILD_DIR" "$SPEC_DIR"
     --distpath "$DIST_DIR" \
     --workpath "$BUILD_DIR" \
     --specpath "$SPEC_DIR" \
-    --add-data "$BACKEND_DIR/app/db:app/db" \
+    --add-data "$BACKEND_DIR/server/db:server/db" \
     --add-data "$BACKEND_DIR/tests/fixtures:tests/fixtures" \
     desktop_server.py
 )

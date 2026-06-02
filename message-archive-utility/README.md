@@ -13,6 +13,22 @@ This project is designed so private message data stays on your computer. Real ph
 
 The repository should be safe to make public even if you keep it private while developing.
 
+## Product Layout
+
+- `website/`: standalone product website and support pages.
+- `frontend/`: React/Vite browser UI for the archive app.
+- `backend/`: FastAPI backend, importers, exports, database schema, and tests.
+- `desktop/`: Electron shell and packaging metadata.
+- `scripts/`: product-local development, build, launch, and smoke-test scripts.
+
+Message Archive Utility is standalone inside `message-archive-utility/`. It does not import app or website files from Home Basis Tracker, Car Care Log, or the root workspace.
+
+Run the product website locally:
+
+```bash
+npm run dev:website
+```
+
 ## Import Paths
 
 Implemented:
@@ -31,10 +47,10 @@ Linked attachment files are copied only when the backup folder is supplied durin
 
 ## One-Command Development
 
-From the repository root:
+From the `message-archive-utility` folder:
 
 ```bash
-npm run dev:message-archive
+npm run dev
 ```
 
 This starts the FastAPI backend and Vite frontend together. Press `Ctrl+C` once to stop both.
@@ -44,14 +60,14 @@ The command assumes the backend virtual environment and frontend dependencies ar
 Optional ports:
 
 ```bash
-BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev:message-archive
+BACKEND_PORT=8001 FRONTEND_PORT=5174 npm run dev
 ```
 
 The backend checks the local macOS MobileSync backup folder through the
 token-protected import API. To point the app at a specific backup folder:
 
 ```bash
-MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$HOME/Library/Application Support/MobileSync/Backup/<backup-folder-id>" npm run dev:message-archive
+MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$HOME/Library/Application Support/MobileSync/Backup/<backup-folder-id>" npm run dev
 ```
 
 ## Desktop Development
@@ -59,10 +75,10 @@ MESSAGE_ARCHIVE_IPHONE_BACKUP_PATHS="$HOME/Library/Application Support/MobileSyn
 The desktop wrapper opens the React UI in an Electron window and starts a local
 FastAPI backend with private desktop storage.
 
-From the repository root:
+From the `message-archive-utility` folder:
 
 ```bash
-npm run dev:message-archive:desktop
+npm run dev:desktop
 ```
 
 The desktop dev command starts or reuses the Vite frontend on `127.0.0.1:5173`.
@@ -89,7 +105,7 @@ repo-local data is not moved or deleted automatically. If Electron reuses a
 backend that was already running, that backend keeps whatever data paths it was
 started with.
 
-The browser-based dev flow still works with `npm run dev:message-archive`.
+The browser-based dev flow still works with `npm run dev`.
 
 The desktop backend expects its Python virtual environment at the app-local path:
 
@@ -107,7 +123,7 @@ python3 -m venv .venv
 To build the frontend for static Electron loading:
 
 ```bash
-npm run build:message-archive:desktop
+npm run build:desktop
 ```
 
 That command bakes the desktop backend URL into the frontend build so the
@@ -116,13 +132,13 @@ packaged/static UI can call the local backend directly from Electron.
 To open the built desktop app without the Vite dev server:
 
 ```bash
-npm run start:message-archive:desktop
+npm run start:desktop
 ```
 
 To install a clickable desktop shortcut on macOS or Linux:
 
 ```bash
-npm run install:message-archive:shortcut
+npm run install:shortcut
 ```
 
 On macOS this creates `Message Archive Utility.app` on the Desktop. On Linux it
@@ -150,8 +166,8 @@ the container. The next validation step is to run the same build/start commands
 on the Mac host:
 
 ```bash
-npm run build:message-archive:desktop
-npm run start:message-archive:desktop
+npm run build:desktop
+npm run start:desktop
 ```
 
 ## Backend Setup
@@ -162,7 +178,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements.txt
 cd backend
-uvicorn app.main:app --reload
+uvicorn server.main:app --reload
 ```
 
 The backend uses FastAPI and SQLite. By default it creates a local database path from `MESSAGE_ARCHIVE_DB_PATH`; keep that path outside Git if you use real data.
@@ -185,7 +201,7 @@ Release builds use the signed DMG script:
 
 ```bash
 source ~/.message-archive-signing-env
-npm run pack:message-archive:mac:dmg:signed
+npm run pack:mac:dmg:signed
 ```
 
 The signing environment file must stay outside Git and must not be printed. The
@@ -197,8 +213,19 @@ After installing or copying the app from the DMG, run the local installed-app
 smoke test with fake sample data only:
 
 ```bash
-MESSAGE_ARCHIVE_APP="/Applications/Message Archive Utility.app" npm run smoke:message-archive:installed
+MESSAGE_ARCHIVE_APP="/Applications/Message Archive Utility.app" npm run smoke:installed
 ```
+
+For unsigned local package verification before distribution:
+
+```bash
+npm run pack:mac
+npm run check:mac-package
+```
+
+The package check verifies the bundled backend executable, frontend bundle,
+local-only network permissions, defensive privacy descriptions, and expected app
+identifier.
 
 For a temporary test install, point `MESSAGE_ARCHIVE_APP` at the copied app under
 `/tmp`. The smoke test verifies bundled-backend launch, `/health`, fake import,

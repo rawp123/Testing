@@ -6,7 +6,7 @@ from pathlib import Path
 
 import uvicorn
 
-from app.main import app as fastapi_app
+from server.main import app as fastapi_app
 
 
 DEFAULT_HOST = "127.0.0.1"

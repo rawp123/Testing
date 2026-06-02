@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from app.main import build_archive_stats
+from server.main import build_archive_stats
 
 
 def test_build_archive_stats_reports_message_quality():
@@ -54,7 +54,7 @@ def test_build_archive_stats_reports_message_quality():
 
 
 def create_archive_connection():
-    schema_path = Path(__file__).resolve().parents[1] / "app" / "db" / "schema.sql"
+    schema_path = Path(__file__).resolve().parents[1] / "server" / "db" / "schema.sql"
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

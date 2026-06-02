@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from app.services.search import build_search_summary
+from server.services.search import build_search_summary
 
 
 def test_build_search_summary_counts_messages_occurrences_people_conversations_and_dates():
@@ -158,7 +158,7 @@ def insert_message(conn, conversation_id, contact_id, source_message_id, sent_at
 
 
 def create_archive_connection():
-    schema_path = Path(__file__).resolve().parents[1] / "app" / "db" / "schema.sql"
+    schema_path = Path(__file__).resolve().parents[1] / "server" / "db" / "schema.sql"
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

@@ -7,7 +7,7 @@ import sqlite3
 import textwrap
 from zoneinfo import ZoneInfo
 
-from app.services.search import build_search_summary
+from server.services.search import build_search_summary
 
 PRIVACY_NOTE = "Created locally from messages stored on this computer."
 ATTACHMENT_NOTE = "Attachments are not included in this export."

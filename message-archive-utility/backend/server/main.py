@@ -1,4 +1,5 @@
 from pathlib import Path
+from contextlib import asynccontextmanager
 import os
 import secrets
 import sqlite3
@@ -8,8 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
-from app.importers.dummy_csv import import_sample_csv
-from app.importers.iphone_backup import (
+from server.importers.dummy_csv import import_sample_csv
+from server.importers.iphone_backup import (
     EXPECTED_SMS_FILE_ID,
     SmsDbNotFoundError,
     UnsafeBackupPathError,
@@ -20,20 +21,20 @@ from app.importers.iphone_backup import (
     locate_sms_db_dry_run,
     validate_copied_sms_db,
 )
-from app.services.export_csv import export_messages_csv
-from app.services.export_pdf import export_messages_pdf, export_search_summary_pdf, safe_filename_part
-from app.services.export_xlsx import EXCEL_MEDIA_TYPE, export_messages_xlsx, export_search_summary_xlsx
-from app.services.contact_display import (
+from server.services.export_csv import export_messages_csv
+from server.services.export_pdf import export_messages_pdf, export_search_summary_pdf, safe_filename_part
+from server.services.export_xlsx import EXCEL_MEDIA_TYPE, export_messages_xlsx, export_search_summary_xlsx
+from server.services.contact_display import (
     UNKNOWN_CONTACT_LABEL,
     clean_participant_names,
     format_contact_display_name,
 )
-from app.services.search import build_search_summary, count_matching_messages, search_messages
+from server.services.search import build_search_summary, count_matching_messages, search_messages
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 PROJECT_DIR = BACKEND_DIR.parent
-SCHEMA_PATH = BACKEND_DIR / "app" / "db" / "schema.sql"
+SCHEMA_PATH = BACKEND_DIR / "server" / "db" / "schema.sql"
 SAMPLE_CSV_PATH = BACKEND_DIR / "tests" / "fixtures" / "sample_messages.csv"
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "message_archive.sqlite3"
 API_TOKEN_HEADER = "X-Message-Archive-Token"
@@ -44,12 +45,20 @@ PRIVATE_RESPONSE_HEADERS = {
     "X-Content-Type-Options": "nosniff",
 }
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    initialize_database()
+    yield
+
+
 app = FastAPI(
     title="Message Archive Utility",
     version="0.1.0",
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -547,11 +556,6 @@ def migrate_database(conn: sqlite3.Connection) -> None:
           WHERE source_ref IS NOT NULL
         """
     )
-
-
-@app.on_event("startup")
-def startup() -> None:
-    initialize_database()
 
 
 @app.api_route("/", methods=["GET", "HEAD"])

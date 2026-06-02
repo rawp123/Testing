@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import HTTPException
 import pytest
 
-from app import main
+from server import main
 
 
 def test_resolve_private_attachment_path_accepts_private_relative_path(tmp_path, monkeypatch):

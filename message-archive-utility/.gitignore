@@ -1,12 +1,12 @@
-data/
-imports/
-exports/
-release/
-screenshots/
-backups/
-attachments/
-private/
-messages/
+/data/
+/imports/
+/exports/
+/release/
+/screenshots/
+/backups/
+/attachments/
+/private/
+/messages/
 
 *.db
 *.db-shm

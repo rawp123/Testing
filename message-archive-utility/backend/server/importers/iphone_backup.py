@@ -4,7 +4,7 @@ import re
 import shutil
 import sqlite3
 
-from app.services.contact_display import format_contact_display_name
+from server.services.contact_display import format_contact_display_name
 
 
 SMS_DOMAIN = "HomeDomain"

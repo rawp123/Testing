@@ -327,7 +327,7 @@ function getBackendArgs() {
     return ["--host", BACKEND_HOST, "--port", String(BACKEND_PORT)];
   }
   return [
-    "app.main:app",
+    "server.main:app",
     "--host",
     BACKEND_HOST,
     "--port",

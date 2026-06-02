@@ -6,10 +6,10 @@ The app browses conversations from the local backend, supports search, can load 
 
 ## Run
 
-From the repository root, you can start the frontend and backend together:
+From the `message-archive-utility` product folder, you can start the frontend and backend together:
 
 ```bash
-npm run dev:message-archive
+npm run dev
 ```
 
 To run only the frontend:

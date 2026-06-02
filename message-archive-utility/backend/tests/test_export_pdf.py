@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 
-from app import main
+from server import main
 
 
 def test_pdf_full_archive_export_returns_downloadable_pdf(tmp_path, monkeypatch):
