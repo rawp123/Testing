@@ -234,5 +234,7 @@ test("restore helpers strip file metadata and reconcile expense document state",
 
 test("restored file names never expose local paths", () => {
   assert.equal(getSafeRestoredFileName("/Users/private/invoice.pdf"), "[local file path removed]");
+  assert.equal(getSafeRestoredFileName("folder\\nested\\receipt\u0000\n2026.pdf"), "receipt2026.pdf");
+  assert.equal(getSafeRestoredFileName("../private/permit.pdf"), "[local file path removed]");
   assert.equal(getSafeRestoredFileName(""), "Attached file");
 });

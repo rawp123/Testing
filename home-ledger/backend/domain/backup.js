@@ -127,7 +127,16 @@ export function isBackupDataUrlTooLarge(dataUrl) {
 }
 
 export function getSafeRestoredFileName(name) {
-  return removeLocalPaths(name).trim() || "Attached file";
+  const pathRemoved = removeLocalPaths(name);
+  if (pathRemoved.includes("[local file path removed]")) {
+    return "[local file path removed]";
+  }
+  const fileName = pathRemoved
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .pop();
+  return fileName?.trim() || "Attached file";
 }
 
 function validateBackupDataRelationships(data) {

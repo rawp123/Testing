@@ -67,8 +67,12 @@ export async function saveDocumentFileRecord(record) {
 }
 
 function getSafeFileName(name) {
-  const fileName = String(name || "").split(/[\\/]/).filter(Boolean).pop();
-  return fileName || "Attached file";
+  const fileName = String(name || "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .pop();
+  return fileName?.trim().slice(0, 180) || "Attached file";
 }
 
 export async function getDocumentFile(fileId) {

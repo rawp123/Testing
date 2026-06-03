@@ -58,6 +58,23 @@ def test_resolve_private_attachment_path_rejects_absolute_outside_file(tmp_path,
     assert error.value.status_code == 400
 
 
+def test_resolve_private_attachment_path_rejects_symlink_escape(tmp_path, monkeypatch):
+    project_dir = tmp_path / "project"
+    attachment_root = project_dir / "data" / "attachments"
+    attachment_root.mkdir(parents=True)
+    outside_file = tmp_path / "outside.jpg"
+    outside_file.write_bytes(b"not private")
+    symlink_path = attachment_root / "linked-photo.jpg"
+    symlink_path.symlink_to(outside_file)
+    monkeypatch.setattr(main, "PROJECT_DIR", project_dir)
+    monkeypatch.delenv("MESSAGE_ARCHIVE_DATA_DIR", raising=False)
+
+    with pytest.raises(HTTPException) as error:
+        main.resolve_private_attachment_path("attachments/linked-photo.jpg")
+
+    assert error.value.status_code == 400
+
+
 def test_resolve_private_attachment_path_rejects_missing_private_file(tmp_path, monkeypatch):
     project_dir = tmp_path / "project"
     (project_dir / "data" / "attachments").mkdir(parents=True)

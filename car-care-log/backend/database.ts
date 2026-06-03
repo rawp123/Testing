@@ -104,7 +104,15 @@ function fileTypeFromExtension(extension: string): string {
 }
 
 function fileNameOnly(value: string): string {
-  return value.replace(/\0/g, '').split(/[\\/]/).filter(Boolean).at(-1) ?? '';
+  return [...value]
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    })
+    .join('')
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .at(-1) ?? '';
 }
 
 function safeJoin(baseDir: string, fileName: string): string {

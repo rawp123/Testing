@@ -729,12 +729,21 @@ export function downloadBlob(blob, filename) {
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
-  link.download = filename;
+  link.download = getSafeDownloadFileName(filename);
   link.rel = "noreferrer";
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+export function getSafeDownloadFileName(filename) {
+  const fileName = String(filename || "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .pop();
+  return fileName?.trim().slice(0, 180) || "home-basis-download";
 }
 
 export function buildExpensesCsv(data) {

@@ -117,4 +117,24 @@ describe('privacy and local-only OCR posture', () => {
     expect(path.basename(stored.filePath)).toMatch(new RegExp(`^${attachment.id}\\.pdf$`));
     expect(fs.existsSync(stored.filePath)).toBe(true);
   });
+
+  it('strips control characters from original attachment filename metadata', () => {
+    const serviceRecordId = createServiceRecord();
+    const sourcePath = path.join(tempRoot, 'receipt-source.txt');
+    fs.writeFileSync(sourcePath, 'Local receipt text');
+
+    const attachment = db.addAttachmentFromLocalFile(
+      { serviceRecordId, label: '', type: 'receipt' },
+      sourcePath,
+      'vehicle\\receipts\\oil\u0000-change\ninvoice\t2026.PDF'
+    );
+    const stored = db.getAttachmentFileForOcr(attachment.id);
+
+    expect(stored.originalFileName).toBe('oil-changeinvoice2026.PDF');
+    expect([...stored.originalFileName].some((char) => {
+      const code = char.charCodeAt(0);
+      return code < 32 || code === 127;
+    })).toBe(false);
+    expect(path.basename(stored.filePath)).toMatch(new RegExp(`^${attachment.id}\\.pdf$`));
+  });
 });

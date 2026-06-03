@@ -4,6 +4,7 @@ import {
   buildCpaReviewPacket,
   buildExpensesCsv,
   formatFileSize,
+  getSafeDownloadFileName,
   getProjectCompleteness,
   getProjectReviewSummaries,
   getPropertyReviewSummaries,
@@ -291,4 +292,10 @@ test("amount, file-size, and path helpers handle edge cases", () => {
   assert.equal(formatFileSize(-1), "Unknown size");
   assert.equal(formatFileSize(1536), "1.5 KB");
   assert.equal(removeLocalPaths("\\\\Server\\Share\\invoice.pdf"), "[local file path removed]");
+});
+
+test("download file names strip paths and control characters", () => {
+  assert.equal(getSafeDownloadFileName("/Users/private/backup.json"), "backup.json");
+  assert.equal(getSafeDownloadFileName("folder\\nested\\receipt\u0000\n2026.pdf"), "receipt2026.pdf");
+  assert.equal(getSafeDownloadFileName(""), "home-basis-download");
 });
