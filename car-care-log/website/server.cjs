@@ -12,8 +12,13 @@ const contentTypes = new Map([
 ]);
 
 function resolveRequestPath(requestUrl) {
-  const parsedUrl = new URL(requestUrl || '/', `http://127.0.0.1:${port}`);
-  const pathname = decodeURIComponent(parsedUrl.pathname);
+  let pathname;
+  try {
+    const parsedUrl = new URL(requestUrl || '/', `http://127.0.0.1:${port}`);
+    pathname = decodeURIComponent(parsedUrl.pathname);
+  } catch {
+    return '';
+  }
   const relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   const filePath = path.resolve(rootDir, relativePath);
 

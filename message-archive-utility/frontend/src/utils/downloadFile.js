@@ -7,7 +7,9 @@ export async function downloadFile(url) {
   }
 
   const blob = await response.blob();
-  const filename = getDownloadFilename(response.headers.get("Content-Disposition")) || getFallbackFilename(url);
+  const filename = safeDownloadFilename(
+    getDownloadFilename(response.headers.get("Content-Disposition")) || getFallbackFilename(url),
+  );
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
@@ -39,4 +41,13 @@ function getFallbackFilename(url) {
   const path = String(url || "").split("?")[0];
   const name = path.split("/").filter(Boolean).pop();
   return name || "message-archive-export";
+}
+
+function safeDownloadFilename(value) {
+  const filename = String(value || "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .pop();
+  return filename || "message-archive-export";
 }

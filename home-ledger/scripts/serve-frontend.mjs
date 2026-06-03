@@ -16,8 +16,13 @@ const contentTypes = new Map([
 ]);
 
 function resolveRequestPath(requestUrl) {
-  const parsedUrl = new URL(requestUrl || "/", `http://127.0.0.1:${port}`);
-  const pathname = decodeURIComponent(parsedUrl.pathname);
+  let pathname;
+  try {
+    const parsedUrl = new URL(requestUrl || "/", `http://127.0.0.1:${port}`);
+    pathname = decodeURIComponent(parsedUrl.pathname);
+  } catch {
+    return "";
+  }
   let relativePath = pathname === "/" || pathname === "/index.html" ? "frontend/index.html" : pathname.replace(/^\/+/, "");
   if (relativePath === "app.js" || relativePath === "styles.css") {
     relativePath = `frontend/${relativePath}`;

@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell, type OpenDialogOptions } fr
 import fs from 'node:fs';
 import path, { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { ATTACHMENT_MAX_BYTES, CarCareDatabase, getStoragePaths, type StoragePaths } from './database';
 import { runLocalOcr } from './ocr';
 import { cleanupStaleIntakeFiles } from './intakeCleanup';
@@ -25,6 +26,7 @@ let mainWindow: BrowserWindow | null = null;
 let database: CarCareDatabase | null = null;
 let storagePaths: StoragePaths | null = null;
 const isSmokeTest = process.env.CAR_CARE_LOG_SMOKE_TEST === '1';
+const rendererIndexPath = join(__dirname, '../renderer/index.html');
 
 interface PendingIntake {
   intakeId: string;
@@ -60,6 +62,50 @@ function getStorage(): StoragePaths {
 
 function showOpenDialog(options: OpenDialogOptions): Promise<Electron.OpenDialogReturnValue> {
   return mainWindow ? dialog.showOpenDialog(mainWindow, options) : dialog.showOpenDialog(options);
+}
+
+function isAllowedRendererUrl(targetUrl: string): boolean {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch {
+    return false;
+  }
+
+  if (parsedUrl.protocol === 'file:') {
+    try {
+      return path.normalize(fileURLToPath(parsedUrl)) === path.normalize(rendererIndexPath);
+    } catch {
+      return false;
+    }
+  }
+
+  if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
+    try {
+      return parsedUrl.origin === new URL(process.env.ELECTRON_RENDERER_URL).origin;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
+function assertTrustedSender(event: Electron.IpcMainInvokeEvent): void {
+  const frameUrl = event.senderFrame?.url || event.sender.getURL();
+  if (!isAllowedRendererUrl(frameUrl)) {
+    throw new Error('Car Care Log request came from an unexpected app page.');
+  }
+}
+
+function handleTrusted<TArgs extends unknown[], TResult>(
+  channel: string,
+  handler: (...args: TArgs) => TResult | Promise<TResult>
+): void {
+  ipcMain.handle(channel, (event, ...args: TArgs) => {
+    assertTrustedSender(event);
+    return handler(...args);
+  });
 }
 
 function cleanText(value: string | null | undefined): string {
@@ -234,33 +280,50 @@ async function createWindow(): Promise<void> {
     return { action: 'deny' };
   });
 
+  mainWindow.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
+  mainWindow.webContents.on('will-attach-webview', (event) => {
+    event.preventDefault();
+  });
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!isAllowedRendererUrl(url)) {
+      event.preventDefault();
+    }
+  });
+  mainWindow.webContents.on('will-redirect', (event, url) => {
+    if (!isAllowedRendererUrl(url)) {
+      event.preventDefault();
+    }
+  });
+
   if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
     await mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
-    await mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    await mainWindow.loadFile(rendererIndexPath);
   }
 }
 
 function registerIpcHandlers(): void {
-  ipcMain.handle('app:snapshot', () => getDatabase().getSnapshot());
+  handleTrusted('app:snapshot', () => getDatabase().getSnapshot());
 
-  ipcMain.handle('vehicles:create', (_event, input: VehicleInput) => getDatabase().createVehicle(input));
-  ipcMain.handle('vehicles:update', (_event, id: string, input: VehicleInput) => getDatabase().updateVehicle(id, input));
-  ipcMain.handle('vehicles:delete', (_event, id: string) => {
+  handleTrusted('vehicles:create', (input: VehicleInput) => getDatabase().createVehicle(input));
+  handleTrusted('vehicles:update', (id: string, input: VehicleInput) => getDatabase().updateVehicle(id, input));
+  handleTrusted('vehicles:delete', (id: string) => {
     getDatabase().deleteVehicle(id);
     return getDatabase().getSnapshot();
   });
 
-  ipcMain.handle('services:create', (_event, input: ServiceRecordInput) => getDatabase().createServiceRecord(input));
-  ipcMain.handle('services:update', (_event, id: string, input: ServiceRecordInput) =>
+  handleTrusted('services:create', (input: ServiceRecordInput) => getDatabase().createServiceRecord(input));
+  handleTrusted('services:update', (id: string, input: ServiceRecordInput) =>
     getDatabase().updateServiceRecord(id, input)
   );
-  ipcMain.handle('services:delete', (_event, id: string) => {
+  handleTrusted('services:delete', (id: string) => {
     getDatabase().deleteServiceRecord(id);
     return getDatabase().getSnapshot();
   });
 
-  ipcMain.handle('attachments:choose-and-add', async (_event, request: AttachmentRequest) => {
+  handleTrusted('attachments:choose-and-add', async (request: AttachmentRequest) => {
     const result = await showOpenDialog({
       title: 'Attach a local document',
       properties: ['openFile'],
@@ -272,19 +335,19 @@ function registerIpcHandlers(): void {
     if (result.canceled || result.filePaths.length === 0) return null;
     return getDatabase().addAttachmentFromFile(request, result.filePaths[0]);
   });
-  ipcMain.handle('attachments:delete', (_event, id: string) => {
+  handleTrusted('attachments:delete', (id: string) => {
     getDatabase().deleteAttachment(id);
     return getDatabase().getSnapshot();
   });
-  ipcMain.handle('attachments:preview', (_event, id: string) => getDatabase().getAttachmentPreview(id));
-  ipcMain.handle('attachments:run-ocr', (_event, id: string) => runOcrForAttachment(id));
-  ipcMain.handle('attachments:review', (_event, id: string) => reviewResultForAttachment(id));
-  ipcMain.handle('attachments:move-to-service', (_event, attachmentId: string, serviceRecordId: string) =>
+  handleTrusted('attachments:preview', (id: string) => getDatabase().getAttachmentPreview(id));
+  handleTrusted('attachments:run-ocr', (id: string) => runOcrForAttachment(id));
+  handleTrusted('attachments:review', (id: string) => reviewResultForAttachment(id));
+  handleTrusted('attachments:move-to-service', (attachmentId: string, serviceRecordId: string) =>
     getDatabase().moveAttachmentToService(attachmentId, serviceRecordId)
   );
 
-  ipcMain.handle('intake:choose-document', (_event, request: DocumentIntakeRequest) => chooseDocumentForIntake(request));
-  ipcMain.handle('intake:create-service', async (_event, request: CreateServiceFromIntakeRequest) => {
+  handleTrusted('intake:choose-document', (request: DocumentIntakeRequest) => chooseDocumentForIntake(request));
+  handleTrusted('intake:create-service', async (request: CreateServiceFromIntakeRequest) => {
     const pending = pendingIntakes.get(request.intakeId);
     if (!pending) throw new Error('Imported document is no longer available. Please import it again.');
     if (pending.vehicleId !== request.service.vehicleId) {
@@ -316,7 +379,7 @@ function registerIpcHandlers(): void {
     pendingIntakes.delete(request.intakeId);
     return db.getServiceRecord(service.id);
   });
-  ipcMain.handle('intake:discard', (_event, intakeId: string) => {
+  handleTrusted('intake:discard', (intakeId: string) => {
     const pending = pendingIntakes.get(intakeId);
     if (pending) {
       fs.rmSync(pending.filePath, { force: true });
@@ -325,9 +388,9 @@ function registerIpcHandlers(): void {
     return true;
   });
 
-  ipcMain.handle('settings:update', (_event, settings: AppSettings) => getDatabase().updateSettings(settings));
+  handleTrusted('settings:update', (settings: AppSettings) => getDatabase().updateSettings(settings));
 
-  ipcMain.handle('export:csv', async () => {
+  handleTrusted('export:csv', async () => {
     const result = await showOpenDialog({
       title: 'Choose a folder for the CSV export',
       properties: ['openDirectory', 'createDirectory']
@@ -336,7 +399,7 @@ function registerIpcHandlers(): void {
     return getDatabase().exportCsvToDirectory(result.filePaths[0]);
   });
 
-  ipcMain.handle('backup:create', async () => {
+  handleTrusted('backup:create', async () => {
     const result = await showOpenDialog({
       title: 'Choose a folder for the local backup',
       properties: ['openDirectory', 'createDirectory']
@@ -345,7 +408,7 @@ function registerIpcHandlers(): void {
     return getDatabase().createBackup(result.filePaths[0]);
   });
 
-  ipcMain.handle('backup:restore', async () => {
+  handleTrusted('backup:restore', async () => {
     const result = await showOpenDialog({
       title: 'Choose a Car Care Log backup folder',
       properties: ['openDirectory']
@@ -356,6 +419,13 @@ function registerIpcHandlers(): void {
 }
 
 app.whenReady().then(async () => {
+  app.on('web-contents-created', (_event, contents) => {
+    contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    contents.on('will-attach-webview', (event) => {
+      event.preventDefault();
+    });
+  });
+
   app.setAppUserModelId('com.carcarelog.app');
   storagePaths = getStoragePaths(app.getPath('userData'));
   cleanupStaleIntakeFiles(storagePaths.intakeDir);

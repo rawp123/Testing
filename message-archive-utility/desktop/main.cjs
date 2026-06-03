@@ -92,6 +92,12 @@ function createWindow() {
     return { action: "deny" };
   });
 
+  window.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
+  window.webContents.on("will-attach-webview", (event) => {
+    event.preventDefault();
+  });
   window.webContents.on("will-navigate", (event, url) => {
     if (!isAllowedNavigation(url)) {
       event.preventDefault();
@@ -386,6 +392,9 @@ app.whenReady().then(async () => {
   app.on("web-contents-created", (_event, contents) => {
     contents.setWindowOpenHandler(() => {
       return { action: "deny" };
+    });
+    contents.on("will-attach-webview", (event) => {
+      event.preventDefault();
     });
   });
 
