@@ -8,6 +8,7 @@ import {
   isBlockedBackupAttachment,
   reconcileRestoredExpenseDocumentation,
   stripDocumentFileMetadata,
+  summarizeBackupEnvelope,
   validateBackupEnvelope,
 } from "../backend/domain/backup.js";
 
@@ -131,6 +132,55 @@ test("createBackupEnvelope sanitizes records and preserves file arrays", () => {
   assert.equal(envelope.files.length, 1);
   assert.equal(envelope.missingFiles.length, 1);
   assert.equal(JSON.stringify(envelope.data).includes("/Users/"), false);
+});
+
+test("summarizeBackupEnvelope reports validated restore contents", () => {
+  const envelope = createBackupEnvelope(
+    {
+      properties: [{ id: "property_1", name: "Main home" }],
+      projects: [{ id: "project_1", propertyId: "property_1", name: "Roof" }],
+      expenses: [{
+        id: "expense_1",
+        propertyId: "property_1",
+        projectId: "project_1",
+        vendor: "Roofer",
+        description: "Roof work",
+      }],
+      documents: [
+        {
+          id: "document_1",
+          propertyId: "property_1",
+          projectId: "project_1",
+          displayName: "Invoice",
+          hasFile: true,
+        },
+        {
+          id: "document_2",
+          propertyId: "property_1",
+          projectId: "project_1",
+          displayName: "Photo",
+          hasFile: true,
+        },
+      ],
+    },
+    [{ documentId: "document_1", dataUrl: "data:text/plain;base64,ZmFrZQ==" }],
+    [{ documentId: "document_2", reason: "missing" }],
+    "2026-06-02T00:00:00.000Z",
+  );
+
+  const summary = summarizeBackupEnvelope(envelope);
+
+  assert.deepEqual(summary.counts, {
+    properties: 1,
+    projects: 1,
+    expenses: 1,
+    documents: 2,
+  });
+  assert.equal(summary.createdAt, "2026-06-02T00:00:00.000Z");
+  assert.equal(summary.fileCount, 1);
+  assert.equal(summary.documentsWithFileMetadata, 2);
+  assert.equal(summary.missingFilesCount, 1);
+  assert.equal(summary.expectedFilesMissingFromBackup, 0);
 });
 
 test("backup attachment guards block active file types and unsafe MIME prefixes", () => {

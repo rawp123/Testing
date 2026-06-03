@@ -78,6 +78,15 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 2,
 });
+const PERMIT_LIKELY_CATEGORIES = new Set([
+  "addition/structural",
+  "electrical",
+  "plumbing",
+  "HVAC",
+  "roof",
+  "windows/doors",
+]);
+const CONTRACT_REVIEW_THRESHOLD = 1000;
 
 export function sanitizeData(value) {
   const sanitized = {
@@ -348,23 +357,113 @@ export function getPropertyReviewSummaries(data) {
 
 export function getProjectReviewSummaries(data) {
   return data.projects.map((project) => {
-    const expenses = data.expenses.filter((expense) => expense.projectId === project.id);
-    const documents = data.documents.filter((document) => document.projectId === project.id);
-    const totals = getExpenseTotals(expenses);
-    const missingDocuments = expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense)).length;
+    const context = getProjectContext(data, project);
+    const completeness = buildProjectCompleteness(project, context);
 
     return {
       project,
-      expenses,
-      documents,
-      totals,
-      missingDocuments,
-      hasPermit: documents.some((document) => document.documentType === "permit") || Boolean(project.permitNumber),
-      hasContract: documents.some((document) => document.documentType === "contract"),
-      hasPhoto: documents.some((document) => document.documentType === "photo"),
-      dateRange: getProjectDateRange(project, expenses),
+      expenses: context.expenses,
+      documents: context.documents,
+      totals: context.totals,
+      missingDocuments: context.missingDocuments,
+      hasPermit: context.documents.some((document) => document.documentType === "permit") || Boolean(project.permitNumber),
+      hasContract: context.documents.some((document) => document.documentType === "contract"),
+      hasPhoto: context.documents.some((document) => document.documentType === "photo"),
+      dateRange: getProjectDateRange(project, context.expenses),
+      completeness,
     };
   });
+}
+
+export function getProjectCompleteness(data, project) {
+  return buildProjectCompleteness(project, getProjectContext(data, project));
+}
+
+function getProjectContext(data, project) {
+  const properties = Array.isArray(data?.properties) ? data.properties : [];
+  const expenses = Array.isArray(data?.expenses) ? data.expenses.filter((expense) => expense.projectId === project?.id) : [];
+  const documents = Array.isArray(data?.documents) ? data.documents.filter((document) => document.projectId === project?.id) : [];
+  const totals = getExpenseTotals(expenses);
+  const missingDocuments = expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense)).length;
+  const unclearExpenses = expenses.filter((expense) => expense.classification === "unclear / ask CPA").length;
+  return { properties, expenses, documents, totals, missingDocuments, unclearExpenses };
+}
+
+function buildProjectCompleteness(project, context) {
+  const { properties, expenses, documents, totals, missingDocuments, unclearExpenses } = context;
+  const expectedDocumentTypes = getExpectedProjectDocumentTypes(project, expenses, totals.total);
+  const expectedDocumentFollowUps = getMissingProjectDocumentTypes(project, documents, expectedDocumentTypes);
+  const isFinished = ["completed", "archived"].includes(project?.status);
+  const checks = [
+    projectCheck(
+      "Linked to a property",
+      properties.some((property) => property.id === project?.propertyId),
+      "Link this project to a property.",
+    ),
+    projectCheck(
+      "Scope or notes added",
+      Boolean(project?.scopeSummary || project?.notes),
+      "Add a short scope summary or project note.",
+    ),
+    projectCheck(
+      "Start date added",
+      Boolean(project?.startDate),
+      "Add a project start date when available.",
+    ),
+    projectCheck(
+      "Completion date handled",
+      !isFinished || Boolean(project?.completionDate),
+      "Add the completion date for finished projects.",
+    ),
+    projectCheck(
+      "Contractor or vendor identified",
+      Boolean(project?.contractor || expenses.some((expense) => expense.vendor)),
+      "Add the contractor/vendor on the project or linked expenses.",
+    ),
+    projectCheck(
+      "Cost records linked",
+      expenses.length > 0,
+      "Link at least one expense to this project.",
+    ),
+    projectCheck(
+      "Supporting documents linked",
+      documents.length > 0,
+      "Link receipts, invoices, permits, photos, or notes to this project.",
+    ),
+    projectCheck(
+      "Receipt and invoice evidence resolved",
+      expenses.length > 0 && missingDocuments === 0,
+      "Resolve expenses that need linked receipt or invoice evidence.",
+    ),
+    projectCheck(
+      "Review classifications chosen",
+      expenses.length > 0 && unclearExpenses === 0,
+      "Review unclear expense classifications with your CPA.",
+    ),
+    projectCheck(
+      "Expected document types covered",
+      expectedDocumentFollowUps.length === 0,
+      "Add expected project document types when available.",
+    ),
+  ];
+  const completedChecks = checks.filter((check) => check.done).length;
+  const totalChecks = checks.length;
+
+  return {
+    score: Math.round((completedChecks / totalChecks) * 100),
+    completedChecks,
+    totalChecks,
+    checks,
+    readyItems: checks.filter((check) => check.done).map((check) => check.label),
+    followUps: [
+      ...checks.filter((check) => !check.done).map((check) => check.followUp),
+      ...expectedDocumentFollowUps.map((item) => `Add a ${item.label.toLowerCase()} record if available or applicable.`),
+    ].filter(Boolean),
+    expectedDocumentTypes,
+    missingExpectedDocumentTypes: expectedDocumentFollowUps,
+    missingDocuments,
+    unclearExpenses,
+  };
 }
 
 export function getReviewReadiness(data) {
@@ -467,11 +566,17 @@ export function buildCpaReviewPacket(data) {
       `Permit number: ${summary.project.permitNumber || "Not added"}`,
       `Tracked spend: ${formatCurrency(summary.totals.total)}`,
       `Documents: ${summary.documents.length}`,
+      `Project completeness: ${summary.completeness.score}% (${summary.completeness.completedChecks}/${summary.completeness.totalChecks} checks)`,
       `Coverage: ${[
         summary.hasPermit ? "permit" : "",
         summary.hasContract ? "contract" : "",
         summary.hasPhoto ? "photos" : "",
       ].filter(Boolean).join(", ") || "No permit/contract/photo records"}`,
+      `Expected document types: ${summary.completeness.expectedDocumentTypes.map((item) => item.label).join(", ") || "None flagged"}`,
+      ...(summary.completeness.followUps.length ? [
+        "Project follow-ups:",
+        ...summary.completeness.followUps.map((item) => `- ${item}`),
+      ] : ["Project follow-ups: None recorded."]),
       summary.project.scopeSummary ? `Scope: ${summary.project.scopeSummary}` : "",
       summary.project.notes ? `Notes: ${summary.project.notes}` : "",
       "",
@@ -518,6 +623,55 @@ function isExpenseMissingLinkedEvidence(data, expense) {
     document.hasFile &&
     document.documentType === expectedType
   );
+}
+
+function projectCheck(label, done, followUp) {
+  return {
+    label,
+    done: Boolean(done),
+    followUp: done ? "" : followUp,
+  };
+}
+
+function getExpectedProjectDocumentTypes(project, expenses, totalSpend) {
+  const expectedTypes = [];
+  if (expenses.length) {
+    expectedTypes.push({ value: "receipt/invoice", label: "Receipt or invoice" });
+  }
+  if (project?.permitNumber || PERMIT_LIKELY_CATEGORIES.has(project?.category)) {
+    expectedTypes.push({ value: "permit", label: "Permit or approval" });
+  }
+  if (project?.contractor || totalSpend >= CONTRACT_REVIEW_THRESHOLD) {
+    expectedTypes.push({ value: "contract", label: "Contract or estimate" });
+  }
+  if (["completed", "archived"].includes(project?.status)) {
+    expectedTypes.push({ value: "photo", label: "Before/after photo" });
+  }
+  if (expenses.length) {
+    expectedTypes.push({ value: "payment record", label: "Payment record" });
+  }
+
+  const seenValues = new Set();
+  return expectedTypes.filter((type) => {
+    if (seenValues.has(type.value)) return false;
+    seenValues.add(type.value);
+    return true;
+  });
+}
+
+function getMissingProjectDocumentTypes(project, documents, expectedDocumentTypes) {
+  return expectedDocumentTypes.filter((type) => {
+    if (type.value === "receipt/invoice") {
+      return !documents.some((document) =>
+        ["receipt", "invoice"].includes(document.documentType) &&
+        document.hasFile
+      );
+    }
+    if (type.value === "permit") {
+      return !project?.permitNumber && !documents.some((document) => document.documentType === "permit");
+    }
+    return !documents.some((document) => document.documentType === type.value);
+  });
 }
 
 function getProjectDateRange(project, expenses) {

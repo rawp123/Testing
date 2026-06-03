@@ -4,6 +4,7 @@ import {
   buildCpaReviewPacket,
   buildExpensesCsv,
   formatFileSize,
+  getProjectCompleteness,
   getProjectReviewSummaries,
   getPropertyReviewSummaries,
   getReviewReadiness,
@@ -179,6 +180,101 @@ test("review readiness and CPA packet summarize professional review gaps", () =>
   assert.match(packet, /Kitchen remodel/);
   assert.match(packet, /Cabinet invoice/);
   assert.match(packet, /does not calculate taxes/);
+});
+
+test("project completeness tracks missing and finished review requirements", () => {
+  const incompleteData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Electrical panel",
+      category: "electrical",
+      status: "completed",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-04-10",
+      vendor: "Electrician Co.",
+      description: "Panel upgrade",
+      amount: 3200,
+      classification: "unclear / ask CPA",
+      documentationStatus: "invoice attached",
+    }],
+  });
+  const incomplete = getProjectCompleteness(incompleteData, incompleteData.projects[0]);
+
+  assert.ok(incomplete.score < 70);
+  assert.ok(incomplete.followUps.some((item) => /scope/i.test(item)));
+  assert.ok(incomplete.followUps.some((item) => /receipt or invoice/i.test(item)));
+  assert.ok(incomplete.missingExpectedDocumentTypes.some((item) => item.value === "permit"));
+
+  const completeData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Electrical panel",
+      category: "electrical",
+      status: "completed",
+      startDate: "2024-04-01",
+      completionDate: "2024-04-12",
+      contractor: "Electrician Co.",
+      permitNumber: "EL-123",
+      scopeSummary: "Panel replacement and related electrical work.",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-04-10",
+      vendor: "Electrician Co.",
+      description: "Panel upgrade",
+      amount: 3200,
+      classification: "potential basis addition",
+      documentationStatus: "invoice attached",
+    }],
+    documents: [
+      {
+        id: "document_1",
+        propertyId: "property_1",
+        projectId: "project_1",
+        expenseId: "expense_1",
+        displayName: "Panel invoice",
+        documentType: "invoice",
+        hasFile: true,
+        fileName: "panel-invoice.pdf",
+      },
+      {
+        id: "document_2",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "Contract",
+        documentType: "contract",
+      },
+      {
+        id: "document_3",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "After photo",
+        documentType: "photo",
+      },
+      {
+        id: "document_4",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "Payment record",
+        documentType: "payment record",
+      },
+    ],
+  });
+  const complete = getProjectCompleteness(completeData, completeData.projects[0]);
+
+  assert.equal(complete.score, 100);
+  assert.equal(complete.followUps.length, 0);
+  assert.deepEqual(complete.missingExpectedDocumentTypes, []);
 });
 
 test("review readiness starts at zero for an empty binder", () => {

@@ -622,6 +622,20 @@ textarea:focus-visible {
   line-height: 1.35;
 }
 
+.compact-score {
+  min-height: 104px;
+  padding: 14px;
+}
+
+.compact-score strong {
+  font-size: 34px;
+}
+
+.project-completeness {
+  display: grid;
+  gap: 12px;
+}
+
 .readiness-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -641,6 +655,10 @@ textarea:focus-visible {
   margin: 0 0 8px;
   color: #1b211f;
   font-size: 15px;
+}
+
+.project-completeness-columns {
+  grid-template-columns: 1fr;
 }
 
 .check-list,

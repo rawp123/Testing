@@ -54,6 +54,21 @@ export function createBackupEnvelope(data, files, missingFiles, createdAt = new 
   };
 }
 
+export function summarizeBackupEnvelope(backup) {
+  const { data, files } = validateBackupEnvelope(backup);
+  const documentsWithFileMetadata = data.documents.filter((document) => document.hasFile).length;
+  const missingFilesCount = Array.isArray(backup?.missingFiles) ? backup.missingFiles.length : 0;
+
+  return {
+    createdAt: cleanBackupText(backup?.createdAt),
+    counts: getBackupDataCounts(data),
+    fileCount: files.length,
+    documentsWithFileMetadata,
+    missingFilesCount,
+    expectedFilesMissingFromBackup: Math.max(0, documentsWithFileMetadata - files.length - missingFilesCount),
+  };
+}
+
 export function findBackupFileForDocument(backupFiles, documentRecord) {
   if (!Array.isArray(backupFiles) || !documentRecord) return null;
   return backupFiles.find((fileRecord) =>
@@ -261,6 +276,15 @@ function assertUniqueBackupIds(records, label) {
 
 function getBackupRecords(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function getBackupDataCounts(data) {
+  return {
+    properties: data.properties.length,
+    projects: data.projects.length,
+    expenses: data.expenses.length,
+    documents: data.documents.length,
+  };
 }
 
 function cleanBackupText(value) {

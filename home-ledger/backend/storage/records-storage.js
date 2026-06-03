@@ -49,3 +49,11 @@ export async function saveBackupFile(filename, contents) {
     contents,
   });
 }
+
+export async function saveCpaReviewPdf(filename, html) {
+  if (!isDesktopMode()) return { handled: false };
+  return desktopBridge.saveCpaReviewPdf({
+    filename,
+    html,
+  });
+}

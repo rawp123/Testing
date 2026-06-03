@@ -13,6 +13,7 @@ import {
   formatCurrency,
   formatDate,
   getExpenseTotals,
+  getProjectCompleteness,
   getProjectReviewSummaries,
   getProjectName,
   getPropertyReviewSummaries,
@@ -41,6 +42,7 @@ import {
   isBlockedBackupAttachment,
   reconcileRestoredExpenseDocumentation,
   stripDocumentFileMetadata,
+  summarizeBackupEnvelope,
   validateBackupEnvelope,
 } from "../backend/domain/backup.js";
 import {
@@ -56,6 +58,7 @@ import {
   isDesktopMode,
   loadRecords,
   saveBackupFile,
+  saveCpaReviewPdf,
   saveRecords,
 } from "../backend/storage/records-storage.js";
 import {
@@ -273,7 +276,7 @@ function renderDashboard() {
         ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
         ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
         ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
-        ["Review readiness", `${readiness.score}%`, readiness.score >= 80 ? "green" : readiness.score >= 50 ? "amber" : "rust"],
+        ["Review readiness", `${readiness.score}%`, scoreToneName(readiness.score)],
       ])}
 
       ${renderNotice("Home Basis Tracker helps organize records for review. It is not tax software and does not decide tax treatment. Confirm classifications and records with your CPA.")}
@@ -334,7 +337,7 @@ function renderReviewReadinessPanel(readiness) {
         <button class="button button-secondary" data-action="open-export" type="button">Open review packet</button>
       `)}
       <div class="readiness-layout">
-        <div class="readiness-score ${readiness.score >= 80 ? "tone-green" : readiness.score >= 50 ? "tone-amber" : "tone-rust"}">
+        <div class="readiness-score ${scoreToneClass(readiness.score)}">
           <strong>${readiness.score}%</strong>
           <span>${readiness.completedChecks} of ${readiness.totalChecks} readiness checks complete</span>
         </div>
@@ -850,6 +853,10 @@ function renderDataSafetyPanel() {
 }
 
 function renderCpaExportPanel() {
+  const hasReviewRecords = data.properties.length || data.expenses.length || data.documents.length;
+  const pdfLabel = isDesktopMode()
+    ? isTutorialMode() ? "Save tutorial CPA PDF" : "Save CPA PDF"
+    : "Print / save PDF";
   return `
     <section class="panel print-hidden">
       ${renderPanelHeader("For CPA review", isTutorialMode()
@@ -857,8 +864,9 @@ function renderCpaExportPanel() {
         : "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
       <div class="backup-actions">
         <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
-        <button class="button button-secondary" data-action="download-cpa-packet" ${data.properties.length || data.expenses.length || data.documents.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial review packet" : "Download CPA review packet"}</button>
-        <button class="button button-primary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial CSV" : "Download expense CSV"}</button>
+        <button class="button button-primary" data-action="download-cpa-pdf" ${hasReviewRecords ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${pdfLabel}</button>
+        <button class="button button-secondary" data-action="download-cpa-packet" ${hasReviewRecords ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial review packet" : "Download CPA review packet"}</button>
+        <button class="button button-secondary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial CSV" : "Download expense CSV"}</button>
       </div>
       <p class="helper-note">Review exports before sharing. Classifications are for organization and CPA discussion only.</p>
     </section>
@@ -1136,12 +1144,14 @@ function renderRecentExpenseTable(expenses) {
 }
 
 function renderProjectsTable(projects, selectedProject) {
-  return table(["Project", "Status", "Category", "Total", "Actions"], projects.map((project) => {
+  return table(["Project", "Status", "Category", "Ready", "Total", "Actions"], projects.map((project) => {
     const projectTotal = getExpenseTotals(data.expenses.filter((expense) => expense.projectId === project.id)).total;
+    const completeness = getProjectCompleteness(data, project);
     return [
       `<button class="table-link" data-action="select-project" data-id="${escapeAttr(project.id)}" type="button">${escapeHtml(project.name)}</button><span>${escapeHtml(getPropertyName(data, project.propertyId))}</span>`,
       optionLabel(PROJECT_STATUSES, project.status),
       optionLabel(EXPENSE_CATEGORIES, project.category),
+      `<span class="pill ${scoreToneClass(completeness.score)}">${completeness.score}%</span><span>${completeness.completedChecks}/${completeness.totalChecks} checks</span>`,
       `<span class="money">${formatCurrency(projectTotal)}</span>`,
       rowActions("edit-project", "delete-project", project.id, project.name),
       selectedProject?.id === project.id ? "is-selected" : "",
@@ -1348,6 +1358,7 @@ function getOcrStatusCopy() {
 function renderProjectDetail(project) {
   const projectExpenses = data.expenses.filter((expense) => expense.projectId === project.id);
   const totals = getExpenseTotals(projectExpenses);
+  const completeness = getProjectCompleteness(data, project);
 
   return `
     ${renderPanelHeader(project.name, getPropertyName(data, project.propertyId), "folder", `<button class="button button-secondary" data-action="edit-project" data-id="${escapeAttr(project.id)}" type="button">Edit</button>`)}
@@ -1362,6 +1373,7 @@ function renderProjectDetail(project) {
     </dl>
     ${project.scopeSummary ? `<p class="notes-block"><strong>Scope:</strong> ${escapeHtml(project.scopeSummary)}</p>` : ""}
     ${project.notes ? `<p class="notes-block">${escapeHtml(project.notes)}</p>` : ""}
+    ${renderProjectCompletenessPanel(completeness)}
     <div class="linked-list">
       <h3>Linked expenses</h3>
       ${projectExpenses.length ? projectExpenses.map((expense) => `
@@ -1373,6 +1385,43 @@ function renderProjectDetail(project) {
           <b>${formatCurrency(expense.amount)}</b>
         </div>
       `).join("") : renderEmpty("No linked expenses", "Assign expenses to this project from the expense tracker.")}
+    </div>
+  `;
+}
+
+function renderProjectCompletenessPanel(completeness) {
+  const readyItems = completeness.readyItems.slice(0, 5);
+  const followUps = completeness.followUps.slice(0, 7);
+
+  return `
+    <div class="project-completeness">
+      <div class="readiness-score compact-score ${scoreToneClass(completeness.score)}">
+        <strong>${completeness.score}%</strong>
+        <span>${completeness.completedChecks} of ${completeness.totalChecks} project checks complete</span>
+      </div>
+      ${completeness.expectedDocumentTypes.length ? `
+        <div class="document-type-list" aria-label="Expected project document types">
+          ${completeness.expectedDocumentTypes.map((type) => `<span>${escapeHtml(type.label)}</span>`).join("")}
+        </div>
+      ` : ""}
+      <div class="readiness-columns project-completeness-columns">
+        <div>
+          <h3>Ready</h3>
+          ${readyItems.length ? `
+            <ul class="check-list">
+              ${readyItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          ` : `<p class="helper-note">Add dates, costs, and documents to build project readiness.</p>`}
+        </div>
+        <div>
+          <h3>Follow up</h3>
+          ${followUps.length ? `
+            <ul class="followup-list">
+              ${followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          ` : `<p class="helper-note">No open project follow-ups recorded.</p>`}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1390,10 +1439,11 @@ function renderExportPropertiesTable() {
 }
 
 function renderExportProjectsTable() {
-  return table(["Project", "Property", "Status", "Dates", "Contractor", "Permit", "Spend", "Documents"], getProjectReviewSummaries(data).map((summary) => [
+  return table(["Project", "Property", "Status", "Ready", "Dates", "Contractor", "Permit", "Spend", "Documents"], getProjectReviewSummaries(data).map((summary) => [
     `<strong>${escapeHtml(summary.project.name)}</strong><span>${summary.project.scopeSummary ? escapeHtml(summary.project.scopeSummary) : "Scope not added"}</span>`,
     escapeHtml(getPropertyName(data, summary.project.propertyId)),
     escapeHtml(optionLabel(PROJECT_STATUSES, summary.project.status)),
+    `<span class="pill ${scoreToneClass(summary.completeness.score)}">${summary.completeness.score}%</span><span>${summary.completeness.completedChecks}/${summary.completeness.totalChecks} checks</span>`,
     escapeHtml(summary.dateRange),
     escapeHtml(summary.project.contractor || "Not added"),
     escapeHtml(summary.project.permitNumber || (summary.hasPermit ? "Permit record attached" : "Not added")),
@@ -1560,6 +1610,8 @@ async function handleClick(event) {
       ? `home-basis-tracker-tutorial-cpa-review-${todayISO()}.txt`
       : `home-basis-tracker-cpa-review-${todayISO()}.txt`;
     downloadTextFile(buildCpaReviewPacket(data), filename, "text/plain;charset=utf-8");
+  } else if (action === "download-cpa-pdf") {
+    await saveCpaReviewPdfFile();
   } else if (action === "download-full-backup") {
     await downloadFullBackup();
   } else if (action === "choose-backup-file") {
@@ -2692,6 +2744,86 @@ function reconcileExpensesAfterDocumentFileRemoval(nextDocuments, changedDocumen
   });
 }
 
+async function saveCpaReviewPdfFile() {
+  if (!data.properties.length && !data.expenses.length && !data.documents.length) {
+    showNotice("Add records before creating a CPA review PDF.");
+    return;
+  }
+
+  if (!isDesktopMode()) {
+    showNotice("Use the browser print dialog to save the review summary as a PDF.");
+    window.print();
+    return;
+  }
+
+  const filename = isTutorialMode()
+    ? `home-basis-tracker-tutorial-cpa-review-${todayISO()}.pdf`
+    : `home-basis-tracker-cpa-review-${todayISO()}.pdf`;
+
+  try {
+    const result = await saveCpaReviewPdf(filename, buildCpaReviewPdfHtml(data));
+    if (result?.canceled) {
+      showNotice("CPA PDF save canceled.");
+      return;
+    }
+    showNotice(isTutorialMode() ? "Tutorial CPA PDF saved." : "CPA PDF saved.");
+  } catch (error) {
+    showNotice(error?.message || "CPA PDF could not be saved.");
+  }
+}
+
+function buildCpaReviewPdfHtml(records) {
+  const title = isTutorialMode() ? "Home Basis Tracker Tutorial CPA Review" : "Home Basis Tracker CPA Review";
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    @page { size: letter; margin: 0.55in; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #1b211f;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    header {
+      margin-bottom: 18px;
+      border-bottom: 1px solid #dbe2dc;
+      padding-bottom: 12px;
+    }
+    h1 {
+      margin: 0 0 5px;
+      color: #143b33;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+    p {
+      margin: 0;
+      color: #5c6a64;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(title)}</h1>
+    <p>Prepared from local records on ${escapeHtml(formatDate(todayISO()))}. For review only; confirm treatment with a qualified professional.</p>
+  </header>
+  <pre>${escapeHtml(buildCpaReviewPacket(records))}</pre>
+</body>
+</html>`;
+}
+
 async function downloadFullBackup() {
   try {
     const backup = await buildFullBackup();
@@ -2790,10 +2922,6 @@ async function restoreFromBackupFile(file) {
   if (file.size > MAX_BACKUP_FILE_SIZE) {
     return showNotice(`Backup files over ${formatFileSize(MAX_BACKUP_FILE_SIZE)} are not accepted in this beta.`);
   }
-  const restoreMessage = isTutorialMode()
-    ? "Restore this backup into the temporary tutorial workspace only? Your real records will not be replaced."
-    : `Restore this backup and replace all current records ${storageLocationShort()}? Only restore backups you created or trust. This does not upload anything. Download a backup first if you want to keep what is here.`;
-  if (!window.confirm(restoreMessage)) return;
 
   let backup;
   try {
@@ -2801,6 +2929,15 @@ async function restoreFromBackupFile(file) {
   } catch {
     return showNotice("This backup file could not be read as JSON.");
   }
+
+  let backupSummary;
+  try {
+    backupSummary = summarizeBackupEnvelope(backup);
+  } catch (error) {
+    return showNotice(getBackupError(error));
+  }
+
+  if (!window.confirm(buildRestorePreviewMessage(file, backupSummary))) return;
 
   const oldFileIds = isTutorialMode() ? [] : await getExistingDocumentFileIds();
   let restored;
@@ -2837,6 +2974,64 @@ async function restoreFromBackupFile(file) {
     ? ` Some older stored files could not be removed from ${storageSurfaceName().toLowerCase()} storage.`
     : "";
   showNotice(`${restoreNotice}${cleanupNotice}`);
+}
+
+function buildRestorePreviewMessage(file, backupSummary) {
+  const backupCounts = formatRecordCounts(backupSummary.counts);
+  const currentCounts = formatRecordCounts(getRecordCounts(data));
+  const fileCoverage = backupSummary.documentsWithFileMetadata
+    ? `${backupSummary.fileCount} of ${backupSummary.documentsWithFileMetadata} document file${backupSummary.documentsWithFileMetadata === 1 ? "" : "s"} included`
+    : "No attached file content marked";
+  const missingFileLine = backupSummary.missingFilesCount || backupSummary.expectedFilesMissingFromBackup
+    ? `Files needing follow-up: ${backupSummary.missingFilesCount + backupSummary.expectedFilesMissingFromBackup}`
+    : "Files needing follow-up: none flagged";
+  const modeCopy = isTutorialMode()
+    ? "This will replace the temporary tutorial workspace only. Your real records will not be changed."
+    : `This will replace the current records ${storageLocationShort()}. Download a backup first if you want to keep what is here.`;
+
+  return [
+    "Restore this Home Basis Tracker backup?",
+    "",
+    `Backup file: ${file?.name || "Selected backup"}`,
+    `Created: ${formatRestoreTimestamp(backupSummary.createdAt)}`,
+    `Backup contents: ${backupCounts}`,
+    `Attached files: ${fileCoverage}`,
+    missingFileLine,
+    "",
+    `Current contents to replace: ${currentCounts}`,
+    modeCopy,
+    "Only restore backups you created or trust.",
+  ].join("\n");
+}
+
+function getRecordCounts(records) {
+  return {
+    properties: Array.isArray(records?.properties) ? records.properties.length : 0,
+    projects: Array.isArray(records?.projects) ? records.projects.length : 0,
+    expenses: Array.isArray(records?.expenses) ? records.expenses.length : 0,
+    documents: Array.isArray(records?.documents) ? records.documents.length : 0,
+  };
+}
+
+function formatRecordCounts(counts) {
+  return [
+    `${counts.properties} ${counts.properties === 1 ? "property" : "properties"}`,
+    `${counts.projects} ${counts.projects === 1 ? "project" : "projects"}`,
+    `${counts.expenses} ${counts.expenses === 1 ? "expense" : "expenses"}`,
+    `${counts.documents} ${counts.documents === 1 ? "document" : "documents"}`,
+  ].join(", ");
+}
+
+function formatRestoreTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not listed";
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function prepareTutorialBackupRestore(backup) {
@@ -3321,6 +3516,16 @@ function formActions(label) {
       <button class="button button-primary" type="submit">${escapeHtml(label)}</button>
     </div>
   `;
+}
+
+function scoreToneName(score) {
+  if (score >= 80) return "green";
+  if (score >= 50) return "amber";
+  return "rust";
+}
+
+function scoreToneClass(score) {
+  return `tone-${scoreToneName(score)}`;
 }
 
 function rowActions(editAction, deleteAction, id, label) {

@@ -21,6 +21,8 @@ const STORAGE_VERSION = 1;
 const MAX_RECORDS_BYTES = 15 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
 const MAX_BACKUP_BYTES = 500 * 1024 * 1024;
+const MAX_REVIEW_HTML_BYTES = 5 * 1024 * 1024;
+const MAX_REVIEW_PDF_BYTES = 50 * 1024 * 1024;
 const RECORDS_FILE = "records.json";
 const ATTACHMENTS_FILE = "attachments.json";
 const DOCUMENTS_DIR = "documents";
@@ -167,6 +169,7 @@ async function runDesktopSmoke(window) {
         const bodyIncludes = (text) => document.body.innerText.includes(text);
 
         assert(window.homeLedgerDesktop?.isDesktop, "Desktop bridge was not available.");
+        assert(typeof window.homeLedgerDesktop.saveCpaReviewPdf === "function", "Desktop PDF save bridge was not available.");
         window.confirm = () => true;
         await window.homeLedgerDesktop.saveData({ properties: [], projects: [], expenses: [], documents: [] });
         assert(bodyIncludes("Home Basis Tracker"), "App shell did not render.");
@@ -241,6 +244,13 @@ async function runDesktopSmoke(window) {
         await waitFor(() => bodyIncludes("CPA review summary") && bodyIncludes("Smoke Roofing LLC"), "export summary");
         const csvButton = document.querySelector('[data-action="download-csv"]');
         assert(csvButton && !csvButton.disabled, "CSV export button should be enabled after adding an expense.");
+        const pdfButton = document.querySelector('[data-action="download-cpa-pdf"]');
+        assert(pdfButton && !pdfButton.disabled, "CPA PDF export button should be enabled after adding records.");
+        const pdfResult = await window.homeLedgerDesktop.saveCpaReviewPdf({
+          filename: "home-basis-tracker-smoke-cpa-review.pdf",
+          html: "<!doctype html><html><body><h1>Home Basis Tracker Smoke CPA Review</h1><p>Smoke Roofing LLC</p></body></html>",
+        });
+        assert(pdfResult && !pdfResult.canceled, "CPA PDF smoke export did not complete.");
         assert(!document.body.innerText.includes("/Users/private"), "Raw local path leaked into the UI.");
 
         const savedData = await window.homeLedgerDesktop.loadData();
@@ -376,6 +386,29 @@ async function writeUtf8FileAtomic(filePath, contents, options = {}) {
   }
 }
 
+async function writeBinaryFileAtomic(filePath, contents, options = {}) {
+  const buffer = Buffer.isBuffer(contents) ? contents : Buffer.from(contents);
+  const maxBytes = Number(options.maxBytes) || 0;
+  if (maxBytes && buffer.byteLength > maxBytes) {
+    throw new Error(options.tooLargeMessage || "The file is too large to save.");
+  }
+
+  const directory = path.dirname(filePath);
+  const baseName = path.basename(filePath);
+  const tempPath = path.join(directory, `.${baseName}.${process.pid}.${Date.now()}.tmp`);
+  try {
+    await fs.writeFile(tempPath, buffer);
+    await chmodBestEffort(tempPath, 0o600);
+    await fsyncFileBestEffort(tempPath);
+    await fs.rename(tempPath, filePath);
+    await chmodBestEffort(filePath, 0o600);
+    await fsyncDirectoryBestEffort(directory);
+  } catch (error) {
+    await fs.rm(tempPath, { force: true }).catch(() => {});
+    throw error;
+  }
+}
+
 async function getFileSize(filePath) {
   try {
     return (await fs.stat(filePath)).size;
@@ -463,6 +496,84 @@ function serializeError(error) {
   };
 }
 
+function ensurePdfFileName(filename) {
+  const safeName = getSafeFileName(filename || "home-basis-tracker-cpa-review.pdf");
+  return safeName.toLowerCase().endsWith(".pdf") ? safeName : `${safeName}.pdf`;
+}
+
+function ensurePdfFilePath(filePath) {
+  return String(filePath || "").toLowerCase().endsWith(".pdf") ? filePath : `${filePath}.pdf`;
+}
+
+function isAllowedPdfRenderUrl(targetUrl) {
+  try {
+    return new URL(targetUrl).protocol === "data:";
+  } catch {
+    return false;
+  }
+}
+
+async function renderHtmlToPdfBuffer(html) {
+  const pdfWindow = new BrowserWindow({
+    show: false,
+    width: 816,
+    height: 1056,
+    backgroundColor: "#ffffff",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+    },
+  });
+
+  pdfWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  pdfWindow.webContents.on("will-navigate", (event, url) => {
+    if (!isAllowedPdfRenderUrl(url)) {
+      event.preventDefault();
+    }
+  });
+  pdfWindow.webContents.on("will-redirect", (event, url) => {
+    if (!isAllowedPdfRenderUrl(url)) {
+      event.preventDefault();
+    }
+  });
+
+  try {
+    await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    await pdfWindow.webContents.executeJavaScript("document.fonts?.ready ? document.fonts.ready.then(() => true) : true", true).catch(() => true);
+    return await pdfWindow.webContents.printToPDF({
+      printBackground: true,
+      pageSize: "Letter",
+      margins: {
+        marginType: "default",
+      },
+    });
+  } finally {
+    if (!pdfWindow.isDestroyed()) {
+      pdfWindow.destroy();
+    }
+  }
+}
+
+async function getPdfSaveTarget(filename) {
+  if (IS_SMOKE_TEST) {
+    return {
+      canceled: false,
+      filePath: path.join(SMOKE_USER_DATA_DIR, ensurePdfFileName(filename)),
+    };
+  }
+
+  return dialog.showSaveDialog({
+    title: "Save Home Basis Tracker CPA review PDF",
+    defaultPath: filename,
+    buttonLabel: "Save PDF",
+    filters: [{ name: "PDF document", extensions: ["pdf"] }],
+    properties: ["createDirectory", "showOverwriteConfirmation"],
+  });
+}
+
 function assertTrustedSender(event) {
   const frameUrl = event?.senderFrame?.url || "";
   if (!isAllowedNavigation(frameUrl)) {
@@ -521,6 +632,31 @@ function registerIpcHandlers() {
     await writeUtf8FileAtomic(result.filePath, contents, {
       maxBytes: MAX_BACKUP_BYTES,
       tooLargeMessage: "Backup file is too large.",
+    });
+    return { canceled: false };
+  });
+
+  ipcMain.handle("home-ledger:save-cpa-review-pdf", async (event, record) => {
+    assertTrustedSender(event);
+    const filename = ensurePdfFileName(record?.filename);
+    const html = String(record?.html || "");
+    if (!html.trim()) {
+      throw new Error("CPA review PDF content was empty.");
+    }
+    if (Buffer.byteLength(html, "utf8") > MAX_REVIEW_HTML_BYTES) {
+      throw new Error("CPA review PDF content is too large.");
+    }
+
+    const result = await getPdfSaveTarget(filename);
+
+    if (result.canceled || !result.filePath) {
+      return { canceled: true };
+    }
+
+    const pdfBuffer = await renderHtmlToPdfBuffer(html);
+    await writeBinaryFileAtomic(ensurePdfFilePath(result.filePath), pdfBuffer, {
+      maxBytes: MAX_REVIEW_PDF_BYTES,
+      tooLargeMessage: "CPA review PDF is too large to save.",
     });
     return { canceled: false };
   });
