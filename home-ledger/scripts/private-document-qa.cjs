@@ -198,10 +198,21 @@ async function seedBaseRecords(window) {
       await waitFor(() => bodyIncludes("Property saved.") && bodyIncludes("Private Document QA Home"), "property save");
 
       await click('[data-tab="projects"]');
+      await click('[data-action="manage-vendors"]');
+      await click('[data-action="add-vendor"]');
+      await setValue("name", "Private QA Vendor");
+      await setValue("category", "other");
+      await submit('[data-form="vendor"]');
+      await waitFor(() => bodyIncludes("Vendor saved.") && bodyIncludes("Private QA Vendor"), "vendor save");
+      await click('[data-action="close-vendor-manager"]');
+
       await click('[data-action="add-project"]');
       await setValue("name", "Private document review");
       await setValue("category", "other");
       await setValue("status", "completed");
+      const vendorOption = Array.from(document.querySelectorAll('[name="vendorId"] option')).find((option) => option.textContent.includes("Private QA Vendor"));
+      assert(vendorOption, "Missing vendor option for private QA project.");
+      await setValue("vendorId", vendorOption.value);
       await submit('[data-form="project"]');
       await waitFor(() => bodyIncludes("Project saved.") && bodyIncludes("Private document review"), "project save");
 
@@ -209,13 +220,13 @@ async function seedBaseRecords(window) {
       await click('[data-action="add-expense"]');
       await setValue("date", "2025-01-15");
       await setValue("amount", "100");
-      await setValue("vendor", "Private QA Vendor");
       await setValue("description", "Private document QA expense");
       await setValue("classification", "unclear / ask CPA");
       await setValue("category", "other");
       await setValue("documentationStatus", "no document yet");
       const projectOption = document.querySelector('[name="projectId"] option:not([value=""])');
       if (projectOption) await setValue("projectId", projectOption.value);
+      await setValue("vendorId", vendorOption.value);
       await submit('[data-form="expense"]');
       await waitFor(() => bodyIncludes("Expense saved.") && bodyIncludes("Private document QA expense"), "expense save");
     })()

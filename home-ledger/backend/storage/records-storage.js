@@ -10,9 +10,9 @@ export async function getStorageInfo() {
   if (!isDesktopMode()) {
     return {
       mode: "browser",
-      recordsPathLabel: "Browser local storage",
+      recordsPathLabel: "Browser storage",
       documentsPathLabel: "Browser IndexedDB",
-      storageDescription: "Records and document copies are stored in this browser profile.",
+      storageDescription: "Records and document copies are available in this browser.",
       recordsBytes: 0,
       documentBytes: 0,
       documentCount: 0,

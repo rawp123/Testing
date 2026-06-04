@@ -7,10 +7,10 @@ import { createTutorialData, TUTORIAL_STEPS } from "../backend/domain/tutorial-d
 test("tutorial workspace data covers the main Home Basis workflows", () => {
   const tutorialData = createTutorialData();
 
-  assert.equal(tutorialData.properties.length, 1);
-  assert.ok(tutorialData.projects.length >= 3);
-  assert.ok(tutorialData.expenses.length >= 5);
-  assert.ok(tutorialData.documents.length >= 4);
+  assert.ok(tutorialData.properties.length >= 2);
+  assert.ok(tutorialData.projects.length >= 12);
+  assert.ok(tutorialData.expenses.length >= 25);
+  assert.ok(tutorialData.documents.length >= 30);
 
   assert.ok(tutorialData.projects.some((project) => project.status === "completed"));
   assert.ok(tutorialData.projects.some((project) => project.status === "in progress"));
@@ -24,6 +24,9 @@ test("tutorial workspace data covers the main Home Basis workflows", () => {
   assert.ok(tutorialData.documents.some((document) => document.documentType === "permit"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "payment record"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "warranty"));
+  assert.ok(tutorialData.documents.some((document) => document.documentType === "photo"));
+  assert.ok(tutorialData.documents.some((document) => document.documentType === "contract"));
+  assert.ok(tutorialData.documents.some((document) => document.documentType === "plan or drawing"));
   assert.ok(TUTORIAL_STEPS.some((step) => /backup/i.test(`${step.title} ${step.summary}`)));
   assert.ok(TUTORIAL_STEPS.some((step) => /CPA|export/i.test(`${step.title} ${step.summary}`)));
 });

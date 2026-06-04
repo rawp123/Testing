@@ -1,5 +1,4 @@
 import {
-  buildCpaReviewPacket,
   buildExpensesCsv,
   CLASSIFICATIONS,
   createId,
@@ -12,13 +11,17 @@ import {
   formatFileSize,
   formatCurrency,
   formatDate,
+  buildSaleScenarioEstimate,
   getExpenseTotals,
+  getExpenseVendorName,
   getProjectCompleteness,
   getProjectReviewSummaries,
+  getProjectVendorName,
   getProjectName,
   getPropertyReviewSummaries,
   getPropertyName,
   getReviewReadiness,
+  getVendorName,
   isDocumentationGap,
   isValidISODate,
   optionLabel,
@@ -33,6 +36,7 @@ import {
   TABS,
   todayISO,
   upsertById,
+  VENDOR_STATUSES,
 } from "../backend/domain/model.js";
 import {
   createBackupEnvelope,
@@ -79,12 +83,19 @@ let activeTab = "dashboard";
 let selectedPropertyId = "";
 let notice = "";
 let storageWriteBlocked = false;
-let propertyMode = "new";
+let propertyMode = "view";
+let editingPropertyField = "";
 let selectedProjectId = "";
+let expandedProjectIds = new Set();
 let editingProjectId;
+let editingProjectField = "";
 let editingExpenseId;
 let editingDocumentId;
+let editingVendorId;
+let vendorManagerOpen = false;
+let draftExpenseProjectId = "";
 let draftDocumentExpenseId = "";
+let draftDocumentProjectId = "";
 let documentPreview = null;
 let lastBackupCreatedAt = "";
 let storageEstimate = {
@@ -94,11 +105,11 @@ let storageEstimate = {
 };
 let storageInfo = {
   mode: isDesktopMode() ? "desktop" : "browser",
-  recordsPathLabel: isDesktopMode() ? "Mac app records file" : "Browser local storage",
+  recordsPathLabel: isDesktopMode() ? "Mac app records file" : "Browser storage",
   documentsPathLabel: isDesktopMode() ? "Mac app documents folder" : "Browser IndexedDB",
   storageDescription: isDesktopMode()
-    ? "Records and document copies are stored locally by the Mac app."
-    : "Records and document copies are stored in this browser profile.",
+    ? "Records and document copies are stored by the Mac app."
+    : "Records and document copies are available in this browser.",
   recordsBytes: 0,
   documentBytes: 0,
   documentCount: 0,
@@ -120,9 +131,20 @@ const expenseFilters = {
 };
 
 const documentFilters = {
-  propertyId: selectedPropertyId || EMPTY_FILTER,
+  propertyId: EMPTY_FILTER,
   documentType: EMPTY_FILTER,
   fileStatus: EMPTY_FILTER,
+};
+const DOCUMENT_TAB_LIBRARY = "library";
+const DOCUMENT_TAB_FOLLOW_UP = "follow-up";
+let documentSubTab = DOCUMENT_TAB_LIBRARY;
+let saleScenario = {
+  propertyId: "",
+  salePrice: "",
+  mortgagePayoff: "",
+  sellingCostsRate: "6",
+  sellingCostsAmount: "",
+  exclusionAmount: "250000",
 };
 
 const DOCUMENT_FILE_FILTERS = [
@@ -148,6 +170,17 @@ const PLAIN_TEXT_MIME_TYPES = new Set([
   "text/xml",
 ]);
 
+const ENABLE_TEMP_SAMPLE_RECORDS = true;
+const TEMP_SAMPLE_RECORDS_DISABLED_KEY = "home-ledger:disable-temp-sample-records";
+const TEMP_SAMPLE_PROPERTY = {
+  id: "temp_sample_property_testing",
+  name: "Sample testing home",
+  address: "42 Garden View Lane",
+  purchaseDate: "2020-04-17",
+  purchasePrice: 485000,
+  notes: "Temporary sample property for testing project workflows. Remove before distribution.",
+};
+
 let tesseractModulePromise;
 let pdfJsModulePromise;
 
@@ -165,7 +198,7 @@ function renderLoading() {
   app.innerHTML = `
     <main class="workspace loading-workspace">
       <section class="panel">
-        ${renderPanelHeader("Opening Home Basis Tracker", "Loading local records from this device.", "home")}
+        ${renderPanelHeader("Opening Home Basis Tracker", "Loading your records.", "home")}
       </section>
     </main>
   `;
@@ -173,14 +206,14 @@ function renderLoading() {
 
 async function initializeApp() {
   try {
-    realData = await loadRecords(STORAGE_KEY);
+    realData = withTemporarySampleRecords(await loadRecords(STORAGE_KEY));
     data = realData;
     storageWriteBlocked = false;
   } catch {
-    realData = EMPTY_DATA;
+    realData = withTemporarySampleRecords(EMPTY_DATA);
     data = EMPTY_DATA;
     storageWriteBlocked = true;
-    notice = "Unable to load local records. To protect existing data, new saves are paused until you restore a backup or reopen the app.";
+    notice = "Unable to load records. To protect existing data, new saves are paused until you restore a backup or reopen the app.";
   }
   try {
     storageInfo = await getStorageInfo();
@@ -189,7 +222,7 @@ async function initializeApp() {
   }
 
   selectedPropertyId = data.properties[0]?.id || "";
-  propertyMode = data.properties.length ? "view" : "new";
+  propertyMode = "view";
   resetFiltersAfterRestore();
   render();
 }
@@ -201,15 +234,21 @@ function render() {
   normalizeSelectionsAndFilters();
 
   app.innerHTML = `
-    <header class="app-header ${isTutorialMode() ? "is-tutorial-mode" : ""}">
-      <div class="brand-block">
-        <p class="eyebrow">${isTutorialMode() ? "Tutorial workspace" : "Home records"}</p>
-        <h1>Home Basis Tracker</h1>
-        <p>${isTutorialMode()
-          ? "You are using sample records. Changes here are temporary and separate from your real binder."
-          : "Keep receipts, project notes, and home improvement records organized on this device."}</p>
-      </div>
-      <div class="header-actions">
+    <div class="app-shell ${isTutorialMode() ? "is-tutorial-mode" : ""}">
+      <aside class="app-sidebar">
+        <div class="brand-block">
+          <div class="brand-row">
+            <span class="brand-mark" aria-hidden="true">
+              <img src="/desktop/build/icon.png" alt="" onerror="this.hidden=true; this.nextElementSibling.hidden=false">
+              <span class="brand-mark-fallback" hidden>H</span>
+            </span>
+            <div>
+              ${isTutorialMode() ? `<p class="eyebrow">Tutorial workspace</p>` : ""}
+              <h1>Home Basis Tracker</h1>
+              ${isTutorialMode() ? `<p>Sample workspace</p>` : ""}
+            </div>
+          </div>
+        </div>
         <nav class="app-tabs" aria-label="App sections" role="tablist">
           ${TABS.map((tab) => `
             <button
@@ -220,21 +259,29 @@ function render() {
               id="${tab.id}-tab"
               role="tab"
               type="button"
-            >${escapeHtml(tab.label)}</button>
+            ><span aria-hidden="true">${tabIcon(tab.id)}</span>${escapeHtml(tab.label)}</button>
           `).join("")}
         </nav>
         ${renderWorkspaceControls()}
-      </div>
-    </header>
-    <main class="workspace">
-      ${renderToast()}
-      ${renderTutorialModeBanner()}
-      <section class="tab-panel" id="${activeTab}-panel" role="tabpanel" aria-labelledby="${activeTab}-tab">
-        ${renderActiveTab()}
-      </section>
-      ${renderDocumentPreview()}
-    </main>
+      </aside>
+      <main class="workspace">
+        ${renderToast()}
+        ${renderTutorialModeBanner()}
+        <section class="tab-panel" id="${activeTab}-panel" role="tabpanel" aria-labelledby="${activeTab}-tab">
+          ${renderActiveTab()}
+        </section>
+        ${vendorManagerOpen ? renderVendorManagerModal() : ""}
+        ${editingVendorId !== undefined ? renderVendorFormModal(editingVendorId ? data.vendors.find((vendor) => vendor.id === editingVendorId) : null) : ""}
+        ${renderDocumentPreview()}
+      </main>
+    </div>
   `;
+  keepActiveTabVisible();
+}
+
+function keepActiveTabVisible() {
+  const activeButton = app.querySelector(".app-tabs button.is-active");
+  activeButton?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
 function renderActiveTab() {
@@ -253,7 +300,7 @@ function renderDashboard() {
   const propertySummaries = getPropertyReviewSummaries(data);
   const recentExpenses = sortByDateDesc(data.expenses).slice(0, 6);
   const hasRecords = data.properties.length || data.projects.length || data.expenses.length || data.documents.length;
-  const storedFileCount = data.documents.filter((document) => document.hasFile).length;
+  const attentionCount = readiness.followUps.length + readiness.expensesMissingLinkedEvidence.length + readiness.documentsWithoutFiles.length + readiness.expensesMissingVendors.length;
   const projectCounts = PROJECT_STATUSES.map((status) => ({
     ...status,
     count: data.projects.filter((project) => project.status === status.value).length,
@@ -263,8 +310,8 @@ function renderDashboard() {
     <div class="page-stack">
       ${hasRecords ? renderPageIntro({
         eyebrow: "Overview",
-        title: "Your home records binder",
-        description: "A local-first summary of projects, expenses, documentation follow-ups, and records to review with your CPA.",
+        title: "Your home records",
+        description: "Track properties, projects, expenses, and documents in one place.",
         actions: `
           <button class="button button-secondary" data-action="add-expense" type="button"><span aria-hidden="true">+</span>Add expense</button>
           <button class="button button-primary" data-action="open-export" type="button"><span aria-hidden="true">↓</span>Export & backup</button>
@@ -272,22 +319,20 @@ function renderDashboard() {
       }) : renderOnboardingPanel()}
 
       ${renderMetrics([
-        ["Total tracked spend", formatCurrency(totals.total), ""],
-        ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
-        ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
-        ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
-        ["Review readiness", `${readiness.score}%`, scoreToneName(readiness.score)],
+        ["Properties", String(data.properties.length), ""],
+        ["Projects", String(data.projects.length), "green"],
+        ["Expenses", String(data.expenses.length), "blue"],
+        ["Documents", String(data.documents.length), "amber"],
+        ["Needs attention", String(attentionCount), attentionCount ? "rust" : "green"],
       ])}
-
-      ${renderNotice("Home Basis Tracker helps organize records for review. It is not tax software and does not decide tax treatment. Confirm classifications and records with your CPA.")}
-      ${storedFileCount ? renderNotice(`${storedFileCount} attached file${storedFileCount === 1 ? " is" : "s are"} stored locally ${storageLocationShort()}. Keep your own backup of important records.`) : ""}
 
       ${hasRecords ? renderReviewReadinessPanel(readiness) : ""}
       ${propertySummaries.length ? renderPropertyDashboardCards(propertySummaries) : ""}
+      ${propertySummaries.length ? renderSaleScenarioPanel(propertySummaries) : ""}
 
       <div class="content-grid two-columns">
         <section class="panel">
-          ${renderPanelHeader("Recent expenses", "Newest records saved in your local binder.", "receipt")}
+          ${renderPanelHeader("Recent expenses", "Newest records in your binder.", "receipt")}
           ${recentExpenses.length ? renderRecentExpenseTable(recentExpenses) : renderEmpty("No expenses yet", "Add receipts, invoices, or notes when you are ready.")}
         </section>
         <section class="panel">
@@ -312,12 +357,12 @@ function renderOnboardingPanel() {
       <div>
         <p class="eyebrow">Start your binder</p>
         <h2>Organize home improvement records before they become hard to find.</h2>
-        <p>Track properties, projects, expenses, document status, notes, and local file attachments. Your records are saved locally ${storageLocationShort()} unless you export or share them.</p>
+        <p>Create a private record of properties, improvement projects, receipts, permits, contractor records, photos, and notes.</p>
       </div>
       <ol class="step-list">
         <li><span aria-hidden="true">⌂</span><span>Add your property</span></li>
         <li><span aria-hidden="true">▣</span><span>Create projects</span></li>
-        <li><span aria-hidden="true">▤</span><span>Track expenses and export a CPA review summary</span></li>
+        <li><span aria-hidden="true">▤</span><span>Attach supporting records and export a review packet</span></li>
       </ol>
       <div class="onboarding-actions">
         <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add your property</button>
@@ -327,31 +372,109 @@ function renderOnboardingPanel() {
   `;
 }
 
+function renderSaleScenarioPanel(propertySummaries) {
+  const propertyOptions = propertySummaries.map((summary) => ({
+    value: summary.property.id,
+    label: summary.property.name,
+  }));
+  const validPropertyIds = new Set(propertyOptions.map((option) => option.value));
+  const propertyId = validPropertyIds.has(saleScenario.propertyId)
+    ? saleScenario.propertyId
+    : selectedPropertyId && validPropertyIds.has(selectedPropertyId)
+      ? selectedPropertyId
+      : propertyOptions[0]?.value || "";
+  const scenario = { ...saleScenario, propertyId };
+  const estimate = buildSaleScenarioEstimate(data, scenario);
+  const hasSalePrice = estimate.salePrice > 0;
+
+  return `
+    <section class="panel sale-scenario-panel">
+      ${renderPanelHeader(
+        "Sale scenario",
+        "Estimate net proceeds and potential taxable gain from saved records and a few assumptions.",
+        "home",
+      )}
+      <div class="sale-scenario-grid">
+        <form class="sale-scenario-form" data-form="sale-scenario" novalidate>
+          <div class="form-row">
+            <label class="field">
+              <span>Property</span>
+              <select name="propertyId">
+                ${propertyOptions.map((option) => optionHtml(option.value, option.label, propertyId)).join("")}
+              </select>
+            </label>
+            ${field("Expected sale price", "salePrice", scenario.salePrice, { type: "number", step: "0.01", placeholder: "Enter sale price" })}
+          </div>
+          <div class="form-row">
+            ${field("Mortgage payoff", "mortgagePayoff", scenario.mortgagePayoff, { type: "number", step: "0.01", placeholder: "Optional" })}
+            ${field("Selling costs (%)", "sellingCostsRate", scenario.sellingCostsRate, { type: "number", step: "0.1" })}
+          </div>
+          <div class="form-row">
+            ${field("Selling costs amount", "sellingCostsAmount", scenario.sellingCostsAmount, { type: "number", step: "0.01", placeholder: "Optional override amount" })}
+            <label class="field">
+              <span>Main-home exclusion</span>
+              <select name="exclusionAmount">
+                ${optionHtml("0", "Do not apply", scenario.exclusionAmount)}
+                ${optionHtml("250000", "$250,000 single", scenario.exclusionAmount)}
+                ${optionHtml("500000", "$500,000 married filing jointly", scenario.exclusionAmount)}
+              </select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">Update estimate</button>
+          </div>
+        </form>
+        <div class="sale-scenario-results">
+          <div class="scenario-result-grid">
+            ${scenarioResultCard("Cash before tax", hasSalePrice ? formatCurrency(estimate.netProceedsBeforeTax) : "Enter sale price", "Sale price minus selling costs and mortgage payoff.")}
+            ${scenarioResultCard("Potential taxable gain", hasSalePrice ? formatCurrency(estimate.potentialTaxableGain) : "Enter sale price", "Gain after the selected exclusion assumption.")}
+          </div>
+          <dl class="scenario-breakdown">
+            ${detailItem("Purchase price", formatCurrency(estimate.purchasePrice))}
+            ${detailItem("Included basis additions", formatCurrency(estimate.basisAdditions))}
+            ${detailItem("Estimated selling costs", hasSalePrice ? formatCurrency(estimate.sellingCosts) : "Not estimated")}
+            ${detailItem("Adjusted basis used", formatCurrency(estimate.adjustedBasis))}
+            ${detailItem("Gain before exclusion", hasSalePrice ? formatCurrency(estimate.gainBeforeExclusion) : "Not estimated")}
+            ${detailItem("Needs-review costs not included", formatCurrency(estimate.needsReviewCosts))}
+          </dl>
+          <p class="helper-note">This planner uses purchase price plus expenses marked potential basis addition. It does not estimate taxes owed, depreciation, state taxes, or whether you qualify for an exclusion. Confirm the assumptions with a qualified professional.</p>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function scenarioResultCard(label, value, helper) {
+  return `
+    <article class="scenario-result-card">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+      <small>${escapeHtml(helper)}</small>
+    </article>
+  `;
+}
+
 function renderReviewReadinessPanel(readiness) {
   const followUps = readiness.followUps.slice(0, 6);
   const readyItems = readiness.readyItems.slice(0, 4);
 
   return `
     <section class="panel review-readiness-panel">
-      ${renderPanelHeader("Review readiness", "A practical checklist for getting this binder ready to share with a CPA.", "clipboard", `
+      ${renderPanelHeader("Record completeness", "Key gaps and next steps.", "clipboard", `
         <button class="button button-secondary" data-action="open-export" type="button">Open review packet</button>
       `)}
       <div class="readiness-layout">
-        <div class="readiness-score ${scoreToneClass(readiness.score)}">
-          <strong>${readiness.score}%</strong>
-          <span>${readiness.completedChecks} of ${readiness.totalChecks} readiness checks complete</span>
-        </div>
-        <div class="readiness-columns">
-          <div>
-            <h3>Ready</h3>
+        <div class="readiness-combined-card">
+          <div class="readiness-list-section">
+            <h3>Core records</h3>
             ${readyItems.length ? `
               <ul class="check-list">
                 ${readyItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
               </ul>
             ` : `<p class="helper-note">Add a property, expenses, and documents to begin building readiness.</p>`}
           </div>
-          <div>
-            <h3>Follow up</h3>
+          <div class="readiness-list-section">
+            <h3>Suggested next actions</h3>
             ${followUps.length ? `
               <ul class="followup-list">
                 ${followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
@@ -360,6 +483,291 @@ function renderReviewReadinessPanel(readiness) {
           </div>
         </div>
       </div>
+    </section>
+  `;
+}
+
+function withTemporarySampleRecords(records) {
+  const cleanData = sanitizeData(records);
+  if (!temporarySampleRecordsEnabled()) return cleanData;
+
+  const propertyId = cleanData.properties[0]?.id || TEMP_SAMPLE_PROPERTY.id;
+  const properties = cleanData.properties.length
+    ? cleanData.properties
+    : [TEMP_SAMPLE_PROPERTY];
+  const sampleProjects = createTemporarySampleProjects(propertyId);
+  const sampleExpenses = createTemporarySampleExpenses(propertyId);
+  const sampleDocuments = createTemporarySampleDocuments(propertyId);
+
+  return sanitizeData({
+    properties,
+    projects: addMissingRecords(cleanData.projects, sampleProjects),
+    expenses: addMissingRecords(cleanData.expenses, sampleExpenses),
+    documents: addMissingRecords(cleanData.documents, sampleDocuments),
+  });
+}
+
+function temporarySampleRecordsEnabled() {
+  try {
+    return ENABLE_TEMP_SAMPLE_RECORDS && window.localStorage.getItem(TEMP_SAMPLE_RECORDS_DISABLED_KEY) !== "true";
+  } catch {
+    return ENABLE_TEMP_SAMPLE_RECORDS;
+  }
+}
+
+function addMissingRecords(existingRecords, temporaryRecords) {
+  const existingIds = new Set(existingRecords.map((record) => record.id));
+  return [
+    ...existingRecords,
+    ...temporaryRecords.filter((record) => !existingIds.has(record.id)),
+  ];
+}
+
+function createTemporarySampleProjects(propertyId) {
+  return [
+    {
+      id: "temp_sample_project_interior_paint",
+      propertyId,
+      name: "Sample: Interior painting",
+      category: "interior painting",
+      startDate: "2024-02-05",
+      completionDate: "2024-02-12",
+      contractor: "Northside Painting Co.",
+      permitNumber: "",
+      status: "completed",
+      scopeSummary: "Painted living room, hallway, bedroom walls, trim, and repaired minor drywall damage.",
+      notes: "Temporary sample project for testing completed work, notes, expenses, and photo/document links.",
+    },
+    {
+      id: "temp_sample_project_exterior_paint",
+      propertyId,
+      name: "Sample: Exterior painting",
+      category: "exterior painting",
+      startDate: "2024-06-03",
+      completionDate: "",
+      contractor: "Evergreen Exterior Finish",
+      permitNumber: "",
+      status: "in progress",
+      scopeSummary: "Prep, scrape, prime, and repaint exterior siding, trim, shutters, and porch railings.",
+      notes: "Useful for testing in-progress projects and follow-up documents.",
+    },
+    {
+      id: "temp_sample_project_bathroom",
+      propertyId,
+      name: "Sample: Bathroom remodel",
+      category: "bathroom",
+      startDate: "2023-09-11",
+      completionDate: "2023-10-20",
+      contractor: "Harbor Bath & Tile",
+      permitNumber: "TMP-BATH-2309",
+      status: "completed",
+      scopeSummary: "Updated tile, vanity, plumbing fixtures, ventilation fan, lighting, and waterproofing.",
+      notes: "Temporary sample with permit, invoice, and photo records.",
+    },
+    {
+      id: "temp_sample_project_deck",
+      propertyId,
+      name: "Sample: Deck repair and railing",
+      category: "deck/patio/porch",
+      startDate: "2025-03-18",
+      completionDate: "",
+      contractor: "Cedarline Carpentry",
+      permitNumber: "TMP-DECK-2503",
+      status: "planned",
+      scopeSummary: "Replace damaged deck boards, reinforce stair stringers, and install new railing sections.",
+      notes: "Temporary sample for planned work and permit/estimate follow-up.",
+    },
+    {
+      id: "temp_sample_project_hvac",
+      propertyId,
+      name: "Sample: Heat pump installation",
+      category: "HVAC",
+      startDate: "2022-11-02",
+      completionDate: "2022-11-04",
+      contractor: "Summit Heating & Air",
+      permitNumber: "TMP-HVAC-2211",
+      status: "completed",
+      scopeSummary: "Installed ducted heat pump system, thermostat, exterior condenser pad, and electrical disconnect.",
+      notes: "Temporary sample for high-value equipment records, warranty, and professional review.",
+    },
+  ];
+}
+
+function createTemporarySampleExpenses(propertyId) {
+  return [
+    {
+      id: "temp_sample_expense_interior_paint",
+      propertyId,
+      projectId: "temp_sample_project_interior_paint",
+      date: "2024-02-12",
+      vendor: "Northside Painting Co.",
+      description: "Interior painting labor and materials",
+      amount: 2480,
+      classification: "repair or maintenance",
+      category: "interior painting",
+      documentationStatus: "receipt attached",
+      notes: "Temporary sample expense linked to interior painting.",
+    },
+    {
+      id: "temp_sample_expense_exterior_deposit",
+      propertyId,
+      projectId: "temp_sample_project_exterior_paint",
+      date: "2024-06-03",
+      vendor: "Evergreen Exterior Finish",
+      description: "Exterior painting deposit",
+      amount: 1500,
+      classification: "unclear / ask CPA",
+      category: "exterior painting",
+      documentationStatus: "needs follow-up",
+      notes: "Temporary sample showing a follow-up item.",
+    },
+    {
+      id: "temp_sample_expense_bathroom_tile",
+      propertyId,
+      projectId: "temp_sample_project_bathroom",
+      date: "2023-09-28",
+      vendor: "Harbor Bath & Tile",
+      description: "Bathroom tile, waterproofing, vanity, and fixture installation",
+      amount: 14875.5,
+      classification: "potential basis addition",
+      category: "bathroom",
+      documentationStatus: "invoice attached",
+      notes: "Temporary sample expense linked to invoice and permit records.",
+    },
+    {
+      id: "temp_sample_expense_deck_estimate",
+      propertyId,
+      projectId: "temp_sample_project_deck",
+      date: "2025-03-10",
+      vendor: "Cedarline Carpentry",
+      description: "Deck repair estimate",
+      amount: 0,
+      classification: "unclear / ask CPA",
+      category: "deck/patio/porch",
+      documentationStatus: "no document yet",
+      notes: "Temporary sample estimate with no payment yet.",
+    },
+    {
+      id: "temp_sample_expense_hvac",
+      propertyId,
+      projectId: "temp_sample_project_hvac",
+      date: "2022-11-04",
+      vendor: "Summit Heating & Air",
+      description: "Heat pump equipment and installation",
+      amount: 18720,
+      classification: "potential basis addition",
+      category: "HVAC",
+      documentationStatus: "invoice attached",
+      notes: "Temporary high-value equipment sample.",
+    },
+  ];
+}
+
+function createTemporarySampleDocuments(propertyId) {
+  return [
+    {
+      id: "temp_sample_document_interior_receipt",
+      propertyId,
+      projectId: "temp_sample_project_interior_paint",
+      expenseId: "temp_sample_expense_interior_paint",
+      displayName: "Sample interior painting receipt",
+      documentType: "receipt",
+      addedDate: "2024-02-13",
+      notes: "Temporary sample document record. No file is stored.",
+      ocrText: "Sample receipt: interior painting labor and materials.",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+    {
+      id: "temp_sample_document_bathroom_invoice",
+      propertyId,
+      projectId: "temp_sample_project_bathroom",
+      expenseId: "temp_sample_expense_bathroom_tile",
+      displayName: "Sample bathroom remodel invoice",
+      documentType: "invoice",
+      addedDate: "2023-10-20",
+      notes: "Temporary sample invoice metadata.",
+      ocrText: "Sample invoice: bathroom tile, waterproofing, vanity, fixtures, and labor.",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+    {
+      id: "temp_sample_document_bathroom_permit",
+      propertyId,
+      projectId: "temp_sample_project_bathroom",
+      expenseId: "",
+      displayName: "Sample bathroom permit",
+      documentType: "permit",
+      addedDate: "2023-09-12",
+      notes: "Temporary sample permit record.",
+      ocrText: "Sample permit TMP-BATH-2309.",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+    {
+      id: "temp_sample_document_deck_estimate",
+      propertyId,
+      projectId: "temp_sample_project_deck",
+      expenseId: "temp_sample_expense_deck_estimate",
+      displayName: "Sample deck repair estimate",
+      documentType: "contract",
+      addedDate: "2025-03-10",
+      notes: "Temporary sample estimate/contract record.",
+      ocrText: "Sample estimate: deck boards, railing, stair stringer reinforcement.",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+    {
+      id: "temp_sample_document_hvac_warranty",
+      propertyId,
+      projectId: "temp_sample_project_hvac",
+      expenseId: "temp_sample_expense_hvac",
+      displayName: "Sample heat pump warranty",
+      documentType: "warranty",
+      addedDate: "2022-11-05",
+      notes: "Temporary sample warranty record.",
+      ocrText: "Sample warranty: heat pump equipment registration.",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+    {
+      id: "temp_sample_document_exterior_photo",
+      propertyId,
+      projectId: "temp_sample_project_exterior_paint",
+      expenseId: "",
+      displayName: "Sample exterior before photos",
+      documentType: "photo",
+      addedDate: "2024-06-03",
+      notes: "Temporary sample photo record.",
+      ocrText: "",
+      hasFile: false,
+      fileStatusNote: "Temporary sample record; no file copy is stored.",
+    },
+  ];
+}
+
+function renderNextActionsPanel(readiness) {
+  const actions = [
+    data.properties.length ? "" : "Add your first property record.",
+    data.projects.length ? "" : "Add an improvement project.",
+    data.expenses.length ? "" : "Record an expense or receipt.",
+    data.documents.length ? "" : "Attach a receipt, permit, invoice, photo, or contract.",
+    readiness.followUps[0] || "",
+  ].filter(Boolean).slice(0, 4);
+
+  return `
+    <section class="panel next-actions-panel">
+      ${renderPanelHeader("Next suggested actions", "Small steps that make the binder easier to review later.", "clipboard")}
+      ${actions.length ? `
+        <div class="safety-list action-list">
+          ${actions.map((item) => `
+            <div>
+              <strong>${escapeHtml(item)}</strong>
+              <span>Keep the record simple now; you can add supporting details later.</span>
+            </div>
+          `).join("")}
+        </div>
+      ` : renderEmpty("No immediate suggestions", "Your core records are in good shape. Keep adding receipts, project notes, and supporting documents as you collect them.")}
     </section>
   `;
 }
@@ -383,9 +791,7 @@ function renderPropertyDashboardCards(propertySummaries) {
               ${detailItem("Documents", `${summary.documents.length} (${summary.storedFiles} files)`)}
               ${detailItem("Follow-ups", summary.missingDocuments)}
             </dl>
-            <div class="readiness-meter" aria-label="Review readiness ${summary.readinessScore}%">
-              <span style="width: ${summary.readinessScore}%"></span>
-            </div>
+            <progress class="readiness-meter" value="${clampPercent(summary.readinessScore)}" max="100" aria-label="Review readiness ${clampPercent(summary.readinessScore)}%"></progress>
           </article>
         `).join("")}
       </div>
@@ -394,24 +800,20 @@ function renderPropertyDashboardCards(propertySummaries) {
 }
 
 function renderWorkspaceControls() {
-  if (isTutorialMode()) {
-    return `
-      <div class="workspace-controls" aria-label="Tutorial workspace controls">
-        <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset tutorial</button>
-        <button class="button button-primary" data-action="exit-tutorial" type="button">Exit tutorial</button>
-      </div>
-    `;
-  }
+  return "";
+}
 
-  return `
-    <div class="workspace-controls" aria-label="Tutorial workspace controls">
-      <button class="button button-secondary" data-action="start-tutorial" type="button">Tutorial workspace</button>
-    </div>
-  `;
+function clampPercent(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.max(0, Math.min(100, Math.round(number)));
 }
 
 function renderTutorialModeBanner() {
   if (!isTutorialMode()) return "";
+  const guideButton = activeTab === "tutorial"
+    ? ""
+    : `<button class="button button-secondary" data-action="open-tutorial-step" data-tutorial-tab="tutorial" type="button">View guide</button>`;
 
   return `
     <section class="tutorial-banner print-hidden">
@@ -421,34 +823,29 @@ function renderTutorialModeBanner() {
         <p>These records are temporary. They do not save to your real Home Basis Tracker records, and file attachments are simulated here.</p>
       </div>
       <div class="tutorial-banner-actions">
-        <button class="button button-secondary" data-action="open-tutorial-step" data-tutorial-tab="tutorial" type="button">View guide</button>
+        ${guideButton}
         <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset sample data</button>
-        <button class="button button-primary" data-action="exit-tutorial" type="button">Return to real records</button>
+        <button class="button button-primary" data-action="exit-tutorial" type="button">Return to binder</button>
       </div>
     </section>
   `;
 }
 
 function renderTutorialView() {
-  const tutorialActions = isTutorialMode()
-    ? `
-      <button class="button button-secondary" data-action="reset-tutorial" type="button">Reset sample data</button>
-      <button class="button button-primary" data-action="exit-tutorial" type="button">Return to real records</button>
-    `
-    : `<button class="button button-primary" data-action="start-tutorial" type="button">Start tutorial workspace</button>`;
+  const intro = isTutorialMode()
+    ? ""
+    : renderPageIntro({
+      eyebrow: "Tutorial Workspace",
+      title: "Learn the app with sample records",
+      description: "Open a separate sample-data workspace to learn every major workflow before entering your own records.",
+      actions: `<button class="button button-primary" data-action="start-tutorial" type="button">Start tutorial workspace</button>`,
+    });
 
   return `
     <div class="page-stack">
-      ${renderPageIntro({
-        eyebrow: "Tutorial Workspace",
-        title: isTutorialMode() ? "Practice with sample home records" : "Learn the app without touching real records",
-        description: isTutorialMode()
-          ? "Use the sample property, projects, expenses, documents, exports, and backup controls. Your real binder is untouched."
-          : "Open a separate sample-data workspace to learn every major workflow before entering your own records.",
-        actions: tutorialActions,
-      })}
+      ${intro}
       ${renderNotice(isTutorialMode()
-        ? "Tutorial changes stay in memory until you exit, reset, or close this app window. They are not saved to your normal records file."
+        ? "Changes stay in memory until you exit, reset, or close this app window."
         : "The normal app opens empty by default. Sample data appears only after you start the tutorial workspace.", "tutorial-notice")}
       ${renderMetrics([
         ["Sample properties", String(tutorialData.properties.length), ""],
@@ -473,11 +870,11 @@ function renderTutorialView() {
         </div>
       </section>
       <section class="panel">
-        ${renderPanelHeader("How separation works", "The tutorial is a sandbox, not your real binder.", "home")}
+        ${renderPanelHeader("How separation works", "The tutorial is a sandbox for practice.", "home")}
         <div class="safety-list">
           <div>
-            <strong>Real records start empty</strong>
-            <span>Sample records are never loaded into the normal workspace on first launch.</span>
+            <strong>Your binder starts empty</strong>
+            <span>Sample records appear only after you open the tutorial.</span>
           </div>
           <div>
             <strong>Edits are temporary</strong>
@@ -485,7 +882,7 @@ function renderTutorialView() {
           </div>
           <div>
             <strong>Files are simulated</strong>
-            <span>Choosing a file in tutorial mode records sample metadata only. The file is not copied into app storage.</span>
+            <span>Choosing a file in tutorial mode records sample metadata only.</span>
           </div>
           <div>
             <strong>Backups stay scoped</strong>
@@ -509,14 +906,12 @@ function renderPropertyView() {
       ${renderPageIntro({
         eyebrow: "Property setup",
         title: "Property records",
-        description: "Create a home profile, then connect projects and expenses to that property.",
+        description: "Keep each home profile connected to its projects, expenses, documents, and notes.",
         actions: `
-          ${data.properties.length ? `<button class="button button-secondary" data-action="edit-property" type="button">Edit selected</button>` : ""}
-          ${selectedProperty ? `<button class="button button-danger" data-action="delete-property" data-id="${escapeAttr(selectedProperty.id)}" type="button">Delete selected</button>` : ""}
           <button class="button button-primary" data-action="add-property" type="button"><span aria-hidden="true">+</span>Add property</button>
         `,
       })}
-      <div class="content-grid two-columns">
+      <div class="content-grid">
         <section class="panel">
           ${renderPanelHeader("Selected property", "", "home")}
           ${data.properties.length ? `
@@ -528,38 +923,94 @@ function renderPropertyView() {
             </label>
             ${selectedProperty ? `
               <div class="summary-card">
-                <h3>${escapeHtml(selectedProperty.name)}</h3>
+                <div class="summary-title-row">
+                  ${renderEditablePropertyField(selectedProperty, "name", "Property name", selectedProperty.name)}
+                </div>
                 <dl class="detail-list">
-                  ${detailItem("Address", selectedProperty.address || "Not added")}
-                  ${detailItem("Purchase date", formatDate(selectedProperty.purchaseDate))}
-                  ${detailItem("Purchase price", selectedProperty.purchasePrice ? formatCurrency(selectedProperty.purchasePrice) : "Not added")}
+                  ${renderEditablePropertyField(selectedProperty, "address", "Address", selectedProperty.address || "Not added")}
+                  ${renderEditablePropertyField(selectedProperty, "purchaseDate", "Purchase date", formatDate(selectedProperty.purchaseDate))}
+                  ${renderEditablePropertyField(selectedProperty, "purchasePrice", "Purchase price", selectedProperty.purchasePrice ? formatCurrency(selectedProperty.purchasePrice) : "Not added")}
                   ${detailItem("Projects", propertyProjects.length)}
                   ${detailItem("Tracked expenses", formatCurrency(totals.total))}
                   ${detailItem("Documents", propertyDocuments.length)}
                 </dl>
-                ${selectedProperty.notes ? `<p class="notes-block">${escapeHtml(selectedProperty.notes)}</p>` : ""}
+                ${selectedProperty.notes ? renderEditablePropertyField(selectedProperty, "notes", "Notes", selectedProperty.notes) : ""}
+                <div class="record-action-row">
+                  <button class="button button-secondary" data-action="add-project" data-property-id="${escapeAttr(selectedProperty.id)}" type="button"><span aria-hidden="true">+</span>Add project</button>
+                  <button class="button button-secondary" data-action="add-expense" type="button"><span aria-hidden="true">+</span>Add expense</button>
+                  <button class="button button-secondary" data-action="add-document" type="button"><span aria-hidden="true">+</span>Add document</button>
+                </div>
+                <div class="property-danger-zone">
+                  <button class="button button-danger" data-action="delete-property" data-id="${escapeAttr(selectedProperty.id)}" type="button">Delete property</button>
+                </div>
               </div>
             ` : ""}
           ` : renderEmpty("No property yet", "Start with the home these records belong to.")}
         </section>
-        <section class="panel">
-          ${renderPanelHeader(propertyMode === "edit" ? "Edit property" : "Add property", "Only the property name is required. You can fill in purchase details later.", "clipboard")}
-          ${propertyMode === "view" && selectedProperty ? renderPropertyNextSteps(selectedProperty) : renderPropertyForm(propertyMode === "edit" ? selectedProperty : null)}
-        </section>
+        ${selectedProperty ? renderPropertyFileOverview(selectedProperty, propertyProjects, propertyExpenses, propertyDocuments) : ""}
       </div>
+      ${propertyMode === "view" ? "" : renderPropertyFormModal(propertyMode === "edit" ? selectedProperty : null)}
     </div>
   `;
 }
 
+function renderPropertyFileOverview(property, projects, expenses, documents) {
+  const totals = getExpenseTotals(expenses);
+  const gaps = getDocumentationAttentionExpenses(expenses).slice(0, 4);
+  const recentExpenses = sortByDateDesc(expenses).slice(0, 4);
+  const recentDocuments = sortDocumentsByAddedDateDesc(documents).slice(0, 4);
+  const openProjects = projects.filter((project) => !["completed", "archived"].includes(project.status));
+
+  return `
+    <section class="panel property-file-panel">
+      ${renderPanelHeader(`${property.name} file`, "Linked projects, costs, documents, and open record gaps.", "clipboard")}
+      <div class="property-file-grid">
+        ${storageMetric("Tracked spend", formatCurrency(totals.total))}
+        ${storageMetric("Potential basis", formatCurrency(totals.potential))}
+        ${storageMetric("Open projects", openProjects.length)}
+        ${storageMetric("Documents", documents.length)}
+      </div>
+      <div class="property-file-sections">
+        <div>
+          <h3>Linked projects</h3>
+          ${projects.length ? `
+            <ul class="record-chip-list">
+              ${projects.slice(0, 5).map((project) => `<li><strong>${escapeHtml(project.name)}</strong><span>${escapeHtml(optionLabel(PROJECT_STATUSES, project.status))} / ${escapeHtml(optionLabel(EXPENSE_CATEGORIES, project.category))}</span></li>`).join("")}
+            </ul>
+          ` : renderEmpty("No projects yet", "Add projects to group related work.")}
+        </div>
+        <div>
+          <h3>Recent expenses</h3>
+          ${recentExpenses.length ? `
+            <ul class="record-chip-list">
+              ${recentExpenses.map((expense) => `<li><strong>${escapeHtml(getExpenseVendorName(data, expense))}</strong><span>${escapeHtml(expense.description)} / ${formatCurrency(expense.amount)}</span></li>`).join("")}
+            </ul>
+          ` : renderEmpty("No expenses yet", "Add costs as receipts or notes arrive.")}
+        </div>
+        <div>
+          <h3>Documents</h3>
+          ${recentDocuments.length ? `
+            <ul class="record-chip-list">
+              ${recentDocuments.map((document) => `<li><strong>${escapeHtml(document.displayName)}</strong><span>${escapeHtml(optionLabel(DOCUMENT_TYPES, document.documentType))} / ${document.hasFile ? "File stored" : "Needs file"}</span></li>`).join("")}
+            </ul>
+          ` : renderEmpty("No documents yet", "Attach receipts, permits, invoices, photos, or notes.")}
+        </div>
+        <div>
+          <h3>Record gaps</h3>
+          ${gaps.length ? `
+            <ul class="record-chip-list compact-followups">
+              ${gaps.map((expense) => `<li><strong>${escapeHtml(getExpenseVendorName(data, expense))}</strong><span>${escapeHtml(getExpenseDocumentationIssue(expense))}</span></li>`).join("")}
+            </ul>
+          ` : `<p class="helper-note">No open documentation gaps for this property.</p>`}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderProjectsView() {
-  const filteredProjects = data.projects.filter((project) => {
-    if (projectFilters.propertyId !== EMPTY_FILTER && project.propertyId !== projectFilters.propertyId) return false;
-    if (projectFilters.status !== EMPTY_FILTER && project.status !== projectFilters.status) return false;
-    if (projectFilters.category !== EMPTY_FILTER && project.category !== projectFilters.category) return false;
-    return true;
-  });
+  const filteredProjects = getFilteredProjects();
   const editingProject = editingProjectId === null ? null : data.projects.find((project) => project.id === editingProjectId);
-  const selectedProject = filteredProjects.find((project) => project.id === selectedProjectId) || filteredProjects[0] || null;
   const hasProjectsForCurrentFilters = data.projects.some((project) => {
     if (projectFilters.propertyId !== EMPTY_FILTER && project.propertyId !== projectFilters.propertyId) return false;
     return true;
@@ -570,35 +1021,104 @@ function renderProjectsView() {
       ${renderPageIntro({
         eyebrow: "Projects",
         title: "Renovation and improvement projects",
-        description: "Group expenses by project so a CPA can review the work, timing, vendor, and documentation together.",
-        actions: `<button class="button button-primary" data-action="add-project" ${data.properties.length ? "" : "disabled"} type="button"><span aria-hidden="true">+</span>Add project</button>`,
+        description: "Track project dates, contractors, permits, notes, expenses, and supporting documents in one place.",
+        actions: `
+          <button class="button button-secondary" data-action="manage-vendors" type="button">Manage vendors</button>
+          <button class="button button-primary" data-action="add-project" ${data.properties.length ? "" : "disabled"} type="button"><span aria-hidden="true">+</span>Add project</button>
+        `,
       })}
       ${data.properties.length ? "" : renderEmpty("Add a property first", "Projects need a property so totals and exports stay organized.")}
-      <div class="content-grid project-layout">
-        <section class="panel">
-          ${renderPanelHeader("Project list", "", "folder")}
-          <div class="filter-bar">
-            ${renderFilter("Property", "project.propertyId", projectFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
-            ${renderFilter("Status", "project.status", projectFilters.status, PROJECT_STATUSES)}
-            ${renderFilter("Category", "project.category", projectFilters.category, EXPENSE_CATEGORIES)}
-          </div>
-          ${filteredProjects.length
-            ? renderProjectsTable(filteredProjects, selectedProject)
-            : hasProjectsForCurrentFilters
-              ? renderEmpty("No matching projects", "Adjust the status or category filters.")
-              : data.properties.length
-                ? renderEmpty("No projects yet", "Add your first project when you want to group related costs.")
-                : renderEmpty("No property yet", "Add a property before creating projects.")}
-        </section>
-        <aside class="panel">
-          ${editingProjectId !== undefined
-            ? `${renderPanelHeader(editingProject ? "Edit project" : "Add project", "Projects help connect related expenses and notes.", "edit")}${renderProjectForm(editingProject || null)}`
-            : selectedProject
-              ? renderProjectDetail(selectedProject)
-              : renderEmpty("No project selected", "Choose a project to see linked expenses.")}
-        </aside>
-      </div>
+      <section class="panel">
+        ${renderPanelHeader("Project list", "", "folder", filteredProjects.length ? renderProjectExpansionActions(filteredProjects) : "")}
+        <div class="filter-bar">
+          ${renderFilter("Property", "project.propertyId", projectFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
+          ${renderFilter("Status", "project.status", projectFilters.status, PROJECT_STATUSES)}
+          ${renderFilter("Category", "project.category", projectFilters.category, EXPENSE_CATEGORIES)}
+        </div>
+        ${filteredProjects.length
+          ? renderProjectsTable(filteredProjects)
+          : hasProjectsForCurrentFilters
+            ? renderEmpty("No matching projects", "Adjust the status or category filters.")
+            : data.properties.length
+              ? renderEmpty("No projects yet", "Add your first project when you are ready to organize an improvement.")
+              : renderEmpty("No property yet", "Add a property before creating projects.")}
+      </section>
+      ${editingProjectId !== undefined ? renderProjectFormModal(editingProject || null) : ""}
     </div>
+  `;
+}
+
+function renderVendorManagerModal() {
+  return `
+    <div class="modal-backdrop" role="presentation">
+      <section class="form-modal vendor-manager-modal" role="dialog" aria-modal="true" aria-labelledby="vendor-manager-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Vendor setup</p>
+            <h2 id="vendor-manager-title">Manage vendors</h2>
+            <p>Set up contractors, stores, agencies, and payees once, then link them to projects and expenses.</p>
+          </div>
+          <button class="icon-button" data-action="close-vendor-manager" type="button" aria-label="Close">×</button>
+        </div>
+        ${renderVendorRegistryContent()}
+      </section>
+    </div>
+  `;
+}
+
+function renderVendorRegistryContent() {
+  const activeVendors = [...data.vendors].sort((a, b) => a.name.localeCompare(b.name));
+  return `
+    <div class="vendor-manager-body">
+      <div class="vendor-manager-toolbar">
+        <div>
+          <h3>Vendor list</h3>
+          <p>${activeVendors.length} vendor${activeVendors.length === 1 ? "" : "s"} available for project and expense records.</p>
+        </div>
+        <button class="button button-secondary" data-action="add-vendor" type="button"><span aria-hidden="true">+</span>Add vendor</button>
+      </div>
+      ${activeVendors.length ? `
+        <div class="vendor-card-list">
+          ${activeVendors.map((vendor) => {
+            const projectCount = data.projects.filter((project) => project.vendorId === vendor.id).length;
+            const expenseCount = data.expenses.filter((expense) => expense.vendorId === vendor.id).length;
+            const totalSpend = getExpenseTotals(data.expenses.filter((expense) => expense.vendorId === vendor.id)).total;
+            return `
+              <article class="vendor-card ${vendor.status === "archived" ? "is-archived" : ""}">
+                <div>
+                  <h3>${escapeHtml(vendor.name)}</h3>
+                  <p>${escapeHtml(optionLabel(EXPENSE_CATEGORIES, vendor.category))}${vendor.contactName ? ` / ${escapeHtml(vendor.contactName)}` : ""}</p>
+                </div>
+                <div class="vendor-card-meta">
+                  <span>${projectCount} project${projectCount === 1 ? "" : "s"}</span>
+                  <span>${expenseCount} expense${expenseCount === 1 ? "" : "s"}</span>
+                  <strong>${formatCurrency(totalSpend)}</strong>
+                  <span class="pill ${vendor.status === "archived" ? "tone-warn" : "tone-green"}">${escapeHtml(optionLabel(VENDOR_STATUSES, vendor.status))}</span>
+                </div>
+                <button class="icon-button" data-action="edit-vendor" data-id="${escapeAttr(vendor.id)}" type="button" aria-label="Edit ${escapeAttr(vendor.name)}">✎</button>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      ` : renderEmpty("No vendors yet", "Add a vendor before linking new project and expense records. Existing payee text will be migrated automatically when present.")}
+    </div>
+  `;
+}
+
+function getFilteredProjects() {
+  return data.projects.filter((project) => {
+    if (projectFilters.propertyId !== EMPTY_FILTER && project.propertyId !== projectFilters.propertyId) return false;
+    if (projectFilters.status !== EMPTY_FILTER && project.status !== projectFilters.status) return false;
+    if (projectFilters.category !== EMPTY_FILTER && project.category !== projectFilters.category) return false;
+    return true;
+  });
+}
+
+function renderProjectExpansionActions(filteredProjects) {
+  const expandedCount = filteredProjects.filter((project) => expandedProjectIds.has(project.id)).length;
+  return `
+    <button class="button button-secondary" data-action="expand-all-projects" type="button" ${expandedCount === filteredProjects.length ? "disabled" : ""}>Expand all</button>
+    <button class="button button-secondary" data-action="collapse-all-projects" type="button" ${expandedCount === 0 ? "disabled" : ""}>Collapse all</button>
   `;
 }
 
@@ -632,7 +1152,7 @@ function renderExpensesView() {
       ${renderPageIntro({
         eyebrow: "Expense tracker",
         title: "Receipts, invoices, and cost records",
-        description: "Classify each item for organization only. Confirm treatment with your CPA.",
+        description: "Connect each cost record to the right property, project, category, and supporting receipt or invoice.",
         actions: `<button class="button button-primary" data-action="add-expense" ${data.properties.length ? "" : "disabled"} type="button"><span aria-hidden="true">+</span>Add expense</button>`,
       })}
       ${data.properties.length ? "" : renderEmpty("Add a property first", "Expense records need a property so totals and exports stay organized.")}
@@ -640,7 +1160,7 @@ function renderExpensesView() {
         ["Filtered total", formatCurrency(totals.total), ""],
         ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
         ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
-        ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
+        ["Needs professional review", formatCurrency(totals.unclear), "amber"],
       ], "compact")}
       ${editingExpenseId !== undefined ? `
         <section class="panel">
@@ -653,7 +1173,7 @@ function renderExpensesView() {
         <div class="filter-bar expense-filters">
           ${renderFilter("Property", "expense.propertyId", expenseFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
           ${renderFilter("Project", "expense.projectId", expenseFilters.projectId, projectOptions.map((project) => ({ value: project.id, label: project.name })))}
-          ${renderFilter("Review type", "expense.classification", expenseFilters.classification, CLASSIFICATIONS)}
+          ${renderFilter("Expense type", "expense.classification", expenseFilters.classification, CLASSIFICATIONS)}
           ${renderFilter("Category", "expense.category", expenseFilters.category, EXPENSE_CATEGORIES)}
           ${renderFilter("Docs", "expense.documentationStatus", expenseFilters.documentationStatus, DOCUMENT_STATUSES)}
           <label class="field compact-field">
@@ -680,16 +1200,21 @@ function renderExpensesView() {
 
 function renderDocumentsView() {
   const readiness = getReviewReadiness(data);
-  const documentationGaps = getDocumentationAttentionExpenses(data.expenses).filter((expense) => {
+  const documentationGaps = sortByDateDesc(getDocumentationAttentionExpenses(data.expenses).filter((expense) => {
     if (documentFilters.propertyId !== EMPTY_FILTER && expense.propertyId !== documentFilters.propertyId) return false;
     return true;
-  });
+  }));
   const filteredDocuments = data.documents.filter((document) => {
     if (documentFilters.propertyId !== EMPTY_FILTER && document.propertyId !== documentFilters.propertyId) return false;
     if (documentFilters.documentType !== EMPTY_FILTER && document.documentType !== documentFilters.documentType) return false;
     if (documentFilters.fileStatus !== EMPTY_FILTER && getDocumentFileStatus(document) !== documentFilters.fileStatus) return false;
     return true;
   });
+  const sortedDocuments = sortDocumentsByAddedDateDesc(filteredDocuments);
+  const documentFollowUps = sortDocumentsByAddedDateDesc(data.documents.filter((document) => {
+    if (documentFilters.propertyId !== EMPTY_FILTER && document.propertyId !== documentFilters.propertyId) return false;
+    return getDocumentFileStatus(document) !== "stored";
+  }));
   const hasDocumentsForCurrentProperty = data.documents.some((document) =>
     documentFilters.propertyId === EMPTY_FILTER || document.propertyId === documentFilters.propertyId
   );
@@ -700,45 +1225,90 @@ function renderDocumentsView() {
       ${renderPageIntro({
         eyebrow: "Document checklist",
         title: "Receipts and supporting documents",
-        description: "Attach receipt and invoice files locally, then track what still needs follow-up.",
+        description: "Build a home record library for receipts, invoices, permits, photos, warranties, contracts, and payment records.",
         actions: `<button class="button button-primary" data-action="add-document" ${data.properties.length ? "" : "disabled"} type="button"><span aria-hidden="true">+</span>Add document</button>`,
       })}
-      ${renderNotice("Try to keep receipts, contractor invoices, permits, before/after photos, and payment records.")}
-      ${renderNotice(`Attached files are stored only ${storageLocationShort()}. They are not uploaded by this app. Anyone with access to ${storageAccessSurface()} may be able to view them.`)}
+      ${renderNotice("Attach receipts, invoices, permits, before/after photos, and payment records as you collect them.")}
       ${data.properties.length ? "" : renderEmpty("Add a property first", "Documents need a property so they can be included with the right home records.")}
       ${data.properties.length ? renderDocumentCenterSummary(readiness) : ""}
+      ${data.properties.length ? renderDocumentSubTabs(sortedDocuments.length, documentationGaps.length, documentFollowUps.length) : ""}
       ${editingDocumentId !== undefined ? `
         <section class="panel">
-          ${renderPanelHeader(editingDocument ? "Edit document" : "Add document", "Save a display name, document type, and optional local file. Local file paths are removed from notes.", "edit", `<button class="icon-button" data-action="close-document-form" type="button" aria-label="Close">×</button>`)}
+          ${renderPanelHeader(editingDocument ? "Edit document" : "Add document", "Save a display name, document type, and optional file. File paths are removed from notes.", "edit", `<button class="icon-button" data-action="close-document-form" type="button" aria-label="Close">×</button>`)}
           ${renderDocumentForm(editingDocument || null)}
         </section>
       ` : ""}
-      <div class="content-grid two-columns">
+      ${data.properties.length && documentSubTab === DOCUMENT_TAB_LIBRARY ? `
         <section class="panel">
-          ${renderPanelHeader("Documentation follow-up", "Expenses missing documents or marked attached without a linked stored receipt/invoice.", "alert")}
-          ${documentationGaps.length
-            ? renderDocumentationGapsTable(documentationGaps)
-            : data.properties.length
-              ? renderEmpty("No open documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")
-              : renderEmpty("No property yet", "Add a property, then track expenses to build the checklist.")}
-        </section>
-        <section class="panel">
-          ${renderPanelHeader("Documents", "", "document")}
+          ${renderPanelHeader("All documents", "Receipts, invoices, permits, photos, warranties, contracts, and notes in one place.", "document")}
           <div class="filter-bar document-filters">
             ${renderFilter("Property", "document.propertyId", documentFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
             ${renderFilter("Type", "document.documentType", documentFilters.documentType, DOCUMENT_TYPES)}
             ${renderFilter("File", "document.fileStatus", documentFilters.fileStatus, DOCUMENT_FILE_FILTERS)}
           </div>
-          ${filteredDocuments.length
-            ? renderDocumentList(filteredDocuments)
+          ${sortedDocuments.length
+            ? renderDocumentList(sortedDocuments)
             : data.properties.length
               ? data.documents.length && hasDocumentsForCurrentProperty
                 ? renderEmpty("No matching documents", "Adjust the document filters to see more records.")
                 : renderEmpty("No documents yet", "Add a simple record for receipts, invoices, permits, photos, or contracts.")
               : renderEmpty("No property yet", "Add a property before attaching documents.")}
         </section>
-      </div>
+      ` : ""}
+      ${data.properties.length && documentSubTab === DOCUMENT_TAB_FOLLOW_UP ? renderDocumentFollowUpTab(documentationGaps, documentFollowUps) : ""}
     </div>
+  `;
+}
+
+function renderDocumentSubTabs(documentCount, expenseFollowUpCount, fileFollowUpCount) {
+  return `
+    <div class="sub-tabs" role="tablist" aria-label="Document views">
+      <button
+        aria-selected="${documentSubTab === DOCUMENT_TAB_LIBRARY}"
+        class="${documentSubTab === DOCUMENT_TAB_LIBRARY ? "is-active" : ""}"
+        data-action="set-document-subtab"
+        data-document-subtab="${DOCUMENT_TAB_LIBRARY}"
+        role="tab"
+        type="button"
+      >All documents <span>${documentCount}</span></button>
+      <button
+        aria-selected="${documentSubTab === DOCUMENT_TAB_FOLLOW_UP}"
+        class="${documentSubTab === DOCUMENT_TAB_FOLLOW_UP ? "is-active" : ""}"
+        data-action="set-document-subtab"
+        data-document-subtab="${DOCUMENT_TAB_FOLLOW_UP}"
+        role="tab"
+        type="button"
+      >Needs follow-up <span>${expenseFollowUpCount} expense${expenseFollowUpCount === 1 ? "" : "s"}</span><span>${fileFollowUpCount} file${fileFollowUpCount === 1 ? "" : "s"}</span></button>
+    </div>
+  `;
+}
+
+function renderDocumentFollowUpTab(documentationGaps, documentFollowUps) {
+  return `
+    <section class="panel">
+      ${renderPanelHeader("Needs follow-up", "Expense documentation gaps and document file follow-ups are listed separately.", "alert")}
+      <div class="filter-bar document-followup-filters">
+        ${renderFilter("Property", "document.propertyId", documentFilters.propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })))}
+      </div>
+      <div class="document-followup-summary">
+        ${storageMetric("Expense documentation gaps", documentationGaps.length)}
+        ${storageMetric("Document file follow-ups", documentFollowUps.length)}
+      </div>
+      <div class="document-followup-grid">
+        <div>
+          <h3>Expense documentation</h3>
+          ${documentationGaps.length
+            ? renderDocumentationGapsTable(documentationGaps)
+            : renderEmpty("No expense documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")}
+        </div>
+        <div>
+          <h3>Document files</h3>
+          ${documentFollowUps.length
+            ? renderDocumentList(documentFollowUps, { compactActions: true })
+            : renderEmpty("No document file follow-ups", "Every matching document record has a stored file attached.")}
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -751,13 +1321,13 @@ function renderDocumentCenterSummary(readiness) {
 
   return `
     <section class="panel document-center-panel">
-      ${renderPanelHeader("Document center", "Coverage, linked records, and missing evidence.", "document")}
+      ${renderPanelHeader("Document center", "Coverage, linked records, and document gaps.", "document")}
       <div class="document-center-grid">
         ${storageMetric("Stored files", readiness.storedDocuments.length)}
         ${storageMetric("Document records", data.documents.length)}
         ${storageMetric("Linked records", linkedDocumentCount)}
         ${storageMetric("Needs file follow-up", readiness.documentsWithoutFiles.length)}
-        ${storageMetric("Expense evidence gaps", readiness.expensesMissingLinkedEvidence.length)}
+        ${storageMetric("Expense document gaps", readiness.expensesMissingLinkedEvidence.length)}
         ${storageMetric("Document types", documentTypeCounts.length || 0)}
       </div>
       ${documentTypeCounts.length ? `
@@ -782,70 +1352,81 @@ function renderExportCenter() {
       ${renderPageIntro({
         eyebrow: "Export & backup",
         title: "Export records and keep backups",
-        description: "Create CPA review files from saved records, then keep a separate private backup for yourself.",
+        description: "Create professional review exports from saved records, then keep a separate private backup for yourself.",
       })}
       ${renderCpaExportPanel()}
-      ${renderStorageHealthPanel()}
       ${renderBackupRestorePanel()}
       ${renderDataSafetyPanel()}
-      <section class="panel print-summary">
-        ${renderPanelHeader("CPA review summary", `Prepared from local records on ${formatDate(todayISO())}.`, "clipboard")}
-        <p class="helper-note print-caveat">For record review only. Home Basis Tracker does not determine tax treatment.</p>
-        ${renderMetrics([
-          ["Total tracked spend", formatCurrency(totals.total), ""],
-          ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
-          ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
-          ["Unclear / ask CPA", formatCurrency(totals.unclear), "amber"],
-        ], "compact")}
-        <div class="export-section">
-          <h3>Review readiness</h3>
-          ${renderExportReadinessChecklist(readiness)}
-        </div>
-        <div class="export-section">
-          <h3>Properties</h3>
-          ${data.properties.length ? renderExportPropertiesTable() : renderEmpty("No properties to export", "Add a property before preparing a full summary.")}
-        </div>
-        <div class="export-section">
-          <h3>Projects</h3>
-          ${data.projects.length ? renderExportProjectsTable() : renderEmpty("No projects to export", "Add project records to group related expenses and documents.")}
-        </div>
-        <div class="export-section">
-          <h3>Expense detail</h3>
-          ${data.expenses.length ? renderExportExpensesTable() : renderEmpty("No expenses to export", "Add expense records to build the CSV and review summary.")}
-        </div>
-        <div class="export-section">
-          <h3>Documentation follow-ups</h3>
-          ${documentationGaps.length ? renderExportDocumentationGapsTable(documentationGaps) : renderEmpty("No open documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")}
-        </div>
-        <div class="export-section">
-          <h3>Documents</h3>
-          ${data.documents.length ? renderExportDocumentsTable() : renderEmpty("No documents to export", "Add documents to include local file metadata in the printable summary.")}
-        </div>
-      </section>
+      ${renderStorageHealthPanel()}
+      ${renderReviewSummaryPreview(totals, readiness, documentationGaps)}
     </div>
+  `;
+}
+
+function renderReviewSummaryPreview(totals, readiness, documentationGaps) {
+  return `
+    <details class="panel print-summary export-preview-panel">
+      <summary>
+        <span>
+          <strong>Detailed review summary preview</strong>
+          <small>Prepared ${formatDate(todayISO())}. Expand only when you want to inspect the full packet content.</small>
+        </span>
+      </summary>
+      <p class="helper-note print-caveat">For record review only. Home Basis Tracker does not determine tax treatment.</p>
+      ${renderMetrics([
+        ["Total tracked spend", formatCurrency(totals.total), ""],
+        ["Marked potential basis additions", formatCurrency(totals.potential), "green"],
+        ["Repair/maintenance", formatCurrency(totals.repair), "rust"],
+        ["Needs professional review", formatCurrency(totals.unclear), "amber"],
+      ], "compact")}
+      <div class="export-section">
+        <h3>Review readiness</h3>
+        ${renderExportReadinessChecklist(readiness)}
+      </div>
+      <div class="export-section">
+        <h3>Properties</h3>
+        ${data.properties.length ? renderExportPropertiesTable() : renderEmpty("No properties to export", "Add a property before preparing a full summary.")}
+      </div>
+      <div class="export-section">
+        <h3>Projects</h3>
+        ${data.projects.length ? renderExportProjectsTable() : renderEmpty("No projects to export", "Add project records to group related expenses and documents.")}
+      </div>
+      <div class="export-section">
+        <h3>Expense detail</h3>
+        ${data.expenses.length ? renderExportExpensesTable() : renderEmpty("No expenses to export", "Add expense records to build the CSV and review summary.")}
+      </div>
+      <div class="export-section">
+        <h3>Documentation follow-ups</h3>
+        ${documentationGaps.length ? renderExportDocumentationGapsTable(documentationGaps) : renderEmpty("No open documentation follow-ups", "Missing documents and attached statuses without linked stored files will appear here.")}
+      </div>
+      <div class="export-section">
+        <h3>Documents</h3>
+        ${data.documents.length ? renderExportDocumentsTable() : renderEmpty("No documents to export", "Add documents to include file metadata in the printable summary.")}
+      </div>
+    </details>
   `;
 }
 
 function renderDataSafetyPanel() {
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("About local storage", "A plain-English note on where your records live.", "home")}
+      ${renderPanelHeader("Backup notes", "Keep a copy of anything important.", "home")}
       <div class="safety-list">
         <div>
-          <strong>Records stay ${storageLocationShort()}</strong>
-          <span>Properties, projects, expenses, and document records are saved with ${recordStorageLabel()}.</span>
+          <strong>Full backups may include files</strong>
+          <span>Backup JSON files can include receipts, invoices, photos, and notes.</span>
         </div>
         <div>
-          <strong>Attached files stay ${storageLocationShort()}</strong>
-          <span>Receipt and invoice files are stored as ${documentStorageLabel()}. This app does not upload them.</span>
+          <strong>Keep backups private</strong>
+          <span>Store backup files somewhere you are comfortable keeping home records.</span>
         </div>
         <div>
-          <strong>${storageCleanupTitle()}</strong>
-          <span>${storageCleanupCopy()}</span>
+          <strong>Restore with care</strong>
+          <span>Restoring a backup replaces the current workspace after confirmation.</span>
         </div>
         <div>
-          <strong>Full backups are private records</strong>
-          <span>Backup JSON files may contain receipts, invoices, photos, and notes. Keep them somewhere private.</span>
+          <strong>Check file follow-ups</strong>
+          <span>After restore, review any documents marked as missing file content.</span>
         </div>
       </div>
     </section>
@@ -855,20 +1436,19 @@ function renderDataSafetyPanel() {
 function renderCpaExportPanel() {
   const hasReviewRecords = data.properties.length || data.expenses.length || data.documents.length;
   const pdfLabel = isDesktopMode()
-    ? isTutorialMode() ? "Save tutorial CPA PDF" : "Save CPA PDF"
+    ? isTutorialMode() ? "Save tutorial review PDF" : "Save professional review PDF"
     : "Print / save PDF";
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("For CPA review", isTutorialMode()
-        ? "CSV and print exports use tutorial sample records only, not your real binder."
-        : "CSV and print exports include saved record details only, not attached file contents.", "clipboard")}
+      ${renderPanelHeader("Create review packet", isTutorialMode()
+        ? "Exports use tutorial sample records only, not your real binder."
+        : "Create a polished review PDF and a spreadsheet-ready expense export from saved records.", "clipboard")}
       <div class="backup-actions">
-        <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print summary</button>
+        <button class="button button-secondary" data-action="print-summary" type="button"><span aria-hidden="true">⎙</span>Print review summary</button>
         <button class="button button-primary" data-action="download-cpa-pdf" ${hasReviewRecords ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${pdfLabel}</button>
-        <button class="button button-secondary" data-action="download-cpa-packet" ${hasReviewRecords ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial review packet" : "Download CPA review packet"}</button>
-        <button class="button button-secondary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial CSV" : "Download expense CSV"}</button>
+        <button class="button button-secondary" data-action="download-csv" ${data.expenses.length ? "" : "disabled"} type="button"><span aria-hidden="true">↓</span>${isTutorialMode() ? "Download tutorial expense CSV" : "Download expense CSV"}</button>
       </div>
-      <p class="helper-note">Review exports before sharing. Classifications are for organization and CPA discussion only.</p>
+      <p class="helper-note">The review packet is for homeowner reference and professional review. The CSV stays spreadsheet-friendly and does not include attached file contents.</p>
     </section>
   `;
 }
@@ -876,22 +1456,19 @@ function renderCpaExportPanel() {
 function renderStorageHealthPanel() {
   const attachedDocuments = data.documents.filter((document) => document.hasFile);
   const attachedFileSize = attachedDocuments.reduce((total, document) => total + (Number(document.fileSize) || 0), 0);
-  const estimateCopy = getStorageEstimateCopy();
 
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("Storage health", `${storageHealthCopy()} It is useful, but it is not a backup.`, "document")}
+      ${renderPanelHeader("Record counts", "Current records and attached file size.", "document")}
       <div class="storage-health-grid">
+        ${storageMetric("Vendors", data.vendors.length)}
         ${storageMetric("Properties", data.properties.length)}
         ${storageMetric("Projects", data.projects.length)}
         ${storageMetric("Expenses", data.expenses.length)}
         ${storageMetric("Documents", data.documents.length)}
         ${storageMetric("Attached files", attachedDocuments.length)}
         ${storageMetric("Attached file size", formatFileSize(attachedFileSize))}
-        ${storageMetric(isDesktopMode() ? "Records file size" : "Browser storage used", estimateCopy.used)}
-        ${storageMetric(isDesktopMode() ? "Stored document copies" : "Estimated quota", estimateCopy.quota)}
       </div>
-      <p class="helper-note">Large files may fail to save if local storage is full or removed. Keep your own backup of important records.</p>
     </section>
   `;
 }
@@ -901,7 +1478,7 @@ function renderBackupRestorePanel() {
     <section class="panel print-hidden">
       ${renderPanelHeader(isTutorialMode() ? "Tutorial backup and restore" : "For your backup", isTutorialMode()
         ? "Create or restore sample backup files inside this temporary tutorial workspace only."
-        : `Create a private backup for your own records, or restore one ${storageLocationShort()}.`, "clipboard")}
+        : "Create a private backup for your own records, or restore one you saved earlier.", "clipboard")}
       <div class="backup-actions">
         <button class="button button-primary" data-action="download-full-backup" type="button">${isTutorialMode() ? "Download tutorial backup" : isDesktopMode() ? "Save full backup" : "Download full backup"}</button>
         <button class="button button-secondary" data-action="choose-backup-file" type="button">${isTutorialMode() ? "Restore into tutorial" : "Restore from backup"}</button>
@@ -968,47 +1545,6 @@ function storageSurfaceName() {
   return isDesktopMode() ? "Mac app" : "Browser";
 }
 
-function storageLocationShort() {
-  if (isTutorialMode()) return "inside this temporary tutorial workspace";
-  return isDesktopMode() ? "in this Mac app on this Mac" : "in this browser on this device";
-}
-
-function storageAccessSurface() {
-  if (isTutorialMode()) return "this tutorial workspace";
-  return isDesktopMode() ? "this Mac user account" : "this browser profile";
-}
-
-function recordStorageLabel() {
-  if (isTutorialMode()) return "temporary in-memory tutorial records";
-  return isDesktopMode() ? "an app-managed records file on this Mac" : "browser local storage on this device";
-}
-
-function documentStorageLabel() {
-  if (isTutorialMode()) return "simulated tutorial document metadata";
-  return isDesktopMode() ? "app-managed copies on this Mac" : "browser document storage in this browser profile";
-}
-
-function storageCleanupTitle() {
-  if (isTutorialMode()) return "Tutorial data resets on request";
-  return isDesktopMode() ? "Deleting app data can remove records" : "Browser cleanup can remove records";
-}
-
-function storageCleanupCopy() {
-  if (isTutorialMode()) {
-    return "Exiting or resetting the tutorial removes sample changes and returns you to your real workspace.";
-  }
-  return isDesktopMode()
-    ? "Deleting the app's local data folder can remove saved records and copied document files."
-    : "Clearing site data, switching browser profiles, or using private browsing can remove saved records and files.";
-}
-
-function storageHealthCopy() {
-  if (isTutorialMode()) return "Tutorial storage is temporary and separate from your real records.";
-  return isDesktopMode()
-    ? "Mac app storage is local to this Mac user account."
-    : "Browser storage is local to this device and browser profile.";
-}
-
 function renderPropertyForm(property) {
   return `
     <form class="form-grid" data-form="property" novalidate>
@@ -1025,21 +1561,165 @@ function renderPropertyForm(property) {
   `;
 }
 
-function renderPropertyNextSteps(property) {
+function renderPropertyFormModal(property) {
+  const isEditing = Boolean(property);
   return `
-    <div class="next-step-panel">
-      <strong>${escapeHtml(property.name)} is ready.</strong>
-      <span>Add projects first if you want to group related costs, or enter expenses directly and organize them later.</span>
-      <div class="next-step-actions">
-        <button class="button button-primary" data-action="add-project" type="button"><span aria-hidden="true">+</span>Add project</button>
-        <button class="button button-secondary" data-action="add-expense" type="button"><span aria-hidden="true">+</span>Add expense</button>
-        <button class="button button-secondary" data-action="add-document" type="button"><span aria-hidden="true">+</span>Add document</button>
-      </div>
+    <div class="modal-backdrop" role="presentation">
+      <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="property-form-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Property setup</p>
+            <h2 id="property-form-title">${isEditing ? "Edit property" : "Add property"}</h2>
+            <p>Only the property name is required. You can fill in purchase details later.</p>
+          </div>
+          <button class="icon-button" data-action="cancel-form" type="button" aria-label="Close">×</button>
+        </div>
+        ${renderPropertyForm(property)}
+      </section>
     </div>
   `;
 }
 
+function renderEditablePropertyField(property, fieldName, label, displayValue) {
+  const isEditing = editingPropertyField === fieldName;
+  const isTitle = fieldName === "name";
+  const wrapperClass = `editable-detail ${isTitle ? "is-title" : ""}`;
+
+  if (isEditing) {
+    return `
+      <div class="${wrapperClass}">
+        <form class="inline-edit-form" data-form="property-field" novalidate>
+          <input type="hidden" name="id" value="${escapeAttr(property.id)}">
+          <input type="hidden" name="fieldName" value="${escapeAttr(fieldName)}">
+          ${renderPropertyFieldControl(fieldName, label, getPropertyFieldEditValue(property, fieldName))}
+          <div class="inline-edit-actions">
+            <button class="icon-button" data-action="cancel-property-field" type="button" aria-label="Cancel edit">×</button>
+            <button class="icon-button save-icon-button" type="submit" aria-label="Save ${escapeAttr(label)}">✓</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  if (isTitle) {
+    return `
+      <div class="${wrapperClass}">
+        <h3>${escapeHtml(displayValue)}</h3>
+        ${propertyEditButton(fieldName, label)}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="${wrapperClass}">
+      <dt>${escapeHtml(label)}</dt>
+      <dd>
+        <span>${escapeHtml(displayValue)}</span>
+        ${propertyEditButton(fieldName, label)}
+      </dd>
+    </div>
+  `;
+}
+
+function propertyEditButton(fieldName, label) {
+  return `<button class="icon-button field-edit-button" data-action="edit-property-field" data-field="${escapeAttr(fieldName)}" type="button" aria-label="Edit ${escapeAttr(label)}">✎</button>`;
+}
+
+function getPropertyFieldEditValue(property, fieldName) {
+  if (fieldName === "purchasePrice") return property.purchasePrice || "";
+  return property[fieldName] || "";
+}
+
+function renderPropertyFieldControl(fieldName, label, value) {
+  if (fieldName === "notes") {
+    return `
+      <label class="field">
+        <span>${escapeHtml(label)}</span>
+        <textarea name="value" rows="3">${escapeHtml(value)}</textarea>
+      </label>
+    `;
+  }
+
+  const type = fieldName === "purchaseDate" ? "date" : fieldName === "purchasePrice" ? "number" : "text";
+  const extra = fieldName === "purchasePrice" ? ` step="0.01" placeholder="0.00"` : "";
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <input name="value" type="${escapeAttr(type)}" value="${escapeAttr(value)}"${extra}>
+    </label>
+  `;
+}
+
+function renderEditableProjectField(project, fieldName, label, displayValue) {
+  const isEditing = editingProjectField === fieldName;
+  const wrapperClass = `editable-detail project-field project-field-${fieldName}`;
+
+  if (isEditing) {
+    return `
+      <div class="${wrapperClass}">
+        <form class="inline-edit-form" data-form="project-field" novalidate>
+          <input type="hidden" name="id" value="${escapeAttr(project.id)}">
+          <input type="hidden" name="fieldName" value="${escapeAttr(fieldName)}">
+          ${renderProjectFieldControl(project, fieldName, label, getProjectFieldEditValue(project, fieldName))}
+          <div class="inline-edit-actions">
+            <button class="icon-button" data-action="cancel-project-field" type="button" aria-label="Cancel edit">×</button>
+            <button class="icon-button save-icon-button" type="submit" aria-label="Save ${escapeAttr(label)}">✓</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="${wrapperClass}">
+      <dt>${escapeHtml(label)}</dt>
+      <dd>
+        <span>${escapeHtml(displayValue)}</span>
+        ${projectEditButton(fieldName, label)}
+      </dd>
+    </div>
+  `;
+}
+
+function projectEditButton(fieldName, label) {
+  return `<button class="icon-button field-edit-button" data-action="edit-project-field" data-field="${escapeAttr(fieldName)}" type="button" aria-label="Edit ${escapeAttr(label)}">✎</button>`;
+}
+
+function getProjectFieldEditValue(project, fieldName) {
+  return project[fieldName] || "";
+}
+
+function renderProjectFieldControl(project, fieldName, label, value) {
+  if (fieldName === "propertyId") {
+    return selectField(label, "value", value || selectedPropertyId || data.properties[0]?.id || "", data.properties.map((property) => ({ value: property.id, label: property.name })), false);
+  }
+  if (fieldName === "category") {
+    return selectField(label, "value", value || "other", EXPENSE_CATEGORIES, false);
+  }
+  if (fieldName === "status") {
+    return selectField(label, "value", value || "planned", PROJECT_STATUSES, false);
+  }
+  if (["scopeSummary", "notes"].includes(fieldName)) {
+    return `
+      <label class="field">
+        <span>${escapeHtml(label)}</span>
+        <textarea name="value" rows="3">${escapeHtml(value)}</textarea>
+      </label>
+    `;
+  }
+
+  const type = ["startDate", "completionDate"].includes(fieldName) ? "date" : "text";
+  const required = fieldName === "name" ? " required" : "";
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <input name="value" type="${escapeAttr(type)}" value="${escapeAttr(value)}"${required}>
+    </label>
+  `;
+}
+
 function renderProjectForm(project) {
+  const vendorId = project?.vendorId || "";
   return `
     <form class="form-grid" data-form="project" novalidate>
       <input type="hidden" name="id" value="${escapeAttr(project?.id || "")}">
@@ -1054,42 +1734,123 @@ function renderProjectForm(project) {
         ${field("Completion date", "completionDate", project?.completionDate || "", { type: "date" })}
       </div>
       <div class="form-row">
-        ${field("Contractor/vendor", "contractor", project?.contractor || "")}
+        ${selectField("Primary vendor", "vendorId", vendorId, getVendorSelectOptions({ includeArchived: true }))}
         ${field("Permit number", "permitNumber", project?.permitNumber || "", { placeholder: "Optional permit or approval number" })}
       </div>
-      ${textarea("Scope summary", "scopeSummary", project?.scopeSummary || "")}
+      <p class="helper-note">Add vendors once, then reuse them across projects and expenses. Leave this unassigned if you are still gathering details. <button class="inline-text-button" data-action="add-vendor" type="button">Add vendor</button></p>
+      ${textarea("Project description", "scopeSummary", project?.scopeSummary || "")}
       ${textarea("Notes", "notes", project?.notes || "")}
       ${formActions("Save project")}
     </form>
   `;
 }
 
+function getVendorSelectOptions({ includeArchived = false } = {}) {
+  return data.vendors
+    .filter((vendor) => includeArchived || vendor.status !== "archived")
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((vendor) => ({
+      value: vendor.id,
+      label: vendor.status === "archived" ? `${vendor.name} (archived)` : vendor.name,
+    }));
+}
+
+function renderVendorFormModal(vendor) {
+  const isEditing = Boolean(vendor);
+  return `
+    <div class="modal-backdrop" role="presentation">
+      <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="vendor-form-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Vendor setup</p>
+            <h2 id="vendor-form-title">${isEditing ? "Edit vendor" : "Add vendor"}</h2>
+            <p>Save a contractor, store, agency, or payee that can be linked to projects and expenses.</p>
+          </div>
+          <button class="icon-button" data-action="cancel-vendor-form" type="button" aria-label="Close">×</button>
+        </div>
+        ${renderVendorForm(vendor)}
+      </section>
+    </div>
+  `;
+}
+
+function renderVendorForm(vendor) {
+  return `
+    <form class="form-grid" data-form="vendor" novalidate>
+      <input type="hidden" name="id" value="${escapeAttr(vendor?.id || "")}">
+      ${field("Vendor name", "name", vendor?.name || "", { required: true, placeholder: "Contractor, store, agency, or person" })}
+      <div class="form-row">
+        ${selectField("Category", "category", vendor?.category || "other", EXPENSE_CATEGORIES, false)}
+        ${selectField("Status", "status", vendor?.status || "active", VENDOR_STATUSES, false)}
+      </div>
+      <div class="form-row">
+        ${field("Contact name", "contactName", vendor?.contactName || "")}
+        ${field("Phone", "phone", vendor?.phone || "")}
+      </div>
+      <div class="form-row">
+        ${field("Email", "email", vendor?.email || "", { type: "email" })}
+        ${field("Website", "website", vendor?.website || "")}
+      </div>
+      ${textarea("Notes", "notes", vendor?.notes || "")}
+      <div class="form-actions">
+        <button class="button button-secondary" data-action="cancel-vendor-form" type="button">Cancel</button>
+        <button class="button button-primary" type="submit">Save vendor</button>
+      </div>
+    </form>
+  `;
+}
+
+function renderProjectFormModal(project) {
+  const isEditing = Boolean(project);
+  return `
+    <div class="modal-backdrop" role="presentation">
+      <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="project-form-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Project setup</p>
+            <h2 id="project-form-title">${isEditing ? "Edit project" : "Add project"}</h2>
+            <p>Save the property, timing, vendor, permits, project description, and notes.</p>
+          </div>
+          <button class="icon-button" data-action="cancel-form" type="button" aria-label="Close">×</button>
+        </div>
+        ${renderProjectForm(project)}
+      </section>
+    </div>
+  `;
+}
+
 function renderExpenseForm(expense) {
-  const propertyId = expense?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
+  const draftProject = !expense && draftExpenseProjectId
+    ? data.projects.find((project) => project.id === draftExpenseProjectId)
+    : null;
+  const propertyId = expense?.propertyId || draftProject?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
   const projectOptions = data.projects.filter((project) => project.propertyId === propertyId);
+  const projectId = expense?.projectId || draftProject?.id || "";
+  const vendorId = expense?.vendorId || draftProject?.vendorId || "";
 
   return `
     <form class="form-grid" data-form="expense" novalidate>
       <input type="hidden" name="id" value="${escapeAttr(expense?.id || "")}">
       <div class="form-row">
         ${selectField("Property", "propertyId", propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })), false)}
-        ${selectField("Project", "projectId", expense?.projectId || "", projectOptions.map((project) => ({ value: project.id, label: project.name })))}
+        ${selectField("Project", "projectId", projectId, projectOptions.map((project) => ({ value: project.id, label: project.name })))}
       </div>
       <div class="form-row">
         ${field("Date", "date", expense?.date || todayISO(), { type: "date", required: true })}
         ${field("Amount", "amount", expense?.amount || "", { type: "number", step: "0.01", placeholder: "0.00", required: true })}
       </div>
       <div class="form-row">
-        ${field("Vendor/payee", "vendor", expense?.vendor || "", { placeholder: "Store, contractor, or person paid", required: true })}
+        ${selectField("Vendor/payee", "vendorId", vendorId, getVendorSelectOptions({ includeArchived: true }))}
         ${field("Description", "description", expense?.description || "", { placeholder: "Roof repair, dishwasher install, permit fee", required: true })}
       </div>
+      <p class="helper-note">Expenses use shared vendors. Choose Unassigned / unknown only when you need to capture the cost before the payee is clear. <button class="inline-text-button" data-action="add-vendor" type="button">Add vendor</button></p>
       <div class="form-row">
-        ${selectField("Review type", "classification", expense?.classification || "unclear / ask CPA", CLASSIFICATIONS, false)}
+        ${selectField("Expense type", "classification", expense?.classification || "unclear / ask CPA", CLASSIFICATIONS, false)}
         ${selectField("Category", "category", expense?.category || "other", EXPENSE_CATEGORIES, false)}
       </div>
-      <p class="helper-note">Examples: roof replacement or an addition might be a potential basis addition; a service visit or small repair might be repair/maintenance. Use unclear when you want your CPA to decide.</p>
+      <p class="helper-note">Examples: roof replacement or an addition might be a potential basis addition; a service visit or small repair might be repair/maintenance. Use professional review when you want a qualified professional to decide.</p>
       ${selectField("Documentation status", "documentationStatus", expense?.documentationStatus || "no document yet", DOCUMENT_STATUSES, false)}
-      <p class="helper-note">Use your best guess for sorting only. Your CPA should make the final call.</p>
+      <p class="helper-note">Use your best guess for sorting only. A qualified professional should make the final call.</p>
       ${textarea("Notes", "notes", expense?.notes || "")}
       ${formActions("Save expense")}
     </form>
@@ -1100,27 +1861,31 @@ function renderDocumentForm(document) {
   const draftExpense = !document && draftDocumentExpenseId
     ? data.expenses.find((expense) => expense.id === draftDocumentExpenseId)
     : null;
-  const propertyId = draftExpense?.propertyId || document?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
+  const draftProject = !document && !draftExpense && draftDocumentProjectId
+    ? data.projects.find((project) => project.id === draftDocumentProjectId)
+    : null;
+  const propertyId = draftExpense?.propertyId || document?.propertyId || draftProject?.propertyId || selectedPropertyId || data.properties[0]?.id || "";
   const projectOptions = data.projects.filter((project) => project.propertyId === propertyId);
   const expenseOptions = data.expenses.filter((expense) => expense.propertyId === propertyId);
   const selectedExpenseId = document?.expenseId || draftExpense?.id || "";
+  const selectedProjectId = draftExpense?.projectId || document?.projectId || draftProject?.id || "";
   const fileHelper = document?.hasFile
     ? `Current file: ${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)}). Choose a new file to replace it.`
     : isTutorialMode()
       ? "Choosing a file in tutorial mode records sample metadata only. No file copy is saved."
-      : `Attached files are saved locally ${storageLocationShort()}. They are not uploaded.`;
+      : "Choose a receipt, invoice, permit, photo, or related file.";
 
   return `
     <form class="form-grid" data-form="document" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="id" value="${escapeAttr(document?.id || "")}">
-      ${selectField("Related expense", "expenseId", selectedExpenseId, expenseOptions.map((expense) => ({ value: expense.id, label: `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}` })))}
+      ${selectField("Related expense", "expenseId", selectedExpenseId, expenseOptions.map((expense) => ({ value: expense.id, label: `${formatDate(expense.date)} / ${getExpenseVendorName(data, expense)} / ${formatCurrency(expense.amount)}` })))}
       <p class="helper-note">Choosing an expense sets the property and project for this document.</p>
       <div class="form-row">
         ${selectField("Property", "propertyId", propertyId, data.properties.map((property) => ({ value: property.id, label: property.name })), false)}
         ${selectField("Document type", "documentType", document?.documentType || "receipt", DOCUMENT_TYPES, false)}
       </div>
       ${field("Display name", "displayName", document?.displayName || "", { required: true })}
-      ${selectField("Project", "projectId", draftExpense?.projectId || document?.projectId || "", projectOptions.map((project) => ({ value: project.id, label: project.name })))}
+      ${selectField("Project", "projectId", selectedProjectId, projectOptions.map((project) => ({ value: project.id, label: project.name })))}
       ${field("Added date", "addedDate", document?.addedDate || todayISO(), { type: "date", required: true })}
       <label class="field file-field">
         <span>Attach file</span>
@@ -1135,72 +1900,159 @@ function renderDocumentForm(document) {
 }
 
 function renderRecentExpenseTable(expenses) {
-  return table(["Date", "Vendor", "Review type", "Amount"], expenses.map((expense) => [
-    formatDate(expense.date),
-    `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
-    optionLabel(CLASSIFICATIONS, expense.classification),
-    `<span class="money">${formatCurrency(expense.amount)}</span>`,
-  ]));
+  return `
+    <div class="recent-record-list">
+      ${expenses.map((expense) => `
+        <article class="recent-record-card">
+          <div>
+            <span>${formatDate(expense.date)}</span>
+            <strong>${escapeHtml(getExpenseVendorName(data, expense))}</strong>
+            <small>${escapeHtml(expense.description)}</small>
+          </div>
+          <div>
+            ${classificationPill(expense.classification)}
+            <strong class="money">${formatCurrency(expense.amount)}</strong>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
 }
 
-function renderProjectsTable(projects, selectedProject) {
-  return table(["Project", "Status", "Category", "Ready", "Total", "Actions"], projects.map((project) => {
-    const projectTotal = getExpenseTotals(data.expenses.filter((expense) => expense.projectId === project.id)).total;
-    const completeness = getProjectCompleteness(data, project);
-    return [
-      `<button class="table-link" data-action="select-project" data-id="${escapeAttr(project.id)}" type="button">${escapeHtml(project.name)}</button><span>${escapeHtml(getPropertyName(data, project.propertyId))}</span>`,
-      optionLabel(PROJECT_STATUSES, project.status),
-      optionLabel(EXPENSE_CATEGORIES, project.category),
-      `<span class="pill ${scoreToneClass(completeness.score)}">${completeness.score}%</span><span>${completeness.completedChecks}/${completeness.totalChecks} checks</span>`,
-      `<span class="money">${formatCurrency(projectTotal)}</span>`,
-      rowActions("edit-project", "delete-project", project.id, project.name),
-      selectedProject?.id === project.id ? "is-selected" : "",
-    ];
-  }));
+function renderProjectsTable(projects) {
+  return `
+    <div class="project-card-list">
+      ${projects.map((project) => {
+        const isExpanded = expandedProjectIds.has(project.id);
+        const projectExpenses = data.expenses.filter((expense) => expense.projectId === project.id);
+        const projectDocuments = data.documents.filter((document) => document.projectId === project.id);
+        const totals = getExpenseTotals(projectExpenses);
+        const completeness = getProjectTabCompleteness(getProjectCompleteness(data, project));
+        return `
+          <article class="project-file-card ${isExpanded ? "is-expanded" : ""}">
+            <div class="project-file-main">
+              <div>
+                <button class="table-link project-title-button" data-action="select-project" data-id="${escapeAttr(project.id)}" aria-expanded="${isExpanded ? "true" : "false"}" type="button">${escapeHtml(project.name)}</button>
+                <p>${escapeHtml(getPropertyName(data, project.propertyId))}</p>
+              </div>
+              <div class="project-file-actions">
+                ${projectRowActions(project)}
+              </div>
+            </div>
+            <div class="project-file-meta">
+              <span class="pill tone-blue">${escapeHtml(optionLabel(PROJECT_STATUSES, project.status))}</span>
+              <span>${escapeHtml(optionLabel(EXPENSE_CATEGORIES, project.category))}</span>
+              <span>${escapeHtml(formatProjectDateRange(project))}</span>
+              <span>${escapeHtml(getProjectVendorName(data, project))}</span>
+            </div>
+            <div class="project-file-stats">
+              ${storageMetric("Expenses", `${projectExpenses.length} / ${formatCurrency(totals.total)}`)}
+              ${storageMetric("Documents", projectDocuments.length)}
+              ${storageMetric("Completeness", `${completeness.score}%`)}
+            </div>
+            ${isExpanded ? `<div class="project-card-detail">${renderProjectDetail(project)}</div>` : ""}
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function formatProjectDateRange(project) {
+  const start = formatDate(project.startDate);
+  const end = formatDate(project.completionDate);
+  if (project.startDate && project.completionDate) return `${start} - ${end}`;
+  if (project.startDate) return `${start} - not completed`;
+  if (project.completionDate) return `Completed ${end}`;
+  return "Not added";
+}
+
+function renderProjectRowTitle(project, isSelected) {
+  return `
+    <div class="project-row-title">
+      <button class="table-link" data-action="select-project" data-id="${escapeAttr(project.id)}" aria-expanded="${isSelected ? "true" : "false"}" type="button">${escapeHtml(project.name)}</button>
+    </div>
+  `;
 }
 
 function renderExpensesTable(expenses) {
-  return table(["Date", "Expense", "Property / project", "Review type", "Docs", "Amount", "Actions"], expenses.map((expense) => [
-    formatDate(expense.date),
-    `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
-    `<strong>${escapeHtml(getPropertyName(data, expense.propertyId))}</strong><span>${escapeHtml(getProjectName(data, expense.projectId))}</span>`,
-    `${classificationPill(expense.classification)}<span>${escapeHtml(optionLabel(EXPENSE_CATEGORIES, expense.category))}</span>`,
-    documentationPill(expense.documentationStatus),
-    `<span class="money">${formatCurrency(expense.amount)}</span>`,
-    rowActions("edit-expense", "delete-expense", expense.id, expense.description),
-  ]));
+  return `
+    <div class="expense-record-list">
+      ${expenses.map((expense) => `
+        <article class="expense-record-card">
+          <div class="expense-record-main">
+            <div>
+              <p class="record-date">${formatDate(expense.date)}</p>
+              <h3>${escapeHtml(getExpenseVendorName(data, expense))}</h3>
+              <p>${escapeHtml(expense.description)}</p>
+            </div>
+            <strong class="record-amount">${formatCurrency(expense.amount)}</strong>
+          </div>
+          <div class="expense-record-meta">
+            <span>${escapeHtml(getPropertyName(data, expense.propertyId))}</span>
+            <span>${escapeHtml(getProjectName(data, expense.projectId))}</span>
+          </div>
+          <div class="expense-record-footer">
+            <div class="expense-chip-row">
+              ${classificationPill(expense.classification)}
+              <span class="pill tone-blue">${escapeHtml(optionLabel(EXPENSE_CATEGORIES, expense.category))}</span>
+              ${documentationPill(expense.documentationStatus)}
+            </div>
+            ${rowActions("edit-expense", "delete-expense", expense.id, expense.description)}
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
 }
 
 function renderDocumentationGapsTable(expenses) {
-  return table(["Date", "Expense", "Status", "Amount", "Actions"], expenses.map((expense) => [
-    formatDate(expense.date),
-    `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
-    `${documentationPill(expense.documentationStatus)}<span>${escapeHtml(getExpenseDocumentationIssue(expense))}</span>`,
-    `<span class="money">${formatCurrency(expense.amount)}</span>`,
-    `<div class="row-actions text-actions">
-      <button class="text-action" data-action="add-document-for-expense" data-id="${escapeAttr(expense.id)}" type="button">Add document</button>
-      <button class="text-action" data-action="edit-expense" data-id="${escapeAttr(expense.id)}" type="button">Edit</button>
-    </div>`,
-  ]));
+  return `
+    <div class="followup-inbox-list">
+      ${expenses.map((expense) => `
+        <article class="followup-inbox-card">
+          <div>
+            <p class="record-date">${formatDate(expense.date)}</p>
+            <h4>${escapeHtml(getExpenseVendorName(data, expense))}</h4>
+            <p>${escapeHtml(expense.description)}</p>
+          </div>
+          <div class="followup-inbox-meta">
+            ${documentationPill(expense.documentationStatus)}
+            <span>${escapeHtml(getExpenseDocumentationIssue(expense))}</span>
+            <strong>${formatCurrency(expense.amount)}</strong>
+          </div>
+          <div class="row-actions text-actions">
+            <button class="text-action" data-action="add-document-for-expense" data-id="${escapeAttr(expense.id)}" type="button">Add document</button>
+            <button class="text-action" data-action="edit-expense" data-id="${escapeAttr(expense.id)}" type="button">Edit</button>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
 }
 
-function renderDocumentList(documents = data.documents) {
+function sortDocumentsByAddedDateDesc(documents) {
+  return [...documents].sort((a, b) => String(b.addedDate || "").localeCompare(String(a.addedDate || "")));
+}
+
+function renderDocumentList(documents = data.documents, options = {}) {
   return `
     <div class="document-list">
       ${documents.map((document) => `
-        <article class="document-card">
-          <div>
+        <article class="document-card document-row-card">
+          <span class="document-icon" aria-hidden="true">${iconSymbol(document.documentType === "photo" ? "image" : "document")}</span>
+          <div class="document-body">
             <h3>${escapeHtml(document.displayName)}</h3>
-            <p>${escapeHtml(optionLabel(DOCUMENT_TYPES, document.documentType))} added ${formatDate(document.addedDate)}</p>
-            <p>${escapeHtml(getPropertyName(data, document.propertyId))}${document.projectId ? ` / ${escapeHtml(getProjectName(data, document.projectId))}` : ""}</p>
+            <p>${escapeHtml(optionLabel(DOCUMENT_TYPES, document.documentType))} · ${formatDate(document.addedDate)}</p>
+            <p>${escapeHtml(getPropertyName(data, document.propertyId))}${document.projectId ? ` / ${escapeHtml(getProjectName(data, document.projectId))}` : ""}${document.expenseId ? ` / ${escapeHtml(getExpenseName(data, document.expenseId))}` : ""}</p>
             ${renderDocumentFileMeta(document)}
             ${document.notes ? `<p class="notes-block">${escapeHtml(document.notes)}</p>` : ""}
           </div>
           <div class="document-actions">
             ${document.hasFile ? `
-              <button class="button button-primary" data-action="preview-document-file" data-id="${escapeAttr(document.id)}" type="button">Preview</button>
-              <button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(document.id)}" type="button">Download file</button>
-              <button class="button button-secondary" data-action="remove-document-file" data-id="${escapeAttr(document.id)}" type="button">Remove file</button>
+              <button class="button button-primary" data-action="preview-document-file" data-id="${escapeAttr(document.id)}" type="button">View document</button>
+              ${options.compactActions ? "" : `<button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(document.id)}" type="button">Download file</button>`}
+              ${options.compactActions ? "" : `<button class="button button-secondary" data-action="remove-document-file" data-id="${escapeAttr(document.id)}" type="button">Remove file</button>`}
             ` : ""}
             ${rowActions("edit-document", "delete-document", document.id, document.displayName)}
           </div>
@@ -1272,7 +2124,7 @@ function renderDocumentFileMeta(document) {
   const type = document.mimeType || "Unknown type";
   return `
     <p>
-      <span class="pill tone-green">Stored locally</span>
+      <span class="pill tone-green">File attached</span>
       <span class="file-meta">${escapeHtml(document.fileName || "Attached file")} / ${escapeHtml(type)} / ${formatFileSize(document.fileSize)}</span>
     </p>
   `;
@@ -1296,7 +2148,7 @@ function renderDocumentPreview() {
       <section class="document-preview-modal" role="dialog" aria-modal="true" aria-labelledby="document-preview-title">
         <div class="modal-header">
           <div>
-            <p class="eyebrow">Document preview</p>
+            <p class="eyebrow">Document reader</p>
             <h2 id="document-preview-title">${escapeHtml(title)}</h2>
             <p>${escapeHtml(documentPreview.fileName || documentRecord.fileName || "Attached file")} / ${escapeHtml(documentPreview.mimeType || documentRecord.mimeType || "Unknown type")}</p>
           </div>
@@ -1321,13 +2173,13 @@ function renderDocumentPreview() {
             <input type="hidden" name="id" value="${escapeAttr(documentRecord.id)}">
             ${textarea("Document notes", "notes", documentRecord.notes || "")}
             <label class="field">
-              <span>Local document text</span>
+              <span>Document text</span>
               <textarea name="ocrText" rows="8">${escapeHtml(documentRecord.ocrText || documentPreview.ocrText || "")}</textarea>
             </label>
             ${ocrCopy ? `<p class="helper-note">${escapeHtml(ocrCopy)}</p>` : ""}
             <div class="form-actions preview-actions">
               <button class="button button-secondary" data-action="download-document-file" data-id="${escapeAttr(documentRecord.id)}" type="button">Download file</button>
-              <button class="button button-secondary" data-action="run-document-ocr" data-id="${escapeAttr(documentRecord.id)}" ${canReadText && documentPreview.ocrStatus !== "running" ? "" : "disabled"} type="button">Read text locally</button>
+              <button class="button button-secondary" data-action="run-document-ocr" data-id="${escapeAttr(documentRecord.id)}" ${canReadText && documentPreview.ocrStatus !== "running" ? "" : "disabled"} type="button">Read text</button>
               <button class="button button-primary" type="submit">Save notes</button>
             </div>
           </form>
@@ -1341,89 +2193,141 @@ function getOcrStatusCopy() {
   if (!documentPreview) return "";
   const documentRecord = data.documents.find((document) => document.id === documentPreview.documentId);
   if (documentPreview.ocrStatus === "running") {
-    return documentPreview.ocrStatusCopy || `Reading document locally... ${Math.round((documentPreview.ocrProgress || 0) * 100)}%`;
+    return documentPreview.ocrStatusCopy || `Reading document... ${Math.round((documentPreview.ocrProgress || 0) * 100)}%`;
   }
-  if (documentPreview.ocrStatus === "done") return "Text saved locally with this document record.";
-  if (documentPreview.ocrStatus === "error") return documentPreview.ocrError || "This file could not be read locally.";
+  if (documentPreview.ocrStatus === "done") return "Text saved with this document record.";
+  if (documentPreview.ocrStatus === "error") return documentPreview.ocrError || "This file could not be read.";
   if (documentPreview.status === "ready") {
     const processor = getDocumentTextProcessor(documentRecord, documentPreview.mimeType);
     if (!processor) {
-      return "Local text reading is available for images, PDFs, and plain text files in this version.";
+      return "Text reading is available for images, PDFs, and plain text files in this version.";
     }
     return processor.readyCopy;
   }
-  return "Text reading runs locally in this app. It does not upload the file.";
+  return "Text reading is available after the file opens.";
 }
 
 function renderProjectDetail(project) {
-  const projectExpenses = data.expenses.filter((expense) => expense.projectId === project.id);
-  const totals = getExpenseTotals(projectExpenses);
   const completeness = getProjectCompleteness(data, project);
+  const visibleCompleteness = getProjectTabCompleteness(completeness);
+  const projectDocuments = data.documents.filter((document) => document.projectId === project.id);
+  const projectExpenses = data.expenses.filter((expense) => expense.projectId === project.id);
 
   return `
-    ${renderPanelHeader(project.name, getPropertyName(data, project.propertyId), "folder", `<button class="button button-secondary" data-action="edit-project" data-id="${escapeAttr(project.id)}" type="button">Edit</button>`)}
-    <dl class="detail-list">
-      ${detailItem("Status", optionLabel(PROJECT_STATUSES, project.status))}
-      ${detailItem("Category", optionLabel(EXPENSE_CATEGORIES, project.category))}
-      ${detailItem("Start", formatDate(project.startDate))}
-      ${detailItem("Completed", formatDate(project.completionDate))}
-      ${detailItem("Vendor/contractor", project.contractor || "Not added")}
-      ${detailItem("Permit number", project.permitNumber || "Not added")}
-      ${detailItem("Linked expense total", formatCurrency(totals.total))}
-    </dl>
-    ${project.scopeSummary ? `<p class="notes-block"><strong>Scope:</strong> ${escapeHtml(project.scopeSummary)}</p>` : ""}
-    ${project.notes ? `<p class="notes-block">${escapeHtml(project.notes)}</p>` : ""}
-    ${renderProjectCompletenessPanel(completeness)}
-    <div class="linked-list">
-      <h3>Linked expenses</h3>
-      ${projectExpenses.length ? projectExpenses.map((expense) => `
-        <div class="linked-row">
-          <div>
-            <strong>${escapeHtml(expense.description)}</strong>
-            <span>${formatDate(expense.date)} / ${escapeHtml(expense.vendor)}</span>
-          </div>
-          <b>${formatCurrency(expense.amount)}</b>
-        </div>
-      `).join("") : renderEmpty("No linked expenses", "Assign expenses to this project from the expense tracker.")}
+    <div class="project-inline-detail">
+      <div>
+        <p class="eyebrow">Project file</p>
+        <dl class="detail-list project-detail-list project-detail-grid">
+          ${renderEditableProjectField(project, "scopeSummary", "Project description", project.scopeSummary || "Not added")}
+          ${renderEditableProjectField(project, "notes", "Notes", project.notes || "Not added")}
+          ${renderEditableProjectField(project, "permitNumber", "Permit number", project.permitNumber || "Not added")}
+        </dl>
+        ${renderLinkedProjectRecords(project, projectDocuments, projectExpenses)}
+      </div>
+      ${renderProjectCompletenessPanel(visibleCompleteness, project)}
     </div>
   `;
 }
 
-function renderProjectCompletenessPanel(completeness) {
+function renderLinkedProjectRecords(project, projectDocuments, projectExpenses) {
+  const receiptCount = projectDocuments.filter((document) => document.documentType === "receipt").length;
+  const permitCount = projectDocuments.filter((document) => document.documentType === "permit").length;
+  const photoCount = projectDocuments.filter((document) => document.documentType === "photo").length;
+  const totals = getExpenseTotals(projectExpenses);
+
+  return `
+    <div class="linked-records-panel">
+      <div class="linked-records-header">
+        <div>
+          <p class="eyebrow">Linked records</p>
+          <h3>Supporting records for this project</h3>
+        </div>
+      </div>
+      <div class="linked-record-grid">
+        ${storageMetric("Documents", projectDocuments.length)}
+        ${storageMetric("Expenses", projectExpenses.length)}
+        ${storageMetric("Receipts", receiptCount)}
+        ${storageMetric("Photos", photoCount)}
+        ${storageMetric("Permits", permitCount || (project.permitNumber ? 1 : 0))}
+        ${storageMetric("Expense total", formatCurrency(totals.total))}
+      </div>
+      ${projectDocuments.length || projectExpenses.length
+        ? `<p class="helper-note">Use the Documents and Expenses tabs to review linked records in detail.</p>`
+        : renderEmpty("No linked records yet", "Add a document or connect expenses when records are available.")}
+    </div>
+  `;
+}
+
+function renderProjectCompletenessPanel(completeness, project) {
   const readyItems = completeness.readyItems.slice(0, 5);
   const followUps = completeness.followUps.slice(0, 7);
 
   return `
     <div class="project-completeness">
-      <div class="readiness-score compact-score ${scoreToneClass(completeness.score)}">
-        <strong>${completeness.score}%</strong>
-        <span>${completeness.completedChecks} of ${completeness.totalChecks} project checks complete</span>
-      </div>
-      ${completeness.expectedDocumentTypes.length ? `
-        <div class="document-type-list" aria-label="Expected project document types">
-          ${completeness.expectedDocumentTypes.map((type) => `<span>${escapeHtml(type.label)}</span>`).join("")}
-        </div>
-      ` : ""}
       <div class="readiness-columns project-completeness-columns">
         <div>
-          <h3>Ready</h3>
+          <h3>Core record status</h3>
           ${readyItems.length ? `
             <ul class="check-list">
               ${readyItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
             </ul>
-          ` : `<p class="helper-note">Add dates, costs, and documents to build project readiness.</p>`}
+          ` : `<p class="helper-note">Add dates, project details, and documents to build project readiness.</p>`}
         </div>
         <div>
-          <h3>Follow up</h3>
+          <h3>Suggested next records</h3>
           ${followUps.length ? `
             <ul class="followup-list">
               ${followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
             </ul>
-          ` : `<p class="helper-note">No open project follow-ups recorded.</p>`}
+          ` : `<p class="helper-note">No suggested project records right now.</p>`}
+          <div class="project-document-action">
+            <button class="button button-secondary" data-action="add-document" data-project-id="${escapeAttr(project.id)}" type="button"><span aria-hidden="true">+</span>Add document</button>
+          </div>
         </div>
       </div>
     </div>
   `;
+}
+
+function getProjectTabCompleteness(completeness) {
+  const hiddenCheckLabels = new Set([
+    "Cost records linked",
+    "Receipt and invoice records linked",
+    "Review classifications chosen",
+  ]);
+  const visibleExpectedDocumentTypes = completeness.missingExpectedDocumentTypes.filter((type) =>
+    !["receipt/invoice", "payment record"].includes(type.value)
+  );
+  const checks = completeness.checks
+    .filter((check) => !hiddenCheckLabels.has(check.label))
+    .map((check) => {
+      if (check.label === "Contractor or vendor identified") {
+        return { ...check, followUp: "Add the contractor/vendor for this project." };
+      }
+      if (check.label === "Supporting documents linked") {
+        return { ...check, followUp: "Link project documents, permits, photos, or notes to this project." };
+      }
+      if (check.label === "Expected document types covered") {
+        return { ...check, done: visibleExpectedDocumentTypes.length === 0 };
+      }
+      return check;
+    });
+  const completedChecks = checks.filter((check) => check.done).length;
+  const totalChecks = checks.length || 1;
+
+  return {
+    ...completeness,
+    score: Math.round((completedChecks / totalChecks) * 100),
+    completedChecks,
+    totalChecks,
+    checks,
+    readyItems: checks.filter((check) => check.done).map((check) => check.label),
+    followUps: [
+      ...checks.filter((check) => !check.done).map((check) => check.followUp),
+      ...visibleExpectedDocumentTypes.map((item) => `Add a ${item.label.toLowerCase()} record if available or applicable.`),
+    ].filter(Boolean),
+    missingExpectedDocumentTypes: visibleExpectedDocumentTypes,
+  };
 }
 
 function renderExportPropertiesTable() {
@@ -1439,13 +2343,13 @@ function renderExportPropertiesTable() {
 }
 
 function renderExportProjectsTable() {
-  return table(["Project", "Property", "Status", "Ready", "Dates", "Contractor", "Permit", "Spend", "Documents"], getProjectReviewSummaries(data).map((summary) => [
-    `<strong>${escapeHtml(summary.project.name)}</strong><span>${summary.project.scopeSummary ? escapeHtml(summary.project.scopeSummary) : "Scope not added"}</span>`,
+  return table(["Project", "Property", "Status", "Completeness", "Dates", "Contractor", "Permit", "Spend", "Documents"], getProjectReviewSummaries(data).map((summary) => [
+    `<strong>${escapeHtml(summary.project.name)}</strong><span>${summary.project.scopeSummary ? escapeHtml(summary.project.scopeSummary) : "Project description not added"}</span>`,
     escapeHtml(getPropertyName(data, summary.project.propertyId)),
     escapeHtml(optionLabel(PROJECT_STATUSES, summary.project.status)),
     `<span class="pill ${scoreToneClass(summary.completeness.score)}">${summary.completeness.score}%</span><span>${summary.completeness.completedChecks}/${summary.completeness.totalChecks} checks</span>`,
     escapeHtml(summary.dateRange),
-    escapeHtml(summary.project.contractor || "Not added"),
+    escapeHtml(getProjectVendorName(data, summary.project, "Not added")),
     escapeHtml(summary.project.permitNumber || (summary.hasPermit ? "Permit record attached" : "Not added")),
     `<span class="money">${formatCurrency(summary.totals.total)}</span>`,
     escapeHtml(`${summary.documents.length} (${summary.missingDocuments} follow-ups)`),
@@ -1471,7 +2375,7 @@ function renderExportExpensesTable() {
     escapeHtml(formatDate(expense.date)),
     escapeHtml(getPropertyName(data, expense.propertyId)),
     escapeHtml(getProjectName(data, expense.projectId)),
-    escapeHtml(expense.vendor),
+    escapeHtml(getExpenseVendorName(data, expense)),
     escapeHtml(expense.description),
     escapeHtml(optionLabel(CLASSIFICATIONS, expense.classification)),
     escapeHtml(optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)),
@@ -1484,7 +2388,7 @@ function renderExportDocumentationGapsTable(expenses) {
     escapeHtml(formatDate(expense.date)),
     escapeHtml(getPropertyName(data, expense.propertyId)),
     escapeHtml(getProjectName(data, expense.projectId)),
-    `<strong>${escapeHtml(expense.vendor)}</strong><span>${escapeHtml(expense.description)}</span>`,
+    `<strong>${escapeHtml(getExpenseVendorName(data, expense))}</strong><span>${escapeHtml(expense.description)}</span>`,
     escapeHtml(optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)),
     escapeHtml(getExpenseDocumentationIssue(expense)),
     `<span class="money">${formatCurrency(expense.amount)}</span>`,
@@ -1498,7 +2402,7 @@ function renderExportDocumentsTable() {
       `<strong>${escapeHtml(document.displayName)}</strong><span>${document.notes ? escapeHtml(document.notes) : "No notes"}</span>`,
       escapeHtml(getPropertyName(data, document.propertyId)),
       escapeHtml(getProjectName(data, document.projectId)),
-      relatedExpense ? escapeHtml(`${relatedExpense.vendor} / ${relatedExpense.description}`) : "No expense",
+      relatedExpense ? escapeHtml(`${getExpenseVendorName(data, relatedExpense)} / ${relatedExpense.description}`) : "No expense",
       escapeHtml(optionLabel(DOCUMENT_TYPES, document.documentType)),
       document.hasFile
         ? `<strong>${escapeHtml(document.fileName || "Attached file")}</strong><span>${escapeHtml(document.mimeType || "Unknown type")} / ${formatFileSize(document.fileSize)}</span>`
@@ -1539,46 +2443,120 @@ async function handleClick(event) {
       render();
     }
     return;
+  } else if (action === "set-document-subtab") {
+    documentSubTab = actionButton.dataset.documentSubtab === DOCUMENT_TAB_FOLLOW_UP ? DOCUMENT_TAB_FOLLOW_UP : DOCUMENT_TAB_LIBRARY;
+    editingDocumentId = undefined;
+    draftDocumentExpenseId = "";
+    draftDocumentProjectId = "";
   } else if (action === "add-property") {
     activeTab = "property";
     propertyMode = "new";
-  } else if (action === "edit-property") {
-    propertyMode = "edit";
+    editingPropertyField = "";
+  } else if (action === "edit-property-field") {
+    editingPropertyField = actionButton.dataset.field || "";
+  } else if (action === "cancel-property-field") {
+    editingPropertyField = "";
   } else if (action === "delete-property") {
     await deleteProperty(id);
   } else if (action === "add-project") {
+    if (actionButton.dataset.propertyId) {
+      selectedPropertyId = actionButton.dataset.propertyId;
+      projectFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+    }
     activeTab = "projects";
     editingProjectId = null;
+    editingProjectField = "";
   } else if (action === "edit-project") {
     activeTab = "projects";
     selectedProjectId = id;
+    expandedProjectIds.add(id);
     editingProjectId = id;
+    editingProjectField = "";
+  } else if (action === "edit-project-field") {
+    editingProjectField = actionButton.dataset.field || "";
+  } else if (action === "cancel-project-field") {
+    editingProjectField = "";
   } else if (action === "select-project") {
-    selectedProjectId = id;
+    if (expandedProjectIds.has(id)) {
+      expandedProjectIds.delete(id);
+      if (selectedProjectId === id) selectedProjectId = "";
+    } else {
+      expandedProjectIds.add(id);
+      selectedProjectId = id;
+    }
     editingProjectId = undefined;
+    editingProjectField = "";
+  } else if (action === "expand-all-projects") {
+    getFilteredProjects().forEach((project) => expandedProjectIds.add(project.id));
+    editingProjectId = undefined;
+    editingProjectField = "";
+  } else if (action === "collapse-all-projects") {
+    getFilteredProjects().forEach((project) => expandedProjectIds.delete(project.id));
+    selectedProjectId = "";
+    editingProjectId = undefined;
+    editingProjectField = "";
   } else if (action === "delete-project") {
     await deleteProject(id);
+  } else if (action === "manage-vendors") {
+    vendorManagerOpen = true;
+    editingVendorId = undefined;
+  } else if (action === "close-vendor-manager") {
+    vendorManagerOpen = false;
+    editingVendorId = undefined;
+  } else if (action === "add-vendor") {
+    editingVendorId = null;
+  } else if (action === "edit-vendor") {
+    editingVendorId = id;
+  } else if (action === "cancel-vendor-form") {
+    editingVendorId = undefined;
   } else if (action === "add-expense") {
+    draftExpenseProjectId = "";
+    if (actionButton.dataset.projectId) {
+      const project = data.projects.find((currentProject) => currentProject.id === actionButton.dataset.projectId);
+      if (project) {
+        selectedPropertyId = project.propertyId;
+        selectedProjectId = project.id;
+        draftExpenseProjectId = project.id;
+        expenseFilters.propertyId = project.propertyId;
+        expenseFilters.projectId = project.id;
+      }
+    }
     activeTab = "expenses";
     editingExpenseId = null;
   } else if (action === "edit-expense") {
     activeTab = "expenses";
     editingExpenseId = id;
+    draftExpenseProjectId = "";
   } else if (action === "delete-expense") {
     await deleteExpense(id);
   } else if (action === "close-expense-form") {
     editingExpenseId = undefined;
+    draftExpenseProjectId = "";
   } else if (action === "add-document") {
+    documentSubTab = DOCUMENT_TAB_LIBRARY;
+    draftDocumentProjectId = "";
+    if (actionButton.dataset.projectId) {
+      const project = data.projects.find((currentProject) => currentProject.id === actionButton.dataset.projectId);
+      if (project) {
+        selectedPropertyId = project.propertyId;
+        selectedProjectId = project.id;
+        documentFilters.propertyId = project.propertyId;
+        draftDocumentProjectId = project.id;
+      }
+    }
     activeTab = "documents";
     editingDocumentId = null;
     draftDocumentExpenseId = "";
   } else if (action === "add-document-for-expense") {
     activeTab = "documents";
+    documentSubTab = DOCUMENT_TAB_FOLLOW_UP;
     editingDocumentId = null;
     draftDocumentExpenseId = id;
+    draftDocumentProjectId = "";
   } else if (action === "edit-document") {
     editingDocumentId = id;
     draftDocumentExpenseId = "";
+    draftDocumentProjectId = "";
   } else if (action === "delete-document") {
     await deleteDocument(id);
   } else if (action === "preview-document-file") {
@@ -1598,18 +2576,14 @@ async function handleClick(event) {
   } else if (action === "close-document-form") {
     editingDocumentId = undefined;
     draftDocumentExpenseId = "";
+    draftDocumentProjectId = "";
   } else if (action === "open-export") {
     activeTab = "export";
   } else if (action === "download-csv") {
     const filename = isTutorialMode()
-      ? `home-basis-tracker-tutorial-expenses-${todayISO()}.csv`
-      : `home-basis-tracker-expenses-${todayISO()}.csv`;
+      ? `home-basis-tracker-tutorial-expense-export-${todayISO()}.csv`
+      : `home-basis-tracker-expense-export-${todayISO()}.csv`;
     downloadTextFile(buildExpensesCsv(data), filename, "text/csv;charset=utf-8");
-  } else if (action === "download-cpa-packet") {
-    const filename = isTutorialMode()
-      ? `home-basis-tracker-tutorial-cpa-review-${todayISO()}.txt`
-      : `home-basis-tracker-cpa-review-${todayISO()}.txt`;
-    downloadTextFile(buildCpaReviewPacket(data), filename, "text/plain;charset=utf-8");
   } else if (action === "download-cpa-pdf") {
     await saveCpaReviewPdfFile();
   } else if (action === "download-full-backup") {
@@ -1618,6 +2592,7 @@ async function handleClick(event) {
     app.querySelector("[data-restore-input]")?.click();
     return;
   } else if (action === "print-summary") {
+    app.querySelector(".print-summary")?.setAttribute("open", "open");
     window.print();
   } else if (action === "cancel-form") {
     closeEditors();
@@ -1636,7 +2611,7 @@ function handleChange(event) {
 
   const filter = control.dataset.filter;
   if (!filter) {
-    if (control.closest('[data-form="expense"]') && control.name === "propertyId") {
+    if (control.closest('[data-form="expense"]') && ["propertyId", "projectId"].includes(control.name)) {
       syncExpenseProjectOptions(control);
     }
     if (control.closest('[data-form="document"]') && ["propertyId", "expenseId"].includes(control.name)) {
@@ -1647,10 +2622,11 @@ function handleChange(event) {
 
   if (filter === "selectedPropertyId") {
     selectedPropertyId = control.value;
+    editingPropertyField = "";
     projectFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
     expenseFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
     expenseFilters.projectId = EMPTY_FILTER;
-    documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+    documentFilters.propertyId = EMPTY_FILTER;
   } else if (filter.startsWith("project.")) {
     projectFilters[filter.replace("project.", "")] = control.value;
   } else if (filter.startsWith("expense.")) {
@@ -1668,7 +2644,7 @@ function handleChange(event) {
 function handleStorageEvent(event) {
   if (event.key !== STORAGE_KEY) return;
   try {
-    realData = event.newValue ? sanitizeData(JSON.parse(event.newValue)) : EMPTY_DATA;
+    realData = withTemporarySampleRecords(event.newValue ? sanitizeData(JSON.parse(event.newValue)) : EMPTY_DATA);
     if (isTutorialMode()) {
       notice = "Your real records changed in another browser window. Exit the tutorial to see the refreshed binder.";
       syncNoticeToast();
@@ -1688,11 +2664,19 @@ function handleStorageEvent(event) {
 function syncExpenseProjectOptions(control) {
   const form = control.closest('[data-form="expense"]');
   const projectSelect = form.elements.projectId;
+  const vendorSelect = form.elements.vendorId;
   const currentProjectId = projectSelect.value;
-  const projectOptions = data.projects.filter((project) => project.propertyId === control.value);
+  const propertyId = form.elements.propertyId.value;
+  const projectOptions = data.projects.filter((project) => project.propertyId === propertyId);
   const selectedProjectId = projectOptions.some((project) => project.id === currentProjectId) ? currentProjectId : "";
 
-  projectSelect.innerHTML = `${optionHtml("", "No project", selectedProjectId)}${projectOptions.map((project) => optionHtml(project.id, project.name, selectedProjectId)).join("")}`;
+  if (control.name === "propertyId") {
+    projectSelect.innerHTML = `${optionHtml("", "No project", selectedProjectId)}${projectOptions.map((project) => optionHtml(project.id, project.name, selectedProjectId)).join("")}`;
+  }
+  const selectedProject = data.projects.find((project) => project.id === projectSelect.value && project.propertyId === propertyId);
+  if (selectedProject?.vendorId && vendorSelect && !vendorSelect.value) {
+    vendorSelect.value = selectedProject.vendorId;
+  }
 }
 
 function syncDocumentRelationshipForm(control) {
@@ -1722,7 +2706,7 @@ function rebuildDocumentRelationshipOptions(form, propertyId, selectedProjectId,
   const expenseOptions = data.expenses.filter((expense) => expense.propertyId === propertyId);
 
   projectSelect.innerHTML = `${optionHtml("", "No project", selectedProjectId)}${projectOptions.map((project) => optionHtml(project.id, project.name, selectedProjectId)).join("")}`;
-  expenseSelect.innerHTML = `${optionHtml("", "No expense", selectedExpenseId)}${expenseOptions.map((expense) => optionHtml(expense.id, `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}`, selectedExpenseId)).join("")}`;
+  expenseSelect.innerHTML = `${optionHtml("", "No expense", selectedExpenseId)}${expenseOptions.map((expense) => optionHtml(expense.id, `${formatDate(expense.date)} / ${getExpenseVendorName(data, expense)} / ${formatCurrency(expense.amount)}`, selectedExpenseId)).join("")}`;
 }
 
 function isTutorialMode() {
@@ -1738,7 +2722,7 @@ function enterTutorialWorkspace({ targetTab = "tutorial" } = {}) {
   data = tutorialData;
   activeTab = targetTab;
   selectedPropertyId = data.properties[0]?.id || "";
-  propertyMode = data.properties.length ? "view" : "new";
+  propertyMode = "view";
   resetFiltersAfterRestore();
   closeEditors();
   closeDocumentPreview({ renderAfterClose: false });
@@ -1752,7 +2736,7 @@ function exitTutorialWorkspace() {
   data = realData;
   activeTab = "dashboard";
   selectedPropertyId = data.properties[0]?.id || "";
-  propertyMode = data.properties.length ? "view" : "new";
+  propertyMode = "view";
   resetFiltersAfterRestore();
   closeEditors();
   closeDocumentPreview({ renderAfterClose: false });
@@ -1785,10 +2769,31 @@ async function handleSubmit(event) {
   const values = Object.fromEntries(formData.entries());
 
   if (formType === "property") await saveProperty(values);
+  if (formType === "property-field") await savePropertyField(values);
+  if (formType === "vendor") await saveVendor(values);
   if (formType === "project") await saveProject(values);
+  if (formType === "project-field") await saveProjectField(values);
   if (formType === "expense") await saveExpense(values);
   if (formType === "document") await saveDocument(values, formData.get("file"));
   if (formType === "document-preview-notes") await saveDocumentPreviewNotes(values);
+  if (formType === "sale-scenario") saveSaleScenario(values);
+}
+
+function saveSaleScenario(values) {
+  const validPropertyId = data.properties.some((property) => property.id === values.propertyId)
+    ? values.propertyId
+    : data.properties[0]?.id || "";
+  saleScenario = {
+    propertyId: validPropertyId,
+    salePrice: removeLocalPaths(values.salePrice || "").trim(),
+    mortgagePayoff: removeLocalPaths(values.mortgagePayoff || "").trim(),
+    sellingCostsRate: removeLocalPaths(values.sellingCostsRate || "").trim() || "6",
+    sellingCostsAmount: removeLocalPaths(values.sellingCostsAmount || "").trim(),
+    exclusionAmount: ["0", "250000", "500000"].includes(String(values.exclusionAmount))
+      ? String(values.exclusionAmount)
+      : "250000",
+  };
+  render();
 }
 
 async function saveProperty(values) {
@@ -1811,6 +2816,44 @@ async function saveProperty(values) {
   selectedPropertyId = property.id;
   propertyMode = "view";
   showNotice("Property saved.");
+}
+
+async function savePropertyField(values) {
+  const form = app.querySelector('[data-form="property-field"]');
+  const property = data.properties.find((currentProperty) => currentProperty.id === values.id);
+  const fieldName = values.fieldName;
+  if (!property || !["name", "address", "purchaseDate", "purchasePrice", "notes"].includes(fieldName)) {
+    editingPropertyField = "";
+    render();
+    return;
+  }
+
+  let nextValue = values.value ?? "";
+  if (fieldName === "name") {
+    nextValue = removeLocalPaths(nextValue).trim();
+    if (!nextValue) return showFormNotice(form, "value", "Property name is required.");
+  } else if (fieldName === "address") {
+    nextValue = removeLocalPaths(nextValue).trim();
+    const addressNotice = getAddressSanityNotice(nextValue);
+    if (addressNotice) return showFormNotice(form, "value", addressNotice);
+  } else if (fieldName === "purchaseDate") {
+    if (nextValue && !isValidISODate(nextValue)) return showFormNotice(form, "value", "Enter a valid purchase date.");
+  } else if (fieldName === "purchasePrice") {
+    if (nextValue && parseAmount(nextValue) < 0) return showFormNotice(form, "value", "Purchase price cannot be negative.");
+    nextValue = parseAmount(nextValue);
+  } else if (fieldName === "notes") {
+    nextValue = removeLocalPaths(nextValue).trim();
+  }
+
+  const saved = await updateData({
+    ...data,
+    properties: data.properties.map((currentProperty) =>
+      currentProperty.id === property.id ? { ...currentProperty, [fieldName]: nextValue } : currentProperty
+    ),
+  });
+  if (!saved) return;
+  editingPropertyField = "";
+  showNotice("Property updated.");
 }
 
 function getAddressSanityNotice(value) {
@@ -1847,6 +2890,44 @@ function getAddressSanityNotice(value) {
   return "";
 }
 
+async function saveVendor(values) {
+  const form = app.querySelector('[data-form="vendor"]');
+  const name = removeLocalPaths(values.name || "").trim();
+  if (!name) return showFormNotice(form, "name", "Vendor name is required.");
+
+  const duplicateVendor = data.vendors.find((vendor) =>
+    vendor.id !== values.id &&
+    vendor.name.trim().toLowerCase() === name.toLowerCase()
+  );
+  if (duplicateVendor) return showFormNotice(form, "name", "A vendor with this name already exists.");
+
+  const vendor = {
+    id: values.id || createId("vendor"),
+    name,
+    category: EXPENSE_CATEGORIES.some((option) => option.value === values.category) ? values.category : "other",
+    contactName: removeLocalPaths(values.contactName).trim(),
+    phone: removeLocalPaths(values.phone).trim(),
+    email: removeLocalPaths(values.email).trim(),
+    website: removeLocalPaths(values.website).trim(),
+    notes: removeLocalPaths(values.notes).trim(),
+    status: VENDOR_STATUSES.some((option) => option.value === values.status) ? values.status : "active",
+  };
+
+  const saved = await updateData({
+    ...data,
+    vendors: upsertById(data.vendors, vendor),
+    projects: data.projects.map((project) =>
+      project.vendorId === vendor.id ? { ...project, contractor: vendor.name } : project
+    ),
+    expenses: data.expenses.map((expense) =>
+      expense.vendorId === vendor.id ? { ...expense, vendor: vendor.name } : expense
+    ),
+  });
+  if (!saved) return;
+  editingVendorId = undefined;
+  showNotice("Vendor saved.");
+}
+
 async function saveProject(values) {
   const form = app.querySelector('[data-form="project"]');
   if (!values.propertyId) return showFormNotice(form, "propertyId", "Property is required.");
@@ -1859,11 +2940,12 @@ async function saveProject(values) {
   const project = {
     id: values.id || createId("project"),
     propertyId: values.propertyId,
+    vendorId: values.vendorId || "",
     name: removeLocalPaths(values.name).trim(),
     category: values.category,
     startDate: values.startDate,
     completionDate: values.completionDate,
-    contractor: removeLocalPaths(values.contractor).trim(),
+    contractor: getVendorName(data, values.vendorId, ""),
     permitNumber: removeLocalPaths(values.permitNumber).trim(),
     status: values.status,
     scopeSummary: removeLocalPaths(values.scopeSummary).trim(),
@@ -1884,6 +2966,7 @@ async function saveProject(values) {
   if (!saved) return;
   selectedPropertyId = project.propertyId;
   selectedProjectId = project.id;
+  expandedProjectIds.add(project.id);
   projectFilters.propertyId = project.propertyId;
   if (expenseFilters.projectId === project.id && expenseFilters.propertyId !== EMPTY_FILTER && expenseFilters.propertyId !== project.propertyId) {
     expenseFilters.projectId = EMPTY_FILTER;
@@ -1892,12 +2975,67 @@ async function saveProject(values) {
   showNotice("Project saved.");
 }
 
+async function saveProjectField(values) {
+  const form = app.querySelector('[data-form="project-field"]');
+  const project = data.projects.find((currentProject) => currentProject.id === values.id);
+  const fieldName = values.fieldName;
+  if (!project || !fieldName) return;
+
+  const nextProject = { ...project };
+  const value = String(values.value ?? "");
+  if (fieldName === "propertyId") {
+    if (!data.properties.some((property) => property.id === value)) return showFormNotice(form, "value", "Property is required.");
+    nextProject.propertyId = value;
+  } else if (fieldName === "name") {
+    if (!value.trim()) return showFormNotice(form, "value", "Project name is required.");
+    nextProject.name = removeLocalPaths(value).trim();
+  } else if (fieldName === "category") {
+    nextProject.category = EXPENSE_CATEGORIES.some((option) => option.value === value) ? value : "other";
+  } else if (fieldName === "status") {
+    nextProject.status = PROJECT_STATUSES.some((option) => option.value === value) ? value : "planned";
+  } else if (["startDate", "completionDate"].includes(fieldName)) {
+    if (value && !isValidISODate(value)) return showFormNotice(form, "value", "Enter a valid date.");
+    nextProject[fieldName] = value;
+    if (nextProject.startDate && nextProject.completionDate && nextProject.completionDate < nextProject.startDate) {
+      return showFormNotice(form, "value", "Completion date cannot be before the start date.");
+    }
+  } else if (fieldName === "vendorId") {
+    nextProject.vendorId = data.vendors.some((vendor) => vendor.id === value) ? value : "";
+    nextProject.contractor = getVendorName(data, nextProject.vendorId, "");
+  } else if (["contractor", "permitNumber", "scopeSummary", "notes"].includes(fieldName)) {
+    nextProject[fieldName] = removeLocalPaths(value).trim();
+  } else {
+    return;
+  }
+
+  const propertyChanged = project.propertyId !== nextProject.propertyId;
+  const saved = await updateData({
+    ...data,
+    projects: upsertById(data.projects, nextProject),
+    expenses: propertyChanged
+      ? data.expenses.map((expense) => expense.projectId === nextProject.id ? { ...expense, propertyId: nextProject.propertyId } : expense)
+      : data.expenses,
+    documents: propertyChanged
+      ? data.documents.map((document) => document.projectId === nextProject.id ? { ...document, propertyId: nextProject.propertyId } : document)
+      : data.documents,
+  });
+  if (!saved) return;
+  selectedPropertyId = nextProject.propertyId;
+  selectedProjectId = nextProject.id;
+  expandedProjectIds.add(nextProject.id);
+  projectFilters.propertyId = nextProject.propertyId;
+  if (expenseFilters.projectId === nextProject.id && expenseFilters.propertyId !== EMPTY_FILTER && expenseFilters.propertyId !== nextProject.propertyId) {
+    expenseFilters.projectId = EMPTY_FILTER;
+  }
+  editingProjectField = "";
+  showNotice("Project updated.");
+}
+
 async function saveExpense(values) {
   const form = app.querySelector('[data-form="expense"]');
   if (!values.propertyId) return showFormNotice(form, "propertyId", "Property is required.");
   if (!values.date) return showFormNotice(form, "date", "Date is required.");
   if (!isValidISODate(values.date)) return showFormNotice(form, "date", "Enter a valid expense date.");
-  if (!values.vendor?.trim()) return showFormNotice(form, "vendor", "Vendor or payee is required.");
   if (!values.description?.trim()) return showFormNotice(form, "description", "Description is required.");
   if (parseAmount(values.amount) <= 0) return showFormNotice(form, "amount", "Enter an amount greater than zero.");
 
@@ -1908,8 +3046,9 @@ async function saveExpense(values) {
     id: values.id || createId("expense"),
     propertyId: values.propertyId,
     projectId,
+    vendorId: values.vendorId || "",
     date: values.date,
-    vendor: removeLocalPaths(values.vendor).trim(),
+    vendor: getVendorName(data, values.vendorId, ""),
     description: removeLocalPaths(values.description).trim(),
     amount: parseAmount(values.amount),
     classification: values.classification,
@@ -1929,7 +3068,9 @@ async function saveExpense(values) {
   if (!saved) return;
   selectedPropertyId = expense.propertyId;
   expenseFilters.propertyId = expense.propertyId;
+  expenseFilters.projectId = expense.projectId || EMPTY_FILTER;
   editingExpenseId = undefined;
+  draftExpenseProjectId = "";
   showNotice("Expense saved.");
 }
 
@@ -2057,6 +3198,7 @@ async function saveDocument(values, file) {
   selectedPropertyId = documentRecord.propertyId;
   editingDocumentId = undefined;
   draftDocumentExpenseId = "";
+  draftDocumentProjectId = "";
   resetStorageEstimate();
 
   if (newlySavedFileId && previousFileId && previousFileId !== newlySavedFileId) {
@@ -2071,7 +3213,7 @@ async function saveDocument(values, file) {
   showNotice(documentRecord.hasFile
     ? isTutorialMode()
       ? "Document saved with tutorial file metadata. No file copy was stored."
-      : "Document and local file saved."
+      : "Document and attached file saved."
     : "Document saved.");
 }
 
@@ -2235,7 +3377,7 @@ async function runDocumentOcr(documentId) {
 
 async function readImageDocumentText(blob, _documentRecord, { onProgress } = {}) {
   const worker = await createOcrWorker((progress) => {
-    onProgress?.(progress, `Reading image locally... ${Math.round(progress * 100)}%`);
+    onProgress?.(progress, `Reading image... ${Math.round(progress * 100)}%`);
   });
   try {
     const text = await recognizeBlobWithWorker(worker, blob);
@@ -2247,7 +3389,7 @@ async function readImageDocumentText(blob, _documentRecord, { onProgress } = {})
 
 async function readPdfDocumentText(blob, _documentRecord, { onProgress } = {}) {
   const pdfjsLib = await loadPdfJs();
-  onProgress?.(0.01, "Opening PDF locally...");
+  onProgress?.(0.01, "Opening PDF...");
 
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(await blob.arrayBuffer()),
@@ -2313,7 +3455,7 @@ async function readPdfDocumentText(blob, _documentRecord, { onProgress } = {}) {
   }
 
   const noticeParts = [];
-  if (ocrPages) noticeParts.push(`${ocrPages} scanned PDF page${ocrPages === 1 ? "" : "s"} processed with local OCR.`);
+  if (ocrPages) noticeParts.push(`${ocrPages} scanned PDF page${ocrPages === 1 ? "" : "s"} processed with OCR.`);
   if (skippedPages) noticeParts.push(`Only the first ${PDF_TEXT_MAX_PAGES} pages were read.`);
   if (failedPages) noticeParts.push(`${failedPages} PDF page${failedPages === 1 ? "" : "s"} could not be read.`);
 
@@ -2330,11 +3472,11 @@ async function readPdfDocumentText(blob, _documentRecord, { onProgress } = {}) {
 
 async function readPlainTextDocument(blob, _documentRecord, { onProgress } = {}) {
   if (blob.size > DOCUMENT_TEXT_FILE_SIZE_LIMIT) {
-    throw new Error(`Text files over ${formatFileSize(DOCUMENT_TEXT_FILE_SIZE_LIMIT)} are too large to read locally in this beta.`);
+    throw new Error(`Text files over ${formatFileSize(DOCUMENT_TEXT_FILE_SIZE_LIMIT)} are too large to read in this beta.`);
   }
-  onProgress?.(0.25, "Reading text file locally...");
+  onProgress?.(0.25, "Reading text file...");
   const text = cleanExtractedDocumentText(await blob.text());
-  onProgress?.(1, "Text file read locally.");
+  onProgress?.(1, "Text file read.");
   return { text };
 }
 
@@ -2479,10 +3621,10 @@ function getOcrError(error) {
   const message = String(error?.message || "");
   if (/too large/i.test(message)) return message;
   if (/worker|wasm|fetch|load/i.test(message)) {
-    return "Local text reading could not start. Reopen the app and try again.";
+    return "Text reading could not start. Reopen the app and try again.";
   }
-  if (/pdf/i.test(message)) return "This PDF could not be read locally.";
-  return "This file could not be read locally.";
+  if (/pdf/i.test(message)) return "This PDF could not be read.";
+  return "This file could not be read.";
 }
 
 function isPreviewableStoredFile(documentRecord, mimeType = "") {
@@ -2496,22 +3638,22 @@ function canReadStoredFileText(documentRecord, mimeType = "") {
 function getDocumentTextProcessor(documentRecord, mimeType = "") {
   if (isImageFile(documentRecord, mimeType)) {
     return {
-      readyCopy: "OCR runs locally in this app. It does not upload the image.",
-      startCopy: "Reading image locally... 0%",
+      readyCopy: "OCR can read supported image text.",
+      startCopy: "Reading image... 0%",
       read: readImageDocumentText,
     };
   }
   if (isPdfFile(documentRecord, mimeType)) {
     return {
-      readyCopy: "PDF pages are read locally. Searchable PDFs are fast; scanned PDFs can take a while.",
-      startCopy: "Opening PDF locally...",
+      readyCopy: "Searchable PDFs are fast; scanned PDFs can take a while.",
+      startCopy: "Opening PDF...",
       read: readPdfDocumentText,
     };
   }
   if (isPlainTextFile(documentRecord, mimeType)) {
     return {
-      readyCopy: "Text files are read locally in this app. They are not uploaded.",
-      startCopy: "Reading text file locally...",
+      readyCopy: "Plain text files can be copied into the document notes.",
+      startCopy: "Reading text file...",
       read: readPlainTextDocument,
     };
   }
@@ -2566,19 +3708,19 @@ async function deleteProperty(propertyId) {
   if (!saved) return;
 
   selectedPropertyId = remainingProperties[0]?.id || "";
-  propertyMode = selectedPropertyId ? "view" : "new";
+  propertyMode = "view";
   resetFiltersAfterRestore();
   resetStorageEstimate();
   const cleanup = isTutorialMode()
     ? { failed: 0 }
     : await deleteFilesBestEffort(fileIdsToDelete);
   showNotice(cleanup.failed
-    ? "Property deleted. Some stored document files could not be removed from local storage."
+    ? "Property deleted. Some attached document files could not be removed."
     : "Property deleted.");
 }
 
 async function deleteProject(projectId) {
-  if (!window.confirm("Delete this project? Linked expenses will stay saved without a project.")) return;
+  if (!window.confirm("Delete this project? Related records will stay saved without this project.")) return;
   const saved = await updateData({
     ...data,
     projects: data.projects.filter((project) => project.id !== projectId),
@@ -2587,9 +3729,11 @@ async function deleteProject(projectId) {
   });
   if (!saved) return;
   if (selectedProjectId === projectId) selectedProjectId = "";
+  expandedProjectIds.delete(projectId);
   if (expenseFilters.projectId === projectId) expenseFilters.projectId = EMPTY_FILTER;
   editingProjectId = undefined;
-  showNotice("Project deleted. Linked expenses were kept.");
+  editingProjectField = "";
+  showNotice("Project deleted. Related records were kept.");
 }
 
 async function deleteExpense(expenseId) {
@@ -2746,7 +3890,7 @@ function reconcileExpensesAfterDocumentFileRemoval(nextDocuments, changedDocumen
 
 async function saveCpaReviewPdfFile() {
   if (!data.properties.length && !data.expenses.length && !data.documents.length) {
-    showNotice("Add records before creating a CPA review PDF.");
+    showNotice("Add records before creating a professional review PDF.");
     return;
   }
 
@@ -2757,23 +3901,80 @@ async function saveCpaReviewPdfFile() {
   }
 
   const filename = isTutorialMode()
-    ? `home-basis-tracker-tutorial-cpa-review-${todayISO()}.pdf`
-    : `home-basis-tracker-cpa-review-${todayISO()}.pdf`;
+    ? `home-basis-tracker-tutorial-professional-review-${todayISO()}.pdf`
+    : `home-basis-tracker-professional-review-${todayISO()}.pdf`;
 
   try {
     const result = await saveCpaReviewPdf(filename, buildCpaReviewPdfHtml(data));
     if (result?.canceled) {
-      showNotice("CPA PDF save canceled.");
+      showNotice("Professional review PDF save canceled.");
       return;
     }
-    showNotice(isTutorialMode() ? "Tutorial CPA PDF saved." : "CPA PDF saved.");
+    showNotice(isTutorialMode() ? "Tutorial review PDF saved." : "Professional review PDF saved.");
   } catch (error) {
-    showNotice(error?.message || "CPA PDF could not be saved.");
+    showNotice(error?.message || "Professional review PDF could not be saved.");
   }
 }
 
 function buildCpaReviewPdfHtml(records) {
-  const title = isTutorialMode() ? "Home Basis Tracker Tutorial CPA Review" : "Home Basis Tracker CPA Review";
+  const cleanData = sanitizeData(records);
+  const totals = getExpenseTotals(cleanData.expenses);
+  const readiness = getReviewReadiness(cleanData);
+  const propertySummaries = getPropertyReviewSummaries(cleanData);
+  const projectSummaries = getProjectReviewSummaries(cleanData);
+  const documentationGaps = sortByDateDesc(cleanData.expenses.filter((expense) => getPdfExpenseDocumentationIssue(cleanData, expense)));
+  const title = isTutorialMode() ? "Tutorial Professional Review" : "Professional Review Packet";
+  const subtitle = isTutorialMode()
+    ? "Prepared from sample tutorial records"
+    : "Prepared from Home Basis Tracker records";
+  const propertyRows = propertySummaries.map((summary) => [
+    `${summary.property.name}${summary.property.address ? `\n${summary.property.address}` : ""}`,
+    formatDate(summary.property.purchaseDate),
+    summary.property.purchasePrice ? formatCurrency(summary.property.purchasePrice) : "Not added",
+    formatCurrency(summary.totals.total),
+    String(summary.projects.length),
+    `${summary.documents.length} (${summary.storedFiles} files)`,
+    String(summary.missingDocuments),
+  ]);
+  const projectRows = projectSummaries.map((summary) => [
+    `${summary.project.name}\n${getPropertyName(cleanData, summary.project.propertyId)}`,
+    optionLabel(PROJECT_STATUSES, summary.project.status),
+    summary.dateRange,
+    getProjectVendorName(cleanData, summary.project, "Not added"),
+    summary.project.permitNumber || (summary.hasPermit ? "Permit record attached" : "Not added"),
+    formatCurrency(summary.totals.total),
+    `${summary.completeness.score}% (${summary.completeness.completedChecks}/${summary.completeness.totalChecks})`,
+  ]);
+  const expenseRows = sortByDateDesc(cleanData.expenses).map((expense) => [
+    formatDate(expense.date),
+    `${getExpenseVendorName(cleanData, expense)}\n${expense.description}`,
+    getPropertyName(cleanData, expense.propertyId),
+    getProjectName(cleanData, expense.projectId),
+    optionLabel(CLASSIFICATIONS, expense.classification),
+    optionLabel(DOCUMENT_STATUSES, expense.documentationStatus),
+    formatCurrency(expense.amount),
+  ]);
+  const followUpRows = documentationGaps.map((expense) => [
+    formatDate(expense.date),
+    `${getExpenseVendorName(cleanData, expense)}\n${expense.description}`,
+    getProjectName(cleanData, expense.projectId),
+    getPdfExpenseDocumentationIssue(cleanData, expense),
+    formatCurrency(expense.amount),
+  ]);
+  const documentRows = cleanData.documents.map((documentRecord) => {
+    const relatedExpense = cleanData.expenses.find((expense) => expense.id === documentRecord.expenseId);
+    return [
+      documentRecord.displayName,
+      optionLabel(DOCUMENT_TYPES, documentRecord.documentType),
+      getPropertyName(cleanData, documentRecord.propertyId),
+      getProjectName(cleanData, documentRecord.projectId),
+      relatedExpense ? `${getExpenseVendorName(cleanData, relatedExpense)} / ${relatedExpense.description}` : "None",
+      documentRecord.hasFile
+        ? `${documentRecord.fileName || "Attached file"} (${formatFileSize(documentRecord.fileSize)})`
+        : documentRecord.fileStatusNote || "No file attached",
+    ];
+  });
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -2785,43 +3986,232 @@ function buildCpaReviewPdfHtml(records) {
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      color: #1b211f;
+      color: #202522;
       background: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 11px;
-      line-height: 1.45;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      font-size: 10.5px;
+      line-height: 1.42;
     }
-    header {
-      margin-bottom: 18px;
-      border-bottom: 1px solid #dbe2dc;
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #214f43;
       padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid #214f43;
+      color: #214f43;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .brand-name {
+      display: block;
+      color: #1f2b26;
+      font-size: 15px;
+      font-weight: 750;
+    }
+    .brand-subtitle {
+      display: block;
+      color: #66716c;
+      font-size: 9px;
+      margin-top: 1px;
+    }
+    .prepared {
+      color: #66716c;
+      font-size: 9px;
+      text-align: right;
     }
     h1 {
-      margin: 0 0 5px;
-      color: #143b33;
-      font-size: 22px;
+      margin: 0 0 6px;
+      color: #15201c;
+      font-size: 24px;
       line-height: 1.15;
+      letter-spacing: 0;
     }
-    p {
-      margin: 0;
-      color: #5c6a64;
+    h2 {
+      margin: 20px 0 8px;
+      color: #214f43;
+      font-size: 13px;
+      line-height: 1.25;
+      border-bottom: 1px solid #d8ded9;
+      padding-bottom: 5px;
     }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    p { margin: 0 0 8px; }
+    .lede {
+      color: #4f5d57;
+      font-size: 11px;
+      max-width: 620px;
+    }
+    .note {
+      border: 1px solid #d8ded9;
+      background: #f7f8f6;
+      padding: 10px 12px;
+      margin: 14px 0 16px;
+      color: #3c4742;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 16px 0 12px;
+    }
+    .metric {
+      border: 1px solid #d8ded9;
+      padding: 9px;
+      min-height: 58px;
+    }
+    .metric span {
+      display: block;
+      color: #66716c;
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .metric strong {
+      display: block;
+      color: #1f2b26;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 12px;
+      page-break-inside: auto;
+    }
+    tr { page-break-inside: avoid; }
+    th {
+      background: #eef2ef;
+      border: 1px solid #cfd7d2;
+      color: #26312d;
+      font-size: 8.5px;
+      letter-spacing: 0.04em;
+      text-align: left;
+      text-transform: uppercase;
+      padding: 6px;
+      vertical-align: top;
+    }
+    td {
+      border: 1px solid #dce2de;
+      padding: 6px;
+      vertical-align: top;
+      white-space: pre-line;
+    }
+    .section {
+      page-break-inside: avoid;
+    }
+    .empty {
+      border: 1px solid #d8ded9;
+      color: #66716c;
+      padding: 9px;
+      margin-bottom: 12px;
+    }
+    .footer {
+      margin-top: 18px;
+      border-top: 1px solid #d8ded9;
+      padding-top: 8px;
+      color: #66716c;
+      font-size: 8.5px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>${escapeHtml(title)}</h1>
-    <p>Prepared from local records on ${escapeHtml(formatDate(todayISO()))}. For review only; confirm treatment with a qualified professional.</p>
-  </header>
-  <pre>${escapeHtml(buildCpaReviewPacket(records))}</pre>
+  <div class="brand-bar">
+    <div class="brand">
+      <span class="brand-mark">HB</span>
+      <div>
+        <span class="brand-name">Home Basis Tracker</span>
+        <span class="brand-subtitle">Home improvement records for professional review</span>
+      </div>
+    </div>
+    <div class="prepared">Prepared ${escapeHtml(formatDate(todayISO()))}</div>
+  </div>
+  <h1>${escapeHtml(title)}</h1>
+  <p class="lede">${escapeHtml(subtitle)}. This packet organizes property, project, expense, and document records so a qualified professional can review them efficiently.</p>
+  <div class="note">Home Basis Tracker does not calculate tax basis or determine tax treatment. Use this report as an organized record handoff and confirm classifications with a qualified professional.</div>
+  <div class="metrics">
+    ${pdfMetric("Total tracked spend", formatCurrency(totals.total))}
+    ${pdfMetric("Potential basis additions", formatCurrency(totals.potential))}
+    ${pdfMetric("Repair or maintenance", formatCurrency(totals.repair))}
+    ${pdfMetric("Needs review", formatCurrency(totals.unclear))}
+    ${pdfMetric("Readiness", `${readiness.score}%`)}
+    ${pdfMetric("Properties", String(cleanData.properties.length))}
+    ${pdfMetric("Projects", String(cleanData.projects.length))}
+    ${pdfMetric("Documents", String(cleanData.documents.length))}
+  </div>
+  ${pdfSection("Readiness Follow-Ups", readiness.followUps.length
+    ? `<ul>${readiness.followUps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    : `<div class="empty">No open readiness follow-ups recorded.</div>`)}
+  ${pdfSection("Property Summary", propertyRows.length
+    ? pdfTable(["Property", "Purchase Date", "Purchase Price", "Tracked Spend", "Projects", "Documents", "Follow-Ups"], propertyRows)
+    : `<div class="empty">No property records.</div>`)}
+  ${pdfSection("Project Summary", projectRows.length
+    ? pdfTable(["Project", "Status", "Dates", "Contractor", "Permit", "Spend", "Completeness"], projectRows)
+    : `<div class="empty">No project records.</div>`)}
+  ${pdfSection("Expense Detail", expenseRows.length
+    ? pdfTable(["Date", "Expense", "Property", "Project", "Classification", "Documentation", "Amount"], expenseRows)
+    : `<div class="empty">No expense records.</div>`)}
+  ${pdfSection("Documentation Follow-Ups", followUpRows.length
+    ? pdfTable(["Date", "Expense", "Project", "Issue", "Amount"], followUpRows)
+    : `<div class="empty">No open documentation follow-ups recorded.</div>`)}
+  ${pdfSection("Document Index", documentRows.length
+    ? pdfTable(["Document", "Type", "Property", "Project", "Related Expense", "Stored File"], documentRows)
+    : `<div class="empty">No document records.</div>`)}
+  <div class="footer">Generated by Home Basis Tracker. Attached file contents are not embedded in this PDF.</div>
 </body>
 </html>`;
+}
+
+function pdfMetric(label, value) {
+  return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function pdfSection(title, body) {
+  return `<section class="section"><h2>${escapeHtml(title)}</h2>${body}</section>`;
+}
+
+function pdfTable(headers, rows) {
+  return `
+    <table>
+      <thead>
+        <tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function getPdfExpenseDocumentationIssue(records, expense) {
+  if (isDocumentationGap(expense)) {
+    return "Needs a receipt, invoice, or follow-up note.";
+  }
+  if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) {
+    return "";
+  }
+
+  const expectedType = expense.documentationStatus === "invoice attached" ? "invoice" : "receipt";
+  const hasLinkedStoredDocument = records.documents.some((documentRecord) =>
+    documentRecord.expenseId === expense.id &&
+    documentRecord.hasFile &&
+    documentRecord.documentType === expectedType
+  );
+  if (hasLinkedStoredDocument) return "";
+  return `Marked ${optionLabel(DOCUMENT_STATUSES, expense.documentationStatus).toLowerCase()}, but no linked stored ${expectedType} is in this binder.`;
 }
 
 async function downloadFullBackup() {
@@ -2968,7 +4358,7 @@ async function restoreFromBackupFile(file) {
   const restoreNotice = isTutorialMode()
     ? "Backup restored into the tutorial workspace only."
     : restored.skippedFiles
-    ? `Backup restored. Some attached files could not be restored ${storageLocationShort()}.`
+    ? "Backup restored. Some attached files could not be restored."
     : "Backup restored.";
   const cleanupNotice = cleanup.failed
     ? ` Some older stored files could not be removed from ${storageSurfaceName().toLowerCase()} storage.`
@@ -2987,7 +4377,7 @@ function buildRestorePreviewMessage(file, backupSummary) {
     : "Files needing follow-up: none flagged";
   const modeCopy = isTutorialMode()
     ? "This will replace the temporary tutorial workspace only. Your real records will not be changed."
-    : `This will replace the current records ${storageLocationShort()}. Download a backup first if you want to keep what is here.`;
+    : "This will replace the current records. Download a backup first if you want to keep what is here.";
 
   return [
     "Restore this Home Basis Tracker backup?",
@@ -3006,6 +4396,7 @@ function buildRestorePreviewMessage(file, backupSummary) {
 
 function getRecordCounts(records) {
   return {
+    vendors: Array.isArray(records?.vendors) ? records.vendors.length : 0,
     properties: Array.isArray(records?.properties) ? records.properties.length : 0,
     projects: Array.isArray(records?.projects) ? records.projects.length : 0,
     expenses: Array.isArray(records?.expenses) ? records.expenses.length : 0,
@@ -3015,6 +4406,7 @@ function getRecordCounts(records) {
 
 function formatRecordCounts(counts) {
   return [
+    `${counts.vendors || 0} ${(counts.vendors || 0) === 1 ? "vendor" : "vendors"}`,
     `${counts.properties} ${counts.properties === 1 ? "property" : "properties"}`,
     `${counts.projects} ${counts.projects === 1 ? "project" : "projects"}`,
     `${counts.expenses} ${counts.expenses === 1 ? "expense" : "expenses"}`,
@@ -3247,13 +4639,18 @@ function normalizeSelectionsAndFilters() {
     expenseFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
   }
   if (documentFilters.propertyId !== EMPTY_FILTER && !propertyIds.has(documentFilters.propertyId)) {
-    documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+    documentFilters.propertyId = EMPTY_FILTER;
   }
 
   const projectIds = new Set(data.projects.map((project) => project.id));
+  const vendorIds = new Set(data.vendors.map((vendor) => vendor.id));
+  if (editingVendorId && !vendorIds.has(editingVendorId)) {
+    editingVendorId = undefined;
+  }
   if (selectedProjectId && !projectIds.has(selectedProjectId)) {
     selectedProjectId = "";
   }
+  expandedProjectIds = new Set([...expandedProjectIds].filter((projectId) => projectIds.has(projectId)));
   if (editingProjectId && !projectIds.has(editingProjectId)) {
     editingProjectId = undefined;
   }
@@ -3279,10 +4676,14 @@ function resetFiltersAfterRestore() {
   expenseFilters.category = EMPTY_FILTER;
   expenseFilters.documentationStatus = EMPTY_FILTER;
   expenseFilters.sort = "date-desc";
-  documentFilters.propertyId = selectedPropertyId || EMPTY_FILTER;
+  documentFilters.propertyId = EMPTY_FILTER;
   documentFilters.documentType = EMPTY_FILTER;
   documentFilters.fileStatus = EMPTY_FILTER;
   selectedProjectId = "";
+  expandedProjectIds = new Set();
+  draftExpenseProjectId = "";
+  draftDocumentExpenseId = "";
+  draftDocumentProjectId = "";
 }
 
 function getBackupError(error) {
@@ -3298,7 +4699,7 @@ function getBackupError(error) {
 
 async function updateData(nextData, options = {}) {
   if (!isTutorialMode() && storageWriteBlocked && !options.allowBlockedWrite) {
-    notice = "Saves are paused because local records could not be loaded safely. Restore a backup or reopen the app before making changes.";
+    notice = "Saves are paused because records could not be loaded safely. Restore a backup or reopen the app before making changes.";
     render();
     return false;
   }
@@ -3315,7 +4716,7 @@ async function updateData(nextData, options = {}) {
     storageWriteBlocked = false;
   } catch {
     data = previousData;
-    notice = `Unable to save locally. Check ${storageSurfaceName()} storage settings before adding more records.`;
+    notice = `Unable to save. Check ${storageSurfaceName()} storage settings before adding more records.`;
     render();
     return false;
   }
@@ -3339,7 +4740,7 @@ function getDocumentStorageError(error) {
   if (/blocked/i.test(message)) {
     return `Document storage is blocked by another ${isDesktopMode() ? "app window" : "browser tab"}. Close other windows for this app and try again.`;
   }
-  return "The file could not be saved locally. Keep your own backup and try again.";
+  return "The file could not be saved. Keep your own backup and try again.";
 }
 
 function renderToast() {
@@ -3399,11 +4800,17 @@ function showFormNotice(form, fieldName, message) {
 }
 
 function closeEditors() {
+  editingPropertyField = "";
   editingProjectId = undefined;
+  editingProjectField = "";
   editingExpenseId = undefined;
   editingDocumentId = undefined;
+  editingVendorId = undefined;
+  vendorManagerOpen = false;
+  draftExpenseProjectId = "";
   draftDocumentExpenseId = "";
-  if (data.properties.length && propertyMode !== "view") propertyMode = "view";
+  draftDocumentProjectId = "";
+  propertyMode = "view";
 }
 
 function renderPageIntro({ actions = "", description = "", eyebrow, title }) {
@@ -3498,7 +4905,7 @@ function selectField(label, name, value, options, includeBlank = true) {
     <label class="field">
       <span>${escapeHtml(label)}</span>
       <select name="${escapeAttr(name)}">
-        ${includeBlank ? optionHtml("", name === "projectId" ? "No project" : name === "expenseId" ? "No expense" : "None", value) : ""}
+        ${includeBlank ? optionHtml("", name === "projectId" ? "No project" : name === "expenseId" ? "No expense" : name === "vendorId" ? "Unassigned / unknown" : "None", value) : ""}
         ${options.map((option) => optionHtml(option.value, option.label, value)).join("")}
       </select>
     </label>
@@ -3535,6 +4942,29 @@ function rowActions(editAction, deleteAction, id, label) {
       <button aria-label="Delete ${escapeAttr(label)}" data-action="${escapeAttr(deleteAction)}" data-id="${escapeAttr(id)}" type="button">×</button>
     </div>
   `;
+}
+
+function deleteRowAction(deleteAction, id, label) {
+  return `
+    <div class="row-actions">
+      <button aria-label="Delete ${escapeAttr(label)}" data-action="${escapeAttr(deleteAction)}" data-id="${escapeAttr(id)}" type="button">×</button>
+    </div>
+  `;
+}
+
+function projectRowActions(project) {
+  return `
+    <div class="row-actions text-actions">
+      <button class="text-action" data-action="edit-project" data-id="${escapeAttr(project.id)}" type="button">Edit details</button>
+      <button aria-label="Delete ${escapeAttr(project.name)}" data-action="delete-project" data-id="${escapeAttr(project.id)}" type="button">×</button>
+    </div>
+  `;
+}
+
+function getExpenseName(records, id) {
+  const expense = records.expenses.find((item) => item.id === id);
+  if (!expense) return "";
+  return `${getExpenseVendorName(records, expense, "Expense")}${expense.description ? ` - ${expense.description}` : ""}`;
 }
 
 function table(headers, rows) {
@@ -3578,9 +5008,23 @@ function iconSymbol(name) {
     edit: "✎",
     folder: "▣",
     home: "⌂",
+    image: "□",
     receipt: "▥",
   };
   return symbols[name] || "•";
+}
+
+function tabIcon(id) {
+  const icons = {
+    dashboard: "⌂",
+    property: "⌁",
+    projects: "▣",
+    expenses: "▥",
+    documents: "◇",
+    export: "↓",
+    tutorial: "▤",
+  };
+  return icons[id] || "•";
 }
 
 function escapeHtml(value) {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  buildCpaReviewPacket,
+  buildSaleScenarioEstimate,
   buildExpensesCsv,
   formatFileSize,
   getSafeDownloadFileName,
@@ -92,11 +92,37 @@ test("sanitizeData drops orphaned records when no usable property remains", () =
   });
 
   assert.deepEqual(cleanData, {
+    vendors: [],
     properties: [],
     projects: [],
     expenses: [],
     documents: [],
   });
+});
+
+test("sanitizeData creates shared vendors from legacy project and expense names", () => {
+  const cleanData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Kitchen",
+      contractor: "Acme Tile",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      vendor: "Acme Tile",
+      description: "Tile labor",
+      amount: 1200,
+    }],
+  });
+
+  assert.equal(cleanData.vendors.length, 1);
+  assert.equal(cleanData.vendors[0].name, "Acme Tile");
+  assert.equal(cleanData.projects[0].vendorId, cleanData.vendors[0].id);
+  assert.equal(cleanData.expenses[0].vendorId, cleanData.vendors[0].id);
 });
 
 test("buildExpensesCsv neutralizes spreadsheet formulas and quotes values", () => {
@@ -116,12 +142,14 @@ test("buildExpensesCsv neutralizes spreadsheet formulas and quotes values", () =
   });
 
   const csv = buildExpensesCsv(cleanData);
+  assert.match(csv, /^Export Source,Export Date,Property,/);
+  assert.match(csv, /^Home Basis Tracker,\d{4}-\d{2}-\d{2},/m);
   assert.match(csv, /,'@Vendor,/);
   assert.match(csv, /"Line one\nLine two"/);
   assert.match(csv, /"Main, Home"/);
 });
 
-test("review readiness and CPA packet summarize professional review gaps", () => {
+test("review readiness and project summaries cover export essentials", () => {
   const cleanData = sanitizeData({
     properties: [{
       id: "property_1",
@@ -171,16 +199,76 @@ test("review readiness and CPA packet summarize professional review gaps", () =>
   const readiness = getReviewReadiness(cleanData);
   const properties = getPropertyReviewSummaries(cleanData);
   const projects = getProjectReviewSummaries(cleanData);
-  const packet = buildCpaReviewPacket(cleanData);
 
   assert.equal(readiness.expensesMissingLinkedEvidence.length, 0);
   assert.equal(readiness.score, 100);
   assert.equal(properties[0].readinessScore, 100);
+  assert.equal(properties[0].documents[0].displayName, "Cabinet invoice");
+  assert.equal(projects[0].project.name, "Kitchen remodel");
   assert.equal(projects[0].hasPermit, true);
-  assert.match(packet, /Home Basis Tracker CPA Review Packet/);
-  assert.match(packet, /Kitchen remodel/);
-  assert.match(packet, /Cabinet invoice/);
-  assert.match(packet, /does not calculate taxes/);
+  assert.equal(projects[0].expenses[0].description, "Cabinet installation");
+});
+
+test("sale scenario estimates proceeds and potential taxable gain from saved basis records", () => {
+  const cleanData = sanitizeData({
+    properties: [{
+      id: "property_1",
+      name: "Main home",
+      purchaseDate: "2020-01-15",
+      purchasePrice: 450000,
+    }],
+    expenses: [
+      {
+        id: "expense_basis",
+        propertyId: "property_1",
+        date: "2024-02-01",
+        vendor: "Builder Co.",
+        description: "Kitchen remodel",
+        amount: 80000,
+        classification: "potential basis addition",
+        category: "kitchen",
+        documentationStatus: "invoice attached",
+      },
+      {
+        id: "expense_repair",
+        propertyId: "property_1",
+        date: "2024-04-01",
+        vendor: "Painter Co.",
+        description: "Touch-up painting",
+        amount: 5000,
+        classification: "repair or maintenance",
+        category: "interior painting",
+        documentationStatus: "receipt attached",
+      },
+      {
+        id: "expense_review",
+        propertyId: "property_1",
+        date: "2024-05-01",
+        vendor: "Roof Co.",
+        description: "Roof work",
+        amount: 12000,
+        classification: "unclear / ask CPA",
+        category: "roof",
+        documentationStatus: "needs follow-up",
+      },
+    ],
+  });
+
+  const estimate = buildSaleScenarioEstimate(cleanData, {
+    propertyId: "property_1",
+    salePrice: 900000,
+    mortgagePayoff: 300000,
+    sellingCostsRate: 6,
+    exclusionAmount: 250000,
+  });
+
+  assert.equal(estimate.sellingCosts, 54000);
+  assert.equal(estimate.adjustedBasis, 530000);
+  assert.equal(estimate.gainBeforeExclusion, 316000);
+  assert.equal(estimate.potentialTaxableGain, 66000);
+  assert.equal(estimate.netProceedsBeforeTax, 546000);
+  assert.equal(estimate.needsReviewCosts, 12000);
+  assert.equal(estimate.repairCosts, 5000);
 });
 
 test("project completeness tracks missing and finished review requirements", () => {
@@ -208,7 +296,7 @@ test("project completeness tracks missing and finished review requirements", () 
   const incomplete = getProjectCompleteness(incompleteData, incompleteData.projects[0]);
 
   assert.ok(incomplete.score < 70);
-  assert.ok(incomplete.followUps.some((item) => /scope/i.test(item)));
+  assert.ok(incomplete.followUps.some((item) => /project description/i.test(item)));
   assert.ok(incomplete.followUps.some((item) => /receipt or invoice/i.test(item)));
   assert.ok(incomplete.missingExpectedDocumentTypes.some((item) => item.value === "permit"));
 

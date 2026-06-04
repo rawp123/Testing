@@ -183,11 +183,21 @@ async function runDesktopSmoke(window) {
         await waitFor(() => bodyIncludes("Property saved.") && bodyIncludes("Smoke Test Home"), "property save");
 
         await click('[data-tab="projects"]');
+        await click('[data-action="manage-vendors"]');
+        await click('[data-action="add-vendor"]');
+        await setValue("name", "Smoke Roofing LLC");
+        await setSelect("category", "roof");
+        await submit('[data-form="vendor"]');
+        await waitFor(() => bodyIncludes("Vendor saved.") && bodyIncludes("Smoke Roofing LLC"), "vendor save");
+        await click('[data-action="close-vendor-manager"]');
+
         await click('[data-action="add-project"]');
         await setValue("name", "Roof replacement");
         await setSelect("category", "roof");
         await setSelect("status", "completed");
-        await setValue("contractor", "Smoke Roofing LLC");
+        const vendorOption = Array.from(document.querySelectorAll('[name="vendorId"] option')).find((option) => option.textContent.includes("Smoke Roofing LLC"));
+        assert(vendorOption, "Missing smoke vendor option.");
+        await setSelect("vendorId", vendorOption.value);
         await submit('[data-form="project"]');
         await waitFor(() => bodyIncludes("Project saved.") && bodyIncludes("Roof replacement"), "project save");
 
@@ -195,17 +205,17 @@ async function runDesktopSmoke(window) {
         await click('[data-action="add-expense"]');
         await setValue("date", "2024-03-15");
         await setValue("amount", "12850.50");
-        await setValue("vendor", "Smoke Roofing LLC");
         await setValue("description", "Full roof replacement");
         await setSelect("classification", "potential basis addition");
         await setSelect("category", "roof");
         await setSelect("documentationStatus", "no document yet");
         const projectOption = document.querySelector('[name="projectId"] option:not([value=""])');
         if (projectOption) await setSelect("projectId", projectOption.value);
+        await setSelect("vendorId", vendorOption.value);
         const expenseForm = document.querySelector('[data-form="expense"]');
         assert(expenseForm.elements.date.value === "2024-03-15", "Expense date was not filled.");
         assert(expenseForm.elements.amount.value === "12850.50", "Expense amount was not filled.");
-        assert(expenseForm.elements.vendor.value === "Smoke Roofing LLC", "Expense vendor was not filled.");
+        assert(expenseForm.elements.vendorId.value === vendorOption.value, "Expense vendor was not filled.");
         assert(expenseForm.elements.description.value === "Full roof replacement", "Expense description was not filled.");
         await submit('[data-form="expense"]');
         await waitFor(() => bodyIncludes("Expense saved.") && bodyIncludes("Full roof replacement"), "expense save");
@@ -241,16 +251,13 @@ async function runDesktopSmoke(window) {
         assert(!filesAfterDelete.some((fileRecord) => fileRecord.id === "file_smoke_private_beta"), "Stored file was not deleted.");
 
         await click('[data-tab="export"]');
-        await waitFor(() => bodyIncludes("CPA review summary") && bodyIncludes("Smoke Roofing LLC"), "export summary");
+        await waitFor(() => bodyIncludes("Professional review summary") && bodyIncludes("Smoke Roofing LLC"), "export summary");
         const csvButton = document.querySelector('[data-action="download-csv"]');
         assert(csvButton && !csvButton.disabled, "CSV export button should be enabled after adding an expense.");
         const pdfButton = document.querySelector('[data-action="download-cpa-pdf"]');
-        assert(pdfButton && !pdfButton.disabled, "CPA PDF export button should be enabled after adding records.");
-        const pdfResult = await window.homeLedgerDesktop.saveCpaReviewPdf({
-          filename: "home-basis-tracker-smoke-cpa-review.pdf",
-          html: "<!doctype html><html><body><h1>Home Basis Tracker Smoke CPA Review</h1><p>Smoke Roofing LLC</p></body></html>",
-        });
-        assert(pdfResult && !pdfResult.canceled, "CPA PDF smoke export did not complete.");
+        assert(pdfButton && !pdfButton.disabled, "Professional review PDF export button should be enabled after adding records.");
+        pdfButton.click();
+        await waitFor(() => bodyIncludes("Professional review PDF saved."), "professional review PDF save");
         assert(!document.body.innerText.includes("/Users/private"), "Raw local path leaked into the UI.");
 
         const savedData = await window.homeLedgerDesktop.loadData();
@@ -330,7 +337,7 @@ async function writeJsonFile(filePath, value) {
   await preserveReadableJsonBackup(filePath);
   await writeUtf8FileAtomic(filePath, text, {
     maxBytes: MAX_RECORDS_BYTES,
-    tooLargeMessage: "The local records file is too large to save.",
+    tooLargeMessage: "The records file is too large to save.",
   });
 }
 
@@ -497,7 +504,7 @@ function serializeError(error) {
 }
 
 function ensurePdfFileName(filename) {
-  const safeName = getSafeFileName(filename || "home-basis-tracker-cpa-review.pdf");
+  const safeName = getSafeFileName(filename || "home-basis-tracker-professional-review.pdf");
   return safeName.toLowerCase().endsWith(".pdf") ? safeName : `${safeName}.pdf`;
 }
 
@@ -566,7 +573,7 @@ async function getPdfSaveTarget(filename) {
   }
 
   return dialog.showSaveDialog({
-    title: "Save Home Basis Tracker CPA review PDF",
+    title: "Save Home Basis Tracker professional review PDF",
     defaultPath: filename,
     buttonLabel: "Save PDF",
     filters: [{ name: "PDF document", extensions: ["pdf"] }],
@@ -590,7 +597,7 @@ function registerIpcHandlers() {
       mode: "desktop",
       recordsPathLabel: "App support records file",
       documentsPathLabel: "App-managed documents folder",
-      storageDescription: "Records and document copies are stored locally by the Mac app.",
+      storageDescription: "Records and document copies are managed by the Mac app.",
       recordsBytes: await getFileSize(getRecordsPath()),
       ...documentSummary,
     };
@@ -641,10 +648,10 @@ function registerIpcHandlers() {
     const filename = ensurePdfFileName(record?.filename);
     const html = String(record?.html || "");
     if (!html.trim()) {
-      throw new Error("CPA review PDF content was empty.");
+      throw new Error("Professional review PDF content was empty.");
     }
     if (Buffer.byteLength(html, "utf8") > MAX_REVIEW_HTML_BYTES) {
-      throw new Error("CPA review PDF content is too large.");
+      throw new Error("Professional review PDF content is too large.");
     }
 
     const result = await getPdfSaveTarget(filename);
@@ -656,7 +663,7 @@ function registerIpcHandlers() {
     const pdfBuffer = await renderHtmlToPdfBuffer(html);
     await writeBinaryFileAtomic(ensurePdfFilePath(result.filePath), pdfBuffer, {
       maxBytes: MAX_REVIEW_PDF_BYTES,
-      tooLargeMessage: "CPA review PDF is too large to save.",
+      tooLargeMessage: "Professional review PDF is too large to save.",
     });
     return { canceled: false };
   });

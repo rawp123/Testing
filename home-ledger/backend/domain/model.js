@@ -1,12 +1,15 @@
 export const STORAGE_KEY = "home-ledger:v1";
 export const BACKUP_APP_ID = "home-basis-tracker";
 export const BACKUP_VERSION = 1;
+export const EXPORT_PRODUCT_NAME = "Home Basis Tracker";
+export const EXPORT_PRODUCT_VERSION = "0.1.0";
 export const MAX_BACKUP_FILE_SIZE = 500 * 1024 * 1024;
 export const MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_RECORDS_PER_TYPE = 5000;
 const MAX_TEXT_LENGTH = 5000;
 
 export const EMPTY_DATA = {
+  vendors: [],
   properties: [],
   projects: [],
   expenses: [],
@@ -15,12 +18,12 @@ export const EMPTY_DATA = {
 
 export const TABS = [
   { id: "dashboard", label: "Dashboard" },
-  { id: "tutorial", label: "Tutorial" },
   { id: "property", label: "Property" },
   { id: "projects", label: "Projects" },
   { id: "expenses", label: "Expenses" },
   { id: "documents", label: "Documents" },
   { id: "export", label: "Export & backup" },
+  { id: "tutorial", label: "Tutorial" },
 ];
 
 export const PROJECT_STATUSES = [
@@ -34,21 +37,61 @@ export const PROJECT_STATUSES = [
 export const CLASSIFICATIONS = [
   { value: "potential basis addition", label: "Potential basis addition" },
   { value: "repair or maintenance", label: "Repair or maintenance" },
-  { value: "unclear / ask CPA", label: "Unclear / ask CPA" },
+  { value: "unclear / ask CPA", label: "Needs professional review" },
 ];
 
 export const EXPENSE_CATEGORIES = [
-  { value: "kitchen", label: "Kitchen" },
-  { value: "bathroom", label: "Bathroom" },
-  { value: "roof", label: "Roof" },
-  { value: "HVAC", label: "HVAC" },
-  { value: "windows/doors", label: "Windows/doors" },
-  { value: "flooring", label: "Flooring" },
-  { value: "landscaping", label: "Landscaping" },
   { value: "addition/structural", label: "Addition/structural" },
-  { value: "plumbing", label: "Plumbing" },
-  { value: "electrical", label: "Electrical" },
   { value: "appliances", label: "Appliances" },
+  { value: "attic", label: "Attic" },
+  { value: "basement", label: "Basement" },
+  { value: "bathroom", label: "Bathroom" },
+  { value: "bedroom", label: "Bedroom" },
+  { value: "cleanup/hauling", label: "Cleanup/hauling" },
+  { value: "closets/storage", label: "Closets/storage" },
+  { value: "deck/patio/porch", label: "Deck/patio/porch" },
+  { value: "demolition", label: "Demolition" },
+  { value: "dining room", label: "Dining room" },
+  { value: "drainage/grading", label: "Drainage/grading" },
+  { value: "driveway/walkway", label: "Driveway/walkway" },
+  { value: "drywall/plaster", label: "Drywall/plaster" },
+  { value: "electrical", label: "Electrical" },
+  { value: "exterior masonry", label: "Exterior masonry" },
+  { value: "fence/gate", label: "Fence/gate" },
+  { value: "fireplace/chimney", label: "Fireplace/chimney" },
+  { value: "flooring", label: "Flooring" },
+  { value: "foundation", label: "Foundation" },
+  { value: "garage", label: "Garage" },
+  { value: "gutters/downspouts", label: "Gutters/downspouts" },
+  { value: "HVAC", label: "HVAC" },
+  { value: "inspection", label: "Inspection" },
+  { value: "insulation/weatherization", label: "Insulation/weatherization" },
+  { value: "irrigation", label: "Irrigation" },
+  { value: "kitchen", label: "Kitchen" },
+  { value: "landscaping", label: "Landscaping/yard" },
+  { value: "laundry/mudroom", label: "Laundry/mudroom" },
+  { value: "lighting", label: "Lighting" },
+  { value: "living/family room", label: "Living/family room" },
+  { value: "office", label: "Office" },
+  { value: "exterior painting", label: "Painting - exterior" },
+  { value: "interior painting", label: "Painting - interior" },
+  { value: "permits/fees", label: "Permits/fees" },
+  { value: "plans/design", label: "Plans/design" },
+  { value: "plumbing", label: "Plumbing" },
+  { value: "pool/spa", label: "Pool/spa" },
+  { value: "roof", label: "Roof" },
+  { value: "sewer/septic", label: "Sewer/septic" },
+  { value: "siding", label: "Siding" },
+  { value: "smart home/security", label: "Smart home/security" },
+  { value: "solar/energy", label: "Solar/energy" },
+  { value: "stairs/railings", label: "Stairs/railings" },
+  { value: "tree work", label: "Tree work" },
+  { value: "trim/millwork", label: "Trim/millwork" },
+  { value: "warranty/service plan", label: "Warranty/service plan" },
+  { value: "water heater", label: "Water heater" },
+  { value: "well/water treatment", label: "Well/water treatment" },
+  { value: "whole home", label: "Whole home" },
+  { value: "windows/doors", label: "Windows/doors" },
   { value: "other", label: "Other" },
 ];
 
@@ -73,6 +116,11 @@ export const DOCUMENT_TYPES = [
   { value: "other", label: "Other" },
 ];
 
+export const VENDOR_STATUSES = [
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+];
+
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -80,22 +128,51 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 });
 const PERMIT_LIKELY_CATEGORIES = new Set([
   "addition/structural",
+  "basement",
+  "deck/patio/porch",
+  "demolition",
+  "drainage/grading",
   "electrical",
-  "plumbing",
+  "exterior masonry",
+  "foundation",
+  "garage",
   "HVAC",
+  "permits/fees",
+  "plumbing",
+  "pool/spa",
   "roof",
+  "sewer/septic",
+  "siding",
+  "solar/energy",
+  "water heater",
+  "well/water treatment",
   "windows/doors",
 ]);
 const CONTRACT_REVIEW_THRESHOLD = 1000;
 
 export function sanitizeData(value) {
   const sanitized = {
+    vendors: Array.isArray(value?.vendors) ? value.vendors.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeVendor) : [],
     properties: Array.isArray(value?.properties) ? value.properties.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeProperty) : [],
     projects: Array.isArray(value?.projects) ? value.projects.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeProject) : [],
     expenses: Array.isArray(value?.expenses) ? value.expenses.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeExpense) : [],
     documents: Array.isArray(value?.documents) ? value.documents.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeDocument) : [],
   };
   return normalizeRelationships(sanitized);
+}
+
+function sanitizeVendor(vendor) {
+  return {
+    id: cleanText(vendor?.id),
+    name: cleanDisplayText(vendor?.name),
+    category: allowedOptionValue(EXPENSE_CATEGORIES, vendor?.category, "other"),
+    contactName: cleanDisplayText(vendor?.contactName),
+    phone: cleanDisplayText(vendor?.phone),
+    email: cleanDisplayText(vendor?.email),
+    website: cleanDisplayText(vendor?.website),
+    notes: cleanDisplayText(vendor?.notes),
+    status: allowedOptionValue(VENDOR_STATUSES, vendor?.status, "active"),
+  };
 }
 
 function sanitizeProperty(property) {
@@ -113,6 +190,7 @@ function sanitizeProject(project) {
   return {
     id: cleanText(project?.id),
     propertyId: cleanText(project?.propertyId),
+    vendorId: cleanText(project?.vendorId),
     name: cleanDisplayText(project?.name),
     category: allowedOptionValue(EXPENSE_CATEGORIES, project?.category, "other"),
     startDate: cleanDate(project?.startDate),
@@ -130,6 +208,7 @@ function sanitizeExpense(expense) {
     id: cleanText(expense?.id),
     propertyId: cleanText(expense?.propertyId),
     projectId: cleanText(expense?.projectId),
+    vendorId: cleanText(expense?.vendorId),
     date: cleanDate(expense?.date),
     vendor: cleanDisplayText(expense?.vendor),
     description: cleanDisplayText(expense?.description),
@@ -168,27 +247,46 @@ function normalizeRelationships(cleanData) {
   const propertyIds = new Set(properties.map((property) => property.id));
   const fallbackPropertyId = properties[0]?.id || "";
 
-  const projects = cleanData.projects
+  const baseProjects = cleanData.projects
     .filter((project) => project.id && project.name)
     .map((project) => ({
       ...project,
       propertyId: propertyIds.has(project.propertyId) ? project.propertyId : fallbackPropertyId,
     }))
     .filter((project) => project.propertyId);
-  const projectIds = new Set(projects.map((project) => project.id));
+  const baseProjectIds = new Set(baseProjects.map((project) => project.id));
 
-  const expenses = cleanData.expenses
-    .filter((expense) => expense.id && expense.vendor && expense.description)
+  const baseExpenses = cleanData.expenses
+    .filter((expense) => expense.id && expense.description)
     .map((expense) => {
       const propertyId = propertyIds.has(expense.propertyId) ? expense.propertyId : fallbackPropertyId;
-      const linkedProject = projects.find((project) => project.id === expense.projectId && project.propertyId === propertyId);
       return {
         ...expense,
         propertyId,
-        projectId: linkedProject?.id || "",
+        projectId: baseProjects.find((project) => project.id === expense.projectId && project.propertyId === propertyId)?.id || "",
       };
     })
     .filter((expense) => expense.propertyId);
+
+  const vendorRegistry = buildVendorRegistry(cleanData.vendors, baseProjects, baseExpenses);
+  const projects = baseProjects.map((project) => ({
+    ...project,
+    vendorId: vendorRegistry.resolve(project.vendorId, project.contractor),
+  })).map((project) => ({
+    ...project,
+    contractor: getVendorNameFromRegistry(vendorRegistry, project.vendorId) || project.contractor,
+  }));
+  const projectIds = new Set(projects.map((project) => project.id));
+
+  const expenses = baseExpenses.map((expense) => {
+    const linkedProject = projects.find((project) => project.id === expense.projectId);
+    const vendorId = vendorRegistry.resolve(expense.vendorId, expense.vendor || linkedProject?.contractor);
+    return {
+      ...expense,
+      vendorId,
+      vendor: getVendorNameFromRegistry(vendorRegistry, vendorId) || expense.vendor,
+    };
+  });
   const expenseIds = new Set(expenses.map((expense) => expense.id));
 
   const documents = cleanData.documents
@@ -216,11 +314,100 @@ function normalizeRelationships(cleanData) {
     .filter((document) => document.propertyId);
 
   return {
+    vendors: vendorRegistry.vendors,
     properties,
-    projects: projects.filter((project) => projectIds.has(project.id)),
+    projects: projects.filter((project) => projectIds.has(project.id) && baseProjectIds.has(project.id)),
     expenses,
     documents,
   };
+}
+
+function buildVendorRegistry(explicitVendors, projects, expenses) {
+  const vendors = [];
+  const byId = new Map();
+  const byNameKey = new Map();
+  const usedIds = new Set();
+
+  function addVendor(vendor, preferredId = "") {
+    const name = cleanDisplayText(vendor?.name);
+    if (!name) return "";
+    const nameKey = vendorNameKey(name);
+    const existingNameId = byNameKey.get(nameKey);
+    if (existingNameId) return existingNameId;
+
+    const rawId = cleanText(preferredId || vendor?.id);
+    const id = rawId && !usedIds.has(rawId) ? rawId : uniqueVendorId(name, usedIds);
+    const normalizedVendor = {
+      id,
+      name,
+      category: allowedOptionValue(EXPENSE_CATEGORIES, vendor?.category, "other"),
+      contactName: cleanDisplayText(vendor?.contactName),
+      phone: cleanDisplayText(vendor?.phone),
+      email: cleanDisplayText(vendor?.email),
+      website: cleanDisplayText(vendor?.website),
+      notes: cleanDisplayText(vendor?.notes),
+      status: allowedOptionValue(VENDOR_STATUSES, vendor?.status, "active"),
+    };
+    vendors.push(normalizedVendor);
+    byId.set(id, normalizedVendor);
+    byNameKey.set(nameKey, id);
+    usedIds.add(id);
+    return id;
+  }
+
+  for (const vendor of explicitVendors) {
+    addVendor(vendor, vendor.id);
+  }
+  for (const project of projects) {
+    if (project.vendorId && byId.has(project.vendorId)) continue;
+    addVendor({ name: project.contractor, category: project.category }, project.vendorId);
+  }
+  for (const expense of expenses) {
+    if (expense.vendorId && byId.has(expense.vendorId)) continue;
+    addVendor({ name: expense.vendor, category: expense.category }, expense.vendorId);
+  }
+
+  vendors.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    vendors,
+    byId,
+    resolve(vendorId, fallbackName = "") {
+      const cleanVendorId = cleanText(vendorId);
+      if (cleanVendorId && byId.has(cleanVendorId)) return cleanVendorId;
+      const fallbackKey = vendorNameKey(fallbackName);
+      if (fallbackKey && byNameKey.has(fallbackKey)) return byNameKey.get(fallbackKey);
+      return "";
+    },
+  };
+}
+
+function getVendorNameFromRegistry(registry, vendorId) {
+  if (!vendorId) return "";
+  return registry.byId.get(vendorId)?.name || "";
+}
+
+function vendorNameKey(value) {
+  return cleanDisplayText(value).toLowerCase().replace(/\s+/g, " ");
+}
+
+function uniqueVendorId(name, usedIds) {
+  const base = `vendor_${slugifyId(name) || "unknown"}`;
+  let id = base;
+  let index = 2;
+  while (usedIds.has(id)) {
+    id = `${base}_${index}`;
+    index += 1;
+  }
+  return id;
+}
+
+function slugifyId(value) {
+  return cleanDisplayText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80);
 }
 
 function cleanText(value) {
@@ -269,6 +456,12 @@ export function parseAmount(value) {
   return Math.round(numericValue * 100) / 100;
 }
 
+function roundMoney(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.round(number * 100) / 100;
+}
+
 export function formatCurrency(value) {
   return currencyFormatter.format(parseAmount(value));
 }
@@ -310,6 +503,19 @@ export function getProjectName(data, id) {
   return data.projects.find((project) => project.id === id)?.name || "No project";
 }
 
+export function getVendorName(data, id, fallback = "Unassigned / unknown") {
+  if (!id) return fallback;
+  return data.vendors?.find((vendor) => vendor.id === id)?.name || fallback;
+}
+
+export function getExpenseVendorName(data, expense, fallback = "Unassigned / unknown") {
+  return getVendorName(data, expense?.vendorId, expense?.vendor || fallback);
+}
+
+export function getProjectVendorName(data, project, fallback = "Vendor not added") {
+  return getVendorName(data, project?.vendorId, project?.contractor || fallback);
+}
+
 export function getExpenseTotals(expenses) {
   return expenses.reduce(
     (totals, expense) => {
@@ -323,6 +529,51 @@ export function getExpenseTotals(expenses) {
     },
     { total: 0, potential: 0, repair: 0, unclear: 0, documentationGaps: 0 },
   );
+}
+
+export function buildSaleScenarioEstimate(data, scenario = {}) {
+  const properties = Array.isArray(data?.properties) ? data.properties : [];
+  const property = properties.find((item) => item.id === scenario.propertyId) || properties[0] || null;
+  const propertyExpenses = property
+    ? (Array.isArray(data?.expenses) ? data.expenses : []).filter((expense) => expense.propertyId === property.id)
+    : [];
+  const totals = getExpenseTotals(propertyExpenses);
+  const salePrice = parseAmount(scenario.salePrice);
+  const mortgagePayoff = parseAmount(scenario.mortgagePayoff);
+  const sellingCostsRate = Math.max(0, parseAmount(scenario.sellingCostsRate));
+  const explicitSellingCosts = parseAmount(scenario.sellingCostsAmount);
+  const sellingCosts = explicitSellingCosts > 0
+    ? explicitSellingCosts
+    : roundMoney(salePrice * (sellingCostsRate / 100));
+  const purchasePrice = parseAmount(property?.purchasePrice);
+  const basisAdditions = roundMoney(totals.potential);
+  const needsReviewCosts = roundMoney(totals.unclear);
+  const adjustedBasis = roundMoney(purchasePrice + basisAdditions);
+  const amountRealized = roundMoney(salePrice - sellingCosts);
+  const gainBeforeExclusion = roundMoney(amountRealized - adjustedBasis);
+  const exclusionAmount = Math.max(0, parseAmount(scenario.exclusionAmount));
+  const excludedGain = Math.min(Math.max(0, gainBeforeExclusion), exclusionAmount);
+  const potentialTaxableGain = roundMoney(Math.max(0, gainBeforeExclusion - exclusionAmount));
+  const netProceedsBeforeTax = roundMoney(salePrice - sellingCosts - mortgagePayoff);
+
+  return {
+    property,
+    salePrice,
+    mortgagePayoff,
+    sellingCostsRate,
+    sellingCosts,
+    purchasePrice,
+    basisAdditions,
+    needsReviewCosts,
+    repairCosts: roundMoney(totals.repair),
+    adjustedBasis,
+    amountRealized,
+    gainBeforeExclusion,
+    exclusionAmount,
+    excludedGain,
+    potentialTaxableGain,
+    netProceedsBeforeTax,
+  };
 }
 
 export function getPropertyReviewSummaries(data) {
@@ -401,9 +652,9 @@ function buildProjectCompleteness(project, context) {
       "Link this project to a property.",
     ),
     projectCheck(
-      "Scope or notes added",
+      "Project description or notes added",
       Boolean(project?.scopeSummary || project?.notes),
-      "Add a short scope summary or project note.",
+      "Add a short project description or project note.",
     ),
     projectCheck(
       "Start date added",
@@ -417,7 +668,7 @@ function buildProjectCompleteness(project, context) {
     ),
     projectCheck(
       "Contractor or vendor identified",
-      Boolean(project?.contractor || expenses.some((expense) => expense.vendor)),
+      Boolean(project?.vendorId || project?.contractor || expenses.some((expense) => expense.vendorId || expense.vendor)),
       "Add the contractor/vendor on the project or linked expenses.",
     ),
     projectCheck(
@@ -431,19 +682,19 @@ function buildProjectCompleteness(project, context) {
       "Link receipts, invoices, permits, photos, or notes to this project.",
     ),
     projectCheck(
-      "Receipt and invoice evidence resolved",
+      "Receipt and invoice records linked",
       expenses.length > 0 && missingDocuments === 0,
-      "Resolve expenses that need linked receipt or invoice evidence.",
+      "Link receipts or invoices for expenses that need them.",
     ),
     projectCheck(
       "Review classifications chosen",
       expenses.length > 0 && unclearExpenses === 0,
-      "Review unclear expense classifications with your CPA.",
+      "Review unclear expense classifications with a qualified professional.",
     ),
     projectCheck(
       "Expected document types covered",
       expectedDocumentFollowUps.length === 0,
-      "Add expected project document types when available.",
+      "",
     ),
   ];
   const completedChecks = checks.filter((check) => check.done).length;
@@ -476,13 +727,15 @@ export function getReviewReadiness(data) {
     !project.startDate || (project.status === "completed" && !project.completionDate)
   );
   const projectsMissingScope = data.projects.filter((project) => !project.scopeSummary && !project.notes);
+  const expensesMissingVendors = data.expenses.filter((expense) => !expense.vendorId);
   const documentsWithoutFiles = data.documents.filter((document) => !document.hasFile);
   const storedDocuments = data.documents.filter((document) => document.hasFile);
-  const totalChecks = 6;
+  const totalChecks = 7;
   const completedChecks = [
     data.properties.length > 0,
     data.expenses.length > 0,
     data.documents.length > 0,
+    data.expenses.length > 0 && expensesMissingVendors.length === 0,
     data.properties.length > 0 && propertiesMissingPurchaseDetails.length === 0,
     data.expenses.length > 0 && expensesMissingLinkedEvidence.length === 0,
     data.expenses.length > 0 && unclearExpenses.length === 0,
@@ -495,6 +748,7 @@ export function getReviewReadiness(data) {
     propertiesMissingPurchaseDetails,
     expensesMissingLinkedEvidence,
     unclearExpenses,
+    expensesMissingVendors,
     projectsMissingDates,
     projectsMissingScope,
     documentsWithoutFiles,
@@ -502,115 +756,22 @@ export function getReviewReadiness(data) {
     readyItems: [
       data.properties.length ? "Property record created" : "",
       data.projects.length ? "Projects grouped" : "",
+      data.expenses.length && !expensesMissingVendors.length ? "Expense vendors linked" : "",
       storedDocuments.length ? "Stored document files attached" : "",
       data.expenses.some((expense) => expense.classification === "potential basis addition") ? "Potential basis additions flagged" : "",
     ].filter(Boolean),
     followUps: [
       data.properties.length ? "" : "Add at least one property.",
-      data.expenses.length ? "" : "Add expense records before preparing a CPA packet.",
+      data.expenses.length ? "" : "Add expense records before preparing a professional review packet.",
       data.documents.length ? "" : "Add supporting document records.",
+      expensesMissingVendors.length ? "Assign vendors/payees to unassigned expenses." : "",
       propertiesMissingPurchaseDetails.length ? "Add purchase date and purchase price where available." : "",
       expensesMissingLinkedEvidence.length ? "Link stored receipts or invoices to documented expenses." : "",
-      unclearExpenses.length ? "Review unclear classifications with your CPA." : "",
+      unclearExpenses.length ? "Review items marked for professional classification." : "",
       projectsMissingDates.length ? "Add missing project start/completion dates." : "",
-      projectsMissingScope.length ? "Add project scope notes for context." : "",
+      projectsMissingScope.length ? "Add project descriptions or notes for context." : "",
     ].filter(Boolean),
   };
-}
-
-export function buildCpaReviewPacket(data) {
-  const cleanData = sanitizeData(data);
-  const totals = getExpenseTotals(cleanData.expenses);
-  const readiness = getReviewReadiness(cleanData);
-  const propertySummaries = getPropertyReviewSummaries(cleanData);
-  const projectSummaries = getProjectReviewSummaries(cleanData);
-  const lines = [
-    "Home Basis Tracker CPA Review Packet",
-    `Prepared: ${formatDate(todayISO())}`,
-    "",
-    "Important note",
-    "Home Basis Tracker organizes records for review. It does not calculate taxes, determine basis, or provide legal or tax advice.",
-    "",
-    "Overall totals",
-    `Total tracked spend: ${formatCurrency(totals.total)}`,
-    `Marked potential basis additions: ${formatCurrency(totals.potential)}`,
-    `Repair/maintenance: ${formatCurrency(totals.repair)}`,
-    `Unclear / ask CPA: ${formatCurrency(totals.unclear)}`,
-    `Documentation follow-ups: ${readiness.expensesMissingLinkedEvidence.length}`,
-    `Review readiness: ${readiness.score}% (${readiness.completedChecks}/${readiness.totalChecks} checks)`,
-    "",
-    "Readiness follow-ups",
-    ...(readiness.followUps.length ? readiness.followUps.map((item) => `- ${item}`) : ["- No open readiness follow-ups recorded."]),
-    "",
-    "Properties",
-    ...(propertySummaries.length ? propertySummaries.flatMap((summary) => [
-      `${summary.property.name}`,
-      `Address: ${summary.property.address || "Not added"}`,
-      `Purchase date: ${formatDate(summary.property.purchaseDate)}`,
-      `Purchase price: ${summary.property.purchasePrice ? formatCurrency(summary.property.purchasePrice) : "Not added"}`,
-      `Tracked spend: ${formatCurrency(summary.totals.total)}`,
-      `Potential basis additions: ${formatCurrency(summary.totals.potential)}`,
-      `Projects: ${summary.projects.length}`,
-      `Documents: ${summary.documents.length} (${summary.storedFiles} stored files)`,
-      `Documentation follow-ups: ${summary.missingDocuments}`,
-      summary.property.notes ? `Notes: ${summary.property.notes}` : "Notes: None",
-      "",
-    ]) : ["No property records.", ""]),
-    "Projects",
-    ...(projectSummaries.length ? projectSummaries.flatMap((summary) => [
-      `${summary.project.name} (${getPropertyName(cleanData, summary.project.propertyId)})`,
-      `Status: ${optionLabel(PROJECT_STATUSES, summary.project.status)}`,
-      `Category: ${optionLabel(EXPENSE_CATEGORIES, summary.project.category)}`,
-      `Dates: ${summary.dateRange}`,
-      `Contractor/vendor: ${summary.project.contractor || "Not added"}`,
-      `Permit number: ${summary.project.permitNumber || "Not added"}`,
-      `Tracked spend: ${formatCurrency(summary.totals.total)}`,
-      `Documents: ${summary.documents.length}`,
-      `Project completeness: ${summary.completeness.score}% (${summary.completeness.completedChecks}/${summary.completeness.totalChecks} checks)`,
-      `Coverage: ${[
-        summary.hasPermit ? "permit" : "",
-        summary.hasContract ? "contract" : "",
-        summary.hasPhoto ? "photos" : "",
-      ].filter(Boolean).join(", ") || "No permit/contract/photo records"}`,
-      `Expected document types: ${summary.completeness.expectedDocumentTypes.map((item) => item.label).join(", ") || "None flagged"}`,
-      ...(summary.completeness.followUps.length ? [
-        "Project follow-ups:",
-        ...summary.completeness.followUps.map((item) => `- ${item}`),
-      ] : ["Project follow-ups: None recorded."]),
-      summary.project.scopeSummary ? `Scope: ${summary.project.scopeSummary}` : "",
-      summary.project.notes ? `Notes: ${summary.project.notes}` : "",
-      "",
-    ]) : ["No project records.", ""]),
-    "Expense detail",
-    ...(cleanData.expenses.length ? sortByDateDesc(cleanData.expenses).flatMap((expense) => [
-      `${formatDate(expense.date)} / ${expense.vendor} / ${formatCurrency(expense.amount)}`,
-      `Property: ${getPropertyName(cleanData, expense.propertyId)}`,
-      `Project: ${getProjectName(cleanData, expense.projectId)}`,
-      `Description: ${expense.description}`,
-      `Category: ${optionLabel(EXPENSE_CATEGORIES, expense.category)}`,
-      `Classification: ${optionLabel(CLASSIFICATIONS, expense.classification)}`,
-      `Documentation: ${optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)}`,
-      isExpenseMissingLinkedEvidence(cleanData, expense) ? "Follow-up: linked stored receipt/invoice evidence should be reviewed." : "Follow-up: none recorded.",
-      expense.notes ? `Notes: ${expense.notes}` : "Notes: None",
-      "",
-    ]) : ["No expense records.", ""]),
-    "Document index",
-    ...(cleanData.documents.length ? cleanData.documents.map((document) => {
-      const linkedExpense = cleanData.expenses.find((expense) => expense.id === document.expenseId);
-      return [
-        `${document.displayName}`,
-        `Type: ${optionLabel(DOCUMENT_TYPES, document.documentType)}`,
-        `Property: ${getPropertyName(cleanData, document.propertyId)}`,
-        `Project: ${getProjectName(cleanData, document.projectId)}`,
-        `Related expense: ${linkedExpense ? `${linkedExpense.vendor} / ${linkedExpense.description}` : "None"}`,
-        `Stored file: ${document.hasFile ? `${document.fileName || "Attached file"} (${formatFileSize(document.fileSize)})` : document.fileStatusNote || "No file attached"}`,
-        document.notes ? `Notes: ${document.notes}` : "Notes: None",
-        "",
-      ].join("\n");
-    }) : ["No document records."]),
-  ];
-
-  return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}\n`;
 }
 
 function isExpenseMissingLinkedEvidence(data, expense) {
@@ -641,7 +802,7 @@ function getExpectedProjectDocumentTypes(project, expenses, totalSpend) {
   if (project?.permitNumber || PERMIT_LIKELY_CATEGORIES.has(project?.category)) {
     expectedTypes.push({ value: "permit", label: "Permit or approval" });
   }
-  if (project?.contractor || totalSpend >= CONTRACT_REVIEW_THRESHOLD) {
+  if (project?.vendorId || project?.contractor || totalSpend >= CONTRACT_REVIEW_THRESHOLD) {
     expectedTypes.push({ value: "contract", label: "Contract or estimate" });
   }
   if (["completed", "archived"].includes(project?.status)) {
@@ -747,9 +908,13 @@ export function getSafeDownloadFileName(filename) {
 }
 
 export function buildExpensesCsv(data) {
+  const cleanData = sanitizeData(data);
   const headers = [
+    "Export Source",
+    "Export Date",
     "Property",
     "Project",
+    "Vendor ID",
     "Category",
     "Date",
     "Vendor/Payee",
@@ -760,12 +925,15 @@ export function buildExpensesCsv(data) {
     "Notes",
   ];
 
-  const rows = sortByDateDesc(data.expenses).map((expense) => [
-    getPropertyName(data, expense.propertyId),
-    getProjectName(data, expense.projectId),
+  const rows = sortByDateDesc(cleanData.expenses).map((expense) => [
+    EXPORT_PRODUCT_NAME,
+    todayISO(),
+    getPropertyName(cleanData, expense.propertyId),
+    getProjectName(cleanData, expense.projectId),
+    expense.vendorId,
     expense.category,
     expense.date,
-    expense.vendor,
+    getExpenseVendorName(cleanData, expense),
     expense.description,
     parseAmount(expense.amount).toFixed(2),
     expense.classification,

@@ -65,6 +65,7 @@ async function clearBrowserStorage(window) {
   await runPageScript(window, `
     (async () => {
       localStorage.clear();
+      localStorage.setItem("home-ledger:disable-temp-sample-records", "true");
       if (indexedDB.databases) {
         const databases = await indexedDB.databases();
         await Promise.all(databases.map((database) => new Promise((resolve, reject) => {
@@ -223,11 +224,21 @@ async function seedRecordsWithAttachment(window) {
       await waitFor(() => bodyIncludes("Property saved.") && bodyIncludes("Beta QA Home"), "property save");
 
       await click('[data-tab="projects"]');
+      await click('[data-action="manage-vendors"]');
+      await click('[data-action="add-vendor"]');
+      await setValue("name", "Beta Stone Co.");
+      await setValue("category", "kitchen");
+      await submit('[data-form="vendor"]');
+      await waitFor(() => bodyIncludes("Vendor saved.") && bodyIncludes("Beta Stone Co."), "vendor save");
+      await click('[data-action="close-vendor-manager"]');
+
       await click('[data-action="add-project"]');
       await setValue("name", "Kitchen counters");
       await setValue("category", "kitchen");
       await setValue("status", "completed");
-      await setValue("contractor", "Beta Stone Co.");
+      const vendorOption = Array.from(document.querySelectorAll('[name="vendorId"] option')).find((option) => option.textContent.includes("Beta Stone Co."));
+      assert(vendorOption, "Missing vendor option for project.");
+      await setValue("vendorId", vendorOption.value);
       await submit('[data-form="project"]');
       await waitFor(() => bodyIncludes("Project saved.") && bodyIncludes("Kitchen counters"), "project save");
 
@@ -235,13 +246,13 @@ async function seedRecordsWithAttachment(window) {
       await click('[data-action="add-expense"]');
       await setValue("date", "2025-02-18");
       await setValue("amount", "3487.42");
-      await setValue("vendor", "Beta Stone Co.");
       await setValue("description", "Quartz countertop installation");
       await setValue("classification", "potential basis addition");
       await setValue("category", "kitchen");
       await setValue("documentationStatus", "no document yet");
       const projectOption = document.querySelector('[name="projectId"] option:not([value=""])');
       if (projectOption) await setValue("projectId", projectOption.value);
+      await setValue("vendorId", vendorOption.value);
       await submit('[data-form="expense"]');
       await waitFor(() => bodyIncludes("Expense saved.") && bodyIncludes("Quartz countertop installation"), "expense save");
 
@@ -265,30 +276,57 @@ async function seedRecordsWithAttachment(window) {
       fileInput.files = dataTransfer.files;
       fileInput.dispatchEvent(new Event("change", { bubbles: true }));
       await submit('[data-form="document"]');
-      await waitFor(() => bodyIncludes("Document and local file saved.") && bodyIncludes("Countertop invoice"), "document save");
+      await waitFor(() => bodyIncludes("Document and attached file saved.") && bodyIncludes("Countertop invoice"), "document save");
       await waitFor(() => {
         const savedRecords = JSON.parse(localStorage.getItem("home-ledger:v1"));
         return savedRecords.documents.length === 1 && savedRecords.documents[0].hasFile;
       }, "document persistence");
       let records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       const savedDocumentId = records.documents[0].id;
+      const previewButton = document.querySelector('[data-action="preview-document-file"][data-id="' + savedDocumentId + '"]');
+      assert(previewButton?.textContent.trim() === "View document", "Stored document should expose a clear View document action.");
 
       await click('[data-action="preview-document-file"][data-id="' + savedDocumentId + '"]');
       await waitFor(() => {
         const button = document.querySelector('.document-preview-modal [data-action="run-document-ocr"]');
         return button && !button.disabled;
       }, "document preview");
+      assert(document.querySelector("#document-preview-title")?.textContent.trim() === "Countertop invoice", "Document reader title should match the selected document.");
+      assert(Boolean(document.querySelector(".document-preview-frame iframe")), "Document reader should show the stored PDF frame.");
+      const readerNotes = document.querySelector('.document-preview-modal textarea[name="notes"]');
+      assert(readerNotes, "Document reader should expose editable notes.");
+      readerNotes.value = "Reader note saved locally. /Users/private/reader-note.pdf";
+      readerNotes.dispatchEvent(new Event("input", { bubbles: true }));
+      const saveReaderNotes = document.querySelector('.document-preview-modal button[type="submit"]');
+      assert(saveReaderNotes, "Document reader should expose a Save notes action.");
+      saveReaderNotes.click();
+      await waitFor(() => {
+        const records = JSON.parse(localStorage.getItem("home-ledger:v1"));
+        return records.documents[0]?.notes === "Reader note saved locally. [local file path removed]";
+      }, "reader note save");
       await click('[data-action="run-document-ocr"]');
       await waitForSlow(() => {
         const records = JSON.parse(localStorage.getItem("home-ledger:v1"));
         const ocrText = records.documents[0]?.ocrText || "";
         return /BETA|PDF|OCR|INVOICE|3487/i.test(ocrText);
       }, "PDF local text extraction");
+      await click('[data-action="close-document-preview"]');
+      await click('[data-tab="dashboard"]');
+      await setValue("salePrice", "900000");
+      await setValue("mortgagePayoff", "300000");
+      await setValue("sellingCostsRate", "6");
+      await setValue("sellingCostsAmount", "");
+      await setValue("exclusionAmount", "250000");
+      await submit('[data-form="sale-scenario"]');
+      await waitFor(() => bodyIncludes("Potential taxable gain") && bodyIncludes("$82,512.58") && bodyIncludes("$546,000.00"), "sale scenario estimate");
 
       records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       assert(records.properties.length === 1, "Expected one property.");
+      assert(records.vendors.length === 1, "Expected one vendor.");
       assert(records.projects.length === 1, "Expected one project.");
       assert(records.expenses.length === 1, "Expected one expense.");
+      assert(records.projects[0].vendorId === records.vendors[0].id, "Project should link to vendor.");
+      assert(records.expenses[0].vendorId === records.vendors[0].id, "Expense should link to vendor.");
       assert(records.documents.length === 1, "Expected one document.");
       const documentRecord = records.documents[0];
       assert(documentRecord.hasFile, "Document should have a stored file.");
@@ -386,9 +424,12 @@ async function restoreBackup(window, backupText) {
 
       const records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       assert(records.properties.length === 1, "Restored backup should have one property.");
+      assert(records.vendors.length === 1, "Restored backup should have one vendor.");
       assert(records.projects.length === 1, "Restored backup should have one project.");
       assert(records.expenses.length === 1, "Restored backup should have one expense.");
       assert(records.documents.length === 1, "Restored backup should have one document.");
+      assert(records.projects[0].vendorId === records.vendors[0].id, "Restored project should link to vendor.");
+      assert(records.expenses[0].vendorId === records.vendors[0].id, "Restored expense should link to vendor.");
       const documentRecord = records.documents[0];
       assert(documentRecord.hasFile, "Restored document should have an attached file.");
       assert(documentRecord.fileName === "countertop-invoice.pdf", "Restored file name should stay sanitized.");
@@ -414,6 +455,7 @@ async function restoreBackup(window, backupText) {
 
       return {
         properties: records.properties.length,
+        vendors: records.vendors.length,
         projects: records.projects.length,
         expenses: records.expenses.length,
         documents: records.documents.length,

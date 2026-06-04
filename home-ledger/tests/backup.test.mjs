@@ -127,6 +127,9 @@ test("createBackupEnvelope sanitizes records and preserves file arrays", () => {
   );
 
   assert.equal(envelope.app, "home-basis-tracker");
+  assert.equal(envelope.productName, "Home Basis Tracker");
+  assert.equal(envelope.productVersion, "0.1.0");
+  assert.equal(envelope.exportType, "full-backup");
   assert.equal(envelope.backupVersion, 1);
   assert.equal(envelope.createdAt, "2026-06-02T00:00:00.000Z");
   assert.equal(envelope.files.length, 1);
@@ -171,6 +174,7 @@ test("summarizeBackupEnvelope reports validated restore contents", () => {
   const summary = summarizeBackupEnvelope(envelope);
 
   assert.deepEqual(summary.counts, {
+    vendors: 1,
     properties: 1,
     projects: 1,
     expenses: 1,

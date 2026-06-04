@@ -1,6 +1,6 @@
 {
   "name": "home-basis-tracker-desktop",
-  "description": "A local-first Mac app for organizing home improvement records for CPA review.",
+  "description": "A Mac app for organizing home improvement records for professional review.",
   "version": "0.1.0",
   "private": true,
   "productName": "Home Basis Tracker",

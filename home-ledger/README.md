@@ -23,7 +23,7 @@ The app does not create an account, upload files, call third-party APIs, or use 
 
 Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove records and attached files.
 
-The Tutorial Workspace is a temporary sample-data sandbox. Users can practice properties, projects, expenses, documents, CPA review exports, backups, restores, reset, and exit without writing sample records into their real binder.
+The Tutorial Workspace is a temporary sample-data sandbox. Users can practice properties, projects, expenses, documents, professional review exports, backups, restores, reset, and exit without writing sample records into their real binder.
 
 ## Product Layout
 
@@ -101,7 +101,7 @@ See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardra
 ## Exports
 
 - **Download CSV** creates a cost record export with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
-- **Print summary** creates a printable CPA review summary.
+- **Print review summary** creates a printable professional review summary.
 - Export wording should say "review with your CPA" or "share with your CPA", not tax-filing language.
 
 ## What Is Intentionally Not Included

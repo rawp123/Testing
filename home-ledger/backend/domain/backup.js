@@ -1,6 +1,8 @@
 import {
   BACKUP_APP_ID,
   BACKUP_VERSION,
+  EXPORT_PRODUCT_NAME,
+  EXPORT_PRODUCT_VERSION,
   MAX_DOCUMENT_FILE_SIZE,
   removeLocalPaths,
   sanitizeData,
@@ -46,6 +48,9 @@ export function validateBackupEnvelope(backup) {
 export function createBackupEnvelope(data, files, missingFiles, createdAt = new Date().toISOString()) {
   return {
     app: BACKUP_APP_ID,
+    productName: EXPORT_PRODUCT_NAME,
+    productVersion: EXPORT_PRODUCT_VERSION,
+    exportType: "full-backup",
     backupVersion: BACKUP_VERSION,
     createdAt,
     data: sanitizeData(data),
@@ -144,7 +149,11 @@ function validateBackupDataRelationships(data) {
     cleanBackupText(property?.id) && cleanBackupText(property?.name)
   );
   const propertyIds = new Set(properties.map((property) => cleanBackupText(property.id)));
+  const vendorIds = new Set(getBackupRecords(data?.vendors)
+    .filter((vendor) => cleanBackupText(vendor?.id) && cleanBackupText(vendor?.name))
+    .map((vendor) => cleanBackupText(vendor.id)));
 
+  assertUniqueBackupIds(getBackupRecords(data?.vendors), "vendor");
   assertUniqueBackupIds(properties, "property");
   assertUniqueBackupIds(getBackupRecords(data?.projects), "project");
   assertUniqueBackupIds(getBackupRecords(data?.expenses), "expense");
@@ -159,6 +168,10 @@ function validateBackupDataRelationships(data) {
     const propertyId = cleanBackupText(project.propertyId);
     if (!propertyIds.has(propertyId)) {
       throw new Error("Backup contains a project that does not belong to a valid property.");
+    }
+    const vendorId = cleanBackupText(project.vendorId);
+    if (vendorId && !vendorIds.has(vendorId) && !cleanBackupText(project.contractor)) {
+      throw new Error("Backup contains a project linked to an unknown vendor.");
     }
     projectById.set(id, { propertyId });
   }
@@ -178,6 +191,10 @@ function validateBackupDataRelationships(data) {
     }
     if (projectId && projectById.get(projectId)?.propertyId !== propertyId) {
       throw new Error("Backup contains an expense linked to a project from another property.");
+    }
+    const vendorId = cleanBackupText(expense.vendorId);
+    if (vendorId && !vendorIds.has(vendorId) && !cleanBackupText(expense.vendor)) {
+      throw new Error("Backup contains an expense linked to an unknown vendor.");
     }
     expenseById.set(id, { propertyId, projectId });
   }
@@ -289,6 +306,7 @@ function getBackupRecords(value) {
 
 function getBackupDataCounts(data) {
   return {
+    vendors: data.vendors.length,
     properties: data.properties.length,
     projects: data.projects.length,
     expenses: data.expenses.length,
