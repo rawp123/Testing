@@ -220,6 +220,48 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).toContain("purchase_price_cents");
     expect(calls[1].options.body).not.toContain("purchasePrice");
   });
+
+  it("uses snake_case project API requests", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        return jsonResponse({
+          data: String(url).includes("/projects/project-1")
+            ? createProjectPayload({ id: "project-1", name: "Kitchen updated" })
+            : [createProjectPayload()]
+        });
+      }) as typeof fetch
+    });
+
+    await client.listProjects("workspace/one");
+    await client.createProject("workspace/one", {
+      property_id: "property-1",
+      name: "Kitchen overhaul",
+      category: "kitchen",
+      status: "in_progress",
+      start_date: "2026-06-01",
+      completion_date: null,
+      contractor_name_raw: "Summit Heating & Air",
+      permit_number: null,
+      scope_summary: "Cabinets and lighting",
+      notes: null
+    });
+    await client.updateProject("workspace/one", "project-1", { name: "Kitchen updated" });
+    await client.archiveProject("workspace/one", "project-1");
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/projects"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/projects"],
+      ["PATCH", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/projects/project-1"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/projects/project-1/archive"]
+    ]);
+    expect(calls[1].options.body).toContain("property_id");
+    expect(calls[1].options.body).toContain("contractor_name_raw");
+    expect(calls[1].options.body).not.toContain("propertyId");
+    expect(calls[1].options.body).not.toContain("contractorNameRaw");
+  });
 });
 
 function jsonResponse(payload: unknown, { status = 200 } = {}) {
@@ -269,6 +311,32 @@ function createPropertyPayload(overrides: Record<string, unknown> = {}) {
     currency_code: "USD",
     notes: null,
     is_primary: true,
+    archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createProjectPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "project-1",
+    property_id: "property-1",
+    property_name: "Office",
+    vendor_id: null,
+    vendor_name: null,
+    name: "Kitchen overhaul",
+    category: "kitchen",
+    status: "in_progress",
+    start_date: "2026-06-01",
+    completion_date: null,
+    contractor_name_raw: "Summit Heating & Air",
+    permit_number: null,
+    scope_summary: "Cabinets and lighting",
+    notes: null,
+    completeness_override_note: null,
+    completeness_overridden_at: null,
+    open_item_count: 2,
     archived_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",

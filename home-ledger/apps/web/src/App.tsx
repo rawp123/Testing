@@ -10,6 +10,7 @@ import { ErrorState } from "./components/ErrorState";
 import { LoadingState } from "./components/LoadingState";
 import { DashboardPage } from "./dashboard/DashboardPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
+import { ProjectsPage } from "./projects/ProjectsPage";
 
 type AppState =
   | { status: "loading" }
@@ -53,6 +54,13 @@ export function App() {
       {state.status === "ready" && activeView === "dashboard" ? <DashboardPage state={state} /> : null}
       {state.status === "ready" && activeView === "properties" ? (
         <PropertiesPage
+          client={client}
+          workspaceId={state.workspace.workspaceId}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "projects" ? (
+        <ProjectsPage
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}

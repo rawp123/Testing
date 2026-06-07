@@ -155,6 +155,47 @@ export interface PropertyInput {
   is_primary?: boolean;
 }
 
+export type ProjectStatus = "planned" | "in_progress" | "blocked" | "completed" | "archived" | string;
+
+export interface ProjectRecord {
+  id: string;
+  property_id: string;
+  property_name?: string | null;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
+  name: string;
+  category: string;
+  status: ProjectStatus;
+  start_date?: string | null;
+  completion_date?: string | null;
+  contractor_name_raw?: string | null;
+  permit_number?: string | null;
+  scope_summary?: string | null;
+  notes?: string | null;
+  completeness_override_note?: string | null;
+  completeness_overridden_at?: string | null;
+  open_item_count?: number;
+  archived_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ProjectInput {
+  property_id: string;
+  vendor_id?: string | null;
+  name: string;
+  category: string;
+  status?: ProjectStatus;
+  start_date?: string | null;
+  completion_date?: string | null;
+  contractor_name_raw?: string | null;
+  permit_number?: string | null;
+  scope_summary?: string | null;
+  notes?: string | null;
+  completeness_override_note?: string | null;
+}
+
 export interface ApiEnvelope<T> {
   data?: T;
   error?: {

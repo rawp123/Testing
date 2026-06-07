@@ -3,6 +3,8 @@ import type {
   DashboardResponse,
   FollowUpItem,
   FollowUpSummaryResponse,
+  ProjectInput,
+  ProjectRecord,
   PropertyInput,
   PropertyRecord,
   SessionResponse
@@ -47,6 +49,10 @@ export interface HomeLedgerApiClient {
   createProperty(workspaceId: string, input: PropertyInput): Promise<PropertyRecord>;
   updateProperty(workspaceId: string, propertyId: string, input: Partial<PropertyInput>): Promise<PropertyRecord>;
   archiveProperty(workspaceId: string, propertyId: string): Promise<PropertyRecord>;
+  listProjects(workspaceId: string): Promise<ProjectRecord[]>;
+  createProject(workspaceId: string, input: ProjectInput): Promise<ProjectRecord>;
+  updateProject(workspaceId: string, projectId: string, input: Partial<ProjectInput>): Promise<ProjectRecord>;
+  archiveProject(workspaceId: string, projectId: string): Promise<ProjectRecord>;
 }
 
 export type InitialDashboardState =
@@ -132,6 +138,32 @@ export function createHomeLedgerApiClient({
     archiveProperty(workspaceId: string, propertyId: string) {
       return request<PropertyRecord>(
         `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties/${encodeURIComponent(requireId(propertyId, "propertyId"))}/archive`,
+        { method: "POST" }
+      );
+    },
+    listProjects(workspaceId: string) {
+      return request<ProjectRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/projects`);
+    },
+    createProject(workspaceId: string, input: ProjectInput) {
+      return request<ProjectRecord>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/projects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    },
+    updateProject(workspaceId: string, projectId: string, input: Partial<ProjectInput>) {
+      return request<ProjectRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/projects/${encodeURIComponent(requireId(projectId, "projectId"))}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    archiveProject(workspaceId: string, projectId: string) {
+      return request<ProjectRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/projects/${encodeURIComponent(requireId(projectId, "projectId"))}/archive`,
         { method: "POST" }
       );
     }
