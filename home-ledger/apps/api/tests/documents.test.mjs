@@ -114,6 +114,8 @@ test("owner and editor can create update and soft delete documents", async () =>
     assert.equal(createResponse.statusCode, 201);
     assert.equal(createResponse.json().data.display_name, "New receipt");
     assert.equal(createResponse.json().data.document_type, "receipt");
+    assert.equal(createResponse.json().data.document_date, "2026-06-05");
+    assert.notEqual(createResponse.json().data.created_at, null);
     assert.equal(createResponse.json().data.file_availability, "not_uploaded");
     assert.equal(createResponse.json().data.property_id, propertyId);
     assert.equal(createResponse.json().data.project_id, projectId);

@@ -217,6 +217,7 @@ test("file-complete updates metadata and file delete detaches without deleting t
   assert.equal(completeResponse.statusCode, 200);
   assert.equal(completeResponse.json().data.status, "available");
   assert.equal(completeResponse.json().data.sha256, VALID_SHA);
+  assert.notEqual(completeResponse.json().data.uploaded_at, null);
   assertSafeFileResponse(completeResponse.json().data);
 
   const documentResponse = await app.inject({
@@ -226,6 +227,9 @@ test("file-complete updates metadata and file delete detaches without deleting t
   });
   assert.equal(documentResponse.json().data.file_availability, "available");
   assert.equal(documentResponse.json().data.file.id, documentFileId);
+  assert.equal(documentResponse.json().data.document_date, "2026-05-07");
+  assert.notEqual(documentResponse.json().data.created_at, completeResponse.json().data.uploaded_at);
+  assert.equal(documentResponse.json().data.file.uploaded_at, undefined);
 
   const deleteResponse = await app.inject({
     method: "DELETE",

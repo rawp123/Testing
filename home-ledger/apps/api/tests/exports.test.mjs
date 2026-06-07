@@ -235,6 +235,9 @@ test("documents CSV and full JSON export safe file and OCR metadata only", async
   assert.equal(documentsResponse.statusCode, 200);
   assert.match(documentsResponse.headers["content-type"], /^text\/csv/);
   assert.equal(documentsResponse.body.split("\n")[0], EXPECTED_DOCUMENT_HEADERS.join(","));
+  assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("document_date"), false);
+  assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("created_at"), true);
+  assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("updated_at"), true);
   assert.match(documentsResponse.body, /Cedarline Carpentry - Receipt/);
   assert.match(documentsResponse.body, /application\/pdf,2048,succeeded,true/);
   assert.doesNotMatch(documentsResponse.body, /Sensitive OCR text/);
@@ -249,7 +252,9 @@ test("documents CSV and full JSON export safe file and OCR metadata only", async
   assert.equal(fullResponse.statusCode, 200);
   assert.match(fullResponse.headers["content-disposition"], /^attachment; filename="home-ledger-full-\d{4}-\d{2}-\d{2}\.json"$/);
   const fullExport = fullResponse.json().data;
-  assert.equal(fullExport.documents.find((document) => document.id === DOCUMENT_IDS.ownerDeckReceipt).ocr.text_available, true);
+  const receiptDocument = fullExport.documents.find((document) => document.id === DOCUMENT_IDS.ownerDeckReceipt);
+  assert.equal(receiptDocument.document_date, "2026-06-05");
+  assert.equal(receiptDocument.ocr.text_available, true);
   const serialized = JSON.stringify(fullExport);
   assert.equal(serialized.includes("Sensitive OCR text"), false);
   assert.equal(serialized.includes("private/owner-deck-receipt.pdf"), false);

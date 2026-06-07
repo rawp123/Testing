@@ -395,7 +395,9 @@ function normalizeText(value) {
 
 function normalizeDateOnly(value) {
   const normalized = normalizeText(value);
-  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return null;
+  const date = new Date(`${normalized}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== normalized ? null : normalized;
 }
 
 function normalizeMimeType(value) {

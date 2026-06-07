@@ -256,6 +256,7 @@ Compatibility with the existing local app:
 - The SaaS `expenses.csv` preserves that established header order for the first local-compatible columns: `Export Source`, `Export Date`, `Property`, `Project`, `Vendor ID`, `Category`, `Date`, `Vendor/Payee`, `Description`, `Amount`, `Cost type`, `Receipt/file status`, and `Notes`.
 - SaaS exports add safe reconciliation fields such as `Amount cents`, record ids, document count, and timestamps. This keeps the hosted API useful for web/iOS clients while minimizing adapter work for existing CSV consumers.
 - The local app does not currently have a separate documents CSV. SaaS `documents.csv` uses stable snake_case headers for web/iOS clients.
+- `full.json` includes `document_date` for document records. The current `documents.csv` header contract does not include `document_date`; its date columns are system metadata timestamps `created_at` and `updated_at`.
 
 Export safety exclusions:
 
@@ -466,7 +467,8 @@ Document rules:
 - Cross-workspace, missing, archived, deleted, or context-mismatched relationship targets return `400 invalid_request` with field details and do not reveal whether a record exists elsewhere.
 - `display_name` is required and trimmed.
 - `document_type` defaults to `other` and is stored as text for migration compatibility.
-- `document_date` uses `YYYY-MM-DD`.
+- `document_date` uses `YYYY-MM-DD` and means the user-supplied date associated with the document, receipt, invoice, permit, photo, or record when known. It is not the system creation timestamp and is not the file upload timestamp.
+- `created_at` and `updated_at` are system timestamps for the document metadata row.
 - `file_availability` defaults to `not_uploaded` and is constrained to the values in the database schema.
 - `notes` and `file_status_note` are trimmed and length-limited.
 - List responses may include same-workspace `property_name`, `project_name`, and `expense_description`.
@@ -493,6 +495,7 @@ File lifecycle rules:
 
 - `POST /file-intent` validates the existing document, file name, MIME type, size, hash, and source, then creates a `pending_upload` `document_files` row.
 - `POST /file-complete` marks a pending file row `available`, sets `uploaded_at`, and updates the parent document `file_availability` to `available`.
+- `uploaded_at` is file lifecycle metadata. It does not change or replace the parent document `document_date`.
 - `GET /file` returns safe file metadata and adapter download availability for the active available file. It never returns raw storage keys, filesystem paths, OCR text, or file bytes as standalone metadata fields.
 - `DELETE /file` soft-deletes the active file row, leaves document metadata intact, and updates the parent document `file_availability` to `removed`.
 - A document can have at most one active available file in the current schema. Completing a replacement marks any prior available file row deleted before activating the new file. Production object cleanup for replaced files is deferred until provider-specific cleanup/background jobs are implemented.
@@ -621,6 +624,7 @@ Canonical SaaS decisions:
 - Local `in progress` maps to SaaS `in_progress`.
 - Unknown legacy classifications map to `review_later`; unknown legacy documentation states map to `needs_follow_up`; unknown project statuses map to `planned`; unknown local categories and document types map to `other`.
 - SaaS separates document metadata, file lifecycle, and OCR text/status. Local `hasFile`/`fileName` maps to file availability and file metadata. Local `ocrText` is sensitive and must not appear in normal document/list/dashboard/export/follow-up responses.
+- Local `addedDate` maps to SaaS `document_date` as a compatibility fallback because the current local form labels it "Document date." The local field name is ambiguous, so import/client adapters should treat it as a user-supplied document-associated date, not as file upload time or metadata creation time. Invalid or non-ISO local dates should not be imported as `document_date`.
 - Local file ids are never object storage keys. Path-like local filenames are reduced to safe filenames before use as file metadata.
 - Generated follow-up `reason_code`, severity, and status values are locked by compatibility tests so future clients do not invent parallel enums.
 - SaaS export headers are intentionally not identical to local review packet table headers. SaaS CSV exports keep machine-friendly ids, integer-cent fields, and safe metadata while preserving spreadsheet formula neutralization.

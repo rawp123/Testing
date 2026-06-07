@@ -175,6 +175,28 @@ test("document file and OCR compatibility strips local-only sensitive fields", (
   assert.equal(Object.hasOwn(mapped.file, "storage_key"), false);
 });
 
+test("local addedDate maps only to user-supplied document_date", () => {
+  assert.equal(mapLocalDocumentForSaaSMetadata({ displayName: "Receipt", addedDate: "2026-06-07" }).document_date, "2026-06-07");
+  assert.equal(mapLocalDocumentForSaaSMetadata({ displayName: "Receipt", addedDate: "" }).document_date, null);
+  assert.equal(mapLocalDocumentForSaaSMetadata({ displayName: "Receipt", addedDate: "06/07/2026" }).document_date, null);
+  assert.equal(mapLocalDocumentForSaaSMetadata({ displayName: "Receipt", addedDate: "2026-02-31" }).document_date, null);
+
+  const mapped = mapLocalDocumentForSaaSMetadata({
+    displayName: "Receipt",
+    addedDate: "2026-06-07",
+    hasFile: true,
+    fileName: "receipt.pdf",
+    fileStoredAt: "2026-06-08T12:00:00.000Z",
+    fileLastModified: 1780852800000
+  });
+  const serialized = JSON.stringify(mapped);
+  assert.equal(mapped.document_date, "2026-06-07");
+  assert.equal(serialized.includes("2026-06-08T12:00:00.000Z"), false);
+  assert.equal(serialized.includes("1780852800000"), false);
+  assert.equal(Object.hasOwn(mapped, "created_at"), false);
+  assert.equal(Object.hasOwn(mapped.file, "uploaded_at"), false);
+});
+
 test("document file availability and OCR status map local restore states safely", () => {
   assert.equal(mapLocalDocumentFileAvailability({ hasFile: false }), "not_uploaded");
   assert.equal(mapLocalDocumentFileAvailability({ hasFile: true }), "available");
