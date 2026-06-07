@@ -36,6 +36,36 @@
 - When adding or changing enum-like values, classification values, follow-up reason codes, export headers, or client-visible response shapes, check existing app values first, add or update compatibility tests where practical, prefer canonical SaaS values with explicit legacy mappings, and avoid preserving unsafe legacy labels as canonical SaaS values.
 - This compatibility review is not required for trivial formatting, lint-only, dependency, or documentation-only changes unless those docs define product contracts.
 
+## Existing iOS Visual / UX Alignment
+
+- For frontend, mobile, web UI, dashboard, form, navigation, component, copy, or product-flow work, inspect the existing iOS app before designing new UI.
+- The SaaS/web frontend should feel like the same product family as the existing iOS app, not a generic SaaS/admin dashboard.
+- Preserve where practical:
+  - visual language
+  - screen hierarchy
+  - dashboard card structure
+  - navigation labels
+  - spacing and density
+  - typography direction
+  - button hierarchy
+  - form field ordering
+  - empty/loading/error state tone
+  - document, expense, project, and follow-up workflows
+  - user-facing terminology
+- Adapt where necessary for web:
+  - responsive layouts
+  - keyboard accessibility
+  - wider desktop viewports
+  - browser navigation patterns
+  - browser-safe file upload/download behavior
+- Do not:
+  - introduce generic SaaS dashboard styling that conflicts with the iOS app
+  - invent new marketing copy or AI-sounding taglines
+  - change product terminology without a clear reason
+  - copy iOS-only platform controls if they do not make sense on web
+  - break existing local/downloadable app behavior
+- If native iOS source or screenshots are not available in the repo, state that clearly and use the closest available existing app implementation/screenshots as the product reference. If the visual reference is insufficient, ask for screenshots before making broad visual design changes.
+
 ## Engineering rules
 
 - Prefer small, reviewable changes.
