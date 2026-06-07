@@ -1,0 +1,76 @@
+{
+  "property": {
+    "id": "property-local-1",
+    "name": "Office",
+    "address": "1124 Huminger Drive",
+    "purchaseDate": "1955-01-01",
+    "purchasePrice": 200000,
+    "notes": "Primary local property",
+    "isPrimary": true
+  },
+  "vendor": {
+    "id": "vendor-local-1",
+    "name": "Cedarline Carpentry",
+    "category": "deck/patio/porch",
+    "contactName": "Chris",
+    "status": "active"
+  },
+  "project": {
+    "id": "project-local-1",
+    "propertyId": "property-local-1",
+    "vendorId": "vendor-local-1",
+    "name": "Sample: Deck repair and railing",
+    "category": "deck/patio/porch",
+    "status": "in progress",
+    "startDate": "2025-03-10",
+    "completionDate": "",
+    "contractor": "Cedarline Carpentry",
+    "permitNumber": "",
+    "scopeSummary": "Deck repair estimate",
+    "notes": "Needs supporting records"
+  },
+  "expense": {
+    "id": "expense-local-1",
+    "propertyId": "property-local-1",
+    "projectId": "project-local-1",
+    "vendorId": "vendor-local-1",
+    "date": "2025-03-10",
+    "vendor": "Cedarline Carpentry",
+    "description": "Deck repair estimate",
+    "amount": "1,234.56",
+    "classification": "unclear / ask CPA",
+    "category": "deck/patio/porch",
+    "documentationStatus": "needs follow-up",
+    "notes": "Review later"
+  },
+  "document": {
+    "id": "document-local-1",
+    "propertyId": "property-local-1",
+    "projectId": "project-local-1",
+    "expenseId": "expense-local-1",
+    "displayName": "Deck invoice",
+    "documentType": "invoice",
+    "addedDate": "2025-03-11",
+    "notes": "Local document fixture",
+    "ocrText": "Sensitive OCR text from local app should stay out of ordinary metadata.",
+    "hasFile": true,
+    "fileId": "local-file-1",
+    "fileName": "/Users/robert/Documents/Deck Invoice.pdf",
+    "fileStatusNote": "",
+    "mimeType": "application/pdf",
+    "fileSize": 92160,
+    "fileStoredAt": "2025-03-11T12:00:00.000Z"
+  },
+  "followUpOverride": {
+    "id": "expense-local-1:classification",
+    "label": "Review cost type",
+    "typeLabel": "Cost type",
+    "detail": "Marked complete outside the app",
+    "expenseId": "expense-local-1",
+    "note": "Reviewed with records"
+  },
+  "exportHeaders": {
+    "expenseDetail": ["Date", "Expense", "Property", "Project", "Cost Type", "Receipt/File", "Amount"],
+    "documentIndex": ["Document", "Type", "Property", "Project", "Related Expense", "Stored File"]
+  }
+}

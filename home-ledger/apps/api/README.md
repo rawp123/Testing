@@ -598,6 +598,44 @@ Deferred for documents:
 - Import mapping.
 - UI.
 
+## Local App Compatibility Boundary
+
+`src/compatibility.js` centralizes the safe translation boundary between the current downloadable/local Home Basis Tracker data shape and the SaaS API contract. It is intended for future import, web-client adapter, and iOS companion work. It is not a full import pipeline and does not change public route behavior by itself.
+
+Local app values inspected:
+
+- Local records use camelCase fields, local string ids, decimal-dollar amounts, and document fields such as `hasFile`, `fileId`, `fileName`, `fileSize`, `mimeType`, and `ocrText`.
+- Local expense classifications include `potential basis addition`, `repair or maintenance`, and `unclear / ask CPA`.
+- Local expense documentation statuses include `receipt attached`, `invoice attached`, `no document yet`, and `needs follow-up`.
+- Local project statuses include `planned`, `in progress`, `blocked`, `completed`, and `archived`.
+- Local document types include `receipt`, `invoice`, `permit`, `warranty`, `photo`, `contract`, `payment record`, `appraisal`, `inspection`, `plan or drawing`, and `other`.
+- Local review packet tables use compact human headers such as `Cost Type`, `Receipt/File`, and `Stored File`.
+
+Canonical SaaS decisions:
+
+- Public API fields stay `snake_case`.
+- SaaS ids stay UUIDs. Local ids must be preserved only through import metadata or mapping tables, not reused as SaaS primary keys.
+- Money uses integer cents. `localDollarsToCents()` parses local dollar numbers/strings deterministically and rejects invalid or ambiguous precision.
+- Expense classifications map to `possible_improvement`, `repair_upkeep`, and `review_later`.
+- Documentation statuses map to `receipt_attached`, `invoice_attached`, `no_document_yet`, and `needs_follow_up`.
+- Local `in progress` maps to SaaS `in_progress`.
+- Unknown legacy classifications map to `review_later`; unknown legacy documentation states map to `needs_follow_up`; unknown project statuses map to `planned`; unknown local categories and document types map to `other`.
+- SaaS separates document metadata, file lifecycle, and OCR text/status. Local `hasFile`/`fileName` maps to file availability and file metadata. Local `ocrText` is sensitive and must not appear in normal document/list/dashboard/export/follow-up responses.
+- Local file ids are never object storage keys. Path-like local filenames are reduced to safe filenames before use as file metadata.
+- Generated follow-up `reason_code`, severity, and status values are locked by compatibility tests so future clients do not invent parallel enums.
+- SaaS export headers are intentionally not identical to local review packet table headers. SaaS CSV exports keep machine-friendly ids, integer-cent fields, and safe metadata while preserving spreadsheet formula neutralization.
+
+Do not copy these local-only assumptions into SaaS:
+
+- local filesystem paths
+- browser or desktop document-storage claims
+- local ids as SaaS ids
+- camelCase public API fields
+- floating-point money behavior
+- inline OCR text in ordinary metadata
+- local backup/restore behavior as cloud import behavior
+- old local labels as canonical SaaS values when they conflict with neutral review-oriented terminology
+
 ## Commands
 
 Run from the repo root:
