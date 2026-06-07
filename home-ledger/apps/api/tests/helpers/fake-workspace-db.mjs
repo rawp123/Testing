@@ -350,6 +350,26 @@ export function createFakeWorkspaceDb(seed = {}) {
         return { rows: [dashboardSummaryRow(params[0])] };
       }
 
+      if (/-- listExportProperties/.test(sql)) {
+        return { rows: exportPropertyRows(params[0]) };
+      }
+
+      if (/-- listExportProjects/.test(sql)) {
+        return { rows: exportProjectRows(params[0]) };
+      }
+
+      if (/-- listExportVendors/.test(sql)) {
+        return { rows: exportVendorRows(params[0]) };
+      }
+
+      if (/-- listExportExpenses/.test(sql)) {
+        return { rows: exportExpenseRows(params[0]) };
+      }
+
+      if (/-- listExportDocuments/.test(sql)) {
+        return { rows: exportDocumentRows(params[0]) };
+      }
+
       if (/-- listProperties/.test(sql)) {
         return listPropertiesRows(sql, params);
       }
@@ -1872,6 +1892,94 @@ export function createFakeWorkspaceDb(seed = {}) {
       ocr_completed_at: ocr?.completed_at || null,
       total_count: totalCount
     };
+  }
+
+  function exportPropertyRows(workspaceId) {
+    return [...properties.values()]
+      .filter((property) => property.workspace_id === workspaceId && property.deleted_at === null)
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  }
+
+  function exportProjectRows(workspaceId) {
+    return [...projects.values()]
+      .filter((project) => project.workspace_id === workspaceId && project.deleted_at === null)
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id))
+      .map((project) => {
+        const property = properties.get(project.property_id);
+        const vendor = project.vendor_id ? vendors.get(project.vendor_id) : null;
+        return {
+          ...project,
+          property_name: property?.name || null,
+          vendor_name: vendor?.name || null
+        };
+      });
+  }
+
+  function exportVendorRows(workspaceId) {
+    return [...vendors.values()]
+      .filter((vendor) => vendor.workspace_id === workspaceId && vendor.deleted_at === null)
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  }
+
+  function exportExpenseRows(workspaceId) {
+    return [...expenses.values()]
+      .filter((expense) => expense.workspace_id === workspaceId && expense.deleted_at === null)
+      .sort((left, right) =>
+        String(right.expense_date || "").localeCompare(String(left.expense_date || "")) ||
+        String(right.created_at).localeCompare(String(left.created_at)) ||
+        left.id.localeCompare(right.id)
+      )
+      .map((expense) => {
+        const property = properties.get(expense.property_id);
+        const project = expense.project_id ? projects.get(expense.project_id) : null;
+        const vendor = expense.vendor_id ? vendors.get(expense.vendor_id) : null;
+        const documentCount = [...documents.values()]
+          .filter((document) => document.workspace_id === workspaceId && document.expense_id === expense.id && document.deleted_at === null)
+          .length;
+        return {
+          ...expense,
+          property_name: property?.name || null,
+          project_name: project?.name || null,
+          vendor_name: vendor?.name || null,
+          document_count: documentCount
+        };
+      });
+  }
+
+  function exportDocumentRows(workspaceId) {
+    return [...documents.values()]
+      .filter((document) => document.workspace_id === workspaceId && document.deleted_at === null)
+      .sort((left, right) =>
+        String(right.document_date || "").localeCompare(String(left.document_date || "")) ||
+        String(right.created_at).localeCompare(String(left.created_at)) ||
+        left.id.localeCompare(right.id)
+      )
+      .map((document) => {
+        const property = properties.get(document.property_id);
+        const project = document.project_id ? projects.get(document.project_id) : null;
+        const expense = document.expense_id ? expenses.get(document.expense_id) : null;
+        const file = activeDocumentFiles(workspaceId, document.id)[0] || null;
+        const ocr = documentOcr.get(document.id);
+        const textAvailable = Boolean(
+          ocr?.text &&
+          ocr.status === "succeeded" &&
+          file?.status === "available" &&
+          ocr.document_file_id === file.id
+        );
+        return {
+          ...document,
+          property_name: property?.name || null,
+          project_name: project?.name || null,
+          expense_description: expense?.description || null,
+          file_id: file?.id || null,
+          file_original_file_name: file?.original_file_name || null,
+          file_mime_type: file?.mime_type || null,
+          file_size_bytes: file?.size_bytes || null,
+          file_status: file?.status || null,
+          ocr_status: ocr?.status || "not_requested",
+          text_available: textAvailable
+        };
+      });
   }
 
   function dashboardSummaryRow(workspaceId) {

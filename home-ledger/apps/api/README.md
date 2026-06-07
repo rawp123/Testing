@@ -1,8 +1,8 @@
 # Home Ledger API Foundation
 
-This package currently contains the SaaS API foundation: database migration tooling, a minimal Fastify runtime, provider-neutral dev/test auth resolution, workspace authorization helpers, session/workspace endpoints, the initial Property, Vendor, Project, Expense, Document, Document File, Document OCR, and Dashboard Summary APIs.
+This package currently contains the SaaS API foundation: database migration tooling, a minimal Fastify runtime, provider-neutral dev/test auth resolution, workspace authorization helpers, session/workspace endpoints, the initial Property, Vendor, Project, Expense, Document, Document File, Document OCR, Dashboard Summary, and Export APIs.
 
-It does not define API-proxied binary upload/download streaming, billing, production OCR provider integration, import, export, invitation, household sharing, reviewer, or support/admin routes yet.
+It does not define API-proxied binary upload/download streaming, billing, production OCR provider integration, import, background export jobs, export object-storage persistence, invitation, household sharing, reviewer, or support/admin routes yet.
 
 ## API Runtime
 
@@ -29,6 +29,10 @@ POST /api/v1/workspaces
 GET /api/v1/workspaces/:workspaceId
 PATCH /api/v1/workspaces/:workspaceId
 GET /api/v1/workspaces/:workspaceId/dashboard
+GET /api/v1/workspaces/:workspaceId/exports/summary
+GET /api/v1/workspaces/:workspaceId/exports/expenses.csv
+GET /api/v1/workspaces/:workspaceId/exports/documents.csv
+GET /api/v1/workspaces/:workspaceId/exports/full.json
 GET /api/v1/workspaces/:workspaceId/properties
 POST /api/v1/workspaces/:workspaceId/properties
 GET /api/v1/workspaces/:workspaceId/properties/:propertyId
@@ -143,6 +147,56 @@ Response areas:
 - `vendors`: active vendor count.
 - `recent_activity`: safe, compact record activity rows.
 - `follow_ups`: safe aggregate follow-up buckets.
+
+## Export API
+
+Export routes generate synchronous workspace-scoped exports for homeowner records. They do not create `exports` table rows, store generated files in object storage, or run background jobs in this ticket.
+
+Routes:
+
+- `GET /api/v1/workspaces/:workspaceId/exports/summary`
+- `GET /api/v1/workspaces/:workspaceId/exports/expenses.csv`
+- `GET /api/v1/workspaces/:workspaceId/exports/documents.csv`
+- `GET /api/v1/workspaces/:workspaceId/exports/full.json`
+
+Role behavior:
+
+- `owner`, `editor`, and `viewer` can export workspace data.
+- Non-members receive `404 not_found`.
+
+Export rules:
+
+- Every export is scoped to the requested workspace.
+- Soft-deleted records are excluded.
+- Archived properties, projects, and vendors are included in full JSON for record continuity. Summary vendor count follows default active-vendor semantics.
+- Expenses use integer cents for totals and include a deterministic decimal `Amount` string only to preserve existing local app CSV compatibility.
+- CSV responses use `Content-Type: text/csv; charset=utf-8` and attachment filenames like `home-ledger-expenses-YYYY-MM-DD.csv`.
+- Full JSON uses `Content-Type: application/json; charset=utf-8` and an attachment filename like `home-ledger-full-YYYY-MM-DD.json`.
+- CSV cells neutralize spreadsheet formulas and escape commas, quotes, CRLF, and newlines.
+- Exports organize records for professional review. They do not label anything as deductible, allowed, disallowed, taxable, or basis-qualified.
+
+Compatibility with the existing local app:
+
+- The downloadable/local app's existing expense CSV is produced by `backend/domain/model.js` `buildExpensesCsv`.
+- The SaaS `expenses.csv` preserves that established header order for the first local-compatible columns: `Export Source`, `Export Date`, `Property`, `Project`, `Vendor ID`, `Category`, `Date`, `Vendor/Payee`, `Description`, `Amount`, `Cost type`, `Receipt/file status`, and `Notes`.
+- SaaS exports add safe reconciliation fields such as `Amount cents`, record ids, document count, and timestamps. This keeps the hosted API useful for web/iOS clients while minimizing adapter work for existing CSV consumers.
+- The local app does not currently have a separate documents CSV. SaaS `documents.csv` uses stable snake_case headers for web/iOS clients.
+
+Export safety exclusions:
+
+- Raw OCR text.
+- Raw object-storage keys.
+- Buckets, object paths, signed URLs, provider internals, access keys, and local filesystem paths.
+- File bytes.
+- Soft-deleted records.
+- Legacy/source metadata and internal audit fields.
+
+Export response areas:
+
+- Summary JSON: `workspace_id`, `generated_at`, record counts, integer-cent totals, and OCR text availability count.
+- Expenses CSV: local-compatible expense columns plus safe SaaS reconciliation metadata.
+- Documents CSV: document metadata, file availability, MIME type, size, OCR status, and text availability.
+- Full JSON: safe structured arrays for properties, projects, vendors, expenses, documents, file metadata, and OCR status metadata.
 
 ## API Field Casing
 

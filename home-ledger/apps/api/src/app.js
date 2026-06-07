@@ -31,6 +31,16 @@ import {
   serializeExpense,
   updateExpense
 } from "./expenses.js";
+import {
+  buildDocumentsCsv,
+  buildExpensesCsv,
+  buildExportSummary,
+  buildFullJsonExport,
+  exportFilename,
+  getExportData,
+  setCsvResponseHeaders,
+  setJsonExportHeaders
+} from "./exports.js";
 import { createFileStorageAdapter } from "./file-storage.js";
 import { createOcrProvider } from "./ocr-provider.js";
 import {
@@ -227,6 +237,70 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
 
       return {
         data: serializeDashboardSummary(summary)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/exports/summary", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const exportData = await getExportData({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      return {
+        data: buildExportSummary(exportData)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/exports/expenses.csv", { preHandler: app.authenticate }, async (request, reply) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const exportData = await getExportData({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+      setCsvResponseHeaders(reply, exportFilename("expenses", "csv"));
+      return reply.send(buildExpensesCsv(exportData));
+    });
+
+    api.get("/workspaces/:workspaceId/exports/documents.csv", { preHandler: app.authenticate }, async (request, reply) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const exportData = await getExportData({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+      setCsvResponseHeaders(reply, exportFilename("documents", "csv"));
+      return reply.send(buildDocumentsCsv(exportData));
+    });
+
+    api.get("/workspaces/:workspaceId/exports/full.json", { preHandler: app.authenticate }, async (request, reply) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const exportData = await getExportData({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+      setJsonExportHeaders(reply, exportFilename("full", "json"));
+      return {
+        data: buildFullJsonExport(exportData)
       };
     });
 
