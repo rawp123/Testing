@@ -10,7 +10,7 @@ import { createDashboardViewModel } from "../src/dashboard/dashboard-model";
 import { formatCents } from "../src/utils/format";
 
 describe("Home Ledger API client", () => {
-  it("loads session dashboard and follow-up summary for the selected workspace", async () => {
+  it("loads session dashboard follow-ups and follow-up summary for the selected workspace", async () => {
     const calls: Array<{ url: string; options: RequestInit }> = [];
     const client = createHomeLedgerApiClient({
       baseUrl: "http://localhost:4000/api/v1/",
@@ -28,6 +28,24 @@ describe("Home Ledger API client", () => {
         }
         if (String(url).endsWith("/workspaces/workspace%2Fone/dashboard")) {
           return jsonResponse({ data: createDashboardPayload({ workspace_id: "workspace/one" }) });
+        }
+        if (String(url).endsWith("/workspaces/workspace%2Fone/follow-ups")) {
+          return jsonResponse({
+            data: [
+              {
+                id: "fu_11111111111111111111111111111111",
+                target_type: "document",
+                target_id: "document-1",
+                document_id: "document-1",
+                severity: "missing_file",
+                reason_code: "document_missing_file",
+                title: "Upload receipt file",
+                description: "The receipt record exists, but the file has not been uploaded.",
+                action_label: "Upload receipt file",
+                status: "open"
+              }
+            ]
+          });
         }
         if (String(url).endsWith("/workspaces/workspace%2Fone/follow-ups/summary")) {
           return jsonResponse({
@@ -47,10 +65,12 @@ describe("Home Ledger API client", () => {
     if (state.status !== "ready") throw new Error("Expected ready state.");
     expect(state.workspace.workspaceId).toBe("workspace/one");
     expect(state.dashboard.workspace_id).toBe("workspace/one");
+    expect(state.followUps).toHaveLength(1);
     expect(state.followUpSummary.open_count).toBe(2);
     expect(calls.map((call) => call.url)).toEqual([
       "http://localhost:4000/api/v1/session",
       "http://localhost:4000/api/v1/workspaces/workspace%2Fone/dashboard",
+      "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups",
       "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups/summary"
     ]);
     expect((calls[0].options.headers as Record<string, string>).Accept).toBe("application/json");
@@ -71,6 +91,7 @@ describe("Home Ledger API client", () => {
     expect(state.status).toBe("empty_workspace");
     expect(state.workspace).toBeNull();
     expect(state.dashboard).toBeNull();
+    expect(state.followUps).toBeNull();
     expect(state.followUpSummary).toBeNull();
   });
 
@@ -156,7 +177,8 @@ describe("Home Ledger API client", () => {
     });
 
     expect(dashboard.expenses.total_amount_cents).toBe(123456789);
-    expect(viewModel.metrics.find((metric) => metric.label === "Expenses")?.detail).toBe("$1,234,567.89");
+    expect(viewModel.metrics.find((metric) => metric.label === "Expenses")?.detail).toBe("$1,234,567.89 total");
+    expect(viewModel.metrics.find((metric) => metric.label === "Total spend")?.value).toBe("$1,234,567.89");
     expect(viewModel.expenseBreakdown[0].amount).toBe("$1,234,567.00");
     expect(viewModel.expenseBreakdown[1].amount).toBe("$0.89");
     expect(formatCents(-125)).toBe("-$1.25");

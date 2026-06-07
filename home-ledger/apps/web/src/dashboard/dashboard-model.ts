@@ -2,6 +2,7 @@ import type {
   DashboardActivity,
   DashboardResponse,
   FollowUpBucket,
+  FollowUpItem,
   FollowUpSummaryResponse,
   SessionResponse,
   WorkspaceMembership
@@ -23,7 +24,7 @@ const ACTIVITY_LABELS = Object.freeze({
 
 export interface DashboardMetric {
   label: string;
-  value: number;
+  value: number | string;
   detail: string;
   href: string;
 }
@@ -41,6 +42,7 @@ export interface DocumentSummaryItem {
 }
 
 export interface RecentActivityItem {
+  activityType: string;
   typeLabel: string;
   recordType: string;
   recordId: string;
@@ -49,6 +51,22 @@ export interface RecentActivityItem {
   occurredAt: string;
   dateLabel: string;
   summary: string;
+}
+
+export interface DashboardActivityFilterOption {
+  value: string;
+  label: string;
+  count: number;
+}
+
+export interface FollowUpRow {
+  id: string;
+  area: string;
+  title: string;
+  description: string;
+  actionLabel: string;
+  severity: string;
+  targetType: string;
 }
 
 export interface DashboardViewModel {
@@ -60,7 +78,9 @@ export interface DashboardViewModel {
   expenseBreakdown: ExpenseBreakdownItem[];
   documentSummary: DocumentSummaryItem[];
   recentActivity: RecentActivityItem[];
+  activityFilterOptions: DashboardActivityFilterOption[];
   followUps: FollowUpBucket[];
+  followUpItems: FollowUpRow[];
   openFollowUpCount: number;
   empty: boolean;
 }
@@ -69,11 +89,13 @@ export function createDashboardViewModel({
   session,
   workspace,
   dashboard,
+  followUps: rawFollowUps,
   followUpSummary
 }: {
   session?: SessionResponse | null;
   workspace?: WorkspaceMembership | null;
   dashboard?: DashboardResponse | null;
+  followUps?: FollowUpItem[] | null;
   followUpSummary?: FollowUpSummaryResponse | null;
 }): DashboardViewModel {
   const safeDashboard = dashboard || emptyDashboard();
@@ -82,7 +104,9 @@ export function createDashboardViewModel({
   const projects = safeDashboard.projects;
   const documents = safeDashboard.documents;
   const vendors = safeDashboard.vendors;
-  const followUps = getFollowUps(safeDashboard, followUpSummary);
+  const followUpBuckets = getFollowUps(safeDashboard, followUpSummary);
+
+  const recentActivity = safeDashboard.recent_activity.map(toActivityRow);
 
   return {
     userName: session?.user?.displayName || session?.user?.email || "Signed-in user",
@@ -92,9 +116,9 @@ export function createDashboardViewModel({
     metrics: [
       metric("Properties", properties.active_count ?? properties.count ?? 0, "Active records", "#properties"),
       metric("Projects", projects.active_count ?? projects.count ?? 0, `${toInteger(projects.open_follow_up_count)} open items`, "#projects"),
-      metric("Expenses", expenses.count ?? 0, formatCents(expenses.total_amount_cents), "#expenses"),
-      metric("Documents", documents.count ?? 0, `${toInteger(documents.with_file_count)} with files`, "#documents"),
-      metric("Vendors", vendors.count ?? 0, "Active vendors", "#vendors")
+      metric("Expenses", expenses.count ?? 0, `${formatCents(expenses.total_amount_cents)} total`, "#expenses"),
+      metric("Total spend", formatCents(expenses.total_amount_cents), "Expense total", "#expenses"),
+      metric("Documents", documents.count ?? 0, `${toInteger(documents.with_file_count)} with files`, "#documents")
     ],
     expenseBreakdown: [
       {
@@ -119,17 +143,19 @@ export function createDashboardViewModel({
       documentMetric("OCR available", documents.ocr_text_available_count ?? 0, "Text ready"),
       documentMetric("OCR pending", documents.ocr_pending_count ?? 0, "In progress")
     ],
-    recentActivity: safeDashboard.recent_activity.map(toActivityRow),
-    followUps,
-    openFollowUpCount: getOpenFollowUpCount(followUps, followUpSummary),
+    recentActivity,
+    activityFilterOptions: getActivityFilterOptions(recentActivity),
+    followUps: followUpBuckets,
+    followUpItems: getFollowUpRows(rawFollowUps),
+    openFollowUpCount: getOpenFollowUpCount(followUpBuckets, followUpSummary),
     empty: isEmptyDashboard(safeDashboard)
   };
 }
 
-function metric(label: string, value: number, detail: string, href: string): DashboardMetric {
+function metric(label: string, value: number | string, detail: string, href: string): DashboardMetric {
   return {
     label,
-    value: toInteger(value),
+    value: typeof value === "number" ? toInteger(value) : value,
     detail,
     href
   };
@@ -145,6 +171,7 @@ function documentMetric(label: string, value: number, detail: string): DocumentS
 
 function toActivityRow(item: DashboardActivity): RecentActivityItem {
   return {
+    activityType: String(item.activity_type || "activity"),
     typeLabel: ACTIVITY_LABELS[item.activity_type as keyof typeof ACTIVITY_LABELS] || titleCase(item.activity_type || "activity"),
     recordType: String(item.record_type || item.activity_type || ""),
     recordId: String(item.record_id || ""),
@@ -154,6 +181,39 @@ function toActivityRow(item: DashboardActivity): RecentActivityItem {
     dateLabel: formatDate(item.occurred_at),
     summary: activitySummary(item)
   };
+}
+
+function getActivityFilterOptions(items: RecentActivityItem[]) {
+  const counts = new Map<string, DashboardActivityFilterOption>();
+  for (const item of items) {
+    const existing = counts.get(item.activityType);
+    counts.set(item.activityType, {
+      value: item.activityType,
+      label: item.typeLabel,
+      count: (existing?.count || 0) + 1
+    });
+  }
+  return [...counts.values()].sort((first, second) => {
+    const labelCompare = first.label.localeCompare(second.label);
+    if (labelCompare) return labelCompare;
+    return first.value.localeCompare(second.value);
+  });
+}
+
+function getFollowUpRows(items?: FollowUpItem[] | null): FollowUpRow[] {
+  return Array.isArray(items)
+    ? items
+      .map((item) => ({
+        id: String(item.id || ""),
+        area: titleCase(item.target_type || "record"),
+        title: String(item.title || "Needs attention"),
+        description: String(item.description || ""),
+        actionLabel: String(item.action_label || "Review"),
+        severity: titleCase(item.severity || "needs_review"),
+        targetType: String(item.target_type || "")
+      }))
+      .filter((item) => item.id && item.title)
+    : [];
 }
 
 function activitySummary(item: DashboardActivity) {

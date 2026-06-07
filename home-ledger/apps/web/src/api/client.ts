@@ -1,6 +1,7 @@
 import type {
   ApiEnvelope,
   DashboardResponse,
+  FollowUpItem,
   FollowUpSummaryResponse,
   SessionResponse
 } from "./types";
@@ -38,6 +39,7 @@ export interface HomeLedgerApiClientOptions {
 export interface HomeLedgerApiClient {
   getSession(): Promise<SessionResponse>;
   getDashboard(workspaceId: string): Promise<DashboardResponse>;
+  getFollowUps(workspaceId: string): Promise<FollowUpItem[]>;
   getFollowUpSummary(workspaceId: string): Promise<FollowUpSummaryResponse>;
 }
 
@@ -47,6 +49,7 @@ export type InitialDashboardState =
       session: SessionResponse;
       workspace: null;
       dashboard: null;
+      followUps: null;
       followUpSummary: null;
     }
   | {
@@ -54,6 +57,7 @@ export type InitialDashboardState =
       session: SessionResponse;
       workspace: NonNullable<ReturnType<typeof chooseActiveWorkspace>>;
       dashboard: DashboardResponse;
+      followUps: FollowUpItem[];
       followUpSummary: FollowUpSummaryResponse;
     };
 
@@ -93,6 +97,9 @@ export function createHomeLedgerApiClient({
     getDashboard(workspaceId: string) {
       return request<DashboardResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/dashboard`);
     },
+    getFollowUps(workspaceId: string) {
+      return request<FollowUpItem[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups`);
+    },
     getFollowUpSummary(workspaceId: string) {
       return request<FollowUpSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups/summary`);
     }
@@ -108,12 +115,14 @@ export async function loadInitialDashboard({ client }: { client: HomeLedgerApiCl
       session,
       workspace: null,
       dashboard: null,
+      followUps: null,
       followUpSummary: null
     };
   }
 
-  const [dashboard, followUpSummary] = await Promise.all([
+  const [dashboard, followUps, followUpSummary] = await Promise.all([
     client.getDashboard(workspace.workspaceId),
+    client.getFollowUps(workspace.workspaceId),
     client.getFollowUpSummary(workspace.workspaceId)
   ]);
 
@@ -122,6 +131,7 @@ export async function loadInitialDashboard({ client }: { client: HomeLedgerApiCl
     session,
     workspace,
     dashboard,
+    followUps,
     followUpSummary
   };
 }

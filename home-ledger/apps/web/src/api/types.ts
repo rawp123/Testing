@@ -77,6 +77,28 @@ export interface FollowUpSummaryResponse {
   [key: string]: unknown;
 }
 
+export interface FollowUpItem {
+  id: string;
+  target_type: "property" | "project" | "expense" | "document" | string;
+  target_id?: string | null;
+  property_id?: string | null;
+  project_id?: string | null;
+  expense_id?: string | null;
+  document_id?: string | null;
+  severity?: "missing_file" | "needs_review" | "missing_info" | "info" | string;
+  reason_code?: string | null;
+  title?: string | null;
+  description?: string | null;
+  action_label?: string | null;
+  status?: "open" | "resolved" | string;
+  source?: string | null;
+  created_from?: string | null;
+  resolved_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
 export interface DashboardResponse {
   workspace_id: string;
   generated_at: string;

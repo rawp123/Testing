@@ -1,10 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { InitialDashboardState } from "../src/api/client";
-import type { DashboardResponse, SessionResponse, WorkspaceMembership } from "../src/api/types";
+import type { DashboardResponse, FollowUpItem, SessionResponse, WorkspaceMembership } from "../src/api/types";
 import { ErrorState } from "../src/components/ErrorState";
 import { LoadingState } from "../src/components/LoadingState";
 import { DashboardPage } from "../src/dashboard/DashboardPage";
+import { NeedsAttention } from "../src/dashboard/NeedsAttention";
 import { createDashboardViewModel } from "../src/dashboard/dashboard-model";
 
 describe("Dashboard React shell", () => {
@@ -16,6 +17,7 @@ describe("Dashboard React shell", () => {
       session: createSession(),
       workspace: null,
       dashboard: null,
+      followUps: null,
       followUpSummary: null
     }} />);
     expect(emptyHtml).toContain("Create a workspace");
@@ -31,32 +33,64 @@ describe("Dashboard React shell", () => {
       session: createSession("Robert"),
       workspace: createWorkspace(),
       dashboard,
+      followUps: createFollowUps(),
       followUpSummary: { open_count: 7, by_type: dashboard.follow_ups }
     });
 
     expect(viewModel.userName).toBe("Robert");
     expect(viewModel.workspaceName).toBe("Home records");
-    expect(viewModel.metrics.find((item) => item.label === "Expenses")?.detail).toBe("$3,172.50");
+    expect(viewModel.metrics.find((item) => item.label === "Expenses")?.detail).toBe("$3,172.50 total");
+    expect(viewModel.metrics.find((item) => item.label === "Total spend")?.value).toBe("$3,172.50");
     expect(viewModel.expenseBreakdown.map((item) => item.label)).toEqual([
       "Possible improvements",
       "Repair / upkeep",
       "Not sure, review later"
     ]);
+    expect(viewModel.activityFilterOptions.map((item) => item.label)).toEqual(["Document", "Expense", "Project"]);
+    expect(viewModel.followUpItems[0]).toMatchObject({
+      area: "Document",
+      title: "Upload receipt file",
+      actionLabel: "Upload receipt file"
+    });
     expect(dashboard.expenses.total_amount_cents).toBe(317250);
   });
 
-  it("renders populated recent activity follow-up counts and summary panels", () => {
+  it("renders populated recent activity and compact dashboard shell", () => {
     const html = renderToStaticMarkup(<DashboardPage state={createReadyState()} />);
 
     expect(html).toContain("Your home records");
     expect(html).toContain("Recent activity");
     expect(html).toContain("Needs attention");
+    expect(html).toContain("All activity");
+    expect(html).toContain("Project <span>1</span>");
+    expect(html).toContain("Expense <span>1</span>");
+    expect(html).toContain("Document <span>1</span>");
+    expect(html).toContain("Add expense");
     expect(html).toContain("Deck repair");
     expect(html).toContain("Cedarline Carpentry");
     expect(html).toContain("$680.00");
-    expect(html).toContain("Expense summary");
-    expect(html).toContain("Document summary");
-    expect(html).toContain("Project items");
+    expect(html).toContain("Total spend");
+    expect(html).not.toContain("Expense summary");
+    expect(html).not.toContain("Document summary");
+  });
+
+  it("renders specific needs-attention rows without generic summary cards", () => {
+    const html = renderToStaticMarkup(<NeedsAttention items={[
+      {
+        id: "fu_11111111111111111111111111111111",
+        area: "Document",
+        title: "Upload receipt file",
+        description: "The receipt record exists, but the file has not been uploaded.",
+        actionLabel: "Upload receipt file",
+        severity: "Missing File",
+        targetType: "document"
+      }
+    ]} />);
+
+    expect(html).toContain("What needs attention");
+    expect(html).toContain("Upload receipt file");
+    expect(html).toContain("The receipt record exists");
+    expect(html).not.toContain("Document items");
   });
 
   it("renders concise empty dashboard copy", () => {
@@ -86,7 +120,7 @@ describe("Dashboard React shell", () => {
 
     expect(html).toContain("Add a property");
     expect(html).toContain("No recent activity");
-    expect(html).toContain("No open items");
+    expect(html).not.toContain("Expense summary");
   });
 
   it("does not render sensitive storage OCR or local-path fields", () => {
@@ -134,11 +168,31 @@ function createReadyState(overrides: Partial<DashboardResponse> = {}): InitialDa
     session: createSession("Robert"),
     workspace: createWorkspace(),
     dashboard,
+    followUps: createFollowUps(),
     followUpSummary: {
       open_count: dashboard.follow_ups.reduce((total, item) => total + item.count, 0),
       by_type: dashboard.follow_ups
     }
   };
+}
+
+function createFollowUps(): FollowUpItem[] {
+  return [
+    {
+      id: "fu_11111111111111111111111111111111",
+      target_type: "document",
+      target_id: "document-1",
+      document_id: "document-1",
+      severity: "missing_file",
+      reason_code: "document_missing_file",
+      title: "Upload receipt file",
+      description: "The receipt record exists, but the file has not been uploaded.",
+      action_label: "Upload receipt file",
+      status: "open",
+      storage_key: "private/object.pdf",
+      ocr_text: "Sensitive text"
+    }
+  ];
 }
 
 function createSession(displayName = "Owner"): SessionResponse {
