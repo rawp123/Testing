@@ -150,7 +150,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
     });
     documentId = createResponse.json().data.id;
 
-    await db.query(
+    const fileResult = await db.query(
       `
         INSERT INTO document_files (
           workspace_id,
@@ -163,6 +163,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
           status
         )
         VALUES ($1, $2, 'test', 'private/object/key.pdf', 'receipt.pdf', 'application/pdf', 1234, 'available')
+        RETURNING id
       `,
       [workspaceId, documentId]
     );
@@ -171,13 +172,14 @@ test("DB-backed Document API validates relationships and soft deletes documents"
         INSERT INTO document_ocr (
           workspace_id,
           document_id,
+          document_file_id,
           status,
           text,
           completed_at
         )
-        VALUES ($1, $2, 'succeeded', 'Recognized text', now())
+        VALUES ($1, $2, $3, 'succeeded', 'Recognized text', now())
       `,
-      [workspaceId, documentId]
+      [workspaceId, documentId, fileResult.rows[0].id]
     );
 
     const detailResponse = await app.inject({

@@ -2,7 +2,7 @@
 
 This package currently contains the SaaS API foundation: database migration tooling, a minimal Fastify runtime, provider-neutral dev/test auth resolution, workspace authorization helpers, session/workspace endpoints, and the initial Property, Vendor, Project, Expense, Document, and Document File APIs.
 
-It does not define production object-storage integration, billing, OCR processing, import, export, invitation, household sharing, reviewer, or support/admin routes yet.
+It does not define API-proxied binary upload/download streaming, billing, OCR processing, import, export, invitation, household sharing, reviewer, or support/admin routes yet.
 
 ## API Runtime
 
@@ -61,6 +61,9 @@ POST /api/v1/workspaces/:workspaceId/documents/:documentId/file-intent
 POST /api/v1/workspaces/:workspaceId/documents/:documentId/file-complete
 GET /api/v1/workspaces/:workspaceId/documents/:documentId/file
 DELETE /api/v1/workspaces/:workspaceId/documents/:documentId/file
+POST /api/v1/workspaces/:workspaceId/documents/:documentId/ocr
+GET /api/v1/workspaces/:workspaceId/documents/:documentId/ocr
+GET /api/v1/workspaces/:workspaceId/documents/:documentId/text
 PATCH /api/v1/workspaces/:workspaceId/documents/:documentId
 DELETE /api/v1/workspaces/:workspaceId/documents/:documentId
 ```
@@ -319,7 +322,7 @@ Document list behavior:
 
 ## Document File API
 
-Document file routes manage the safe file metadata lifecycle for existing documents. They use the `document_files` table and a small storage adapter boundary. In the current implementation the adapter returns local/test intent metadata only; it does not store binary content or create production signed object-storage URLs.
+Document file routes manage the safe file metadata lifecycle for existing documents. They use the `document_files` table and a storage adapter boundary. The local/test adapter does not require network access and returns `null` upload/download URLs. The S3-compatible adapter generates short-lived signed URLs for private buckets.
 
 Role behavior:
 
@@ -331,10 +334,36 @@ File lifecycle rules:
 
 - `POST /file-intent` validates the existing document, file name, MIME type, size, hash, and source, then creates a `pending_upload` `document_files` row.
 - `POST /file-complete` marks a pending file row `available`, sets `uploaded_at`, and updates the parent document `file_availability` to `available`.
-- `GET /file` returns safe file metadata and adapter download availability for the active available file. It never returns raw storage keys, buckets, filesystem paths, OCR text, or file bytes.
+- `GET /file` returns safe file metadata and adapter download availability for the active available file. It never returns raw storage keys, filesystem paths, OCR text, or file bytes as standalone metadata fields.
 - `DELETE /file` soft-deletes the active file row, leaves document metadata intact, and updates the parent document `file_availability` to `removed`.
-- A document can have at most one active available file in the current schema. Completing a replacement marks any prior available file row deleted before activating the new file. Production object cleanup for replaced files is deferred until a real storage adapter/background cleanup path exists.
-- Upload intent and download responses include adapter metadata. In local/test mode `upload_url` and `download_url` are `null`; production object storage must be wired through the adapter in a later ticket.
+- A document can have at most one active available file in the current schema. Completing a replacement marks any prior available file row deleted before activating the new file. Production object cleanup for replaced files is deferred until provider-specific cleanup/background jobs are implemented.
+- Upload intent and download responses include adapter metadata. In local/test mode `upload_url` and `download_url` are `null`. In S3 mode, `upload_url` and `download_url` are short-lived signed URLs created only for authorized requests.
+- Storage keys are generated server-side and do not use the client filename. Normal document metadata responses continue to expose safe file summaries only.
+
+Storage configuration:
+
+```sh
+FILE_STORAGE_DRIVER=local
+
+# S3-compatible production storage:
+FILE_STORAGE_DRIVER=s3
+FILE_STORAGE_BUCKET=home-ledger-documents
+FILE_STORAGE_REGION=us-east-1
+FILE_STORAGE_ENDPOINT=
+FILE_STORAGE_ACCESS_KEY_ID=
+FILE_STORAGE_SECRET_ACCESS_KEY=
+FILE_STORAGE_FORCE_PATH_STYLE=false
+FILE_STORAGE_UPLOAD_URL_TTL_SECONDS=600
+FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS=300
+```
+
+S3-compatible storage notes:
+
+- `FILE_STORAGE_BUCKET`, `FILE_STORAGE_REGION`, `FILE_STORAGE_ACCESS_KEY_ID`, and `FILE_STORAGE_SECRET_ACCESS_KEY` are required when `FILE_STORAGE_DRIVER=s3`.
+- `FILE_STORAGE_ENDPOINT` is optional for S3-compatible providers such as Cloudflare R2, Backblaze B2 S3 API, or MinIO.
+- `FILE_STORAGE_FORCE_PATH_STYLE=true` is commonly needed for MinIO and some S3-compatible endpoints.
+- Signed URL TTLs must be between `1` and `3600` seconds.
+- Buckets should remain private. The API should be the only component that creates signed upload/download URLs.
 
 Validation:
 
@@ -347,18 +376,64 @@ Validation:
 
 Deferred for document files:
 
-- Real object-storage signed upload/download URLs.
 - Binary upload streaming through the API.
 - Malware scanning and quarantine enforcement.
 - Activity/audit event creation for download and delete actions.
-- OCR queueing, OCR retry, and OCR text read APIs.
+- Provider-specific immediate object deletion for removed/replaced files.
 - Derived expense documentation status.
 - Import mapping.
 - UI.
 
+## Document OCR API
+
+Document OCR routes manage extracted text status and safe explicit text reads. OCR text is sensitive user data and is stored separately in `document_ocr`.
+
+Role behavior:
+
+- `owner` and `editor` can request OCR.
+- `viewer` can read OCR status and extracted text for accessible documents.
+- Non-members receive `404 not_found`.
+
+OCR lifecycle rules:
+
+- `POST /ocr` requests OCR for the current available document file.
+- `GET /ocr` returns status metadata only.
+- `GET /text` returns extracted text only when OCR succeeded for the current available file.
+- OCR cannot start for deleted documents or documents without an available file.
+- Normal document list/detail responses never include raw OCR text. They only include status and `has_text`.
+- Replacing or removing a document file resets or skips OCR and makes prior extracted text unavailable.
+- Provider raw errors, stack traces, storage keys, signed URLs, and object-storage internals are not returned from OCR endpoints.
+
+OCR response fields:
+
+- `document_id`
+- `document_file_id`
+- `ocr_status`
+- `ocr_requested_at`
+- `ocr_completed_at`
+- `text_available`
+- `engine`
+- `failure_reason`
+
+OCR configuration:
+
+```sh
+OCR_MODE=disabled
+OCR_MODE=fake
+```
+
+`disabled` records queued lifecycle status without extracting text. `fake` returns deterministic extracted text for tests and local API checks. No external OCR service is called by the current implementation.
+
+Deferred for OCR:
+
+- Real production OCR provider integration.
+- Async worker queue and retry backoff.
+- OCR search.
+- OCR read audit events.
+- OCR inclusion/exclusion decisions for exports.
+
 Deferred for documents:
 
-- OCR queueing, OCR retry, and OCR text read APIs.
 - Derived expense documentation status.
 - Activity event creation.
 - Import mapping.

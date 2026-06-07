@@ -294,6 +294,76 @@ test("available files can be replaced and deleted documents cannot issue file in
   await app.close();
 });
 
+test("S3 storage returns signed URLs only from file lifecycle endpoints", async () => {
+  const db = createFakeWorkspaceDb(createSeededWorkspaceState());
+  const app = buildApp({
+    config: createConfig({
+      fileStorageDriver: "s3",
+      fileStorage: {
+        driver: "s3",
+        bucket: "home-ledger-documents",
+        region: "us-east-1",
+        endpoint: "https://storage.example.test",
+        accessKeyId: "test-access-key",
+        secretAccessKey: "test-secret-key",
+        forcePathStyle: true,
+        uploadUrlTtlSeconds: 120,
+        downloadUrlTtlSeconds: 60
+      }
+    }),
+    db
+  });
+
+  const intentResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/file-intent`,
+    headers: authHeaders("owner@example.test"),
+    payload: createFilePayload()
+  });
+  assert.equal(intentResponse.statusCode, 201);
+  assert.equal(intentResponse.json().data.upload_method, "signed_url_put");
+  assert.match(intentResponse.json().data.upload_url, /^https:\/\/storage\.example\.test\//);
+  assert.equal(intentResponse.json().data.upload_token, null);
+  assertSafeSignedUrlResponse(intentResponse.json().data);
+  const documentFileId = intentResponse.json().data.document_file_id;
+
+  const completeResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/file-complete`,
+    headers: authHeaders("owner@example.test"),
+    payload: {
+      document_file_id: documentFileId,
+      upload_id: documentFileId,
+      size_bytes: 2048
+    }
+  });
+  assert.equal(completeResponse.statusCode, 200);
+  assert.equal(Object.hasOwn(completeResponse.json().data, "download_url"), false);
+  assertSafeFileResponse(completeResponse.json().data);
+
+  const fileResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/file`,
+    headers: authHeaders("owner@example.test")
+  });
+  assert.equal(fileResponse.statusCode, 200);
+  assert.equal(fileResponse.json().data.download_available, true);
+  assert.match(fileResponse.json().data.download_url, /^https:\/\/storage\.example\.test\//);
+  assertSafeSignedUrlResponse(fileResponse.json().data);
+
+  const documentResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}`,
+    headers: authHeaders("owner@example.test")
+  });
+  assert.equal(documentResponse.statusCode, 200);
+  assert.equal(documentResponse.json().data.file.id, documentFileId);
+  assert.equal(Object.hasOwn(documentResponse.json().data.file, "download_url"), false);
+  assertSafeFileResponse(documentResponse.json().data);
+
+  await app.close();
+});
+
 function createFilePayload(overrides = {}) {
   return {
     original_file_name: "receipt.pdf",
@@ -338,5 +408,25 @@ function assertSafeFileResponse(value) {
     "workspaces/"
   ]) {
     assert.equal(text.includes(unsafe), false, `${unsafe} should not be exposed`);
+  }
+}
+
+function assertSafeSignedUrlResponse(value) {
+  const text = JSON.stringify(value);
+  for (const unsafe of [
+    "storage_key",
+    "storageKey",
+    "object_key",
+    "objectStorageKey",
+    "local_path",
+    "file_path",
+    "test-secret-key",
+    "secretAccessKey"
+  ]) {
+    assert.equal(text.includes(unsafe), false, `${unsafe} should not be exposed`);
+  }
+  for (const url of [value.upload_url, value.download_url].filter(Boolean)) {
+    assert.equal(url.includes(WORKSPACE_IDS.owner), false, "signed URL should not include raw workspace id");
+    assert.equal(url.includes(DOCUMENT_IDS.ownerKitchenInvoice), false, "signed URL should not include raw document id");
   }
 }

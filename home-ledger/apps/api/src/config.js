@@ -45,6 +45,12 @@ export function loadConfig(env = process.env) {
     issues.push({ key: "DB_POOL_MAX", message: "DB_POOL_MAX must be between 1 and 100." });
   }
 
+  const fileStorage = loadFileStorageConfig(env, issues);
+  const ocrMode = (normalizeText(env.OCR_MODE) || "disabled").toLowerCase();
+  if (!["disabled", "fake", "test"].includes(ocrMode)) {
+    issues.push({ key: "OCR_MODE", message: "OCR_MODE must be disabled, fake, or test." });
+  }
+
   if (issues.length > 0) {
     throw new ConfigError(issues);
   }
@@ -60,9 +66,10 @@ export function loadConfig(env = process.env) {
     devAuthEmail,
     devAuthDisplayName,
     sessionCookieName: normalizeText(env.SESSION_COOKIE_NAME) || "home_ledger_session",
-    fileStorageDriver: normalizeText(env.FILE_STORAGE_DRIVER) || "local",
+    fileStorageDriver: fileStorage.driver,
+    fileStorage,
     billingProvider: normalizeText(env.BILLING_PROVIDER) || "none",
-    ocrMode: normalizeText(env.OCR_MODE) || "disabled",
+    ocrMode,
     analyticsEnabled: parseBoolean(env.ANALYTICS_ENABLED, false),
     dbPoolMax,
     requestIdHeader: normalizeText(env.REQUEST_ID_HEADER) || "x-request-id"
@@ -134,6 +141,65 @@ function parseBoolean(value, fallback) {
     return false;
   }
   return fallback;
+}
+
+function loadFileStorageConfig(env, issues) {
+  const driver = (normalizeText(env.FILE_STORAGE_DRIVER) || "local").toLowerCase();
+  if (!["local", "test", "s3"].includes(driver)) {
+    issues.push({ key: "FILE_STORAGE_DRIVER", message: "FILE_STORAGE_DRIVER must be local, test, or s3." });
+  }
+
+  const uploadUrlTtlSeconds = parseInteger(env.FILE_STORAGE_UPLOAD_URL_TTL_SECONDS, 600);
+  if (!Number.isInteger(uploadUrlTtlSeconds) || uploadUrlTtlSeconds < 1 || uploadUrlTtlSeconds > 3600) {
+    issues.push({
+      key: "FILE_STORAGE_UPLOAD_URL_TTL_SECONDS",
+      message: "FILE_STORAGE_UPLOAD_URL_TTL_SECONDS must be between 1 and 3600."
+    });
+  }
+
+  const downloadUrlTtlSeconds = parseInteger(env.FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS, 300);
+  if (!Number.isInteger(downloadUrlTtlSeconds) || downloadUrlTtlSeconds < 1 || downloadUrlTtlSeconds > 3600) {
+    issues.push({
+      key: "FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS",
+      message: "FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS must be between 1 and 3600."
+    });
+  }
+
+  const endpoint = normalizeText(env.FILE_STORAGE_ENDPOINT);
+  if (endpoint) {
+    try {
+      const parsed = new URL(endpoint);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        issues.push({ key: "FILE_STORAGE_ENDPOINT", message: "FILE_STORAGE_ENDPOINT must be an http or https URL." });
+      }
+    } catch {
+      issues.push({ key: "FILE_STORAGE_ENDPOINT", message: "FILE_STORAGE_ENDPOINT must be a valid URL." });
+    }
+  }
+
+  const bucket = normalizeText(env.FILE_STORAGE_BUCKET);
+  const region = normalizeText(env.FILE_STORAGE_REGION);
+  const accessKeyId = normalizeText(env.FILE_STORAGE_ACCESS_KEY_ID);
+  const secretAccessKey = String(env.FILE_STORAGE_SECRET_ACCESS_KEY || "");
+
+  if (driver === "s3") {
+    if (!bucket) issues.push({ key: "FILE_STORAGE_BUCKET", message: "FILE_STORAGE_BUCKET is required for S3 storage." });
+    if (!region) issues.push({ key: "FILE_STORAGE_REGION", message: "FILE_STORAGE_REGION is required for S3 storage." });
+    if (!accessKeyId) issues.push({ key: "FILE_STORAGE_ACCESS_KEY_ID", message: "FILE_STORAGE_ACCESS_KEY_ID is required for S3 storage." });
+    if (!secretAccessKey) issues.push({ key: "FILE_STORAGE_SECRET_ACCESS_KEY", message: "FILE_STORAGE_SECRET_ACCESS_KEY is required for S3 storage." });
+  }
+
+  return Object.freeze({
+    driver,
+    bucket,
+    region,
+    endpoint,
+    accessKeyId,
+    secretAccessKey,
+    forcePathStyle: parseBoolean(env.FILE_STORAGE_FORCE_PATH_STYLE, false),
+    uploadUrlTtlSeconds,
+    downloadUrlTtlSeconds
+  });
 }
 
 function isLocalLikeEnv(appEnv) {

@@ -12,8 +12,13 @@ import {
   getDocumentById,
   getDocumentFileDownload,
   getDocumentFilterOptions,
+  getDocumentOcrStatus,
+  getDocumentOcrText,
   listDocuments,
+  requestDocumentOcr,
   serializeDocument,
+  serializeDocumentOcr,
+  serializeDocumentOcrText,
   updateDocument
 } from "./documents.js";
 import {
@@ -26,6 +31,7 @@ import {
   updateExpense
 } from "./expenses.js";
 import { createFileStorageAdapter } from "./file-storage.js";
+import { createOcrProvider } from "./ocr-provider.js";
 import {
   archiveProperty,
   createProperty,
@@ -59,8 +65,12 @@ import {
   updateWorkspaceBasics
 } from "./workspaces.js";
 
-export function buildApp({ config, db, logger = false, fileStorage } = {}) {
-  const storage = fileStorage || createFileStorageAdapter({ driver: config.fileStorageDriver });
+export function buildApp({ config, db, logger = false, fileStorage, ocrProvider } = {}) {
+  const storage = fileStorage || createFileStorageAdapter({
+    driver: config.fileStorageDriver,
+    config: config.fileStorage
+  });
+  const ocr = ocrProvider || createOcrProvider({ mode: config.ocrMode });
   const app = Fastify({
     logger,
     genReqId: (request) => {
@@ -935,6 +945,74 @@ export function buildApp({ config, db, logger = false, fileStorage } = {}) {
 
       return {
         data: file
+      };
+    });
+
+    api.post("/workspaces/:workspaceId/documents/:documentId/ocr", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceRole({
+        request,
+        db,
+        workspaceId: request.params.workspaceId,
+        allowedRoles: ["owner", "editor"]
+      });
+
+      const ocrStatus = await requestDocumentOcr({
+        db,
+        ocrProvider: ocr,
+        workspaceId: request.params.workspaceId,
+        documentId: request.params.documentId
+      });
+
+      if (!ocrStatus) {
+        throw apiError(404, "not_found", "Document not found.");
+      }
+
+      return {
+        data: serializeDocumentOcr(ocrStatus)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/documents/:documentId/ocr", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const ocrStatus = await getDocumentOcrStatus({
+        db,
+        workspaceId: request.params.workspaceId,
+        documentId: request.params.documentId
+      });
+
+      if (!ocrStatus) {
+        throw apiError(404, "not_found", "Document not found.");
+      }
+
+      return {
+        data: serializeDocumentOcr(ocrStatus)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/documents/:documentId/text", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const ocrText = await getDocumentOcrText({
+        db,
+        workspaceId: request.params.workspaceId,
+        documentId: request.params.documentId
+      });
+
+      if (!ocrText) {
+        throw apiError(404, "not_found", "Document not found.");
+      }
+
+      return {
+        data: serializeDocumentOcrText(ocrText)
       };
     });
 

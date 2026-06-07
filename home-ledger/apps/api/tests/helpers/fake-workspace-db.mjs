@@ -65,6 +65,7 @@ export function createFakeWorkspaceDb(seed = {}) {
   const expenses = new Map();
   const documents = new Map();
   const documentFiles = new Map();
+  const documentOcr = new Map();
   const queries = [];
   let userCounter = 1;
   let workspaceCounter = 100;
@@ -75,6 +76,7 @@ export function createFakeWorkspaceDb(seed = {}) {
   let expenseCounter = 1000;
   let documentCounter = 1200;
   let documentFileCounter = 1400;
+  let documentOcrCounter = 1600;
 
   for (const user of seed.users || []) {
     users.set(user.id, {
@@ -242,6 +244,26 @@ export function createFakeWorkspaceDb(seed = {}) {
     });
   }
 
+  for (const ocr of seed.documentOcr || []) {
+    documentOcr.set(ocr.document_id, {
+      id: makeUuid(documentOcrCounter++),
+      workspace_id: WORKSPACE_IDS.owner,
+      document_id: DOCUMENT_IDS.ownerDeckReceipt,
+      document_file_id: DOCUMENT_FILE_IDS.ownerDeckReceipt,
+      status: "not_requested",
+      text: null,
+      text_sha256: null,
+      engine: null,
+      error_code: null,
+      error_message: null,
+      started_at: null,
+      completed_at: null,
+      created_at: "2026-06-06T12:00:00.000Z",
+      updated_at: "2026-06-06T12:00:00.000Z",
+      ...ocr
+    });
+  }
+
   const db = {
     queries,
     users,
@@ -253,6 +275,7 @@ export function createFakeWorkspaceDb(seed = {}) {
     expenses,
     documents,
     documentFiles,
+    documentOcr,
     async query(sql, params = []) {
       queries.push({ sql, params });
       const normalizedSql = normalizeSql(sql);
@@ -738,6 +761,50 @@ export function createFakeWorkspaceDb(seed = {}) {
             ? [file]
             : []
         };
+      }
+
+      if (/-- getDocumentOcrRow/.test(sql)) {
+        return {
+          rows: documentOcrRows({
+            workspaceId: params[0],
+            documentId: params[1],
+            includeText: /o\.text AS ocr_text/.test(sql)
+          })
+        };
+      }
+
+      if (/-- upsertDocumentOcr/.test(sql)) {
+        const [
+          workspaceId,
+          documentId,
+          documentFileId,
+          status,
+          text,
+          textSha256,
+          engine,
+          errorCode,
+          errorMessage,
+          completed
+        ] = params;
+        const existing = documentOcr.get(documentId);
+        const ocr = {
+          id: existing?.id || makeUuid(documentOcrCounter++),
+          workspace_id: workspaceId,
+          document_id: documentId,
+          document_file_id: documentFileId,
+          status,
+          text,
+          text_sha256: textSha256,
+          engine,
+          error_code: errorCode,
+          error_message: errorMessage,
+          started_at: "2026-06-06T13:00:00.000Z",
+          completed_at: completed ? "2026-06-06T13:00:00.000Z" : null,
+          created_at: existing?.created_at || "2026-06-06T12:00:00.000Z",
+          updated_at: "2026-06-06T13:00:00.000Z"
+        };
+        documentOcr.set(documentId, ocr);
+        return { rows: [] };
       }
 
       if (/-- listDocuments/.test(sql)) {
@@ -1742,11 +1809,50 @@ export function createFakeWorkspaceDb(seed = {}) {
       });
   }
 
+  function documentOcrRows({ workspaceId, documentId, includeText }) {
+    const document = documents.get(documentId);
+    if (!isActiveDocument(document, workspaceId)) {
+      return [];
+    }
+    const file = activeDocumentFiles(workspaceId, documentId)[0] || null;
+    const ocr = documentOcr.get(documentId);
+    const textAvailable = Boolean(
+      ocr?.text &&
+      ocr.status === "succeeded" &&
+      file?.status === "available" &&
+      ocr.document_file_id === file.id
+    );
+    return [
+      {
+        document_id: documentId,
+        active_file_id: file?.id || null,
+        active_file_status: file?.status || null,
+        document_file_id: ocr?.document_file_id || null,
+        ocr_status: ocr?.status || "not_requested",
+        ocr_engine: ocr?.engine || null,
+        ocr_error_code: ocr?.error_code || null,
+        ocr_error_message: ocr?.error_message || null,
+        ocr_started_at: ocr?.started_at || null,
+        ocr_completed_at: ocr?.completed_at || null,
+        ocr_created_at: ocr?.created_at || null,
+        ocr_text_available: textAvailable,
+        ...(includeText ? { ocr_text: textAvailable ? ocr.text : null } : {})
+      }
+    ];
+  }
+
   function documentRow(document, totalCount) {
     const property = properties.get(document.property_id);
     const project = document.project_id ? projects.get(document.project_id) : null;
     const expense = document.expense_id ? expenses.get(document.expense_id) : null;
     const file = activeDocumentFiles(document.workspace_id, document.id)[0] || null;
+    const ocr = documentOcr.get(document.id);
+    const ocrHasText = Boolean(
+      ocr?.text &&
+      ocr.status === "succeeded" &&
+      file?.status === "available" &&
+      ocr.document_file_id === file.id
+    );
     return {
       ...document,
       property_name: property?.name || null,
@@ -1757,9 +1863,9 @@ export function createFakeWorkspaceDb(seed = {}) {
       file_mime_type: file?.mime_type || null,
       file_size_bytes: file?.size_bytes || null,
       file_status: file?.status || null,
-      ocr_status: "not_requested",
-      ocr_has_text: false,
-      ocr_completed_at: null,
+      ocr_status: ocr?.status || "not_requested",
+      ocr_has_text: ocrHasText,
+      ocr_completed_at: ocr?.completed_at || null,
       total_count: totalCount
     };
   }

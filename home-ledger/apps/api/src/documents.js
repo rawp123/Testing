@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { apiError, validationError } from "./errors.js";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -480,6 +481,14 @@ export async function completeDocumentFileUpload({ db, workspaceId, documentId, 
     fileStatusNote: null,
     actorUserId
   });
+  await resetDocumentOcrForFileChange({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId: result.rows[0].id,
+    status: "not_requested",
+    reason: null
+  });
 
   return serializeDocumentFile(result.rows[0]);
 }
@@ -500,6 +509,7 @@ export async function getDocumentFileDownload({ db, storage, workspaceId, docume
     workspaceId,
     documentId,
     documentFileId: file.id,
+    storageKey: file.storage_key,
     status: file.status,
     mimeType: file.mime_type,
     sizeBytes: Number(file.size_bytes || 0)
@@ -529,7 +539,8 @@ export async function deleteDocumentFile({ db, storage, workspaceId, documentId,
     workspaceId,
     documentId,
     documentFileId: file.id,
-    storageProvider: file.storage_provider
+    storageProvider: file.storage_provider,
+    storageKey: file.storage_key
   });
 
   const result = await db.query(
@@ -565,10 +576,98 @@ export async function deleteDocumentFile({ db, storage, workspaceId, documentId,
     fileStatusNote: "File removed.",
     actorUserId
   });
+  await resetDocumentOcrForFileChange({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId: file.id,
+    status: "skipped",
+    reason: "File removed."
+  });
 
   return {
     ...serializeDocumentFile(result.rows[0]),
     cleanup_deferred: Boolean(cleanup.cleanup_deferred)
+  };
+}
+
+export async function requestDocumentOcr({ db, ocrProvider, workspaceId, documentId }) {
+  validateDocumentId(documentId);
+  const document = await getActiveDocumentFileState({ db, workspaceId, documentId });
+  if (!document) {
+    return null;
+  }
+
+  const file = await getActiveDocumentFile({ db, workspaceId, documentId });
+  if (!file || file.status !== "available") {
+    throw apiError(409, "conflict", "Document has no available file for OCR.");
+  }
+
+  await upsertDocumentOcr({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId: file.id,
+    status: "processing",
+    text: null,
+    textSha256: null,
+    engine: ocrProvider?.mode || null,
+    errorCode: null,
+    errorMessage: null,
+    completed: false
+  });
+
+  const result = await ocrProvider.requestText({
+    workspaceId,
+    documentId,
+    file: {
+      id: file.id,
+      original_file_name: file.original_file_name,
+      mime_type: file.mime_type,
+      size_bytes: Number(file.size_bytes || 0)
+    }
+  });
+
+  const text = normalizeOcrText(result.text);
+  await upsertDocumentOcr({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId: file.id,
+    status: normalizeOcrStatus(result.status),
+    text,
+    textSha256: text ? sha256Hex(text) : null,
+    engine: normalizeNullableText(result.engine),
+    errorCode: sanitizeOcrError(result.errorCode),
+    errorMessage: sanitizeOcrError(result.errorMessage),
+    completed: ["succeeded", "failed", "skipped"].includes(normalizeOcrStatus(result.status))
+  });
+
+  return getDocumentOcrStatus({ db, workspaceId, documentId });
+}
+
+export async function getDocumentOcrStatus({ db, workspaceId, documentId }) {
+  validateDocumentId(documentId);
+  const row = await getDocumentOcrRow({ db, workspaceId, documentId });
+  if (!row) {
+    return null;
+  }
+  return mapOcrStatus(row);
+}
+
+export async function getDocumentOcrText({ db, workspaceId, documentId }) {
+  validateDocumentId(documentId);
+  const row = await getDocumentOcrRow({ db, workspaceId, documentId, includeText: true });
+  if (!row) {
+    return null;
+  }
+  const status = mapOcrStatus(row);
+  if (!status.textAvailable) {
+    throw apiError(404, "not_found", "Document text not found.");
+  }
+  return {
+    ...status,
+    text: row.ocr_text || ""
   };
 }
 
@@ -607,6 +706,31 @@ export function serializeDocumentFile(file) {
     status: file.status,
     uploaded_at: formatTimestamp(file.uploaded_at),
     deleted_at: formatTimestamp(file.deleted_at)
+  };
+}
+
+export function serializeDocumentOcr(ocr) {
+  return {
+    document_id: ocr.documentId,
+    document_file_id: ocr.documentFileId,
+    ocr_status: ocr.status,
+    ocr_requested_at: ocr.requestedAt,
+    ocr_completed_at: ocr.completedAt,
+    text_available: ocr.textAvailable,
+    engine: ocr.engine,
+    failure_reason: ocr.failureReason
+  };
+}
+
+export function serializeDocumentOcrText(ocrText) {
+  return {
+    document_id: ocrText.documentId,
+    document_file_id: ocrText.documentFileId,
+    ocr_status: ocrText.status,
+    ocr_requested_at: ocrText.requestedAt,
+    ocr_completed_at: ocrText.completedAt,
+    text_available: ocrText.textAvailable,
+    text: ocrText.text
   };
 }
 
@@ -891,6 +1015,7 @@ async function getActiveDocumentFile({ db, workspaceId, documentId }) {
       SELECT id,
              document_id,
              storage_provider,
+             storage_key,
              original_file_name,
              mime_type,
              size_bytes,
@@ -935,6 +1060,136 @@ async function getDocumentFileById({ db, workspaceId, documentId, documentFileId
     [workspaceId, documentId, documentFileId]
   );
   return result.rows[0] || null;
+}
+
+async function getDocumentOcrRow({ db, workspaceId, documentId, includeText = false }) {
+  const result = await db.query(
+    `
+      -- getDocumentOcrRow
+      SELECT d.id AS document_id,
+             f.id AS active_file_id,
+             f.status AS active_file_status,
+             o.document_file_id,
+             coalesce(o.status, 'not_requested') AS ocr_status,
+             o.engine AS ocr_engine,
+             o.error_code AS ocr_error_code,
+             o.error_message AS ocr_error_message,
+             o.started_at AS ocr_started_at,
+             o.completed_at AS ocr_completed_at,
+             o.created_at AS ocr_created_at,
+             (o.text IS NOT NULL
+               AND length(o.text) > 0
+               AND o.status = 'succeeded'
+               AND o.document_file_id = f.id
+               AND f.status = 'available') AS ocr_text_available
+             ${includeText ? ", o.text AS ocr_text" : ""}
+      FROM documents d
+      LEFT JOIN LATERAL (
+        SELECT df.id, df.status
+        FROM document_files df
+        WHERE df.workspace_id = d.workspace_id
+          AND df.document_id = d.id
+          AND df.deleted_at IS NULL
+        ORDER BY CASE WHEN df.status = 'available' THEN 0 ELSE 1 END, df.created_at DESC, df.id ASC
+        LIMIT 1
+      ) f ON true
+      LEFT JOIN document_ocr o
+        ON o.workspace_id = d.workspace_id
+       AND o.document_id = d.id
+      WHERE d.workspace_id = $1
+        AND d.id = $2
+        AND d.deleted_at IS NULL
+      LIMIT 1
+    `,
+    [workspaceId, documentId]
+  );
+  return result.rows[0] || null;
+}
+
+async function upsertDocumentOcr({
+  db,
+  workspaceId,
+  documentId,
+  documentFileId,
+  status,
+  text,
+  textSha256,
+  engine,
+  errorCode,
+  errorMessage,
+  completed
+}) {
+  await db.query(
+    `
+      -- upsertDocumentOcr
+      INSERT INTO document_ocr (
+        workspace_id,
+        document_id,
+        document_file_id,
+        status,
+        text,
+        text_sha256,
+        engine,
+        error_code,
+        error_message,
+        started_at,
+        completed_at
+      )
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        now(),
+        CASE WHEN $10::boolean THEN now() ELSE NULL END
+      )
+      ON CONFLICT (document_id)
+      DO UPDATE SET
+        document_file_id = EXCLUDED.document_file_id,
+        status = EXCLUDED.status,
+        text = EXCLUDED.text,
+        text_sha256 = EXCLUDED.text_sha256,
+        engine = EXCLUDED.engine,
+        error_code = EXCLUDED.error_code,
+        error_message = EXCLUDED.error_message,
+        started_at = EXCLUDED.started_at,
+        completed_at = EXCLUDED.completed_at,
+        updated_at = now()
+    `,
+    [
+      workspaceId,
+      documentId,
+      documentFileId,
+      status,
+      text,
+      textSha256,
+      engine,
+      errorCode,
+      errorMessage,
+      completed
+    ]
+  );
+}
+
+async function resetDocumentOcrForFileChange({ db, workspaceId, documentId, documentFileId, status, reason }) {
+  await upsertDocumentOcr({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId,
+    status,
+    text: null,
+    textSha256: null,
+    engine: null,
+    errorCode: reason ? "file_changed" : null,
+    errorMessage: reason,
+    completed: status === "skipped"
+  });
 }
 
 async function updateDocumentFileAvailability({ db, workspaceId, documentId, fileAvailability, fileStatusNote, actorUserId }) {
@@ -1042,7 +1297,7 @@ function documentColumns() {
     f.size_bytes AS file_size_bytes,
     f.status AS file_status,
     o.status AS ocr_status,
-    (o.text IS NOT NULL AND length(o.text) > 0) AS ocr_has_text,
+    (o.text IS NOT NULL AND length(o.text) > 0 AND o.status = 'succeeded' AND o.document_file_id = f.id AND f.status = 'available') AS ocr_has_text,
     o.completed_at AS ocr_completed_at
   `;
 }
@@ -1125,6 +1380,22 @@ function mapDocumentRow(row) {
     deletedAt: formatTimestamp(row.deleted_at),
     createdAt: formatTimestamp(row.created_at),
     updatedAt: formatTimestamp(row.updated_at)
+  };
+}
+
+function mapOcrStatus(row) {
+  const status = row.ocr_status || "not_requested";
+  return {
+    documentId: row.document_id,
+    documentFileId: row.document_file_id || row.active_file_id || null,
+    status,
+    requestedAt: formatTimestamp(row.ocr_started_at || row.ocr_created_at),
+    completedAt: formatTimestamp(row.ocr_completed_at),
+    textAvailable: Boolean(row.ocr_text_available),
+    engine: row.ocr_engine || null,
+    failureReason: status === "failed" || status === "skipped"
+      ? sanitizeOcrError(row.ocr_error_message || row.ocr_error_code)
+      : null
   };
 }
 
@@ -1215,6 +1486,29 @@ function normalizeOptionalText(value) {
 function normalizeNullableText(value) {
   const normalized = String(value ?? "").trim();
   return normalized || null;
+}
+
+function normalizeOcrText(value) {
+  const normalized = String(value ?? "")
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+    .trim();
+  return normalized || null;
+}
+
+function normalizeOcrStatus(value) {
+  const normalized = String(value || "").trim();
+  return ["queued", "processing", "succeeded", "failed", "skipped"].includes(normalized)
+    ? normalized
+    : "queued";
+}
+
+function sanitizeOcrError(value) {
+  const normalized = normalizeNullableText(value);
+  return normalized ? normalized.slice(0, 240) : null;
+}
+
+function sha256Hex(value) {
+  return createHash("sha256").update(String(value)).digest("hex");
 }
 
 function normalizeDate(value) {

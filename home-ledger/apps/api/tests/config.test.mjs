@@ -13,9 +13,85 @@ test("loadConfig returns local dev defaults without requiring a final auth provi
   assert.equal(config.devAuthEnabled, true);
   assert.equal(config.devAuthEmail, "dev@example.test");
   assert.equal(config.fileStorageDriver, "local");
+  assert.equal(config.fileStorage.driver, "local");
+  assert.equal(config.fileStorage.uploadUrlTtlSeconds, 600);
+  assert.equal(config.fileStorage.downloadUrlTtlSeconds, 300);
   assert.equal(config.billingProvider, "none");
   assert.equal(config.ocrMode, "disabled");
   assert.equal(config.analyticsEnabled, false);
+});
+
+test("loadConfig validates and returns S3 storage settings without leaking secrets", () => {
+  const config = loadConfig({
+    DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",
+    FILE_STORAGE_DRIVER: "s3",
+    FILE_STORAGE_BUCKET: "home-ledger-documents",
+    FILE_STORAGE_REGION: "us-east-1",
+    FILE_STORAGE_ENDPOINT: "https://r2.example.test",
+    FILE_STORAGE_ACCESS_KEY_ID: "storage-access-key",
+    FILE_STORAGE_SECRET_ACCESS_KEY: "storage-secret-key",
+    FILE_STORAGE_FORCE_PATH_STYLE: "true",
+    FILE_STORAGE_UPLOAD_URL_TTL_SECONDS: "120",
+    FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS: "60"
+  });
+
+  assert.equal(config.fileStorageDriver, "s3");
+  assert.deepEqual(config.fileStorage, {
+    driver: "s3",
+    bucket: "home-ledger-documents",
+    region: "us-east-1",
+    endpoint: "https://r2.example.test",
+    accessKeyId: "storage-access-key",
+    secretAccessKey: "storage-secret-key",
+    forcePathStyle: true,
+    uploadUrlTtlSeconds: 120,
+    downloadUrlTtlSeconds: 60
+  });
+});
+
+test("loadConfig validates OCR mode", () => {
+  const fakeConfig = loadConfig({
+    DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",
+    OCR_MODE: "fake"
+  });
+  assert.equal(fakeConfig.ocrMode, "fake");
+
+  assert.throws(
+    () => loadConfig({
+      DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",
+      OCR_MODE: "external-provider-secret"
+    }),
+    (error) => {
+      assert.equal(error instanceof ConfigError, true);
+      assert.deepEqual(error.issues.map((issue) => issue.key), ["OCR_MODE"]);
+      assert.doesNotMatch(formatConfigError(error), /external-provider-secret/);
+      return true;
+    }
+  );
+});
+
+test("loadConfig requires S3 storage credentials only when S3 is selected", () => {
+  assert.throws(
+    () => loadConfig({
+      DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",
+      FILE_STORAGE_DRIVER: "s3",
+      FILE_STORAGE_SECRET_ACCESS_KEY: "do-not-print-this-secret",
+      FILE_STORAGE_ENDPOINT: "not a url",
+      FILE_STORAGE_UPLOAD_URL_TTL_SECONDS: "0"
+    }),
+    (error) => {
+      assert.equal(error instanceof ConfigError, true);
+      assert.deepEqual(error.issues.map((issue) => issue.key), [
+        "FILE_STORAGE_UPLOAD_URL_TTL_SECONDS",
+        "FILE_STORAGE_ENDPOINT",
+        "FILE_STORAGE_BUCKET",
+        "FILE_STORAGE_REGION",
+        "FILE_STORAGE_ACCESS_KEY_ID"
+      ]);
+      assert.doesNotMatch(formatConfigError(error), /do-not-print-this-secret/);
+      return true;
+    }
+  );
 });
 
 test("loadConfig refuses production dev auth and reports variable names only", () => {
