@@ -1,16 +1,26 @@
 import type { ReactNode } from "react";
 
-const PRIMARY_NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: "⌂", current: true },
-  { id: "properties", label: "Property", icon: "⌁" },
-  { id: "projects", label: "Projects", icon: "▣" },
-  { id: "expenses", label: "Expenses", icon: "▥" },
-  { id: "documents", label: "Documents", icon: "◇" },
-  { id: "calculators", label: "Calculators", icon: "▤" },
-  { id: "exports", label: "Export & backup", icon: "↓" }
-];
+export type AppView = "dashboard" | "properties";
 
-export function AppShell({ children }: { children: ReactNode }) {
+const PRIMARY_NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },
+  { id: "properties", label: "Property", icon: "⌁", enabled: true },
+  { id: "projects", label: "Projects", icon: "▣", enabled: false },
+  { id: "expenses", label: "Expenses", icon: "▥", enabled: false },
+  { id: "documents", label: "Documents", icon: "◇", enabled: false },
+  { id: "calculators", label: "Calculators", icon: "▤", enabled: false },
+  { id: "exports", label: "Export & backup", icon: "↓", enabled: false }
+] as const;
+
+export function AppShell({
+  activeView = "dashboard",
+  children,
+  onNavigate
+}: {
+  activeView?: AppView;
+  children: ReactNode;
+  onNavigate?: (view: AppView) => void;
+}) {
   return (
     <div className="app-shell">
       <aside className="app-sidebar" aria-label="Primary navigation">
@@ -26,11 +36,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="app-tabs" aria-label="App sections">
           {PRIMARY_NAV_ITEMS.map((item) => (
             <button
-              aria-current={item.current ? "page" : undefined}
-              aria-disabled={item.current ? undefined : "true"}
-              className={item.current ? "is-active" : ""}
+              aria-current={activeView === item.id ? "page" : undefined}
+              aria-disabled={item.enabled ? undefined : "true"}
+              className={activeView === item.id ? "is-active" : ""}
               key={item.id}
-              title={item.current ? item.label : `${item.label} will be added in a later ticket`}
+              onClick={() => {
+                if (item.enabled) onNavigate?.(item.id as AppView);
+              }}
+              title={item.enabled ? item.label : `${item.label} will be added in a later ticket`}
               type="button"
             >
               <span aria-hidden="true">{item.icon}</span>

@@ -130,6 +130,31 @@ export interface DashboardResponse {
   follow_ups: FollowUpBucket[];
 }
 
+export interface PropertyRecord {
+  id: string;
+  name: string;
+  display_address?: string | null;
+  purchase_date?: string | null;
+  purchase_price_cents?: number | null;
+  currency_code?: string | null;
+  notes?: string | null;
+  is_primary?: boolean;
+  archived_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface PropertyInput {
+  name: string;
+  display_address?: string | null;
+  purchase_date?: string | null;
+  purchase_price_cents?: number | null;
+  currency_code?: string;
+  notes?: string | null;
+  is_primary?: boolean;
+}
+
 export interface ApiEnvelope<T> {
   data?: T;
   error?: {

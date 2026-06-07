@@ -183,6 +183,43 @@ describe("Home Ledger API client", () => {
     expect(viewModel.expenseBreakdown[1].amount).toBe("$0.89");
     expect(formatCents(-125)).toBe("-$1.25");
   });
+
+  it("uses snake_case property API requests", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        return jsonResponse({
+          data: String(url).includes("/properties/property-1")
+            ? createPropertyPayload({ id: "property-1", name: "Office updated" })
+            : [createPropertyPayload()]
+        });
+      }) as typeof fetch
+    });
+
+    await client.listProperties("workspace/one");
+    await client.createProperty("workspace/one", {
+      name: "Office",
+      display_address: "1124 Huminger Drive",
+      purchase_date: "2024-01-01",
+      purchase_price_cents: 20000000,
+      currency_code: "USD",
+      notes: null,
+      is_primary: true
+    });
+    await client.updateProperty("workspace/one", "property-1", { name: "Office updated" });
+    await client.archiveProperty("workspace/one", "property-1");
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/properties"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/properties"],
+      ["PATCH", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/properties/property-1"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/properties/property-1/archive"]
+    ]);
+    expect(calls[1].options.body).toContain("purchase_price_cents");
+    expect(calls[1].options.body).not.toContain("purchasePrice");
+  });
 });
 
 function jsonResponse(payload: unknown, { status = 200 } = {}) {
@@ -218,6 +255,23 @@ function createDashboardPayload(overrides: Partial<DashboardResponse> = {}): Das
     vendors: { count: 1 },
     recent_activity: [],
     follow_ups: [],
+    ...overrides
+  };
+}
+
+function createPropertyPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "property-1",
+    name: "Office",
+    display_address: "1124 Huminger Drive",
+    purchase_date: "2024-01-01",
+    purchase_price_cents: 20000000,
+    currency_code: "USD",
+    notes: null,
+    is_primary: true,
+    archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
     ...overrides
   };
 }

@@ -3,6 +3,8 @@ import type {
   DashboardResponse,
   FollowUpItem,
   FollowUpSummaryResponse,
+  PropertyInput,
+  PropertyRecord,
   SessionResponse
 } from "./types";
 
@@ -41,6 +43,10 @@ export interface HomeLedgerApiClient {
   getDashboard(workspaceId: string): Promise<DashboardResponse>;
   getFollowUps(workspaceId: string): Promise<FollowUpItem[]>;
   getFollowUpSummary(workspaceId: string): Promise<FollowUpSummaryResponse>;
+  listProperties(workspaceId: string): Promise<PropertyRecord[]>;
+  createProperty(workspaceId: string, input: PropertyInput): Promise<PropertyRecord>;
+  updateProperty(workspaceId: string, propertyId: string, input: Partial<PropertyInput>): Promise<PropertyRecord>;
+  archiveProperty(workspaceId: string, propertyId: string): Promise<PropertyRecord>;
 }
 
 export type InitialDashboardState =
@@ -102,6 +108,32 @@ export function createHomeLedgerApiClient({
     },
     getFollowUpSummary(workspaceId: string) {
       return request<FollowUpSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups/summary`);
+    },
+    listProperties(workspaceId: string) {
+      return request<PropertyRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties`);
+    },
+    createProperty(workspaceId: string, input: PropertyInput) {
+      return request<PropertyRecord>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    },
+    updateProperty(workspaceId: string, propertyId: string, input: Partial<PropertyInput>) {
+      return request<PropertyRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties/${encodeURIComponent(requireId(propertyId, "propertyId"))}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    archiveProperty(workspaceId: string, propertyId: string) {
+      return request<PropertyRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties/${encodeURIComponent(requireId(propertyId, "propertyId"))}/archive`,
+        { method: "POST" }
+      );
     }
   });
 }
