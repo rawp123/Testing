@@ -510,7 +510,7 @@ test("expense API uses snake_case resource fields and hides internal metadata", 
   });
   assert.equal(deleteResponse.statusCode, 200);
   assertExpenseResponseShape(deleteResponse.json().data);
-  assert.equal(deleteResponse.json().data.open_item_count, null);
+  assert.equal(deleteResponse.json().data.open_item_count, 0);
   assert.notEqual(deleteResponse.json().data.deleted_at, null);
 
   const filterResponse = await app.inject({

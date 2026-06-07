@@ -41,6 +41,14 @@ import {
   setCsvResponseHeaders,
   setJsonExportHeaders
 } from "./exports.js";
+import {
+  addOpenItemCounts,
+  getFollowUpSummary,
+  listFollowUps,
+  reopenFollowUp,
+  resolveFollowUp,
+  serializeFollowUp
+} from "./follow-ups.js";
 import { createFileStorageAdapter } from "./file-storage.js";
 import { createOcrProvider } from "./ocr-provider.js";
 import {
@@ -234,9 +242,89 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         db,
         workspaceId: request.params.workspaceId
       });
+      const followUpSummary = await getFollowUpSummary({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+      summary.projects.open_follow_up_count = followUpSummary.open_count;
+      summary.followUps = followUpSummary.by_type;
 
       return {
         data: serializeDashboardSummary(summary)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/follow-ups", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const followUps = await listFollowUps({
+        db,
+        workspaceId: request.params.workspaceId,
+        status: request.query?.status || "open"
+      });
+
+      return {
+        data: followUps.map(serializeFollowUp)
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/follow-ups/summary", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      return {
+        data: await getFollowUpSummary({
+          db,
+          workspaceId: request.params.workspaceId
+        })
+      };
+    });
+
+    api.post("/workspaces/:workspaceId/follow-ups/:followUpId/resolve", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceRole({
+        request,
+        db,
+        workspaceId: request.params.workspaceId,
+        allowedRoles: ["owner", "editor"]
+      });
+
+      const followUp = await resolveFollowUp({
+        db,
+        workspaceId: request.params.workspaceId,
+        followUpId: request.params.followUpId,
+        input: request.body,
+        actorUserId: request.auth.userId
+      });
+
+      return {
+        data: serializeFollowUp(followUp)
+      };
+    });
+
+    api.post("/workspaces/:workspaceId/follow-ups/:followUpId/reopen", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceRole({
+        request,
+        db,
+        workspaceId: request.params.workspaceId,
+        allowedRoles: ["owner", "editor"]
+      });
+
+      const followUp = await reopenFollowUp({
+        db,
+        workspaceId: request.params.workspaceId,
+        followUpId: request.params.followUpId,
+        input: request.body
+      });
+
+      return {
+        data: serializeFollowUp(followUp)
       };
     });
 
@@ -590,9 +678,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         pagination: request.query || {},
         sort: request.query?.sort
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: result.data
+      });
 
       return {
-        data: result.data.map(serializeProject),
+        data: counted.projects.map(serializeProject),
         meta: result.meta
       };
     });
@@ -611,9 +704,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         input: request.body,
         actorUserId: request.auth.userId
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: [project]
+      });
 
       return reply.code(201).send({
-        data: serializeProject(project)
+        data: serializeProject(counted.projects[0])
       });
     });
 
@@ -651,9 +749,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!project) {
         throw apiError(404, "not_found", "Project not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: [project]
+      });
 
       return {
-        data: serializeProject(project)
+        data: serializeProject(counted.projects[0])
       };
     });
 
@@ -676,9 +779,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!project) {
         throw apiError(404, "not_found", "Project not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: [project]
+      });
 
       return {
-        data: serializeProject(project)
+        data: serializeProject(counted.projects[0])
       };
     });
 
@@ -700,9 +808,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!project) {
         throw apiError(404, "not_found", "Project not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: [project]
+      });
 
       return {
-        data: serializeProject(project)
+        data: serializeProject(counted.projects[0])
       };
     });
 
@@ -724,9 +837,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!project) {
         throw apiError(404, "not_found", "Project not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        projects: [project]
+      });
 
       return {
-        data: serializeProject(project)
+        data: serializeProject(counted.projects[0])
       };
     });
 
@@ -744,9 +862,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         pagination: request.query || {},
         sort: request.query?.sort
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        expenses: result.data
+      });
 
       return {
-        data: result.data.map(serializeExpense),
+        data: counted.expenses.map(serializeExpense),
         meta: result.meta
       };
     });
@@ -765,9 +888,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         input: request.body,
         actorUserId: request.auth.userId
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        expenses: [expense]
+      });
 
       return reply.code(201).send({
-        data: serializeExpense(expense)
+        data: serializeExpense(counted.expenses[0])
       });
     });
 
@@ -805,9 +933,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!expense) {
         throw apiError(404, "not_found", "Expense not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        expenses: [expense]
+      });
 
       return {
-        data: serializeExpense(expense)
+        data: serializeExpense(counted.expenses[0])
       };
     });
 
@@ -830,9 +963,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!expense) {
         throw apiError(404, "not_found", "Expense not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        expenses: [expense]
+      });
 
       return {
-        data: serializeExpense(expense)
+        data: serializeExpense(counted.expenses[0])
       };
     });
 
@@ -854,9 +992,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!expense) {
         throw apiError(404, "not_found", "Expense not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        expenses: [expense]
+      });
 
       return {
-        data: serializeExpense(expense)
+        data: serializeExpense(counted.expenses[0])
       };
     });
 

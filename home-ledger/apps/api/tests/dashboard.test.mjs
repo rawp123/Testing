@@ -168,7 +168,7 @@ test("dashboard aggregates active records and counts archived or deleted records
       { status: "completed", count: 1 },
       { status: "in_progress", count: 1 }
     ],
-    open_follow_up_count: 3
+    open_follow_up_count: 9
   });
   assert.deepEqual(data.expenses, {
     count: 3,
@@ -196,8 +196,10 @@ test("dashboard aggregates active records and counts archived or deleted records
   });
   assert.deepEqual(data.vendors, { count: 2 });
   assert.deepEqual(data.follow_ups, [
-    { type: "expense_support", label: "Expense support", count: 1 },
-    { type: "missing_file", label: "Documents missing files", count: 2 }
+    { type: "document_items", label: "Document items", count: 2 },
+    { type: "expense_items", label: "Expense items", count: 2 },
+    { type: "project_items", label: "Project items", count: 3 },
+    { type: "property_items", label: "Property items", count: 2 }
   ]);
 
   const serialized = JSON.stringify(data);

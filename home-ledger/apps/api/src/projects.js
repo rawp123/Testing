@@ -302,7 +302,7 @@ export function serializeProject(project) {
     notes: project.notes,
     completeness_override_note: project.completenessOverrideNote,
     completeness_overridden_at: project.completenessOverriddenAt,
-    open_item_count: null,
+    open_item_count: Number(project.openItemCount || 0),
     archived_at: project.archivedAt,
     created_at: project.createdAt,
     updated_at: project.updatedAt

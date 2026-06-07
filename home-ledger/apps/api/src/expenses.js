@@ -285,7 +285,7 @@ export function serializeExpense(expense) {
     documentation_status: expense.documentationStatus,
     notes: expense.notes,
     document_count: expense.documentCount,
-    open_item_count: null,
+    open_item_count: Number(expense.openItemCount || 0),
     deleted_at: expense.deletedAt,
     created_at: expense.createdAt,
     updated_at: expense.updatedAt

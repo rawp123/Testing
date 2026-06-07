@@ -489,7 +489,7 @@ test("project API uses snake_case resource fields and hides internal metadata", 
   });
   assert.equal(archiveResponse.statusCode, 200);
   assertProjectResponseShape(archiveResponse.json().data);
-  assert.equal(archiveResponse.json().data.open_item_count, null);
+  assert.equal(archiveResponse.json().data.open_item_count, 0);
 
   const filterResponse = await app.inject({
     method: "GET",

@@ -244,8 +244,10 @@ test("DB-backed Dashboard API summarizes workspace records without leaking file 
     assert.equal(data.documents.ocr_pending_count, 1);
     assert.equal(data.vendors.count, 1);
     assert.deepEqual(data.follow_ups, [
-      { type: "expense_support", label: "Expense support", count: 1 },
-      { type: "missing_file", label: "Documents missing files", count: 1 }
+      { type: "document_items", label: "Document items", count: 1 },
+      { type: "expense_items", label: "Expense items", count: 1 },
+      { type: "project_items", label: "Project items", count: 3 },
+      { type: "property_items", label: "Property items", count: 2 }
     ]);
     assert.equal(JSON.stringify(data).includes("Other workspace expense"), false);
     assert.equal(JSON.stringify(data).includes("Deleted dashboard expense"), false);

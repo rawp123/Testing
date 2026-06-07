@@ -66,6 +66,7 @@ export function createFakeWorkspaceDb(seed = {}) {
   const documents = new Map();
   const documentFiles = new Map();
   const documentOcr = new Map();
+  const followUpOverrides = new Map();
   const queries = [];
   let userCounter = 1;
   let workspaceCounter = 100;
@@ -77,6 +78,7 @@ export function createFakeWorkspaceDb(seed = {}) {
   let documentCounter = 1200;
   let documentFileCounter = 1400;
   let documentOcrCounter = 1600;
+  let followUpOverrideCounter = 1800;
 
   for (const user of seed.users || []) {
     users.set(user.id, {
@@ -264,6 +266,27 @@ export function createFakeWorkspaceDb(seed = {}) {
     });
   }
 
+  for (const override of seed.followUpOverrides || []) {
+    followUpOverrides.set(override.id, {
+      workspace_id: WORKSPACE_IDS.owner,
+      follow_up_type: "expense_missing_document_support",
+      source_follow_up_id: null,
+      property_id: null,
+      project_id: null,
+      expense_id: null,
+      document_id: null,
+      label_snapshot: null,
+      detail_snapshot: null,
+      note: null,
+      completed_by_user_id: null,
+      completed_at: "2026-06-06T13:00:00.000Z",
+      invalidated_at: null,
+      created_at: "2026-06-06T13:00:00.000Z",
+      updated_at: "2026-06-06T13:00:00.000Z",
+      ...override
+    });
+  }
+
   const db = {
     queries,
     users,
@@ -276,6 +299,7 @@ export function createFakeWorkspaceDb(seed = {}) {
     documents,
     documentFiles,
     documentOcr,
+    followUpOverrides,
     async query(sql, params = []) {
       queries.push({ sql, params });
       const normalizedSql = normalizeSql(sql);
@@ -348,6 +372,81 @@ export function createFakeWorkspaceDb(seed = {}) {
 
       if (/-- getDashboardSummary/.test(sql)) {
         return { rows: [dashboardSummaryRow(params[0])] };
+      }
+
+      if (/-- listFollowUpProperties/.test(sql)) {
+        return { rows: followUpPropertyRows(params[0]) };
+      }
+
+      if (/-- listFollowUpProjects/.test(sql)) {
+        return { rows: followUpProjectRows(params[0]) };
+      }
+
+      if (/-- listFollowUpExpenses/.test(sql)) {
+        return { rows: followUpExpenseRows(params[0]) };
+      }
+
+      if (/-- listFollowUpDocuments/.test(sql)) {
+        return { rows: followUpDocumentRows(params[0]) };
+      }
+
+      if (/-- listActiveFollowUpOverrides/.test(sql)) {
+        return { rows: activeFollowUpOverrideRows(params[0]) };
+      }
+
+      if (/-- findActiveFollowUpOverrideBySource/.test(sql)) {
+        return {
+          rows: activeFollowUpOverrideRows(params[0]).filter((override) => override.source_follow_up_id === params[1]).slice(0, 1)
+        };
+      }
+
+      if (/-- createFollowUpOverride/.test(sql)) {
+        const [
+          workspaceId,
+          followUpType,
+          sourceFollowUpId,
+          propertyId,
+          projectId,
+          expenseId,
+          documentId,
+          labelSnapshot,
+          detailSnapshot,
+          note,
+          actorUserId
+        ] = params;
+        const override = {
+          id: makeUuid(followUpOverrideCounter++),
+          workspace_id: workspaceId,
+          follow_up_type: followUpType,
+          source_follow_up_id: sourceFollowUpId,
+          property_id: propertyId,
+          project_id: projectId,
+          expense_id: expenseId,
+          document_id: documentId,
+          label_snapshot: labelSnapshot,
+          detail_snapshot: detailSnapshot,
+          note,
+          completed_by_user_id: actorUserId,
+          completed_at: "2026-06-06T13:00:00.000Z",
+          invalidated_at: null,
+          created_at: "2026-06-06T13:00:00.000Z",
+          updated_at: "2026-06-06T13:00:00.000Z"
+        };
+        followUpOverrides.set(override.id, override);
+        return { rows: [override] };
+      }
+
+      if (/-- reopenFollowUpOverride/.test(sql)) {
+        const [workspaceId, sourceFollowUpId] = params;
+        const override = activeFollowUpOverrideRows(workspaceId)
+          .find((candidate) => candidate.source_follow_up_id === sourceFollowUpId);
+        if (!override) {
+          return { rows: [] };
+        }
+        const storedOverride = followUpOverrides.get(override.id);
+        storedOverride.invalidated_at = "2026-06-06T14:00:00.000Z";
+        storedOverride.updated_at = "2026-06-06T14:00:00.000Z";
+        return { rows: [{ id: storedOverride.id }] };
       }
 
       if (/-- listExportProperties/.test(sql)) {
@@ -1892,6 +1991,72 @@ export function createFakeWorkspaceDb(seed = {}) {
       ocr_completed_at: ocr?.completed_at || null,
       total_count: totalCount
     };
+  }
+
+  function followUpPropertyRows(workspaceId) {
+    return [...properties.values()]
+      .filter((property) => property.workspace_id === workspaceId && property.deleted_at === null && property.archived_at === null)
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  }
+
+  function followUpProjectRows(workspaceId) {
+    return [...projects.values()]
+      .filter((project) => project.workspace_id === workspaceId && project.deleted_at === null && project.archived_at === null)
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id))
+      .map((project) => {
+        const property = properties.get(project.property_id);
+        const vendor = project.vendor_id ? vendors.get(project.vendor_id) : null;
+        return {
+          ...project,
+          property_name: property?.name || null,
+          vendor_name: vendor?.name || null
+        };
+      });
+  }
+
+  function followUpExpenseRows(workspaceId) {
+    return [...expenses.values()]
+      .filter((expense) => expense.workspace_id === workspaceId && expense.deleted_at === null)
+      .sort((left, right) => String(right.created_at).localeCompare(String(left.created_at)) || left.id.localeCompare(right.id))
+      .map((expense) => {
+        const property = properties.get(expense.property_id);
+        const project = expense.project_id ? projects.get(expense.project_id) : null;
+        const vendor = expense.vendor_id ? vendors.get(expense.vendor_id) : null;
+        return {
+          ...expense,
+          property_name: property?.name || null,
+          project_name: project?.name || null,
+          vendor_name: vendor?.name || null
+        };
+      });
+  }
+
+  function followUpDocumentRows(workspaceId) {
+    return [...documents.values()]
+      .filter((document) => document.workspace_id === workspaceId && document.deleted_at === null)
+      .sort((left, right) => left.display_name.localeCompare(right.display_name) || left.id.localeCompare(right.id))
+      .map((document) => {
+        const property = properties.get(document.property_id);
+        const project = document.project_id ? projects.get(document.project_id) : null;
+        const expense = document.expense_id ? expenses.get(document.expense_id) : null;
+        const file = activeDocumentFiles(workspaceId, document.id)[0] || null;
+        const ocr = documentOcr.get(document.id);
+        return {
+          ...document,
+          property_name: property?.name || null,
+          project_name: project?.name || null,
+          expense_description: expense?.description || null,
+          file_id: file?.id || null,
+          file_status: file?.status || null,
+          ocr_status: ocr?.status || "not_requested"
+        };
+      });
+  }
+
+  function activeFollowUpOverrideRows(workspaceId) {
+    return [...followUpOverrides.values()]
+      .filter((override) => override.workspace_id === workspaceId && override.invalidated_at === null)
+      .sort((left, right) => String(right.completed_at).localeCompare(String(left.completed_at)) || left.id.localeCompare(right.id));
   }
 
   function exportPropertyRows(workspaceId) {
