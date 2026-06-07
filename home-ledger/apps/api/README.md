@@ -1,8 +1,8 @@
 # Home Ledger API Foundation
 
-This package currently contains the SaaS API foundation: database migration tooling, a minimal Fastify runtime, provider-neutral dev/test auth resolution, workspace authorization helpers, session/workspace endpoints, and the initial Property, Vendor, Project, Expense, Document, and Document File APIs.
+This package currently contains the SaaS API foundation: database migration tooling, a minimal Fastify runtime, provider-neutral dev/test auth resolution, workspace authorization helpers, session/workspace endpoints, the initial Property, Vendor, Project, Expense, Document, Document File, Document OCR, and Dashboard Summary APIs.
 
-It does not define API-proxied binary upload/download streaming, billing, OCR processing, import, export, invitation, household sharing, reviewer, or support/admin routes yet.
+It does not define API-proxied binary upload/download streaming, billing, production OCR provider integration, import, export, invitation, household sharing, reviewer, or support/admin routes yet.
 
 ## API Runtime
 
@@ -28,6 +28,7 @@ GET /api/v1/workspaces
 POST /api/v1/workspaces
 GET /api/v1/workspaces/:workspaceId
 PATCH /api/v1/workspaces/:workspaceId
+GET /api/v1/workspaces/:workspaceId/dashboard
 GET /api/v1/workspaces/:workspaceId/properties
 POST /api/v1/workspaces/:workspaceId/properties
 GET /api/v1/workspaces/:workspaceId/properties/:propertyId
@@ -110,6 +111,38 @@ Error behavior:
 Client-provided user ids, roles, memberships, workspace ids, entitlements, and object keys are ignored for authorization.
 
 Workspace archive/delete endpoints are deferred until retention and deletion policy is resolved.
+
+## Dashboard Summary API
+
+`GET /api/v1/workspaces/:workspaceId/dashboard` returns workspace-scoped aggregate data for the dashboard landing page.
+
+Role behavior:
+
+- `owner`, `editor`, and `viewer` can read dashboard summaries.
+- Non-members receive `404 not_found`.
+
+Dashboard rules:
+
+- Every count is scoped to the requested workspace.
+- Soft-deleted records are excluded.
+- Archived properties and projects are included in top-level `count` and separated into `active_count` and `archived_count`.
+- Vendor `count` follows default API semantics and counts active, non-archived vendors.
+- Expense totals use integer cents only.
+- Document file counts are derived from active available file rows, not client-supplied filenames or object keys.
+- OCR text counts are derived from `document_ocr`, but raw OCR text is never returned by dashboard responses.
+- Storage keys, bucket names, signed URLs, raw OCR text, property addresses, vendor contact details, legacy metadata, and internal audit fields are not returned.
+- `recent_activity` is derived from safe core record metadata for active properties, projects, expenses, and documents until the dedicated activity event service is implemented.
+- `follow_ups` is a compact aggregate summary from existing record state. Full generated follow-up item APIs and override resolution remain separate future work.
+
+Response areas:
+
+- `properties`: total, active, and archived counts.
+- `projects`: total, active, archived, status groups, and aggregate open follow-up count.
+- `expenses`: count, total amount, classification groups, and review-oriented totals.
+- `documents`: count, file availability counts, OCR status counts, and document type groups.
+- `vendors`: active vendor count.
+- `recent_activity`: safe, compact record activity rows.
+- `follow_ups`: safe aggregate follow-up buckets.
 
 ## API Field Casing
 

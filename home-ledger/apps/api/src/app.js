@@ -21,6 +21,7 @@ import {
   serializeDocumentOcrText,
   updateDocument
 } from "./documents.js";
+import { getDashboardSummary, serializeDashboardSummary } from "./dashboard.js";
 import {
   createExpense,
   deleteExpense,
@@ -209,6 +210,23 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
           ...workspace,
           role: membership.role
         })
+      };
+    });
+
+    api.get("/workspaces/:workspaceId/dashboard", { preHandler: app.authenticate }, async (request) => {
+      await requireWorkspaceMembership({
+        request,
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      const summary = await getDashboardSummary({
+        db,
+        workspaceId: request.params.workspaceId
+      });
+
+      return {
+        data: serializeDashboardSummary(summary)
       };
     });
 

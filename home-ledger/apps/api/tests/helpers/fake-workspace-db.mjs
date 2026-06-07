@@ -346,6 +346,10 @@ export function createFakeWorkspaceDb(seed = {}) {
         return { rows: [workspace] };
       }
 
+      if (/-- getDashboardSummary/.test(sql)) {
+        return { rows: [dashboardSummaryRow(params[0])] };
+      }
+
       if (/-- listProperties/.test(sql)) {
         return listPropertiesRows(sql, params);
       }
@@ -1868,6 +1872,177 @@ export function createFakeWorkspaceDb(seed = {}) {
       ocr_completed_at: ocr?.completed_at || null,
       total_count: totalCount
     };
+  }
+
+  function dashboardSummaryRow(workspaceId) {
+    const workspaceProperties = [...properties.values()]
+      .filter((property) => property.workspace_id === workspaceId && property.deleted_at === null);
+    const openProperties = workspaceProperties.filter((property) => property.archived_at === null);
+    const workspaceProjects = [...projects.values()]
+      .filter((project) => project.workspace_id === workspaceId && project.deleted_at === null);
+    const openProjects = workspaceProjects.filter((project) => project.archived_at === null);
+    const workspaceVendors = [...vendors.values()]
+      .filter((vendor) => vendor.workspace_id === workspaceId && vendor.deleted_at === null);
+    const openVendors = workspaceVendors.filter((vendor) => vendor.archived_at === null);
+    const workspaceExpenses = [...expenses.values()]
+      .filter((expense) => expense.workspace_id === workspaceId && expense.deleted_at === null);
+    const workspaceDocuments = [...documents.values()]
+      .filter((document) => document.workspace_id === workspaceId && document.deleted_at === null);
+
+    const documentFileStates = workspaceDocuments.map((document) => {
+      const file = activeDocumentFiles(workspaceId, document.id).find((candidate) => candidate.status === "available") || null;
+      const ocr = documentOcr.get(document.id);
+      return {
+        document,
+        hasAvailableFile: Boolean(file),
+        hasOcrText: Boolean(
+          file &&
+          ocr?.text &&
+          ocr.status === "succeeded" &&
+          ocr.document_file_id === file.id
+        ),
+        hasPendingOcr: ["queued", "processing"].includes(ocr?.status)
+      };
+    });
+
+    const expenseSupportCount = workspaceExpenses
+      .filter((expense) => ["no_document_yet", "needs_follow_up"].includes(expense.documentation_status)).length;
+    const missingFileCount = documentFileStates.filter((state) => !state.hasAvailableFile).length;
+    const projectReviewCount = openProjects
+      .filter((project) => project.status === "blocked" || (project.status === "completed" && !project.completion_date)).length;
+
+    return {
+      property_count: workspaceProperties.length,
+      active_property_count: openProperties.length,
+      archived_property_count: workspaceProperties.length - openProperties.length,
+      project_count: workspaceProjects.length,
+      active_project_count: openProjects.length,
+      archived_project_count: workspaceProjects.length - openProjects.length,
+      expense_count: workspaceExpenses.length,
+      total_amount_cents: sumBy(workspaceExpenses, "amount_cents"),
+      review_later_count: workspaceExpenses.filter((expense) => expense.record_treatment === "review_later").length,
+      possible_improvement_total_cents: sumBy(
+        workspaceExpenses.filter((expense) => expense.record_treatment === "possible_improvement"),
+        "amount_cents"
+      ),
+      repair_upkeep_total_cents: sumBy(
+        workspaceExpenses.filter((expense) => expense.record_treatment === "repair_upkeep"),
+        "amount_cents"
+      ),
+      document_count: workspaceDocuments.length,
+      with_file_count: documentFileStates.filter((state) => state.hasAvailableFile).length,
+      missing_file_count: missingFileCount,
+      ocr_text_available_count: documentFileStates.filter((state) => state.hasOcrText).length,
+      ocr_pending_count: documentFileStates.filter((state) => state.hasPendingOcr).length,
+      vendor_count: openVendors.length,
+      projects_by_status: groupCount(workspaceProjects, "status").map(([status, count]) => ({ status, count })),
+      expenses_by_classification: groupCount(workspaceExpenses, "record_treatment").map(([recordTreatment, count]) => ({
+        record_treatment: recordTreatment,
+        count,
+        total_amount_cents: sumBy(
+          workspaceExpenses.filter((expense) => expense.record_treatment === recordTreatment),
+          "amount_cents"
+        )
+      })),
+      documents_by_type: groupCount(workspaceDocuments, "document_type").map(([documentType, count]) => ({
+        document_type: documentType,
+        count
+      })),
+      recent_activity: recentActivityRows({
+        properties: openProperties,
+        projects: openProjects,
+        expenses: workspaceExpenses,
+        documents: workspaceDocuments
+      }),
+      follow_ups: [
+        expenseSupportCount > 0 ? { type: "expense_support", label: "Expense support", count: expenseSupportCount } : null,
+        missingFileCount > 0 ? { type: "missing_file", label: "Documents missing files", count: missingFileCount } : null,
+        projectReviewCount > 0 ? { type: "needs_review", label: "Projects needing review", count: projectReviewCount } : null
+      ].filter(Boolean)
+    };
+  }
+
+  function recentActivityRows({ properties: activityProperties, projects: activityProjects, expenses: activityExpenses, documents: activityDocuments }) {
+    return [
+      ...activityProperties.map((property) => ({
+        activity_type: "property",
+        record_type: "property",
+        record_id: property.id,
+        record_name: property.name,
+        summary: property.name,
+        occurred_at: property.created_at,
+        property_id: property.id,
+        property_name: property.name
+      })),
+      ...activityProjects.map((project) => {
+        const property = properties.get(project.property_id);
+        return {
+          activity_type: "project",
+          record_type: "project",
+          record_id: project.id,
+          record_name: project.name,
+          summary: project.name,
+          occurred_at: project.created_at,
+          property_id: project.property_id,
+          property_name: property?.name || null,
+          project_id: project.id,
+          project_name: project.name,
+          status: project.status
+        };
+      }),
+      ...activityExpenses.map((expense) => {
+        const property = properties.get(expense.property_id);
+        const project = expense.project_id ? projects.get(expense.project_id) : null;
+        return {
+          activity_type: "expense",
+          record_type: "expense",
+          record_id: expense.id,
+          record_name: expense.description,
+          summary: expense.description,
+          occurred_at: expense.created_at,
+          property_id: expense.property_id,
+          property_name: property?.name || null,
+          project_id: expense.project_id,
+          project_name: project?.name || null,
+          expense_id: expense.id,
+          amount_cents: expense.amount_cents,
+          record_treatment: expense.record_treatment
+        };
+      }),
+      ...activityDocuments.map((document) => {
+        const property = properties.get(document.property_id);
+        const project = document.project_id ? projects.get(document.project_id) : null;
+        return {
+          activity_type: "document",
+          record_type: "document",
+          record_id: document.id,
+          record_name: document.display_name,
+          summary: document.display_name,
+          occurred_at: document.created_at,
+          property_id: document.property_id,
+          property_name: property?.name || null,
+          project_id: document.project_id,
+          project_name: project?.name || null,
+          document_id: document.id,
+          document_type: document.document_type,
+          file_availability: document.file_availability
+        };
+      })
+    ]
+      .sort((left, right) => String(right.occurred_at).localeCompare(String(left.occurred_at)) || left.record_id.localeCompare(right.record_id))
+      .slice(0, 10);
+  }
+
+  function groupCount(rows, field) {
+    const counts = new Map();
+    for (const row of rows) {
+      counts.set(row[field], (counts.get(row[field]) || 0) + 1);
+    }
+    return [...counts.entries()].sort(([left], [right]) => String(left).localeCompare(String(right)));
+  }
+
+  function sumBy(rows, field) {
+    return rows.reduce((total, row) => total + Number(row[field] || 0), 0);
   }
 
   function valueForSqlMarker(sql, params, columnName) {
