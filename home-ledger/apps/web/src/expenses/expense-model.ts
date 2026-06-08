@@ -101,6 +101,14 @@ export function formValuesToExpenseInput(values: ExpenseFormValues): ExpenseInpu
   };
 }
 
+export function applyExpenseVendorSelection(values: ExpenseFormValues, vendorId: string): ExpenseFormValues {
+  return {
+    ...values,
+    vendorId,
+    vendorNameRaw: vendorId ? "" : values.vendorNameRaw
+  };
+}
+
 export function propertyOptionsFromRecords(properties: PropertyRecord[]): SelectOption[] {
   return properties
     .map((property) => ({

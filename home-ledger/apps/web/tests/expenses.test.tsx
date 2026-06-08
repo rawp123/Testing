@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ExpenseRecord, ProjectRecord, PropertyRecord, VendorRecord } from "../src/api/types";
 import { ExpensesView } from "../src/expenses/ExpensesPage";
 import {
+  applyExpenseVendorSelection,
   centsToDollarInput,
   dollarsToCents,
   expenseToFormValues,
@@ -10,7 +11,7 @@ import {
   propertyOptionsFromRecords,
   toExpenseRows
 } from "../src/expenses/expense-model";
-import { vendorOptionsFromRecords } from "../src/vendors/vendor-model";
+import { vendorOptionsFromRecords, vendorToFormValues } from "../src/vendors/vendor-model";
 
 describe("Expenses screen", () => {
   it("maps expense records for compact grid display", () => {
@@ -129,6 +130,7 @@ describe("Expenses screen", () => {
     expect(html).toContain("Property");
     expect(html).toContain("Project");
     expect(html).toContain("Vendor/payee");
+    expect(html).toContain("Add vendor");
     expect(html).toContain("Payee name if unassigned");
     expect(html).toContain("Cedarline Carpentry");
     expect(html).toContain("Review type");
@@ -186,6 +188,79 @@ describe("Expenses screen", () => {
     })).toMatchObject({
       vendor_id: null,
       vendor_name_raw: "Cedarline Carpentry"
+    });
+  });
+
+  it("renders inline vendor creation inside the expense form without hiding the expense draft", () => {
+    const html = renderToStaticMarkup(
+      <ExpensesView
+        expenses={[createExpense()]}
+        formError="Expense draft error"
+        formValues={{
+          ...expenseToFormValues(createExpense()),
+          description: "Draft deck boards",
+          vendorNameRaw: "New Deck Vendor",
+          notes: "Keep expense notes"
+        }}
+        inlineVendorError="Vendor could not be saved."
+        inlineVendorOpen
+        inlineVendorValues={{
+          ...vendorToFormValues(),
+          name: "New Deck Vendor",
+          phone: "555-0188"
+        }}
+        modalMode="create"
+        onArchiveExpense={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseInlineVendor={() => undefined}
+        onCloseModal={() => undefined}
+        onEditExpense={() => undefined}
+        onFormChange={() => undefined}
+        onInlineVendorChange={() => undefined}
+        onNewExpense={() => undefined}
+        onOpenInlineVendor={() => undefined}
+        onSaveExpense={() => undefined}
+        onSaveInlineVendor={() => undefined}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Add expense");
+    expect(html).toContain("Draft deck boards");
+    expect(html).toContain("Keep expense notes");
+    expect(html).toContain("Add vendor to this record");
+    expect(html).toContain("Save a vendor and select it for this record.");
+    expect(html).toContain("Similar names are allowed.");
+    expect(html).toContain("New Deck Vendor");
+    expect(html).toContain("555-0188");
+    expect(html).toContain("Vendor could not be saved.");
+    expect(html).not.toContain("unique vendor");
+    expect(html).not.toContain("duplicate vendor");
+  });
+
+  it("selects a created expense vendor and clears only the raw payee fallback", () => {
+    const draft = {
+      ...expenseToFormValues(),
+      propertyId: "property-1",
+      description: "Draft expense",
+      amount: "55.00",
+      category: "repair_upkeep",
+      vendorNameRaw: "Raw payee",
+      notes: "Keep this note"
+    };
+
+    expect(applyExpenseVendorSelection(draft, "vendor-new")).toEqual({
+      ...draft,
+      vendorId: "vendor-new",
+      vendorNameRaw: ""
+    });
+    expect(applyExpenseVendorSelection(draft, "")).toEqual({
+      ...draft,
+      vendorId: "",
+      vendorNameRaw: "Raw payee"
     });
   });
 });

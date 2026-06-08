@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { ProjectRecord, VendorRecord } from "../src/api/types";
 import { ProjectsView } from "../src/projects/ProjectsPage";
 import {
+  applyProjectVendorSelection,
   formValuesToProjectInput,
   projectToFormValues,
   propertyOptionsFromRecords,
   toProjectRows
 } from "../src/projects/project-model";
-import { vendorOptionsFromRecords } from "../src/vendors/vendor-model";
+import { vendorOptionsFromRecords, vendorToFormValues } from "../src/vendors/vendor-model";
 
 describe("Projects screen", () => {
   it("maps project records for compact grid display", () => {
@@ -170,6 +171,7 @@ describe("Projects screen", () => {
     expect(html).toContain("Save project");
     expect(html).toContain("Property");
     expect(html).toContain("Status");
+    expect(html).toContain("Add vendor");
     expect(html).toContain("Vendor name if unassigned");
     expect(html).toContain("Summit Heating &amp; Air");
     expect(html).toContain("Permit number");
@@ -221,6 +223,75 @@ describe("Projects screen", () => {
     })).toMatchObject({
       vendor_id: null,
       contractor_name_raw: "Summit Heating & Air"
+    });
+  });
+
+  it("renders inline vendor creation inside the project form without hiding the project draft", () => {
+    const html = renderToStaticMarkup(
+      <ProjectsView
+        formError="Project draft error"
+        formValues={{
+          ...projectToFormValues(createProject()),
+          name: "Draft porch repair",
+          contractorNameRaw: "New Porch Vendor"
+        }}
+        inlineVendorError="Vendor could not be saved."
+        inlineVendorOpen
+        inlineVendorValues={{
+          ...vendorToFormValues(),
+          name: "New Porch Vendor",
+          contactName: "Alex"
+        }}
+        modalMode="create"
+        onArchiveProject={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseInlineVendor={() => undefined}
+        onCloseModal={() => undefined}
+        onEditProject={() => undefined}
+        onFormChange={() => undefined}
+        onInlineVendorChange={() => undefined}
+        onNewProject={() => undefined}
+        onOpenInlineVendor={() => undefined}
+        onSaveInlineVendor={() => undefined}
+        onSaveProject={() => undefined}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Add project");
+    expect(html).toContain("Draft porch repair");
+    expect(html).toContain("Add vendor to this record");
+    expect(html).toContain("Save a vendor and select it for this record.");
+    expect(html).toContain("Similar names are allowed.");
+    expect(html).toContain("New Porch Vendor");
+    expect(html).toContain("Alex");
+    expect(html).toContain("Vendor could not be saved.");
+    expect(html).not.toContain("unique vendor");
+    expect(html).not.toContain("duplicate vendor");
+  });
+
+  it("selects a created project vendor and clears only the raw contractor fallback", () => {
+    const draft = {
+      ...projectToFormValues(),
+      propertyId: "property-1",
+      name: "Draft project",
+      category: "kitchen",
+      contractorNameRaw: "Raw contractor",
+      notes: "Keep this note"
+    };
+
+    expect(applyProjectVendorSelection(draft, "vendor-new")).toEqual({
+      ...draft,
+      vendorId: "vendor-new",
+      contractorNameRaw: ""
+    });
+    expect(applyProjectVendorSelection(draft, "")).toEqual({
+      ...draft,
+      vendorId: "",
+      contractorNameRaw: "Raw contractor"
     });
   });
 });

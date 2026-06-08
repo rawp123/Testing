@@ -11,6 +11,7 @@ import { PageTitle } from "../components/PageTitle";
 import { PanelHeader, WorkspacePanel } from "../components/WorkspacePanel";
 import {
   PROJECT_STATUS_OPTIONS,
+  applyProjectVendorSelection,
   formValuesToProjectInput,
   projectToFormValues,
   propertyOptionsFromRecords,
@@ -20,7 +21,14 @@ import {
   type ProjectRow,
   type SelectOption
 } from "./project-model";
-import { vendorOptionsFromRecords, type VendorSelectOption } from "../vendors/vendor-model";
+import { InlineVendorCreatePanel } from "../vendors/InlineVendorCreatePanel";
+import {
+  formValuesToVendorInput,
+  vendorOptionsFromRecords,
+  vendorToFormValues,
+  type VendorFormValues,
+  type VendorSelectOption
+} from "../vendors/vendor-model";
 
 type ProjectsState =
   | { status: "loading"; projects: ProjectRecord[]; properties: PropertyRecord[]; vendors: VendorRecord[] }
@@ -42,6 +50,10 @@ export function ProjectsPage({
   const [formValues, setFormValues] = useState<ProjectFormValues>(() => projectToFormValues());
   const [formError, setFormError] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [inlineVendorOpen, setInlineVendorOpen] = useState(false);
+  const [inlineVendorValues, setInlineVendorValues] = useState<VendorFormValues>(() => vendorToFormValues());
+  const [inlineVendorError, setInlineVendorError] = useState("");
+  const [inlineVendorSaving, setInlineVendorSaving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +87,7 @@ export function ProjectsPage({
     setSelectedProject(null);
     setFormValues(projectToFormValues(null, propertyOptions[0]?.value || ""));
     setFormError("");
+    resetInlineVendor();
     setModalMode("create");
   };
 
@@ -82,6 +95,7 @@ export function ProjectsPage({
     setSelectedProject(project);
     setFormValues(projectToFormValues(project, propertyOptions[0]?.value || ""));
     setFormError("");
+    resetInlineVendor();
     setModalMode("edit");
   };
 
@@ -89,6 +103,14 @@ export function ProjectsPage({
     setModalMode(null);
     setSelectedProject(null);
     setFormError("");
+    resetInlineVendor();
+  };
+
+  const resetInlineVendor = () => {
+    setInlineVendorOpen(false);
+    setInlineVendorValues(vendorToFormValues());
+    setInlineVendorError("");
+    setInlineVendorSaving(false);
   };
 
   const refreshProjects = async () => {
@@ -128,6 +150,40 @@ export function ProjectsPage({
     }
   };
 
+  const openInlineVendor = () => {
+    setInlineVendorValues({
+      ...vendorToFormValues(),
+      name: formValues.contractorNameRaw
+    });
+    setInlineVendorError("");
+    setInlineVendorOpen(true);
+  };
+
+  const saveInlineVendor = async () => {
+    const input = formValuesToVendorInput(inlineVendorValues);
+    if (!input.name) {
+      setInlineVendorError("Vendor name is required.");
+      return;
+    }
+
+    setInlineVendorSaving(true);
+    try {
+      const vendor = await client.createVendor(workspaceId, input);
+      setState((current) => ({
+        ...current,
+        vendors: [...current.vendors.filter((existing) => existing.id !== vendor.id), vendor]
+      }));
+      setFormValues((current) => applyProjectVendorSelection(current, vendor.id));
+      setInlineVendorOpen(false);
+      setInlineVendorValues(vendorToFormValues());
+      setInlineVendorError("");
+    } catch {
+      setInlineVendorError("Vendor could not be saved.");
+    } finally {
+      setInlineVendorSaving(false);
+    }
+  };
+
   const archiveProject = async (project: ProjectRecord) => {
     try {
       await client.archiveProject(workspaceId, project.id);
@@ -149,15 +205,23 @@ export function ProjectsPage({
       errorMessage={state.status === "error" ? state.message : ""}
       formError={formError}
       formValues={formValues}
+      inlineVendorError={inlineVendorError}
+      inlineVendorOpen={inlineVendorOpen}
+      inlineVendorSaving={inlineVendorSaving}
+      inlineVendorValues={inlineVendorValues}
       loading={state.status === "loading"}
       modalMode={modalMode}
       onArchiveProject={archiveProject}
       onChangeFilter={setActiveFilter}
       onCloseModal={closeModal}
+      onCloseInlineVendor={resetInlineVendor}
       onEditProject={openEdit}
       onFormChange={setFormValues}
+      onInlineVendorChange={setInlineVendorValues}
       onNewProject={openCreate}
+      onOpenInlineVendor={openInlineVendor}
       onSaveProject={saveProject}
+      onSaveInlineVendor={saveInlineVendor}
       projects={state.projects}
       propertyOptions={propertyOptions}
       selectedProject={selectedProject}
@@ -172,15 +236,23 @@ export function ProjectsView({
   errorMessage = "",
   formError = "",
   formValues,
+  inlineVendorError = "",
+  inlineVendorOpen = false,
+  inlineVendorSaving = false,
+  inlineVendorValues = vendorToFormValues(),
   loading = false,
   modalMode = null,
   onArchiveProject,
   onChangeFilter,
   onCloseModal,
+  onCloseInlineVendor = () => undefined,
   onEditProject,
   onFormChange,
+  onInlineVendorChange = () => undefined,
   onNewProject,
+  onOpenInlineVendor = () => undefined,
   onSaveProject,
+  onSaveInlineVendor = () => undefined,
   projects,
   propertyOptions,
   selectedProject,
@@ -191,15 +263,23 @@ export function ProjectsView({
   errorMessage?: string;
   formError?: string;
   formValues: ProjectFormValues;
+  inlineVendorError?: string;
+  inlineVendorOpen?: boolean;
+  inlineVendorSaving?: boolean;
+  inlineVendorValues?: VendorFormValues;
   loading?: boolean;
   modalMode?: "create" | "edit" | null;
   onArchiveProject: (project: ProjectRecord) => void;
   onChangeFilter: (filter: string) => void;
   onCloseModal: () => void;
+  onCloseInlineVendor?: () => void;
   onEditProject: (project: ProjectRecord) => void;
   onFormChange: (values: ProjectFormValues) => void;
+  onInlineVendorChange?: (values: VendorFormValues) => void;
   onNewProject: () => void;
+  onOpenInlineVendor?: () => void;
   onSaveProject: () => void;
+  onSaveInlineVendor?: () => void;
   projects: ProjectRecord[];
   propertyOptions: SelectOption[];
   selectedProject?: ProjectRecord | null;
@@ -364,11 +444,7 @@ export function ProjectsView({
             <FormField helper="Select a saved vendor, or leave unassigned." label="Vendor">
               <select
                 name="vendor_id"
-                onChange={(event) => onFormChange({
-                  ...formValues,
-                  vendorId: event.currentTarget.value,
-                  contractorNameRaw: event.currentTarget.value ? "" : formValues.contractorNameRaw
-                })}
+                onChange={(event) => onFormChange(applyProjectVendorSelection(formValues, event.currentTarget.value))}
                 value={formValues.vendorId}
               >
                 <option value="">Unassigned / unknown</option>
@@ -376,6 +452,7 @@ export function ProjectsView({
                   <option key={vendor.value} value={vendor.value}>{vendor.label}</option>
                 ))}
               </select>
+              <button className="inline-link-button" onClick={onOpenInlineVendor} type="button">Add vendor</button>
             </FormField>
             <FormField helper="Use only when no saved vendor is selected." label="Vendor name if unassigned">
               <input
@@ -393,6 +470,16 @@ export function ProjectsView({
               />
             </FormField>
           </div>
+          {inlineVendorOpen ? (
+            <InlineVendorCreatePanel
+              errorMessage={inlineVendorError}
+              onCancel={onCloseInlineVendor}
+              onChange={onInlineVendorChange}
+              onSave={onSaveInlineVendor}
+              saving={inlineVendorSaving}
+              values={inlineVendorValues}
+            />
+          ) : null}
           <FormField label="Scope">
             <textarea
               name="scope_summary"

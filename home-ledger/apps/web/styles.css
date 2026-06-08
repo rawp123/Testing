@@ -948,6 +948,56 @@ button {
   padding: 9px 11px;
 }
 
+.inline-link-button {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 820;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.inline-create-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.inline-create-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inline-create-header h3 {
+  color: var(--ink);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.inline-create-header p {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 720;
+  margin: 3px 0 0;
+}
+
+.inline-create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .form-grid {
   display: grid;
   gap: 12px;

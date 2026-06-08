@@ -87,6 +87,14 @@ export function formValuesToProjectInput(values: ProjectFormValues): ProjectInpu
   };
 }
 
+export function applyProjectVendorSelection(values: ProjectFormValues, vendorId: string): ProjectFormValues {
+  return {
+    ...values,
+    vendorId,
+    contractorNameRaw: vendorId ? "" : values.contractorNameRaw
+  };
+}
+
 export function propertyOptionsFromRecords(properties: PropertyRecord[]): SelectOption[] {
   return properties
     .map((property) => ({
