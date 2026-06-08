@@ -13,6 +13,7 @@ import { DocumentsPage } from "./documents/DocumentsPage";
 import { ExpensesPage } from "./expenses/ExpensesPage";
 import { ExportsPage } from "./exports/ExportsPage";
 import { FollowUpsPage } from "./follow-ups/FollowUpsPage";
+import { ImportMigrationPage } from "./import/ImportMigrationPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
 import { SettingsPage } from "./settings/SettingsPage";
@@ -112,6 +113,12 @@ export function App() {
           onNavigate={setActiveView}
           session={state.session}
           workspace={state.workspace}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "import" ? (
+        <ImportMigrationPage
+          onNavigate={setActiveView}
+          workspaceName={state.workspace.workspaceName}
         />
       ) : null}
     </AppShell>

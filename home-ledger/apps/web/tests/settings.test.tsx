@@ -25,6 +25,8 @@ describe("Settings screen", () => {
     expect(html).toContain("Data controls");
     expect(html).toContain("Open export");
     expect(html).toContain("Import and migration");
+    expect(html).toContain("Prepare migration");
+    expect(html).toContain("Open import");
     expect(html).toContain("not connected");
     expect(html).toContain("Documents and files");
     expect(html).toContain("Open documents");
@@ -32,7 +34,7 @@ describe("Settings screen", () => {
     expect(html).toContain("organizes home records for professional review");
   });
 
-  it("uses existing navigation actions for export and documents", () => {
+  it("uses existing navigation actions for export import and documents", () => {
     const html = renderToStaticMarkup(
       <SettingsView
         onNavigate={() => undefined}
@@ -42,6 +44,7 @@ describe("Settings screen", () => {
     );
 
     expect(html).toContain("Open export");
+    expect(html).toContain("Open import");
     expect(html).toContain("Open documents");
     expect(html).not.toContain("href=");
     expect(html).not.toContain("Download package");

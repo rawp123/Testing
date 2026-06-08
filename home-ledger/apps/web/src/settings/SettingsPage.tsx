@@ -94,6 +94,15 @@ export function SettingsView({
             <strong>Import and migration</strong>
             <p>Backup import and migration review are planned, but not connected in this web app yet.</p>
           </div>
+          <div className="settings-action-list">
+            <div>
+              <strong>Prepare migration</strong>
+              <p>Review what can be prepared before automated import is connected.</p>
+            </div>
+            <button className="button button-secondary" onClick={() => onNavigate("import")} type="button">
+              Open import
+            </button>
+          </div>
           <div className="settings-note">
             <strong>Deletion controls</strong>
             <p>Workspace deletion and account deletion controls are not connected yet.</p>

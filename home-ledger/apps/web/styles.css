@@ -783,6 +783,44 @@ button {
   font-weight: 720;
 }
 
+.migration-grid {
+  align-items: start;
+}
+
+.migration-check-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.migration-check-list li {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-weight: 760;
+  padding: 10px 12px;
+}
+
+.migration-disabled-control {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.migration-disabled-control input:disabled {
+  opacity: 0.78;
+}
+
+.migration-disabled-control button {
+  justify-self: start;
+}
+
 .empty-state {
   border: 1px dashed var(--border);
   border-radius: var(--radius-control);
