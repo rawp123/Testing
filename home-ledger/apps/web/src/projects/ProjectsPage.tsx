@@ -201,6 +201,10 @@ export function ProjectsView({
   const filterOptions = useMemo(() => buildProjectFilterOptions(rows), [rows]);
   const filteredRows = useMemo(() => filterProjectRows(rows, activeFilter), [activeFilter, rows]);
   const canAddProject = propertyOptions.length > 0;
+  const emptyTitle = canAddProject ? "No projects" : "Add a property first";
+  const emptyCopy = canAddProject
+    ? "Add a project after the property record is set up."
+    : "Projects need a property before they can be created.";
   const columns = useMemo<CompactRecordColumn<ProjectRow>[]>(() => [
     {
       key: "name",
@@ -250,7 +254,7 @@ export function ProjectsView({
 
       <FilterPanel className="projects-filter-panel" onClear={() => onChangeFilter("all")}>
         <FilterChipGroup
-          label="Project filters"
+          label="Project filters by property, status, category, and open items"
           onChange={onChangeFilter}
           options={filterOptions}
           value={activeFilter}
@@ -262,7 +266,7 @@ export function ProjectsView({
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
         {loading ? <p className="muted-copy">Loading projects.</p> : null}
         {!loading && !rows.length ? (
-          <EmptyState title="No projects">Add a project after the property record is set up.</EmptyState>
+          <EmptyState title={emptyTitle}>{emptyCopy}</EmptyState>
         ) : null}
         {!loading && rows.length > 0 && !filteredRows.length ? (
           <EmptyState title="No projects for this filter">Clear the project filter to see all projects.</EmptyState>
@@ -390,6 +394,14 @@ function buildProjectFilterOptions(rows: ProjectRow[]): FilterChip[] {
     options.push({ value: "open", label: "Open items", count: openCount });
   }
 
+  const properties = countRows(rows, (row) => row.source.property_id || "unassigned");
+  for (const [propertyId, count] of sortedEntries(properties, (propertyId) =>
+    rows.find((row) => row.source.property_id === propertyId)?.propertyName || "No property"
+  )) {
+    const label = rows.find((row) => row.source.property_id === propertyId)?.propertyName || "No property";
+    options.push({ value: `property:${propertyId}`, label, count });
+  }
+
   const statuses = new Map<string, number>();
   for (const row of rows) {
     const status = row.source.status || "planned";
@@ -398,14 +410,50 @@ function buildProjectFilterOptions(rows: ProjectRow[]): FilterChip[] {
   for (const [status, count] of [...statuses.entries()].sort((left, right) => statusLabel(left[0]).localeCompare(statusLabel(right[0])))) {
     options.push({ value: `status:${status}`, label: statusLabel(status), count });
   }
+
+  const categories = countRows(rows, (row) => row.source.category || "other");
+  for (const [category, count] of sortedEntries(categories, (category) => category)) {
+    options.push({ value: `category:${category}`, label: categoryLabel(category), count });
+  }
   return options;
 }
 
 function filterProjectRows(rows: ProjectRow[], filter: string) {
   if (filter === "open") return rows.filter((row) => row.openItemCount > 0);
+  if (filter.startsWith("property:")) {
+    const propertyId = filter.slice("property:".length);
+    return rows.filter((row) => (row.source.property_id || "unassigned") === propertyId);
+  }
   if (filter.startsWith("status:")) {
     const status = filter.slice("status:".length);
     return rows.filter((row) => row.source.status === status);
   }
+  if (filter.startsWith("category:")) {
+    const category = filter.slice("category:".length);
+    return rows.filter((row) => (row.source.category || "other") === category);
+  }
   return rows;
+}
+
+function countRows(rows: ProjectRow[], getValue: (row: ProjectRow) => string) {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const value = getValue(row);
+    counts.set(value, (counts.get(value) || 0) + 1);
+  }
+  return counts;
+}
+
+function sortedEntries(counts: Map<string, number>, getLabel: (value: string) => string) {
+  return [...counts.entries()].sort((left, right) =>
+    getLabel(left[0]).localeCompare(getLabel(right[0])) || left[0].localeCompare(right[0])
+  );
+}
+
+function categoryLabel(category: string) {
+  return category
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase()) || "Other";
 }

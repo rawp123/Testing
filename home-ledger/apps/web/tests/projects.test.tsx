@@ -46,12 +46,16 @@ describe("Projects screen", () => {
     expect(html).toContain("Project records");
     expect(html).toContain("Add project");
     expect(html).toContain("Open items");
+    expect(html).toContain("Office");
+    expect(html).toContain("Kitchen");
     expect(html).toContain("Kitchen overhaul");
     expect(html).toContain("Office");
     expect(html).toContain("In progress");
     expect(html).toContain("2 open");
     expect(html).toContain("Edit");
     expect(html).toContain("Archive");
+    expect(html).not.toContain("workspace_id");
+    expect(html).not.toContain("storage_key");
   });
 
   it("renders filtered empty and loading/error states with direct copy", () => {
@@ -77,6 +81,64 @@ describe("Projects screen", () => {
     expect(html).toContain("Projects could not be loaded.");
     expect(html).toContain("No projects for this filter");
     expect(html).toContain("Clear the project filter to see all projects.");
+  });
+
+  it("filters projects by property context", () => {
+    const html = renderToStaticMarkup(
+      <ProjectsView
+        activeFilter="property:property-2"
+        formValues={projectToFormValues()}
+        onArchiveProject={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onEditProject={() => undefined}
+        onFormChange={() => undefined}
+        onNewProject={() => undefined}
+        onSaveProject={() => undefined}
+        projects={[
+          createProject(),
+          createProject({
+            id: "project-2",
+            property_id: "property-2",
+            property_name: "Lake house",
+            name: "Dock repair",
+            category: "deck/patio/porch",
+            open_item_count: 0
+          })
+        ]}
+        propertyOptions={propertyOptionsFromRecords([
+          createProperty(),
+          { ...createProperty(), id: "property-2", name: "Lake house" }
+        ])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Dock repair");
+    expect(html).toContain("Lake house");
+    expect(html).not.toContain("Kitchen overhaul");
+  });
+
+  it("guides users to add a property before creating projects", () => {
+    const html = renderToStaticMarkup(
+      <ProjectsView
+        formValues={projectToFormValues()}
+        onArchiveProject={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onEditProject={() => undefined}
+        onFormChange={() => undefined}
+        onNewProject={() => undefined}
+        onSaveProject={() => undefined}
+        projects={[]}
+        propertyOptions={[]}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Add a property first");
+    expect(html).toContain("Projects need a property before they can be created.");
+    expect(html).toContain("disabled");
   });
 
   it("renders add and edit modal fields with property selector", () => {

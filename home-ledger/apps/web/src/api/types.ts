@@ -174,7 +174,7 @@ export interface ProjectRecord {
   notes?: string | null;
   completeness_override_note?: string | null;
   completeness_overridden_at?: string | null;
-  open_item_count?: number;
+  open_item_count: number;
   archived_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

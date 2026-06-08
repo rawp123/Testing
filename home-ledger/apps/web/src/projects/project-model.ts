@@ -49,7 +49,7 @@ export function toProjectRows(projects: ProjectRecord[]): ProjectRow[] {
     dateRange: formatDateRange(project.start_date, project.completion_date),
     contractor: project.vendor_name || project.contractor_name_raw || "No vendor",
     openItems: formatOpenItemCount(project.open_item_count),
-    openItemCount: Number(project.open_item_count || 0),
+    openItemCount: project.open_item_count,
     source: project
   }));
 }
