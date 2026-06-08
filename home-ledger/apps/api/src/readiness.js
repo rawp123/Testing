@@ -1,3 +1,5 @@
+import { getFileStorageReadiness } from "./storage-readiness.js";
+
 export async function getReadinessSnapshot({ config, db } = {}) {
   const checks = [];
 
@@ -8,7 +10,7 @@ export async function getReadinessSnapshot({ config, db } = {}) {
   checks.push(authReadinessCheck(config));
   checks.push(billingReadinessCheck(config));
 
-  const status = checks.every((check) => check.status === "ok" || check.status === "disabled")
+  const status = checks.every(isAcceptableReadinessStatus)
     ? "ready"
     : "not_ready";
 
@@ -71,20 +73,7 @@ async function databaseReadinessCheck(db) {
 }
 
 function fileStorageReadinessCheck(config) {
-  const driver = config?.fileStorageDriver || config?.fileStorage?.driver || "local";
-  if (driver === "s3") {
-    return {
-      name: "file_storage",
-      status: "ok",
-      message: "Object storage is configured for signed upload and download intents."
-    };
-  }
-
-  return {
-    name: "file_storage",
-    status: "degraded",
-    message: "Object storage is using local/test behavior; production storage is not connected."
-  };
+  return getFileStorageReadiness(config);
 }
 
 function ocrReadinessCheck(config) {
@@ -112,9 +101,17 @@ function authReadinessCheck(config) {
     };
   }
 
+  if (isLocalLikeEnv(config?.appEnv)) {
+    return {
+      name: "auth",
+      status: "local_only",
+      message: "Auth is using local/test behavior."
+    };
+  }
+
   return {
     name: "auth",
-    status: "degraded",
+    status: "not_ready",
     message: "Production auth provider is not connected."
   };
 }
@@ -133,4 +130,12 @@ function billingReadinessCheck(config) {
     status: "disabled",
     message: "Billing provider is not connected."
   };
+}
+
+function isAcceptableReadinessStatus(check) {
+  return check.status === "ok" || check.status === "disabled" || check.status === "local_only";
+}
+
+function isLocalLikeEnv(appEnv) {
+  return appEnv === "local" || appEnv === "test";
 }

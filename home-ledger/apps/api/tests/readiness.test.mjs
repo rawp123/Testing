@@ -120,8 +120,8 @@ test("GET /ready returns 503 when required readiness checks fail", async () => {
         },
         {
           name: "file_storage",
-          status: "degraded",
-          message: "Object storage is using local/test behavior; production storage is not connected."
+          status: "local_only",
+          message: "Object storage is using local/test metadata-only behavior."
         },
         {
           name: "ocr",
@@ -130,8 +130,8 @@ test("GET /ready returns 503 when required readiness checks fail", async () => {
         },
         {
           name: "auth",
-          status: "degraded",
-          message: "Production auth provider is not connected."
+          status: "local_only",
+          message: "Auth is using local/test behavior."
         },
         {
           name: "billing",
@@ -141,6 +141,43 @@ test("GET /ready returns 503 when required readiness checks fail", async () => {
       ]
     }
   });
+
+  await app.close();
+});
+
+test("GET /ready rejects production runtime without production object storage", async () => {
+  const app = buildApp({
+    config: createConfig({
+      appEnv: "production",
+      authProvider: "oidc",
+      billingProvider: "stripe",
+      fileStorageDriver: "local",
+      fileStorage: {
+        driver: "local",
+        bucket: "private-bucket",
+        accessKeyId: "storage-access-key",
+        secretAccessKey: "storage-secret-key"
+      }
+    }),
+    db: createReadyDb()
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/ready"
+  });
+
+  assert.equal(response.statusCode, 503);
+  const body = response.json();
+  assert.equal(body.data.status, "not_ready");
+  assert.deepEqual(body.data.checks.find((check) => check.name === "file_storage"), {
+    name: "file_storage",
+    status: "not_ready",
+    message: "Production object storage is not configured."
+  });
+  assert.doesNotMatch(response.body, /private-bucket/i);
+  assert.doesNotMatch(response.body, /storage-access-key/i);
+  assert.doesNotMatch(response.body, /storage-secret-key/i);
 
   await app.close();
 });
@@ -163,7 +200,7 @@ test("readiness serialization omits provider internals and raw config", async ()
   const serialized = serializeReadinessSnapshot(snapshot);
   const body = JSON.stringify(serialized);
 
-  assert.equal(serialized.status, "not_ready");
+  assert.equal(serialized.status, "ready");
   assert.doesNotMatch(body, /postgres:\/\/user:secret/i);
   assert.doesNotMatch(body, /secret-bucket/i);
   assert.doesNotMatch(body, /secret-access-key/i);

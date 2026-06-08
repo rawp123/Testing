@@ -39,7 +39,7 @@ AUTH_PROVIDER=none
 SESSION_COOKIE_NAME=home_ledger_session
 ```
 
-`AUTH_PROVIDER=none` is the current explicit production-ready placeholder. Do not set `AUTH_PROVIDER=dev` or `DEV_AUTH_ENABLED=true` in production. The API refuses production dev auth.
+`AUTH_PROVIDER=none` is the current explicit placeholder while production sign-in is not connected. Do not set `AUTH_PROVIDER=dev` or `DEV_AUTH_ENABLED=true` in production. The API refuses production dev auth.
 
 File storage:
 
@@ -56,6 +56,8 @@ FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS=300
 ```
 
 The bucket should be private. The API creates short-lived signed URLs for authorized file operations. Normal metadata responses must not expose raw object keys, bucket names, signed URLs, local paths, or provider internals.
+
+Production readiness requires `FILE_STORAGE_DRIVER=s3` plus bucket, region, access key id, and secret access key values. Local and test modes may use `FILE_STORAGE_DRIVER=local` or `FILE_STORAGE_DRIVER=test`; those modes keep upload and download URLs `null` and are reported as `local_only`, not production-ready storage.
 
 OCR:
 
@@ -117,14 +119,14 @@ Checks:
 
 - required runtime configuration is present
 - database connection can run a minimal query
-- file storage mode is production-ready or degraded
+- file storage mode is production-ready, local/test only, or not ready
 - OCR mode is configured or disabled
 - auth provider is configured or degraded
 - billing provider is configured or disabled
 
 Readiness responses are intentionally safe. They must not expose database URLs, passwords, tokens, raw auth headers, secret keys, storage keys, signed URLs, bucket names, provider internal errors, local absolute paths, raw OCR text, or billing provider internals.
 
-`GET /ready` returns `503` if required checks fail or critical production dependencies are degraded. In the current skeleton, local/test file storage and missing production auth are reported as degraded.
+`GET /ready` returns `503` if required checks fail or production object storage is missing in production mode. Local/test file storage is reported as `local_only` so local development remains usable without real object-storage credentials.
 
 ## Deployment-Oriented Commands
 
@@ -157,6 +159,8 @@ Run the deployment readiness check:
 DATABASE_URL=postgres://... npm run saas:deploy:check
 ```
 
+By default, this command follows the configured `APP_ENV`. With no `APP_ENV`, it uses local readiness rules and reports local/test storage as `local_only`. Set `APP_ENV=production` to enforce production object-storage readiness.
+
 For local production-like verification using the test database:
 
 ```sh
@@ -166,6 +170,12 @@ DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test 
 
 The local production-like command only confirms configuration shape and database connectivity. It does not contact an auth provider, Stripe, object storage, or an OCR provider.
 
+To confirm production storage enforcement without real credentials, run a negative local check and expect it to fail without printing raw configuration values:
+
+```sh
+APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=local npm run saas:deploy:check
+```
+
 ## Minimum Pre-Deployment Checklist
 
 - Confirm `APP_ENV=production` and `NODE_ENV=production`.
@@ -173,6 +183,7 @@ The local production-like command only confirms configuration shape and database
 - Confirm migrations have been applied to the target database.
 - Confirm `DATABASE_URL` is stored in a secret manager and is not printed in logs.
 - Confirm `FILE_STORAGE_DRIVER=s3` and the bucket is private.
+- Confirm `FILE_STORAGE_BUCKET`, `FILE_STORAGE_REGION`, `FILE_STORAGE_ACCESS_KEY_ID`, and `FILE_STORAGE_SECRET_ACCESS_KEY` are set through deployment secrets.
 - Confirm signed URL TTLs are no longer than needed.
 - Confirm `OCR_MODE=disabled` unless a production OCR provider has been explicitly implemented.
 - Confirm `BILLING_PROVIDER=none` unless backend billing/provider work has been explicitly implemented.

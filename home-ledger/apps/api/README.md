@@ -39,7 +39,7 @@ GET /ready
 
 `GET /health` is a liveness check. It only confirms the API process can respond.
 
-`GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail or production-critical providers are still degraded.
+`GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail or production object storage is missing in production mode.
 
 Authenticated endpoint:
 
@@ -550,6 +550,8 @@ S3-compatible storage notes:
 - `FILE_STORAGE_FORCE_PATH_STYLE=true` is commonly needed for MinIO and some S3-compatible endpoints.
 - Signed URL TTLs must be between `1` and `3600` seconds.
 - Buckets should remain private. The API should be the only component that creates signed upload/download URLs.
+- `FILE_STORAGE_DRIVER=local` and `FILE_STORAGE_DRIVER=test` are local/test metadata-only modes. They preserve document file lifecycle metadata and return `null` upload/download URLs, but they are not production-ready object storage.
+- `/ready` and `npm run saas:deploy:check` report local/test storage as `local_only` outside production and `not_ready` when `APP_ENV=production`.
 
 Validation:
 
@@ -682,7 +684,7 @@ npm run saas:db:reset:test
 
 `saas:db:check` and `saas:db:reset:test` require `TEST_DATABASE_URL`. These commands refuse to use `DATABASE_URL` and require the database name to contain `test`.
 
-`saas:deploy:check` requires `DATABASE_URL` and runs the same readiness logic used by `GET /ready`. It checks database connectivity and safe provider readiness. It does not run migrations, seed data, call external OCR services, create billing customers, or validate a real production auth provider beyond configured/not-connected status.
+`saas:deploy:check` requires `DATABASE_URL` and runs the same readiness logic used by `GET /ready`. It checks database connectivity and safe provider readiness. It does not run migrations, seed data, call external OCR services, create billing customers, or validate a real production auth provider beyond configured/not-connected status. Set `APP_ENV=production` to enforce production object-storage readiness.
 
 ## Local PostgreSQL Setup
 
