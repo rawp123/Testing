@@ -306,6 +306,126 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).not.toContain("amountCents");
     expect(calls[1].options.body).not.toContain("recordTreatment");
   });
+
+  it("uses document metadata and file lifecycle API requests safely", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        const textUrl = String(url);
+        if (textUrl.endsWith("/documents/document-1/file-intent")) {
+          return jsonResponse({
+            data: {
+              upload_id: "file-1",
+              document_file_id: "file-1",
+              upload_method: "api_adapter",
+              upload_url: null,
+              upload_headers: { "content-type": "application/pdf" },
+              upload_token: "upload-token",
+              expires_at: "2026-06-07T12:10:00.000Z",
+              max_size_bytes: 26214400,
+              file: createDocumentFilePayload({ status: "pending_upload" })
+            }
+          });
+        }
+        if (textUrl.endsWith("/documents/document-1/file-complete")) {
+          return jsonResponse({ data: createDocumentFilePayload({ status: "available" }) });
+        }
+        if (textUrl.endsWith("/documents/document-1/file")) {
+          return jsonResponse({ data: createDocumentFilePayload({ status: "available" }) });
+        }
+        return jsonResponse({
+          data: textUrl.includes("/documents/document-1")
+            ? createDocumentPayload({ id: "document-1", display_name: "Receipt updated" })
+            : [createDocumentPayload()]
+        });
+      }) as typeof fetch
+    });
+
+    await client.listDocuments("workspace/one");
+    await client.createDocument("workspace/one", {
+      property_id: "property-1",
+      project_id: "project-1",
+      expense_id: "expense-1",
+      display_name: "Receipt",
+      document_type: "receipt",
+      document_date: "2026-06-05",
+      notes: null,
+      file_availability: "not_uploaded",
+      file_status_note: null
+    });
+    await client.updateDocument("workspace/one", "document-1", { display_name: "Receipt updated" });
+    await client.createDocumentFileIntent("workspace/one", "document-1", {
+      original_file_name: "receipt.pdf",
+      mime_type: "application/pdf",
+      size_bytes: 128,
+      sha256: "a".repeat(64),
+      source: "web_upload"
+    });
+    await client.completeDocumentFileUpload("workspace/one", "document-1", {
+      document_file_id: "file-1",
+      upload_id: "file-1",
+      size_bytes: 128,
+      sha256: "a".repeat(64)
+    });
+    await client.getDocumentFile("workspace/one", "document-1");
+    await client.removeDocumentFile("workspace/one", "document-1");
+    await client.archiveDocument("workspace/one", "document-1");
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents"],
+      ["PATCH", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-intent"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file"],
+      ["DELETE", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file"],
+      ["DELETE", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1"]
+    ]);
+    expect(calls[1].options.body).toContain("display_name");
+    expect(calls[1].options.body).toContain("document_type");
+    expect(calls[1].options.body).not.toContain("displayName");
+    expect(calls[3].options.body).toContain("original_file_name");
+    expect(calls[3].options.body).not.toContain("/Users/");
+  });
+
+  it("attaches document files through intent and complete without exposing paths", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        if (String(url).endsWith("/file-intent")) {
+          return jsonResponse({
+            data: {
+              upload_id: "file-1",
+              document_file_id: "file-1",
+              upload_method: "api_adapter",
+              upload_url: null,
+              upload_headers: { "content-type": "text/plain" },
+              upload_token: "upload-token",
+              expires_at: "2026-06-07T12:10:00.000Z",
+              max_size_bytes: 26214400,
+              file: createDocumentFilePayload({ original_file_name: "receipt.txt", mime_type: "text/plain", status: "pending_upload" })
+            }
+          });
+        }
+        return jsonResponse({ data: createDocumentFilePayload({ original_file_name: "receipt.txt", mime_type: "text/plain", status: "available" }) });
+      }) as typeof fetch
+    });
+
+    await client.attachDocumentFile("workspace/one", "document-1", new File(["hello"], "/Users/robert/receipt.txt", { type: "text/plain" }));
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-intent"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"]
+    ]);
+    expect(calls[0].options.body).toContain("receipt.txt");
+    expect(calls[0].options.body).not.toContain("/Users/robert");
+    expect(calls[0].options.body).toContain("sha256");
+  });
+
 });
 
 function jsonResponse(payload: unknown, { status = 200 } = {}) {
@@ -411,6 +531,46 @@ function createExpensePayload(overrides: Record<string, unknown> = {}) {
     deleted_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createDocumentPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "document-1",
+    property_id: "property-1",
+    property_name: "Office",
+    project_id: "project-1",
+    project_name: "Deck repair",
+    expense_id: "expense-1",
+    expense_description: "Deck boards",
+    display_name: "Receipt",
+    document_type: "receipt",
+    document_date: "2026-06-05",
+    notes: null,
+    file_availability: "not_uploaded",
+    file_status_note: null,
+    file: null,
+    ocr: { status: "not_requested", has_text: false, completed_at: null },
+    deleted_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createDocumentFilePayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "file-1",
+    document_id: "document-1",
+    original_file_name: "receipt.pdf",
+    mime_type: "application/pdf",
+    size_bytes: 128,
+    sha256: "a".repeat(64),
+    source: "web_upload",
+    status: "available",
+    uploaded_at: "2026-06-07T12:00:00.000Z",
+    deleted_at: null,
     ...overrides
   };
 }

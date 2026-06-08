@@ -239,6 +239,105 @@ export interface ExpenseInput {
   notes?: string | null;
 }
 
+export type DocumentFileAvailability =
+  | "available"
+  | "missing"
+  | "not_uploaded"
+  | "removed"
+  | "blocked"
+  | "skipped"
+  | "tutorial_metadata"
+  | "corrupt"
+  | "checksum_failed"
+  | string;
+
+export interface DocumentFileSummary {
+  id: string;
+  document_id: string;
+  original_file_name?: string | null;
+  mime_type?: string | null;
+  size_bytes?: number | null;
+  sha256?: string | null;
+  source?: string | null;
+  status?: string | null;
+  uploaded_at?: string | null;
+  deleted_at?: string | null;
+  download_available?: boolean;
+  download_url?: string | null;
+  expires_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface DocumentOcrSummary {
+  status?: string | null;
+  has_text?: boolean;
+  completed_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface DocumentRecord {
+  id: string;
+  property_id: string;
+  property_name?: string | null;
+  project_id?: string | null;
+  project_name?: string | null;
+  expense_id?: string | null;
+  expense_description?: string | null;
+  display_name: string;
+  document_type: string;
+  document_date?: string | null;
+  notes?: string | null;
+  file_availability: DocumentFileAvailability;
+  file_status_note?: string | null;
+  file?: DocumentFileSummary | null;
+  ocr?: DocumentOcrSummary | null;
+  open_item_count?: number;
+  deleted_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface DocumentInput {
+  property_id?: string | null;
+  project_id?: string | null;
+  expense_id?: string | null;
+  display_name: string;
+  document_type?: string;
+  document_date?: string | null;
+  notes?: string | null;
+  file_availability?: DocumentFileAvailability;
+  file_status_note?: string | null;
+}
+
+export interface DocumentFileIntentInput {
+  original_file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  sha256?: string | null;
+  source?: "web_upload" | "ios_upload";
+}
+
+export interface DocumentFileCompleteInput {
+  document_file_id: string;
+  upload_id?: string | null;
+  size_bytes: number;
+  sha256?: string | null;
+}
+
+export interface DocumentFileIntentResponse {
+  upload_id: string;
+  document_file_id: string;
+  upload_method?: string | null;
+  upload_url?: string | null;
+  upload_headers?: Record<string, string>;
+  upload_token?: string | null;
+  expires_at?: string | null;
+  max_size_bytes?: number;
+  file: DocumentFileSummary;
+}
+
+
 export interface ApiEnvelope<T> {
   data?: T;
   error?: {

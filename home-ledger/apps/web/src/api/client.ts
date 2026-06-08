@@ -1,6 +1,12 @@
 import type {
   ApiEnvelope,
   DashboardResponse,
+  DocumentFileCompleteInput,
+  DocumentFileIntentInput,
+  DocumentFileIntentResponse,
+  DocumentFileSummary,
+  DocumentInput,
+  DocumentRecord,
   ExpenseInput,
   ExpenseRecord,
   FollowUpItem,
@@ -59,6 +65,15 @@ export interface HomeLedgerApiClient {
   createExpense(workspaceId: string, input: ExpenseInput): Promise<ExpenseRecord>;
   updateExpense(workspaceId: string, expenseId: string, input: Partial<ExpenseInput>): Promise<ExpenseRecord>;
   archiveExpense(workspaceId: string, expenseId: string): Promise<ExpenseRecord>;
+  listDocuments(workspaceId: string): Promise<DocumentRecord[]>;
+  createDocument(workspaceId: string, input: DocumentInput): Promise<DocumentRecord>;
+  updateDocument(workspaceId: string, documentId: string, input: Partial<DocumentInput>): Promise<DocumentRecord>;
+  archiveDocument(workspaceId: string, documentId: string): Promise<DocumentRecord>;
+  createDocumentFileIntent(workspaceId: string, documentId: string, input: DocumentFileIntentInput): Promise<DocumentFileIntentResponse>;
+  completeDocumentFileUpload(workspaceId: string, documentId: string, input: DocumentFileCompleteInput): Promise<DocumentFileSummary>;
+  getDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
+  removeDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
+  attachDocumentFile(workspaceId: string, documentId: string, file: File): Promise<DocumentFileSummary>;
 }
 
 export type InitialDashboardState =
@@ -198,6 +213,116 @@ export function createHomeLedgerApiClient({
         `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/expenses/${encodeURIComponent(requireId(expenseId, "expenseId"))}`,
         { method: "DELETE" }
       );
+    },
+    listDocuments(workspaceId: string) {
+      return request<DocumentRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents`);
+    },
+    createDocument(workspaceId: string, input: DocumentInput) {
+      return request<DocumentRecord>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    },
+    updateDocument(workspaceId: string, documentId: string, input: Partial<DocumentInput>) {
+      return request<DocumentRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    archiveDocument(workspaceId: string, documentId: string) {
+      return request<DocumentRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}`,
+        { method: "DELETE" }
+      );
+    },
+    createDocumentFileIntent(workspaceId: string, documentId: string, input: DocumentFileIntentInput) {
+      return request<DocumentFileIntentResponse>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/file-intent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    completeDocumentFileUpload(workspaceId: string, documentId: string, input: DocumentFileCompleteInput) {
+      return request<DocumentFileSummary>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/file-complete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    getDocumentFile(workspaceId: string, documentId: string) {
+      return request<DocumentFileSummary>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/file`
+      );
+    },
+    removeDocumentFile(workspaceId: string, documentId: string) {
+      return request<DocumentFileSummary>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/file`,
+        { method: "DELETE" }
+      );
+    },
+    async attachDocumentFile(workspaceId: string, documentId: string, file: File) {
+      const cleanFileName = sanitizeFileName(file.name);
+      const mimeType = file.type || "application/octet-stream";
+      const sha256 = await sha256File(file);
+      const workspace = encodeURIComponent(requireId(workspaceId, "workspaceId"));
+      const document = encodeURIComponent(requireId(documentId, "documentId"));
+      const intent = await request<DocumentFileIntentResponse>(
+        `/workspaces/${workspace}/documents/${document}/file-intent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            original_file_name: cleanFileName,
+            mime_type: mimeType,
+            size_bytes: file.size,
+            sha256,
+            source: "web_upload"
+          })
+        }
+      );
+
+      if (intent.upload_url) {
+        const uploadResponse = await fetchImpl(intent.upload_url, {
+          method: intent.upload_method === "signed_url_put" ? "PUT" : "POST",
+          headers: {
+            ...(intent.upload_headers || {}),
+            "content-type": mimeType
+          },
+          body: file
+        });
+        if (!uploadResponse.ok) {
+          throw new HomeLedgerApiError({
+            status: uploadResponse.status,
+            code: "upload_failed",
+            message: "File upload failed."
+          });
+        }
+      }
+
+      return request<DocumentFileSummary>(
+        `/workspaces/${workspace}/documents/${document}/file-complete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            document_file_id: intent.document_file_id,
+            upload_id: intent.upload_id,
+            size_bytes: file.size,
+            sha256
+          })
+        }
+      );
     }
   });
 }
@@ -280,4 +405,18 @@ function headersFrom(headers: RequestInit["headers"]): Record<string, string> {
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
   if (Array.isArray(headers)) return Object.fromEntries(headers);
   return headers as Record<string, string>;
+}
+
+function sanitizeFileName(value: string) {
+  const leaf = String(value || "Attached file").split(/[/\\]/).filter(Boolean).at(-1) || "Attached file";
+  return leaf.replace(/[\u0000-\u001f\u007f]/g, "").trim() || "Attached file";
+}
+
+async function sha256File(file: File) {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) return null;
+  const digest = await subtle.digest("SHA-256", await file.arrayBuffer());
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
