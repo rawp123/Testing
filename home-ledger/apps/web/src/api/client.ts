@@ -1,6 +1,8 @@
 import type {
   ApiEnvelope,
   DashboardResponse,
+  ExpenseInput,
+  ExpenseRecord,
   FollowUpItem,
   FollowUpSummaryResponse,
   ProjectInput,
@@ -53,6 +55,10 @@ export interface HomeLedgerApiClient {
   createProject(workspaceId: string, input: ProjectInput): Promise<ProjectRecord>;
   updateProject(workspaceId: string, projectId: string, input: Partial<ProjectInput>): Promise<ProjectRecord>;
   archiveProject(workspaceId: string, projectId: string): Promise<ProjectRecord>;
+  listExpenses(workspaceId: string): Promise<ExpenseRecord[]>;
+  createExpense(workspaceId: string, input: ExpenseInput): Promise<ExpenseRecord>;
+  updateExpense(workspaceId: string, expenseId: string, input: Partial<ExpenseInput>): Promise<ExpenseRecord>;
+  archiveExpense(workspaceId: string, expenseId: string): Promise<ExpenseRecord>;
 }
 
 export type InitialDashboardState =
@@ -165,6 +171,32 @@ export function createHomeLedgerApiClient({
       return request<ProjectRecord>(
         `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/projects/${encodeURIComponent(requireId(projectId, "projectId"))}/archive`,
         { method: "POST" }
+      );
+    },
+    listExpenses(workspaceId: string) {
+      return request<ExpenseRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/expenses`);
+    },
+    createExpense(workspaceId: string, input: ExpenseInput) {
+      return request<ExpenseRecord>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/expenses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    },
+    updateExpense(workspaceId: string, expenseId: string, input: Partial<ExpenseInput>) {
+      return request<ExpenseRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/expenses/${encodeURIComponent(requireId(expenseId, "expenseId"))}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    archiveExpense(workspaceId: string, expenseId: string) {
+      return request<ExpenseRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/expenses/${encodeURIComponent(requireId(expenseId, "expenseId"))}`,
+        { method: "DELETE" }
       );
     }
   });

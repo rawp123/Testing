@@ -9,6 +9,7 @@ import type { AppView } from "./components/AppShell";
 import { ErrorState } from "./components/ErrorState";
 import { LoadingState } from "./components/LoadingState";
 import { DashboardPage } from "./dashboard/DashboardPage";
+import { ExpensesPage } from "./expenses/ExpensesPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
 
@@ -61,6 +62,13 @@ export function App() {
       ) : null}
       {state.status === "ready" && activeView === "projects" ? (
         <ProjectsPage
+          client={client}
+          workspaceId={state.workspace.workspaceId}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "expenses" ? (
+        <ExpensesPage
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}

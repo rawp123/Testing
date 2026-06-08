@@ -262,6 +262,50 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).not.toContain("propertyId");
     expect(calls[1].options.body).not.toContain("contractorNameRaw");
   });
+
+  it("uses snake_case expense API requests with integer cents", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        return jsonResponse({
+          data: String(url).includes("/expenses/expense-1")
+            ? createExpensePayload({ id: "expense-1", description: "Deck boards updated" })
+            : [createExpensePayload()]
+        });
+      }) as typeof fetch
+    });
+
+    await client.listExpenses("workspace/one");
+    await client.createExpense("workspace/one", {
+      property_id: "property-1",
+      project_id: "project-1",
+      vendor_name_raw: "Cedarline Carpentry",
+      expense_date: "2026-06-05",
+      description: "Deck boards",
+      amount_cents: 248000,
+      currency_code: "USD",
+      category: "repair_upkeep",
+      record_treatment: "repair_upkeep",
+      documentation_status: "needs_follow_up",
+      notes: null
+    });
+    await client.updateExpense("workspace/one", "expense-1", { description: "Deck boards updated" });
+    await client.archiveExpense("workspace/one", "expense-1");
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/expenses"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/expenses"],
+      ["PATCH", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/expenses/expense-1"],
+      ["DELETE", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/expenses/expense-1"]
+    ]);
+    expect(calls[1].options.body).toContain("amount_cents");
+    expect(calls[1].options.body).toContain("record_treatment");
+    expect(calls[1].options.body).toContain("documentation_status");
+    expect(calls[1].options.body).not.toContain("amountCents");
+    expect(calls[1].options.body).not.toContain("recordTreatment");
+  });
 });
 
 function jsonResponse(payload: unknown, { status = 200 } = {}) {
@@ -338,6 +382,33 @@ function createProjectPayload(overrides: Record<string, unknown> = {}) {
     completeness_overridden_at: null,
     open_item_count: 2,
     archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createExpensePayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "expense-1",
+    property_id: "property-1",
+    property_name: "Office",
+    project_id: "project-1",
+    project_name: "Deck repair",
+    vendor_id: null,
+    vendor_name: null,
+    vendor_name_raw: "Cedarline Carpentry",
+    expense_date: "2026-06-05",
+    description: "Deck boards",
+    amount_cents: 248000,
+    currency_code: "USD",
+    category: "repair_upkeep",
+    record_treatment: "repair_upkeep",
+    documentation_status: "needs_follow_up",
+    notes: null,
+    document_count: 0,
+    open_item_count: 1,
+    deleted_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",
     ...overrides

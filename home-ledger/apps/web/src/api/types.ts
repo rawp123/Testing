@@ -196,6 +196,49 @@ export interface ProjectInput {
   completeness_override_note?: string | null;
 }
 
+export type ExpenseRecordTreatment = "possible_improvement" | "repair_upkeep" | "review_later" | string;
+export type ExpenseDocumentationStatus = "receipt_attached" | "invoice_attached" | "no_document_yet" | "needs_follow_up" | string;
+
+export interface ExpenseRecord {
+  id: string;
+  property_id: string;
+  property_name?: string | null;
+  project_id?: string | null;
+  project_name?: string | null;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
+  vendor_name_raw?: string | null;
+  expense_date?: string | null;
+  description: string;
+  amount_cents: number;
+  currency_code?: string | null;
+  category: string;
+  record_treatment: ExpenseRecordTreatment;
+  documentation_status: ExpenseDocumentationStatus;
+  notes?: string | null;
+  document_count?: number;
+  open_item_count?: number;
+  deleted_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ExpenseInput {
+  property_id: string;
+  project_id?: string | null;
+  vendor_id?: string | null;
+  vendor_name_raw?: string | null;
+  expense_date?: string | null;
+  description: string;
+  amount_cents: number;
+  currency_code?: string;
+  category: string;
+  record_treatment?: ExpenseRecordTreatment;
+  documentation_status?: ExpenseDocumentationStatus;
+  notes?: string | null;
+}
+
 export interface ApiEnvelope<T> {
   data?: T;
   error?: {
