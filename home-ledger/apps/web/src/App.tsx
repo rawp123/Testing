@@ -11,6 +11,7 @@ import { LoadingState } from "./components/LoadingState";
 import { DashboardPage } from "./dashboard/DashboardPage";
 import { DocumentsPage } from "./documents/DocumentsPage";
 import { ExpensesPage } from "./expenses/ExpensesPage";
+import { ExportsPage } from "./exports/ExportsPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
 
@@ -77,6 +78,13 @@ export function App() {
       ) : null}
       {state.status === "ready" && activeView === "documents" ? (
         <DocumentsPage
+          client={client}
+          workspaceId={state.workspace.workspaceId}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "exports" ? (
+        <ExportsPage
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}

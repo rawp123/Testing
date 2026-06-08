@@ -5,6 +5,8 @@ import type {
   DocumentFileIntentInput,
   DocumentFileIntentResponse,
   DocumentFileSummary,
+  ExportDownloadResponse,
+  ExportSummaryResponse,
   DocumentInput,
   DocumentRecord,
   ExpenseInput,
@@ -74,6 +76,10 @@ export interface HomeLedgerApiClient {
   getDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
   removeDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
   attachDocumentFile(workspaceId: string, documentId: string, file: File): Promise<DocumentFileSummary>;
+  getExportSummary(workspaceId: string): Promise<ExportSummaryResponse>;
+  downloadExpensesCsv(workspaceId: string): Promise<ExportDownloadResponse>;
+  downloadDocumentsCsv(workspaceId: string): Promise<ExportDownloadResponse>;
+  downloadFullJsonExport(workspaceId: string): Promise<ExportDownloadResponse>;
 }
 
 export type InitialDashboardState =
@@ -121,6 +127,27 @@ export function createHomeLedgerApiClient({
       throw normalizeApiError(response, payload);
     }
     return payload?.data as T;
+  }
+
+  async function download(path: string, fallbackFileName: string): Promise<ExportDownloadResponse> {
+    const response = await fetchImpl(`${normalizedBaseUrl}${path}`, {
+      method: "GET",
+      headers: {
+        Accept: "*/*",
+        ...headers
+      }
+    });
+
+    if (!response.ok) {
+      const payload = await readJsonPayload<unknown>(response);
+      throw normalizeApiError(response, payload);
+    }
+
+    return {
+      blob: await response.blob(),
+      file_name: fileNameFromContentDisposition(response.headers.get("content-disposition")) || fallbackFileName,
+      content_type: response.headers.get("content-type") || "application/octet-stream"
+    };
   }
 
   return Object.freeze({
@@ -323,6 +350,27 @@ export function createHomeLedgerApiClient({
           })
         }
       );
+    },
+    getExportSummary(workspaceId: string) {
+      return request<ExportSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/summary`);
+    },
+    downloadExpensesCsv(workspaceId: string) {
+      return download(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/expenses.csv`,
+        "home-ledger-expenses.csv"
+      );
+    },
+    downloadDocumentsCsv(workspaceId: string) {
+      return download(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/documents.csv`,
+        "home-ledger-documents.csv"
+      );
+    },
+    downloadFullJsonExport(workspaceId: string) {
+      return download(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/full.json`,
+        "home-ledger-full.json"
+      );
     }
   });
 }
@@ -405,6 +453,17 @@ function headersFrom(headers: RequestInit["headers"]): Record<string, string> {
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
   if (Array.isArray(headers)) return Object.fromEntries(headers);
   return headers as Record<string, string>;
+}
+
+function fileNameFromContentDisposition(value: string | null) {
+  const text = String(value || "");
+  const utf8Match = text.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) return sanitizeFileName(decodeURIComponent(utf8Match[1]));
+  const quotedMatch = text.match(/filename="([^"]+)"/i);
+  if (quotedMatch?.[1]) return sanitizeFileName(quotedMatch[1]);
+  const plainMatch = text.match(/filename=([^;]+)/i);
+  if (plainMatch?.[1]) return sanitizeFileName(plainMatch[1]);
+  return "";
 }
 
 function sanitizeFileName(value: string) {

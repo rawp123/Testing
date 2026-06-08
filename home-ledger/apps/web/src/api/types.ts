@@ -337,6 +337,27 @@ export interface DocumentFileIntentResponse {
   file: DocumentFileSummary;
 }
 
+export interface ExportSummaryResponse {
+  workspace_id: string;
+  generated_at: string;
+  property_count: number;
+  project_count: number;
+  expense_count: number;
+  total_expense_amount_cents: number;
+  document_count: number;
+  vendor_count: number;
+  review_later_count: number;
+  possible_improvement_total_cents: number;
+  repair_upkeep_total_cents: number;
+  text_available_document_count: number;
+  [key: string]: unknown;
+}
+
+export interface ExportDownloadResponse {
+  blob: Blob;
+  file_name: string;
+  content_type: string;
+}
 
 export interface ApiEnvelope<T> {
   data?: T;

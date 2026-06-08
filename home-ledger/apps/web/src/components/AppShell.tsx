@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type AppView = "dashboard" | "properties" | "projects" | "expenses" | "documents";
+export type AppView = "dashboard" | "properties" | "projects" | "expenses" | "documents" | "exports";
 
 const PRIMARY_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },
@@ -9,7 +9,7 @@ const PRIMARY_NAV_ITEMS = [
   { id: "expenses", label: "Expenses", icon: "▥", enabled: true },
   { id: "documents", label: "Documents", icon: "◇", enabled: true },
   { id: "calculators", label: "Calculators", icon: "▤", enabled: false },
-  { id: "exports", label: "Export & backup", icon: "↓", enabled: false }
+  { id: "exports", label: "Export", icon: "↓", enabled: true }
 ] as const;
 
 export function AppShell({

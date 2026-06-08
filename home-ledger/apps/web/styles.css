@@ -376,6 +376,14 @@ button {
   color: #ffffff;
 }
 
+.button:disabled,
+.compact-record-table button:disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
+  cursor: default;
+}
+
 @media (prefers-color-scheme: dark) {
   .button-primary,
   .compact-record-table button {
@@ -644,6 +652,45 @@ button {
   white-space: nowrap;
 }
 
+.export-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.export-summary-metric {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.export-summary-metric span,
+.export-summary-metric small {
+  color: var(--muted);
+  font-weight: 760;
+}
+
+.export-summary-metric span {
+  font-size: 0.82rem;
+}
+
+.export-summary-metric strong {
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.export-summary-metric small {
+  font-size: 0.78rem;
+}
+
+.export-download-message {
+  margin: 12px 0 0;
+}
+
 .empty-state {
   border: 1px dashed var(--border);
   border-radius: var(--radius-control);
@@ -809,6 +856,10 @@ button {
   .step-list {
     grid-template-columns: 1fr;
   }
+
+  .export-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
@@ -855,8 +906,12 @@ button {
     font-weight: 800;
   }
 
-.compact-record-table button {
+  .compact-record-table button {
   justify-self: start;
+  }
+
+  .export-summary-grid {
+    grid-template-columns: 1fr;
   }
 }
 

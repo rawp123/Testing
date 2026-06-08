@@ -426,6 +426,53 @@ describe("Home Ledger API client", () => {
     expect(calls[0].options.body).toContain("sha256");
   });
 
+  it("uses API-backed export endpoints and attachment filenames", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        if (String(url).endsWith("/exports/summary")) {
+          return jsonResponse({
+            data: {
+              workspace_id: "workspace/one",
+              generated_at: "2026-06-07T12:00:00.000Z",
+              property_count: 1,
+              project_count: 2,
+              expense_count: 3,
+              total_expense_amount_cents: 12345,
+              document_count: 4,
+              vendor_count: 5,
+              review_later_count: 1,
+              possible_improvement_total_cents: 10000,
+              repair_upkeep_total_cents: 2345,
+              text_available_document_count: 1
+            }
+          });
+        }
+        return blobResponse("id,name\n1,Office", {
+          contentType: String(url).endsWith(".json") ? "application/json; charset=utf-8" : "text/csv; charset=utf-8",
+          fileName: String(url).endsWith(".json") ? "home-ledger-full-2026-06-07.json" : "home-ledger-expenses-2026-06-07.csv"
+        });
+      }) as typeof fetch
+    });
+
+    const summary = await client.getExportSummary("workspace/one");
+    const expenses = await client.downloadExpensesCsv("workspace/one");
+    await client.downloadDocumentsCsv("workspace/one");
+    const full = await client.downloadFullJsonExport("workspace/one");
+
+    expect(summary.total_expense_amount_cents).toBe(12345);
+    expect(expenses.file_name).toBe("home-ledger-expenses-2026-06-07.csv");
+    expect(expenses.content_type).toContain("text/csv");
+    expect(full.file_name).toBe("home-ledger-full-2026-06-07.json");
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/exports/summary"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/exports/expenses.csv"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/exports/documents.csv"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/exports/full.json"]
+    ]);
+  });
 });
 
 function jsonResponse(payload: unknown, { status = 200 } = {}) {
@@ -433,6 +480,27 @@ function jsonResponse(payload: unknown, { status = 200 } = {}) {
     ok: status >= 200 && status < 300,
     status,
     text: async () => JSON.stringify(payload)
+  } as Response;
+}
+
+function blobResponse(body: string, {
+  contentType,
+  fileName,
+  status = 200
+}: {
+  contentType: string;
+  fileName: string;
+  status?: number;
+}) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: new Headers({
+      "content-disposition": `attachment; filename="${fileName}"`,
+      "content-type": contentType
+    }),
+    text: async () => body,
+    blob: async () => new Blob([body], { type: contentType })
   } as Response;
 }
 
