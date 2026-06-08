@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type AppView = "dashboard" | "follow-ups" | "properties" | "projects" | "vendors" | "expenses" | "documents" | "exports" | "settings" | "import";
+export type AppView = "dashboard" | "follow-ups" | "properties" | "projects" | "vendors" | "expenses" | "documents" | "exports" | "settings" | "import" | "billing";
 
 const PRIMARY_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },

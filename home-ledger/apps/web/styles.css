@@ -787,6 +787,28 @@ button {
   align-items: start;
 }
 
+.billing-grid {
+  align-items: start;
+}
+
+.billing-usage-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.billing-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.billing-control-grid .button {
+  width: 100%;
+}
+
 .migration-check-list {
   display: grid;
   gap: 8px;
@@ -996,6 +1018,10 @@ button {
   }
 
   .settings-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-control-grid {
     grid-template-columns: 1fr;
   }
 }

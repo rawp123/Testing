@@ -6,6 +6,7 @@ import {
 } from "./api/client";
 import { AppShell } from "./components/AppShell";
 import type { AppView } from "./components/AppShell";
+import { BillingPlanPage } from "./billing/BillingPlanPage";
 import { ErrorState } from "./components/ErrorState";
 import { LoadingState } from "./components/LoadingState";
 import { DashboardPage } from "./dashboard/DashboardPage";
@@ -117,6 +118,13 @@ export function App() {
       ) : null}
       {state.status === "ready" && activeView === "import" ? (
         <ImportMigrationPage
+          onNavigate={setActiveView}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "billing" ? (
+        <BillingPlanPage
+          dashboard={state.dashboard}
           onNavigate={setActiveView}
           workspaceName={state.workspace.workspaceName}
         />

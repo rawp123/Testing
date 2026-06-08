@@ -22,6 +22,8 @@ describe("Settings screen", () => {
     expect(html).toContain("Robert Parrish");
     expect(html).toContain("owner@example.test");
     expect(html).toContain("Development sign-in");
+    expect(html).toContain("Billing and plan");
+    expect(html).toContain("Open billing");
     expect(html).toContain("Data controls");
     expect(html).toContain("Open export");
     expect(html).toContain("Import and migration");
@@ -34,7 +36,7 @@ describe("Settings screen", () => {
     expect(html).toContain("organizes home records for professional review");
   });
 
-  it("uses existing navigation actions for export import and documents", () => {
+  it("uses existing navigation actions for billing export import and documents", () => {
     const html = renderToStaticMarkup(
       <SettingsView
         onNavigate={() => undefined}
@@ -43,6 +45,7 @@ describe("Settings screen", () => {
       />
     );
 
+    expect(html).toContain("Open billing");
     expect(html).toContain("Open export");
     expect(html).toContain("Open import");
     expect(html).toContain("Open documents");

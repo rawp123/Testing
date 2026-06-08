@@ -77,6 +77,15 @@ export function SettingsView({
               <dd>{signInLabel(session)}</dd>
             </div>
           </dl>
+          <div className="settings-action-list">
+            <div>
+              <strong>Billing and plan</strong>
+              <p>Review the future plan surface and current usage snapshot.</p>
+            </div>
+            <button className="button button-secondary" onClick={() => onNavigate("billing")} type="button">
+              Open billing
+            </button>
+          </div>
         </WorkspacePanel>
 
         <WorkspacePanel className="settings-section">
