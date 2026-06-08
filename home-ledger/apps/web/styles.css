@@ -321,6 +321,7 @@ button {
 .panel,
 .status-panel,
 .onboarding-panel {
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -606,6 +607,7 @@ button {
 }
 
 .table-wrap {
+  min-width: 0;
   overflow-x: auto;
   max-width: 100%;
 }

@@ -248,7 +248,7 @@ export function PropertiesView({
                 value={formValues.purchaseDate}
               />
             </FormField>
-            <FormField helper="Optional. Stored as cents." label="Purchase price">
+            <FormField helper="Optional. Enter dollars and cents." label="Purchase price">
               <input
                 inputMode="decimal"
                 name="purchase_price"

@@ -466,7 +466,7 @@ export function ExpensesView({
                 value={formValues.vendorNameRaw}
               />
             </FormField>
-            <FormField helper="Stored as cents." label="Amount">
+            <FormField helper="Enter dollars and cents." label="Amount">
               <input
                 inputMode="decimal"
                 name="amount"

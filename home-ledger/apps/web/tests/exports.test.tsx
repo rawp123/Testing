@@ -21,7 +21,7 @@ describe("Export screen", () => {
     expect(generatedAtLabel(createSummary())).toBe("Summary generated 06/07/2026");
   });
 
-  it("renders API-backed export options and unavailable states", () => {
+  it("renders available export options and unavailable states", () => {
     const html = renderToStaticMarkup(
       <ExportsView
         onDownload={() => undefined}
@@ -83,7 +83,7 @@ describe("Export screen", () => {
     expect(unavailableRows.every((row) => !row.kind)).toBe(true);
     expect(html).toContain("Downloading");
     expect(html).toContain("disabled=\"\"");
-    expect(html).toContain("ZIP package export is not exposed by the current SaaS API.");
+    expect(html).toContain("ZIP package export is not connected yet.");
   });
 });
 

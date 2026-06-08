@@ -50,7 +50,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "review-packet-pdf",
     name: "Review packet",
-    includes: "Printable packet export is not exposed by the current SaaS API.",
+    includes: "Printable packet export is not connected yet.",
     format: "PDF",
     status: "unavailable",
     actionLabel: "Unavailable"
@@ -58,7 +58,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "excel-workbook",
     name: "Workbook",
-    includes: "Excel workbook export is not exposed by the current SaaS API.",
+    includes: "Excel workbook export is not connected yet.",
     format: "Excel",
     status: "unavailable",
     actionLabel: "Unavailable"
@@ -66,7 +66,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "document-package",
     name: "Document package",
-    includes: "ZIP package export is not exposed by the current SaaS API.",
+    includes: "ZIP package export is not connected yet.",
     format: "ZIP",
     status: "unavailable",
     actionLabel: "Unavailable"

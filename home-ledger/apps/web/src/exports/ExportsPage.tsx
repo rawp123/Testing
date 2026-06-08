@@ -135,7 +135,7 @@ export function ExportsView({
       </WorkspacePanel>
 
       <FilterPanel title="Scope">
-        <span>Workspace-wide exports are available. Property and project-scoped exports are not exposed by the current API.</span>
+        <span>Workspace-wide exports are available. Property and project-specific exports are not connected yet.</span>
       </FilterPanel>
 
       <WorkspacePanel>
@@ -167,7 +167,7 @@ function exportColumns({
       render: (row) => (
         <div className="record-stack">
           <strong>{row.name}</strong>
-          <span>{row.status === "available" ? "API-backed download" : "Not available yet"}</span>
+          <span>{row.status === "available" ? "Available download" : "Not available yet"}</span>
         </div>
       )
     },

@@ -26,7 +26,10 @@ type AppState =
   | { status: "error"; message: string }
   | InitialDashboardState;
 
-const client = createHomeLedgerApiClient();
+const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+const client = createHomeLedgerApiClient({
+  baseUrl: viteEnv?.VITE_API_BASE_URL
+});
 
 export function App() {
   const [state, setState] = useState<AppState>({ status: "loading" });
