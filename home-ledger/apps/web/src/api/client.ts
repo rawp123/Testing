@@ -17,7 +17,9 @@ import type {
   ProjectRecord,
   PropertyInput,
   PropertyRecord,
-  SessionResponse
+  SessionResponse,
+  VendorInput,
+  VendorRecord
 } from "./types";
 
 const DEFAULT_API_BASE_URL = "/api/v1";
@@ -59,6 +61,10 @@ export interface HomeLedgerApiClient {
   createProperty(workspaceId: string, input: PropertyInput): Promise<PropertyRecord>;
   updateProperty(workspaceId: string, propertyId: string, input: Partial<PropertyInput>): Promise<PropertyRecord>;
   archiveProperty(workspaceId: string, propertyId: string): Promise<PropertyRecord>;
+  listVendors(workspaceId: string): Promise<VendorRecord[]>;
+  createVendor(workspaceId: string, input: VendorInput): Promise<VendorRecord>;
+  updateVendor(workspaceId: string, vendorId: string, input: Partial<VendorInput>): Promise<VendorRecord>;
+  archiveVendor(workspaceId: string, vendorId: string): Promise<VendorRecord>;
   listProjects(workspaceId: string): Promise<ProjectRecord[]>;
   createProject(workspaceId: string, input: ProjectInput): Promise<ProjectRecord>;
   updateProject(workspaceId: string, projectId: string, input: Partial<ProjectInput>): Promise<ProjectRecord>;
@@ -186,6 +192,32 @@ export function createHomeLedgerApiClient({
     archiveProperty(workspaceId: string, propertyId: string) {
       return request<PropertyRecord>(
         `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties/${encodeURIComponent(requireId(propertyId, "propertyId"))}/archive`,
+        { method: "POST" }
+      );
+    },
+    listVendors(workspaceId: string) {
+      return request<VendorRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/vendors`);
+    },
+    createVendor(workspaceId: string, input: VendorInput) {
+      return request<VendorRecord>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/vendors`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    },
+    updateVendor(workspaceId: string, vendorId: string, input: Partial<VendorInput>) {
+      return request<VendorRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/vendors/${encodeURIComponent(requireId(vendorId, "vendorId"))}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    archiveVendor(workspaceId: string, vendorId: string) {
+      return request<VendorRecord>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/vendors/${encodeURIComponent(requireId(vendorId, "vendorId"))}/archive`,
         { method: "POST" }
       );
     },

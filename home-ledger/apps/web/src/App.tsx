@@ -14,6 +14,7 @@ import { ExpensesPage } from "./expenses/ExpensesPage";
 import { ExportsPage } from "./exports/ExportsPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
+import { VendorsPage } from "./vendors/VendorsPage";
 
 type AppState =
   | { status: "loading" }
@@ -64,6 +65,13 @@ export function App() {
       ) : null}
       {state.status === "ready" && activeView === "projects" ? (
         <ProjectsPage
+          client={client}
+          workspaceId={state.workspace.workspaceId}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "vendors" ? (
+        <VendorsPage
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}

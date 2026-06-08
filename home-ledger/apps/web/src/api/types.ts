@@ -155,6 +155,37 @@ export interface PropertyInput {
   is_primary?: boolean;
 }
 
+export type VendorStatus = "active" | "archived" | string;
+
+export interface VendorRecord {
+  id: string;
+  name: string;
+  normalized_name?: string | null;
+  category?: string | null;
+  contact_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  notes?: string | null;
+  status?: VendorStatus;
+  source_confidence?: string | null;
+  archived_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface VendorInput {
+  name: string;
+  category?: string | null;
+  contact_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  notes?: string | null;
+  status?: VendorStatus;
+}
+
 export type ProjectStatus = "planned" | "in_progress" | "blocked" | "completed" | "archived" | string;
 
 export interface ProjectRecord {

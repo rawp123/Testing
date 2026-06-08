@@ -221,6 +221,46 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).not.toContain("purchasePrice");
   });
 
+  it("uses snake_case vendor API requests", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        return jsonResponse({
+          data: String(url).includes("/vendors/vendor-1")
+            ? createVendorPayload({ id: "vendor-1", name: "Cedarline Carpentry updated" })
+            : [createVendorPayload()]
+        });
+      }) as typeof fetch
+    });
+
+    await client.listVendors("workspace/one");
+    await client.createVendor("workspace/one", {
+      name: "Cedarline Carpentry",
+      category: "deck/patio/porch",
+      contact_name: "Morgan Lee",
+      phone: "555-0100",
+      email: "morgan@example.test",
+      website: "https://cedarline.example",
+      notes: null,
+      status: "active"
+    });
+    await client.updateVendor("workspace/one", "vendor-1", { contact_name: "Morgan A. Lee" });
+    await client.archiveVendor("workspace/one", "vendor-1");
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/vendors"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/vendors"],
+      ["PATCH", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/vendors/vendor-1"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/vendors/vendor-1/archive"]
+    ]);
+    expect(calls[1].options.body).toContain("contact_name");
+    expect(calls[1].options.body).not.toContain("contactName");
+    expect(calls[1].options.body).not.toContain("normalizedName");
+    expect(calls[1].options.body).not.toContain("source_confidence");
+  });
+
   it("uses snake_case project API requests", async () => {
     const calls: Array<{ url: string; options: RequestInit }> = [];
     const client = createHomeLedgerApiClient({
@@ -569,6 +609,26 @@ function createProjectPayload(overrides: Record<string, unknown> = {}) {
     completeness_override_note: null,
     completeness_overridden_at: null,
     open_item_count: 2,
+    archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createVendorPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "vendor-1",
+    name: "Cedarline Carpentry",
+    normalized_name: "cedarline carpentry",
+    category: "deck/patio/porch",
+    contact_name: "Morgan Lee",
+    phone: "555-0100",
+    email: "morgan@example.test",
+    website: "https://cedarline.example",
+    notes: null,
+    status: "active",
+    source_confidence: "user_confirmed",
     archived_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",

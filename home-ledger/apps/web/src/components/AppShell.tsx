@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 
-export type AppView = "dashboard" | "properties" | "projects" | "expenses" | "documents" | "exports";
+export type AppView = "dashboard" | "properties" | "projects" | "vendors" | "expenses" | "documents" | "exports";
 
 const PRIMARY_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },
   { id: "properties", label: "Property", icon: "⌁", enabled: true },
   { id: "projects", label: "Projects", icon: "▣", enabled: true },
+  { id: "vendors", label: "Vendors", icon: "◎", enabled: true },
   { id: "expenses", label: "Expenses", icon: "▥", enabled: true },
   { id: "documents", label: "Documents", icon: "◇", enabled: true },
   { id: "calculators", label: "Calculators", icon: "▤", enabled: false },
