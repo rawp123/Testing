@@ -12,6 +12,42 @@ export const DOCUMENT_TYPE_OPTIONS = [
   { value: "other", label: "Other" }
 ] as const;
 
+export const MAX_DOCUMENT_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+export const DOCUMENT_FILE_HELPER_COPY = "PDF, image, receipt, invoice, permit, or note. Maximum file size: 25 MB.";
+
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/heic",
+  "image/heif",
+  "text/plain"
+]);
+
+const BLOCKED_DOCUMENT_EXTENSIONS = [
+  ".app",
+  ".bat",
+  ".bin",
+  ".cmd",
+  ".com",
+  ".dmg",
+  ".exe",
+  ".jar",
+  ".js",
+  ".msi",
+  ".ps1",
+  ".scr",
+  ".sh",
+  ".vbs",
+  ".zip"
+];
+
+const BLOCKED_DOCUMENT_MIME_PREFIXES = [
+  "application/x-",
+  "text/html",
+  "text/javascript"
+];
+
 export interface DocumentFormValues {
   propertyId: string;
   projectId: string;
@@ -52,9 +88,7 @@ export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
       type: documentTypeLabel(document.document_type),
       linkedTo: [document.property_name, document.project_name, document.expense_description].filter(Boolean).join(" · ") || "Not linked",
       fileStatus: fileAvailabilityLabel(document.file_availability),
-      fileMeta: file
-        ? `${safeFileName(file.original_file_name || "Attached file")} · ${file.mime_type || "Unknown type"} · ${formatFileSize(file.size_bytes)}`
-        : document.file_status_note || "No file attached",
+      fileMeta: file ? formatDocumentFileSummary(file) : document.file_status_note || "No file attached",
       documentDate: document.document_date ? formatDate(document.document_date) : "No date",
       openItems: formatOpenItemCount(document.open_item_count),
       openItemCount: document.open_item_count,
@@ -151,9 +185,47 @@ export function formatFileSize(value: number | string | null | undefined) {
   return `${(bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`;
 }
 
+export function formatDocumentFileSummary(file: {
+  original_file_name?: string | null;
+  mime_type?: string | null;
+  size_bytes?: number | string | null;
+} | null | undefined) {
+  if (!file) return "No file attached";
+  return `${safeFileName(file.original_file_name || "Attached file")} · ${file.mime_type || "Unknown type"} · ${formatFileSize(file.size_bytes)}`;
+}
+
+export function documentFileHelperFor(document?: DocumentRecord | null) {
+  if (document?.file) {
+    return `Current file: ${formatDocumentFileSummary(document.file)}. Choose a new file to replace it. Maximum file size: 25 MB.`;
+  }
+  return DOCUMENT_FILE_HELPER_COPY;
+}
+
+export function getDocumentFileValidationMessage(file: File | null | undefined) {
+  if (!file) return "";
+  const fileName = safeFileName(file.name);
+  if (file.size > MAX_DOCUMENT_FILE_SIZE_BYTES) {
+    return `Maximum file size: ${formatFileSize(MAX_DOCUMENT_FILE_SIZE_BYTES)}.`;
+  }
+  const mimeType = String(file.type || "application/octet-stream").toLowerCase();
+  if (!ALLOWED_DOCUMENT_MIME_TYPES.has(mimeType) || isBlockedDocumentFile({ fileName, mimeType })) {
+    return "Use a PDF, image, receipt, invoice, permit, or note file.";
+  }
+  return "";
+}
+
 export function safeFileName(value: string | null | undefined) {
   const text = String(value || "").split(/[/\\]/).filter(Boolean).at(-1) || "";
   return text.replace(/[\u0000-\u001f\u007f]/g, "").trim();
+}
+
+function isBlockedDocumentFile({ fileName, mimeType }: { fileName: string; mimeType: string }) {
+  const loweredName = fileName.toLowerCase();
+  const loweredMimeType = mimeType.toLowerCase();
+  return (
+    BLOCKED_DOCUMENT_EXTENSIONS.some((extension) => loweredName.endsWith(extension)) ||
+    BLOCKED_DOCUMENT_MIME_PREFIXES.some((prefix) => loweredMimeType.startsWith(prefix))
+  );
 }
 
 function formatOpenItemCount(value: unknown) {

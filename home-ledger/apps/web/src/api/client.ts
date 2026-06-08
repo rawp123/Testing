@@ -1,6 +1,7 @@
 import type {
   ApiEnvelope,
   DashboardResponse,
+  DocumentFileAttachResult,
   DocumentFileCompleteInput,
   DocumentFileIntentInput,
   DocumentFileIntentResponse,
@@ -85,7 +86,7 @@ export interface HomeLedgerApiClient {
   completeDocumentFileUpload(workspaceId: string, documentId: string, input: DocumentFileCompleteInput): Promise<DocumentFileSummary>;
   getDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
   removeDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
-  attachDocumentFile(workspaceId: string, documentId: string, file: File): Promise<DocumentFileSummary>;
+  attachDocumentFile(workspaceId: string, documentId: string, file: File): Promise<DocumentFileAttachResult>;
   getExportSummary(workspaceId: string): Promise<ExportSummaryResponse>;
   downloadExpensesCsv(workspaceId: string): Promise<ExportDownloadResponse>;
   downloadDocumentsCsv(workspaceId: string): Promise<ExportDownloadResponse>;
@@ -376,6 +377,7 @@ export function createHomeLedgerApiClient({
         }
       );
 
+      const uploadUrlAvailable = Boolean(intent.upload_url);
       if (intent.upload_url) {
         const uploadResponse = await fetchImpl(intent.upload_url, {
           method: intent.upload_method === "signed_url_put" ? "PUT" : "POST",
@@ -394,7 +396,7 @@ export function createHomeLedgerApiClient({
         }
       }
 
-      return request<DocumentFileSummary>(
+      const completedFile = await request<DocumentFileSummary>(
         `/workspaces/${workspace}/documents/${document}/file-complete`,
         {
           method: "POST",
@@ -407,6 +409,14 @@ export function createHomeLedgerApiClient({
           })
         }
       );
+      return {
+        file: completedFile,
+        upload_method: intent.upload_method || null,
+        upload_url_available: uploadUrlAvailable,
+        browser_upload_performed: uploadUrlAvailable,
+        completed_without_browser_upload: !uploadUrlAvailable,
+        max_size_bytes: intent.max_size_bytes ?? null
+      };
     },
     getExportSummary(workspaceId: string) {
       return request<ExportSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/summary`);

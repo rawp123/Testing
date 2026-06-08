@@ -503,15 +503,66 @@ describe("Home Ledger API client", () => {
       }) as typeof fetch
     });
 
-    await client.attachDocumentFile("workspace/one", "document-1", new File(["hello"], "/Users/robert/receipt.txt", { type: "text/plain" }));
+    const result = await client.attachDocumentFile("workspace/one", "document-1", new File(["hello"], "/Users/robert/receipt.txt", { type: "text/plain" }));
 
     expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
       ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-intent"],
       ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"]
     ]);
+    expect(result).toMatchObject({
+      upload_method: "api_adapter",
+      upload_url_available: false,
+      browser_upload_performed: false,
+      completed_without_browser_upload: true
+    });
+    expect(result.file).toMatchObject({ original_file_name: "receipt.txt", status: "available" });
     expect(calls[0].options.body).toContain("receipt.txt");
     expect(calls[0].options.body).not.toContain("/Users/robert");
     expect(calls[0].options.body).toContain("sha256");
+  });
+
+  it("uploads document bytes when a signed upload URL is available", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        const textUrl = String(url);
+        if (textUrl.endsWith("/file-intent")) {
+          return jsonResponse({
+            data: {
+              upload_id: "file-1",
+              document_file_id: "file-1",
+              upload_method: "signed_url_put",
+              upload_url: "https://storage.example.test/signed-upload?token=secret",
+              upload_headers: { "content-type": "application/pdf" },
+              upload_token: null,
+              expires_at: "2026-06-07T12:10:00.000Z",
+              max_size_bytes: 26214400,
+              file: createDocumentFilePayload({ original_file_name: "receipt.pdf", status: "pending_upload" })
+            }
+          });
+        }
+        if (textUrl === "https://storage.example.test/signed-upload?token=secret") {
+          return new Response(null, { status: 200 });
+        }
+        return jsonResponse({ data: createDocumentFilePayload({ original_file_name: "receipt.pdf", status: "available" }) });
+      }) as typeof fetch
+    });
+
+    const result = await client.attachDocumentFile("workspace/one", "document-1", new File(["pdf"], "receipt.pdf", { type: "application/pdf" }));
+
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-intent"],
+      ["PUT", "https://storage.example.test/signed-upload?token=secret"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"]
+    ]);
+    expect(result).toMatchObject({
+      upload_method: "signed_url_put",
+      upload_url_available: true,
+      browser_upload_performed: true,
+      completed_without_browser_upload: false
+    });
   });
 
   it("uses API-backed export endpoints and attachment filenames", async () => {

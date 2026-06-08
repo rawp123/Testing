@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { HomeLedgerApiClient } from "../api/client";
+import { HomeLedgerApiError, type HomeLedgerApiClient } from "../api/client";
 import type { DocumentRecord, ExpenseRecord, ProjectRecord, PropertyRecord } from "../api/types";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
@@ -11,10 +11,13 @@ import { PageTitle } from "../components/PageTitle";
 import { PanelHeader, WorkspacePanel } from "../components/WorkspacePanel";
 import {
   DOCUMENT_TYPE_OPTIONS,
+  documentFileHelperFor,
   documentToFormValues,
   documentTypeLabel,
   expenseOptionsFromRecords,
   fileAvailabilityLabel,
+  formatDocumentFileSummary,
+  getDocumentFileValidationMessage,
   formValuesToDocumentInput,
   projectOptionsFromRecords,
   propertyOptionsFromRecords,
@@ -45,6 +48,7 @@ export function DocumentsPage({
   const [formValues, setFormValues] = useState<DocumentFormValues>(() => documentToFormValues());
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formError, setFormError] = useState("");
+  const [noticeMessage, setNoticeMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
@@ -88,6 +92,7 @@ export function DocumentsPage({
     setFormValues(documentToFormValues(null, propertyOptions[0]?.value || ""));
     setSelectedFile(null);
     setFormError("");
+    setNoticeMessage("");
     setModalMode("create");
   };
 
@@ -96,6 +101,7 @@ export function DocumentsPage({
     setFormValues(documentToFormValues(document, propertyOptions[0]?.value || ""));
     setSelectedFile(null);
     setFormError("");
+    setNoticeMessage("");
     setModalMode("edit");
   };
 
@@ -117,6 +123,13 @@ export function DocumentsPage({
   };
 
   const saveDocument = async () => {
+    setNoticeMessage("");
+    setFormError("");
+    const fileValidationMessage = getDocumentFileValidationMessage(selectedFile);
+    if (fileValidationMessage) {
+      setFormError(fileValidationMessage);
+      return;
+    }
     const input = formValuesToDocumentInput(formValues, selectedFile?.name || "");
     if (!input.display_name) {
       setFormError("Name is required unless a file is selected.");
@@ -132,12 +145,17 @@ export function DocumentsPage({
         ? await client.updateDocument(workspaceId, selectedDocument.id, input)
         : await client.createDocument(workspaceId, input);
       if (selectedFile) {
-        await client.attachDocumentFile(workspaceId, document.id, selectedFile);
+        const attachResult = await client.attachDocumentFile(workspaceId, document.id, selectedFile);
+        setNoticeMessage(attachResult.completed_without_browser_upload
+          ? "File details attached. This environment does not provide a browser upload URL, so file bytes were not uploaded."
+          : "Document and attached file saved.");
+      } else {
+        setNoticeMessage("Document saved.");
       }
       closeModal();
       await refreshDocuments();
-    } catch {
-      setFormError("Document could not be saved.");
+    } catch (error) {
+      setFormError(documentFileActionError(error, "Document could not be saved."));
     }
   };
 
@@ -158,38 +176,38 @@ export function DocumentsPage({
   };
 
   const removeFile = async (document: DocumentRecord) => {
+    setNoticeMessage("");
     try {
       await client.removeDocumentFile(workspaceId, document.id);
       await refreshDocuments();
-    } catch {
+      setNoticeMessage("Attached file removed. The document record was kept.");
+    } catch (error) {
       setState((current) => ({
         status: "error",
         documents: current.documents,
         properties: current.properties,
         projects: current.projects,
         expenses: current.expenses,
-        message: "File could not be removed."
+        message: documentFileActionError(error, "File could not be removed.")
       }));
     }
   };
 
   const downloadFile = async (document: DocumentRecord) => {
+    setNoticeMessage("");
     try {
       const file = await client.getDocumentFile(workspaceId, document.id);
       if (file.download_url) {
         globalThis.open?.(file.download_url, "_blank", "noopener,noreferrer");
+        setNoticeMessage("File link opened in a new tab.");
         return;
       }
+      setNoticeMessage("File details are attached. This environment does not provide a browser download URL.");
+    } catch (error) {
       setState((current) => ({
         ...current,
         status: "error",
-        message: "File metadata is available. No download URL is configured for this environment."
-      }));
-    } catch {
-      setState((current) => ({
-        ...current,
-        status: "error",
-        message: "File could not be opened."
+        message: documentFileActionError(error, "File could not be opened.")
       }));
     }
   };
@@ -204,6 +222,7 @@ export function DocumentsPage({
       formValues={formValues}
       loading={state.status === "loading"}
       modalMode={modalMode}
+      noticeMessage={noticeMessage}
       onArchiveDocument={archiveDocument}
       onChangeFilter={setActiveFilter}
       onCloseModal={closeModal}
@@ -232,6 +251,7 @@ export function DocumentsView({
   formValues,
   loading = false,
   modalMode = null,
+  noticeMessage = "",
   onArchiveDocument,
   onChangeFilter,
   onCloseModal,
@@ -256,6 +276,7 @@ export function DocumentsView({
   formValues: DocumentFormValues;
   loading?: boolean;
   modalMode?: "create" | "edit" | null;
+  noticeMessage?: string;
   onArchiveDocument: (document: DocumentRecord) => void;
   onChangeFilter: (filter: string) => void;
   onCloseModal: () => void;
@@ -352,6 +373,9 @@ export function DocumentsView({
       onFormChange({ ...formValues, displayName: safeFileName(file.name) });
     }
   };
+  const selectedDocumentFile = selectedDocument?.file || null;
+  const fileInputLabel = selectedDocumentFile ? "Replace file" : "File";
+  const selectedFileLabel = selectedDocumentFile ? "Replacement file" : "Selected file";
 
   return (
     <div className="page-stack">
@@ -381,6 +405,7 @@ export function DocumentsView({
       <WorkspacePanel className="documents-panel">
         <PanelHeader icon="◇" title="Documents" />
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
+        {noticeMessage ? <div className="inline-notice" role="status">{noticeMessage}</div> : null}
         {loading ? <p className="muted-copy">Loading documents.</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title="No documents">Add receipts, invoices, permits, photos, contracts, or notes.</EmptyState>
@@ -411,14 +436,20 @@ export function DocumentsView({
           title={modalMode === "edit" ? "Edit document" : "Add document"}
         >
           {formError ? <div className="inline-error" role="alert">{formError}</div> : null}
-          <FormField helper="PDF, image, receipt, invoice, permit, or note. Maximum file size: 25 MB." label="File">
+          {selectedDocumentFile ? (
+            <div className="file-summary-panel">
+              <strong>Attached file</strong>
+              <span>{formatDocumentFileSummary(selectedDocumentFile)}</span>
+            </div>
+          ) : null}
+          <FormField helper={documentFileHelperFor(selectedDocument)} label={fileInputLabel}>
             <input
               name="file"
               onChange={(event) => changeFile(event.currentTarget.files?.[0] || null)}
               type="file"
             />
           </FormField>
-          {selectedFileName ? <p className="helper-note">Selected file: {safeFileName(selectedFileName)}</p> : null}
+          {selectedFileName ? <p className="helper-note">{selectedFileLabel}: {safeFileName(selectedFileName)}</p> : null}
           <div className="form-grid two-column">
             <FormField label="Property">
               <select
@@ -532,4 +563,14 @@ function filterDocumentRows(rows: DocumentRow[], filter: string) {
     return rows.filter((row) => row.source.document_type === documentType);
   }
   return rows;
+}
+
+function documentFileActionError(error: unknown, fallback: string) {
+  if (error instanceof HomeLedgerApiError) {
+    if (error.status === 403) return "You can view documents, but you do not have permission to change files.";
+    if (error.status === 413) return "Maximum file size: 25 MB.";
+    if (error.status === 415) return "Use a PDF, image, receipt, invoice, permit, or note file.";
+    return error.message || fallback;
+  }
+  return fallback;
 }

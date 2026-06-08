@@ -7,6 +7,7 @@ import {
   fileAvailabilityLabel,
   formValuesToDocumentInput,
   formatFileSize,
+  getDocumentFileValidationMessage,
   propertyOptionsFromRecords,
   safeFileName,
   toDocumentRows
@@ -56,6 +57,7 @@ describe("Documents screen", () => {
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
         workspaceName="Home records"
+        noticeMessage="File details are attached. This environment does not provide a browser download URL."
       />
     );
 
@@ -69,8 +71,11 @@ describe("Documents screen", () => {
     expect(html).toContain("Remove file");
     expect(html).toContain("Archive");
     expect(html).toContain("1 open");
+    expect(html).toContain("This environment does not provide a browser download URL.");
     expect(html).not.toContain("undefined");
     expect(html).not.toContain("null");
+    expect(html).not.toContain("storage_key");
+    expect(html).not.toContain("signed-upload");
   });
 
   it("renders empty and filtered states with direct copy", () => {
@@ -105,7 +110,10 @@ describe("Documents screen", () => {
   it("renders add and edit modal fields with dependent expense options and upload control", () => {
     const html = renderToStaticMarkup(
       <DocumentsView
-        documents={[createDocument()]}
+        documents={[createDocument({
+          file_availability: "available",
+          file: createDocumentFile()
+        })]}
         expenses={[
           createExpense({
             vendor_id: "vendor-1",
@@ -134,7 +142,10 @@ describe("Documents screen", () => {
           createProperty(),
           createProperty({ id: "property-2", name: "Rental" })
         ])}
-        selectedDocument={createDocument()}
+        selectedDocument={createDocument({
+          file_availability: "available",
+          file: createDocumentFile()
+        })}
         selectedFileName="/tmp/new-receipt.pdf"
         workspaceName="Home records"
       />
@@ -142,8 +153,11 @@ describe("Documents screen", () => {
 
     expect(html).toContain("Edit document");
     expect(html).toContain("Save document");
+    expect(html).toContain("Attached file");
+    expect(html).toContain("Current file: receipt.pdf");
+    expect(html).toContain("Replace file");
     expect(html).toContain("type=\"file\"");
-    expect(html).toContain("Selected file: new-receipt.pdf");
+    expect(html).toContain("Replacement file: new-receipt.pdf");
     expect(html).toContain("Linked expense");
     expect(html).toContain("Saved Cedarline");
     expect(html).not.toContain("Legacy Cedarline");
@@ -178,6 +192,16 @@ describe("Documents screen", () => {
       file_availability: "not_uploaded",
       file_status_note: null
     });
+  });
+
+  it("validates selected document files before upload", () => {
+    expect(getDocumentFileValidationMessage(new File(["hello"], "receipt.txt", { type: "text/plain" }))).toBe("");
+    expect(getDocumentFileValidationMessage(new File(["x"], "script.js", { type: "text/javascript" }))).toBe("Use a PDF, image, receipt, invoice, permit, or note file.");
+    expect(getDocumentFileValidationMessage({
+      name: "large.pdf",
+      size: 26 * 1024 * 1024,
+      type: "application/pdf"
+    } as File)).toBe("Maximum file size: 25 MB.");
   });
 });
 

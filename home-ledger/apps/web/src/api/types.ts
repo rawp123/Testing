@@ -377,6 +377,15 @@ export interface DocumentFileIntentResponse {
   file: DocumentFileSummary;
 }
 
+export interface DocumentFileAttachResult {
+  file: DocumentFileSummary;
+  upload_method?: string | null;
+  upload_url_available: boolean;
+  browser_upload_performed: boolean;
+  completed_without_browser_upload: boolean;
+  max_size_bytes?: number | null;
+}
+
 export interface ExportSummaryResponse {
   workspace_id: string;
   generated_at: string;
