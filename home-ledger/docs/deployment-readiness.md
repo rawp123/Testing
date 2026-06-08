@@ -4,6 +4,8 @@ This document describes the current deployment configuration contract for the Ho
 
 Home Ledger organizes home records for professional review. Deployment copy and configuration should preserve that boundary and avoid tax, legal, accounting, or compliance conclusions.
 
+Provider and deployment target recommendations are documented in `docs/saas-provider-deployment-decision.md`.
+
 ## Runtime Services
 
 Required for a production-like SaaS deployment:
