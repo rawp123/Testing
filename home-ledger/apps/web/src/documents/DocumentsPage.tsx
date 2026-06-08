@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { HomeLedgerApiError, type HomeLedgerApiClient } from "../api/client";
-import type { DocumentRecord, ExpenseRecord, ProjectRecord, PropertyRecord } from "../api/types";
+import type { DocumentOcrTextResponse, DocumentRecord, ExpenseRecord, ProjectRecord, PropertyRecord } from "../api/types";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
 import { EmptyState } from "../components/EmptyState";
@@ -33,6 +33,12 @@ type DocumentsState =
   | { status: "ready"; documents: DocumentRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; expenses: ExpenseRecord[] }
   | { status: "error"; documents: DocumentRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; expenses: ExpenseRecord[]; message: string };
 
+type OcrTextModalState =
+  | { status: "closed" }
+  | { status: "loading"; document: DocumentRecord }
+  | { status: "ready"; document: DocumentRecord; text: DocumentOcrTextResponse }
+  | { status: "error"; document: DocumentRecord; message: string };
+
 export function DocumentsPage({
   client,
   workspaceId,
@@ -50,6 +56,7 @@ export function DocumentsPage({
   const [formError, setFormError] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [ocrTextModal, setOcrTextModal] = useState<OcrTextModalState>({ status: "closed" });
 
   useEffect(() => {
     let cancelled = false;
@@ -212,6 +219,38 @@ export function DocumentsPage({
     }
   };
 
+  const requestOcr = async (document: DocumentRecord) => {
+    setNoticeMessage("");
+    try {
+      const result = await client.requestDocumentOcr(workspaceId, document.id);
+      await refreshDocuments();
+      setNoticeMessage(result.text_available
+        ? "Document text is available."
+        : "Document text reading requested.");
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        status: "error",
+        message: documentOcrActionError(error, "Document text could not be requested.")
+      }));
+    }
+  };
+
+  const readOcrText = async (document: DocumentRecord) => {
+    setNoticeMessage("");
+    setOcrTextModal({ status: "loading", document });
+    try {
+      const text = await client.getDocumentOcrText(workspaceId, document.id);
+      setOcrTextModal({ status: "ready", document, text });
+    } catch (error) {
+      setOcrTextModal({
+        status: "error",
+        document,
+        message: documentOcrActionError(error, "Document text could not be opened.")
+      });
+    }
+  };
+
   return (
     <DocumentsView
       activeFilter={activeFilter}
@@ -231,12 +270,16 @@ export function DocumentsPage({
       onFileChange={setSelectedFile}
       onFormChange={setFormValues}
       onNewDocument={openCreate}
+      onReadOcrText={readOcrText}
       onRemoveFile={removeFile}
+      onRequestOcr={requestOcr}
       onSaveDocument={saveDocument}
+      onCloseOcrText={() => setOcrTextModal({ status: "closed" })}
       projects={state.projects}
       propertyOptions={propertyOptions}
       selectedDocument={selectedDocument}
       selectedFileName={selectedFile?.name || ""}
+      ocrTextModal={ocrTextModal}
       workspaceName={workspaceName}
     />
   );
@@ -260,8 +303,12 @@ export function DocumentsView({
   onFileChange,
   onFormChange,
   onNewDocument,
+  onReadOcrText,
   onRemoveFile,
+  onRequestOcr,
   onSaveDocument,
+  onCloseOcrText,
+  ocrTextModal = { status: "closed" },
   projects,
   propertyOptions,
   selectedDocument,
@@ -285,8 +332,12 @@ export function DocumentsView({
   onFileChange: (file: File | null) => void;
   onFormChange: (values: DocumentFormValues) => void;
   onNewDocument: () => void;
+  onReadOcrText: (document: DocumentRecord) => void;
   onRemoveFile: (document: DocumentRecord) => void;
+  onRequestOcr: (document: DocumentRecord) => void;
   onSaveDocument: () => void;
+  onCloseOcrText: () => void;
+  ocrTextModal?: OcrTextModalState;
   projects: ProjectRecord[];
   propertyOptions: SelectOption[];
   selectedDocument?: DocumentRecord | null;
@@ -323,6 +374,16 @@ export function DocumentsView({
         </div>
       )
     },
+    {
+      key: "ocr",
+      header: "Text",
+      render: (row) => (
+        <div className="record-stack">
+          <strong>{row.ocrStatus}</strong>
+          <span>{row.ocrMeta}</span>
+        </div>
+      )
+    },
     { key: "date", header: "Date", render: (row) => row.documentDate },
     { key: "openItems", header: "Open items", align: "right", render: (row) => row.openItems },
     {
@@ -333,12 +394,14 @@ export function DocumentsView({
         <div className="row-actions">
           {row.hasFile ? <button onClick={() => onDownloadFile(row.source)} type="button">View file</button> : null}
           <button onClick={() => onEditDocument(row.source)} type="button">{row.hasFile ? "Edit" : "Attach file"}</button>
+          {row.canReadOcrText ? <button onClick={() => onReadOcrText(row.source)} type="button">Read text</button> : null}
+          {row.canRequestOcr && !row.canReadOcrText ? <button onClick={() => onRequestOcr(row.source)} type="button">Request text</button> : null}
           {row.hasFile ? <button onClick={() => onRemoveFile(row.source)} type="button">Remove file</button> : null}
           <button onClick={() => onArchiveDocument(row.source)} type="button">Archive</button>
         </div>
       )
     }
-  ], [onArchiveDocument, onDownloadFile, onEditDocument, onRemoveFile]);
+  ], [onArchiveDocument, onDownloadFile, onEditDocument, onReadOcrText, onRemoveFile, onRequestOcr]);
 
   const changeProperty = (propertyId: string) => {
     const currentProject = projects.find((project) => project.id === formValues.projectId);
@@ -525,6 +588,28 @@ export function DocumentsView({
           </FormField>
         </Modal>
       ) : null}
+
+      {ocrTextModal.status !== "closed" ? (
+        <Modal
+          footer={<button className="button button-primary" onClick={onCloseOcrText} type="button">Done</button>}
+          onClose={onCloseOcrText}
+          subtitle={ocrTextModal.document.property_name || workspaceName}
+          title="Document text"
+        >
+          <div className="file-summary-panel">
+            <strong>{ocrTextModal.document.display_name || "Document"}</strong>
+            <span>{ocrTextModal.document.file ? formatDocumentFileSummary(ocrTextModal.document.file) : "No file attached"}</span>
+          </div>
+          {ocrTextModal.status === "loading" ? <p className="muted-copy">Loading document text.</p> : null}
+          {ocrTextModal.status === "error" ? <div className="inline-error" role="alert">{ocrTextModal.message}</div> : null}
+          {ocrTextModal.status === "ready" ? (
+            <div className="ocr-text-panel">
+              <p className="helper-note">Extracted text is shown only in this view.</p>
+              <pre>{ocrTextModal.text.text || "No document text was found."}</pre>
+            </div>
+          ) : null}
+        </Modal>
+      ) : null}
     </div>
   );
 }
@@ -570,6 +655,16 @@ function documentFileActionError(error: unknown, fallback: string) {
     if (error.status === 403) return "You can view documents, but you do not have permission to change files.";
     if (error.status === 413) return "Maximum file size: 25 MB.";
     if (error.status === 415) return "Use a PDF, image, receipt, invoice, permit, or note file.";
+    return error.message || fallback;
+  }
+  return fallback;
+}
+
+function documentOcrActionError(error: unknown, fallback: string) {
+  if (error instanceof HomeLedgerApiError) {
+    if (error.status === 403) return "You can view documents, but you do not have permission to request text reading.";
+    if (error.status === 404) return "Document text is not available.";
+    if (error.status === 409) return "Attach a file before requesting document text.";
     return error.message || fallback;
   }
   return fallback;

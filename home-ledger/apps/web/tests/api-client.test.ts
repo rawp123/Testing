@@ -423,6 +423,12 @@ describe("Home Ledger API client", () => {
         if (textUrl.endsWith("/documents/document-1/file")) {
           return jsonResponse({ data: createDocumentFilePayload({ status: "available" }) });
         }
+        if (textUrl.endsWith("/documents/document-1/ocr")) {
+          return jsonResponse({ data: createDocumentOcrPayload({ ocr_status: "succeeded", text_available: true }) });
+        }
+        if (textUrl.endsWith("/documents/document-1/text")) {
+          return jsonResponse({ data: createDocumentOcrTextPayload({ text: "Extracted document text." }) });
+        }
         return jsonResponse({
           data: textUrl.includes("/documents/document-1")
             ? createDocumentPayload({ id: "document-1", display_name: "Receipt updated" })
@@ -459,6 +465,9 @@ describe("Home Ledger API client", () => {
     });
     await client.getDocumentFile("workspace/one", "document-1");
     await client.removeDocumentFile("workspace/one", "document-1");
+    await client.requestDocumentOcr("workspace/one", "document-1");
+    await client.getDocumentOcrStatus("workspace/one", "document-1");
+    await client.getDocumentOcrText("workspace/one", "document-1");
     await client.archiveDocument("workspace/one", "document-1");
 
     expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
@@ -469,6 +478,9 @@ describe("Home Ledger API client", () => {
       ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"],
       ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file"],
       ["DELETE", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/ocr"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/ocr"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/text"],
       ["DELETE", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1"]
     ]);
     expect(calls[1].options.body).toContain("display_name");
@@ -476,6 +488,7 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).not.toContain("displayName");
     expect(calls[3].options.body).toContain("original_file_name");
     expect(calls[3].options.body).not.toContain("/Users/");
+    expect(calls.map((call) => call.url).join("\n")).not.toContain("ocrText");
   });
 
   it("attaches document files through intent and complete without exposing paths", async () => {
@@ -822,6 +835,28 @@ function createDocumentFilePayload(overrides: Record<string, unknown> = {}) {
     status: "available",
     uploaded_at: "2026-06-07T12:00:00.000Z",
     deleted_at: null,
+    ...overrides
+  };
+}
+
+function createDocumentOcrPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    document_id: "document-1",
+    document_file_id: "file-1",
+    ocr_status: "not_requested",
+    ocr_requested_at: null,
+    ocr_completed_at: null,
+    text_available: false,
+    engine: null,
+    failure_reason: null,
+    ...overrides
+  };
+}
+
+function createDocumentOcrTextPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    ...createDocumentOcrPayload({ ocr_status: "succeeded", text_available: true }),
+    text: "Extracted document text.",
     ...overrides
   };
 }

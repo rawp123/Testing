@@ -9,6 +9,8 @@ import type {
   ExportDownloadResponse,
   ExportSummaryResponse,
   DocumentInput,
+  DocumentOcrStatusResponse,
+  DocumentOcrTextResponse,
   DocumentRecord,
   ExpenseInput,
   ExpenseRecord,
@@ -87,6 +89,9 @@ export interface HomeLedgerApiClient {
   getDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
   removeDocumentFile(workspaceId: string, documentId: string): Promise<DocumentFileSummary>;
   attachDocumentFile(workspaceId: string, documentId: string, file: File): Promise<DocumentFileAttachResult>;
+  requestDocumentOcr(workspaceId: string, documentId: string): Promise<DocumentOcrStatusResponse>;
+  getDocumentOcrStatus(workspaceId: string, documentId: string): Promise<DocumentOcrStatusResponse>;
+  getDocumentOcrText(workspaceId: string, documentId: string): Promise<DocumentOcrTextResponse>;
   getExportSummary(workspaceId: string): Promise<ExportSummaryResponse>;
   downloadExpensesCsv(workspaceId: string): Promise<ExportDownloadResponse>;
   downloadDocumentsCsv(workspaceId: string): Promise<ExportDownloadResponse>;
@@ -417,6 +422,22 @@ export function createHomeLedgerApiClient({
         completed_without_browser_upload: !uploadUrlAvailable,
         max_size_bytes: intent.max_size_bytes ?? null
       };
+    },
+    requestDocumentOcr(workspaceId: string, documentId: string) {
+      return request<DocumentOcrStatusResponse>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/ocr`,
+        { method: "POST" }
+      );
+    },
+    getDocumentOcrStatus(workspaceId: string, documentId: string) {
+      return request<DocumentOcrStatusResponse>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/ocr`
+      );
+    },
+    getDocumentOcrText(workspaceId: string, documentId: string) {
+      return request<DocumentOcrTextResponse>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/documents/${encodeURIComponent(requireId(documentId, "documentId"))}/text`
+      );
     },
     getExportSummary(workspaceId: string) {
       return request<ExportSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/exports/summary`);

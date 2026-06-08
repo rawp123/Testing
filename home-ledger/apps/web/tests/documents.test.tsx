@@ -8,6 +8,7 @@ import {
   formValuesToDocumentInput,
   formatFileSize,
   getDocumentFileValidationMessage,
+  ocrStatusLabel,
   propertyOptionsFromRecords,
   safeFileName,
   toDocumentRows
@@ -25,6 +26,7 @@ describe("Documents screen", () => {
       type: "Receipt",
       linkedTo: "Office · Deck repair · Deck boards",
       fileStatus: "Attached",
+      ocrStatus: "Not requested",
       documentDate: "06/05/2026",
       openItems: "1 open",
       openItemCount: 1,
@@ -32,6 +34,17 @@ describe("Documents screen", () => {
     });
     expect(rows[0].fileMeta).toContain("receipt.pdf");
     expect(rows[0].fileMeta).not.toContain("/Users/robert");
+
+    const pendingRows = toDocumentRows([createDocument({
+      file_availability: "available",
+      file: createDocumentFile(),
+      ocr: { status: "queued", has_text: false, completed_at: null }
+    })]);
+    expect(pendingRows[0]).toMatchObject({
+      ocrStatus: "Queued",
+      canRequestOcr: false,
+      canReadOcrText: false
+    });
   });
 
   it("renders the documents grid, filters, file status, and compact actions", () => {
@@ -52,8 +65,11 @@ describe("Documents screen", () => {
         onFileChange={() => undefined}
         onFormChange={() => undefined}
         onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
         onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
         onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
         workspaceName="Home records"
@@ -66,8 +82,11 @@ describe("Documents screen", () => {
     expect(html).toContain("Open items");
     expect(html).toContain("Cedarline receipt");
     expect(html).toContain("Attached");
+    expect(html).toContain("Not requested");
+    expect(html).toContain("Text not requested.");
     expect(html).toContain("receipt.pdf");
     expect(html).toContain("View file");
+    expect(html).toContain("Request text");
     expect(html).toContain("Remove file");
     expect(html).toContain("Archive");
     expect(html).toContain("1 open");
@@ -94,8 +113,11 @@ describe("Documents screen", () => {
         onFileChange={() => undefined}
         onFormChange={() => undefined}
         onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
         onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
         onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
         workspaceName="Home records"
@@ -132,8 +154,11 @@ describe("Documents screen", () => {
         onFileChange={() => undefined}
         onFormChange={() => undefined}
         onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
         onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
         onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
         projects={[
           createProject(),
           createProject({ id: "project-2", property_id: "property-2", name: "Bathroom remodel" })
@@ -171,6 +196,8 @@ describe("Documents screen", () => {
 
   it("normalizes document form values to safe document API input", () => {
     expect(fileAvailabilityLabel("not_uploaded")).toBe("Not uploaded");
+    expect(ocrStatusLabel("succeeded", true)).toBe("Text available");
+    expect(ocrStatusLabel("queued", false)).toBe("Queued");
     expect(formatFileSize(1536)).toBe("1.5 KB");
     expect(safeFileName("/Users/robert/receipt.pdf")).toBe("receipt.pdf");
     expect(formValuesToDocumentInput({
@@ -202,6 +229,64 @@ describe("Documents screen", () => {
       size: 26 * 1024 * 1024,
       type: "application/pdf"
     } as File)).toBe("Maximum file size: 25 MB.");
+  });
+
+  it("shows read-text actions only through the focused OCR text view", () => {
+    const html = renderToStaticMarkup(
+      <DocumentsView
+        documents={[createDocument({
+          file_availability: "available",
+          file: createDocumentFile(),
+          ocr: { status: "succeeded", has_text: true, completed_at: "2026-06-08T12:00:00.000Z" }
+        })]}
+        expenses={[createExpense()]}
+        formValues={documentToFormValues()}
+        onArchiveDocument={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onDownloadFile={() => undefined}
+        onEditDocument={() => undefined}
+        onFileChange={() => undefined}
+        onFormChange={() => undefined}
+        onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
+        onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
+        onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
+        ocrTextModal={{
+          status: "ready",
+          document: createDocument({
+            file_availability: "available",
+            file: createDocumentFile(),
+            ocr: { status: "succeeded", has_text: true, completed_at: "2026-06-08T12:00:00.000Z" }
+          }),
+          text: {
+            document_id: "document-1",
+            document_file_id: "file-1",
+            ocr_status: "succeeded",
+            ocr_requested_at: "2026-06-08T12:00:00.000Z",
+            ocr_completed_at: "2026-06-08T12:00:00.000Z",
+            text_available: true,
+            text: "Extracted line one\nExtracted line two"
+          }
+        }}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Text available");
+    expect(html).toContain("Read text");
+    expect(html).not.toContain("Request text");
+    expect(html).toContain("Document text");
+    expect(html).toContain("Extracted line one");
+    expect(html).not.toContain("storage_key");
+    expect(html).not.toContain("signed-upload");
+    expect(html).not.toContain("/Users/");
+    expect(html).not.toContain("provider");
+    expect(html).not.toContain("deductible");
   });
 });
 

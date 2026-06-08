@@ -315,6 +315,22 @@ export interface DocumentOcrSummary {
   [key: string]: unknown;
 }
 
+export interface DocumentOcrStatusResponse {
+  document_id: string;
+  document_file_id?: string | null;
+  ocr_status: string;
+  ocr_requested_at?: string | null;
+  ocr_completed_at?: string | null;
+  text_available: boolean;
+  engine?: string | null;
+  failure_reason?: string | null;
+  [key: string]: unknown;
+}
+
+export interface DocumentOcrTextResponse extends DocumentOcrStatusResponse {
+  text: string;
+}
+
 export interface DocumentRecord {
   id: string;
   property_id: string;

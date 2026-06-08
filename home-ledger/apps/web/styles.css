@@ -985,6 +985,27 @@ button {
   font-size: 0.88rem;
 }
 
+.ocr-text-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.ocr-text-panel pre {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+  padding: 12px;
+}
+
 .inline-link-button {
   justify-self: start;
   border: 0;

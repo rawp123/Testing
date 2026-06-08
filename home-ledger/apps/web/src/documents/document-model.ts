@@ -65,10 +65,14 @@ export interface DocumentRow {
   linkedTo: string;
   fileStatus: string;
   fileMeta: string;
+  ocrStatus: string;
+  ocrMeta: string;
   documentDate: string;
   openItems: string;
   openItemCount: number;
   hasFile: boolean;
+  canRequestOcr: boolean;
+  canReadOcrText: boolean;
   source: DocumentRecord;
 }
 
@@ -82,6 +86,9 @@ export interface SelectOption {
 export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
   return documents.map((document) => {
     const file = document.file || null;
+    const ocrStatus = String(document.ocr?.status || "not_requested");
+    const hasFile = document.file_availability === "available" && Boolean(file);
+    const hasText = Boolean(document.ocr?.has_text);
     return {
       id: document.id,
       name: document.display_name || "Untitled document",
@@ -89,10 +96,14 @@ export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
       linkedTo: [document.property_name, document.project_name, document.expense_description].filter(Boolean).join(" · ") || "Not linked",
       fileStatus: fileAvailabilityLabel(document.file_availability),
       fileMeta: file ? formatDocumentFileSummary(file) : document.file_status_note || "No file attached",
+      ocrStatus: ocrStatusLabel(document.ocr?.status, document.ocr?.has_text),
+      ocrMeta: ocrStatusDetail(document),
       documentDate: document.document_date ? formatDate(document.document_date) : "No date",
       openItems: formatOpenItemCount(document.open_item_count),
       openItemCount: document.open_item_count,
-      hasFile: document.file_availability === "available" && Boolean(file),
+      hasFile,
+      canRequestOcr: hasFile && !hasText && !["queued", "processing"].includes(ocrStatus),
+      canReadOcrText: hasText,
       source: document
     };
   });
@@ -175,6 +186,33 @@ export function fileAvailabilityLabel(value: string | null | undefined) {
     checksum_failed: "Checksum failed"
   };
   return labels[String(value || "")] || titleCase(value || "not_uploaded");
+}
+
+export function ocrStatusLabel(status: string | null | undefined, hasText = false) {
+  if (hasText) return "Text available";
+  const labels: Record<string, string> = {
+    not_requested: "Not requested",
+    queued: "Queued",
+    processing: "Processing",
+    succeeded: "No text",
+    failed: "Failed",
+    skipped: "Skipped"
+  };
+  return labels[String(status || "not_requested")] || titleCase(status || "not_requested");
+}
+
+export function ocrStatusDetail(document: DocumentRecord) {
+  const status = String(document.ocr?.status || "not_requested");
+  if (document.ocr?.has_text) {
+    return document.ocr.completed_at ? `Text available · ${formatDate(document.ocr.completed_at)}` : "Text available";
+  }
+  if (document.file_availability !== "available" || !document.file) return "Attach a file before reading text.";
+  if (status === "queued") return "Text reading has been requested.";
+  if (status === "processing") return "Text reading is in progress.";
+  if (status === "failed") return "Text could not be read.";
+  if (status === "skipped") return "Text reading skipped.";
+  if (status === "succeeded") return "No document text is available.";
+  return "Text not requested.";
 }
 
 export function formatFileSize(value: number | string | null | undefined) {
