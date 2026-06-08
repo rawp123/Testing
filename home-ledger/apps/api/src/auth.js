@@ -4,6 +4,11 @@ import { listActiveMembershipsForUser } from "./workspaces.js";
 export const TEST_AUTH_EMAIL_HEADER = "x-home-ledger-test-auth-email";
 export const TEST_AUTH_DISPLAY_NAME_HEADER = "x-home-ledger-test-auth-display-name";
 
+// Production auth will plug in ahead of the same membership lookup used here:
+// verify the provider session server-side, map the external subject to an
+// internal user, then resolve workspace roles from workspace_memberships.
+// Request headers may select only test identity in APP_ENV=test; they must not
+// supply roles, workspace ids, user ids, or entitlements.
 export async function resolveAuthenticatedRequest({ request, config, db }) {
   if (config.authProvider !== "dev" || !config.devAuthEnabled) {
     return null;

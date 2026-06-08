@@ -3,7 +3,7 @@ import test from "node:test";
 import { buildApp } from "../src/app.js";
 import { getReadinessSnapshot, serializeReadinessSnapshot } from "../src/readiness.js";
 
-test("GET /ready returns safe readiness details without auth", async () => {
+test("GET /ready returns safe readiness details with local auth", async () => {
   const app = buildApp({
     config: createConfig({
       fileStorageDriver: "s3",
@@ -18,7 +18,8 @@ test("GET /ready returns safe readiness details without auth", async () => {
         uploadUrlTtlSeconds: 600,
         downloadUrlTtlSeconds: 300
       },
-      authProvider: "oidc",
+      authProvider: "dev",
+      devAuthEnabled: true,
       billingProvider: "stripe",
       ocrMode: "disabled"
     }),
@@ -57,8 +58,8 @@ test("GET /ready returns safe readiness details without auth", async () => {
         },
         {
           name: "auth",
-          status: "ok",
-          message: "Auth provider is configured."
+          status: "local_only",
+          message: "Auth is using local/test behavior."
         },
         {
           name: "billing",
@@ -77,6 +78,7 @@ test("GET /ready returns safe readiness details without auth", async () => {
     "storage.internal.example.test",
     "signed_url",
     "workspaces/",
+    "oidc",
     "/Users/",
     "Extracted text",
     "deductible",
@@ -175,9 +177,15 @@ test("GET /ready rejects production runtime without production object storage", 
     status: "not_ready",
     message: "Production object storage is not configured."
   });
+  assert.deepEqual(body.data.checks.find((check) => check.name === "auth"), {
+    name: "auth",
+    status: "not_ready",
+    message: "Production auth adapter is not implemented."
+  });
   assert.doesNotMatch(response.body, /private-bucket/i);
   assert.doesNotMatch(response.body, /storage-access-key/i);
   assert.doesNotMatch(response.body, /storage-secret-key/i);
+  assert.doesNotMatch(response.body, /oidc/i);
 
   await app.close();
 });
@@ -215,6 +223,11 @@ test("GET /ready rejects production runtime using local OCR behavior", async () 
     status: "not_ready",
     message: "Production OCR provider is not configured."
   });
+  assert.deepEqual(body.data.checks.find((check) => check.name === "auth"), {
+    name: "auth",
+    status: "not_ready",
+    message: "Production auth adapter is not implemented."
+  });
 
   for (const blocked of [
     "private-bucket",
@@ -222,8 +235,62 @@ test("GET /ready rejects production runtime using local OCR behavior", async () 
     "storage-access-key",
     "storage-secret-key",
     "provider-request",
+    "oidc",
     "Extracted text",
     "signed_url",
+    "/Users/"
+  ]) {
+    assert.doesNotMatch(response.body, new RegExp(escapeRegExp(blocked), "i"));
+  }
+
+  await app.close();
+});
+
+test("GET /ready reports production auth placeholders as not ready without internals", async () => {
+  const app = buildApp({
+    config: createConfig({
+      appEnv: "production",
+      authProvider: "provider_internal_secret",
+      devAuthEnabled: false,
+      billingProvider: "stripe",
+      ocrMode: "disabled",
+      fileStorageDriver: "s3",
+      fileStorage: {
+        driver: "s3",
+        bucket: "private-bucket",
+        region: "us-east-1",
+        endpoint: "https://storage.internal.example.test",
+        accessKeyId: "storage-access-key",
+        secretAccessKey: "storage-secret-key"
+      }
+    }),
+    db: createReadyDb()
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/ready"
+  });
+
+  assert.equal(response.statusCode, 503);
+  const body = response.json();
+  assert.equal(body.data.status, "not_ready");
+  assert.deepEqual(body.data.checks.find((check) => check.name === "auth"), {
+    name: "auth",
+    status: "not_ready",
+    message: "Production auth adapter is not implemented."
+  });
+
+  for (const blocked of [
+    "provider_internal_secret",
+    "private-bucket",
+    "storage.internal.example.test",
+    "storage-access-key",
+    "storage-secret-key",
+    "signed_url",
+    "OAuth",
+    "JWT",
+    "raw-session-token",
     "/Users/"
   ]) {
     assert.doesNotMatch(response.body, new RegExp(escapeRegExp(blocked), "i"));

@@ -1,3 +1,4 @@
+import { getAuthReadiness } from "./auth-readiness.js";
 import { getOcrReadiness } from "./ocr-readiness.js";
 import { getFileStorageReadiness } from "./storage-readiness.js";
 
@@ -82,27 +83,7 @@ function ocrReadinessCheck(config) {
 }
 
 function authReadinessCheck(config) {
-  if (config?.authProvider && config.authProvider !== "none" && config.authProvider !== "dev") {
-    return {
-      name: "auth",
-      status: "ok",
-      message: "Auth provider is configured."
-    };
-  }
-
-  if (isLocalLikeEnv(config?.appEnv)) {
-    return {
-      name: "auth",
-      status: "local_only",
-      message: "Auth is using local/test behavior."
-    };
-  }
-
-  return {
-    name: "auth",
-    status: "not_ready",
-    message: "Production auth provider is not connected."
-  };
+  return getAuthReadiness(config);
 }
 
 function billingReadinessCheck(config) {
@@ -123,8 +104,4 @@ function billingReadinessCheck(config) {
 
 function isAcceptableReadinessStatus(check) {
   return check.status === "ok" || check.status === "disabled" || check.status === "local_only";
-}
-
-function isLocalLikeEnv(appEnv) {
-  return appEnv === "local" || appEnv === "test";
 }

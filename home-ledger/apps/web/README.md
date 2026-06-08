@@ -22,7 +22,7 @@ For direct local review against the SaaS API:
 TEST_DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run saas:db:reset:test
 DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run seed:api:dev
 DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run dev:api
-VITE_API_BASE_URL=http://127.0.0.1:4000 npm run dev:web
+VITE_API_BASE_URL=http://127.0.0.1:4000/api/v1 npm run dev:web
 curl -s http://127.0.0.1:4000/api/v1/session | python3 -m json.tool
 ```
 
@@ -56,4 +56,4 @@ npm run test:web
 npm run build:web
 ```
 
-Deployment configuration and production-readiness expectations are documented in `docs/deployment-readiness.md`. The current web app still relies on the existing API session contract and does not add production auth, billing, import execution, or production OCR UI.
+Deployment configuration and production-readiness expectations are documented in `docs/deployment-readiness.md` and `docs/auth-provider-plan.md`. The current web app still relies on the existing API session contract and does not add production auth, billing, import execution, or production OCR UI.

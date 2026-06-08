@@ -39,7 +39,7 @@ AUTH_PROVIDER=none
 SESSION_COOKIE_NAME=home_ledger_session
 ```
 
-`AUTH_PROVIDER=none` is the current explicit placeholder while production sign-in is not connected. Do not set `AUTH_PROVIDER=dev` or `DEV_AUTH_ENABLED=true` in production. The API refuses production dev auth.
+`AUTH_PROVIDER=none` is the current explicit placeholder while production sign-in is not connected. Do not set `AUTH_PROVIDER=dev` or `DEV_AUTH_ENABLED=true` in production. The API refuses production dev auth. Setting another provider name is also not enough for production readiness until a real adapter has been implemented and documented in `docs/auth-provider-plan.md`.
 
 File storage:
 
@@ -123,12 +123,18 @@ Checks:
 - database connection can run a minimal query
 - file storage mode is production-ready, local/test only, or not ready
 - OCR mode is disabled, local/test only, or not ready
-- auth provider is configured or degraded
+- auth mode is local/test only, not connected, or backed by a future production adapter
 - billing provider is configured or disabled
 
 Readiness responses are intentionally safe. They must not expose database URLs, passwords, tokens, raw auth headers, secret keys, storage keys, signed URLs, bucket names, provider internal errors, local absolute paths, raw OCR text, or billing provider internals.
 
-`GET /ready` returns `503` if required checks fail or production object storage is missing in production mode. Local/test file storage is reported as `local_only` so local development remains usable without real object-storage credentials.
+`GET /ready` returns `503` if required checks fail, production object storage is missing in production mode, or production auth is not connected. Local/test file storage and dev auth are reported as `local_only` so local development remains usable without real provider credentials.
+
+Auth readiness is intentionally conservative:
+
+- `AUTH_PROVIDER=dev` with local/test dev auth reports `local_only`.
+- `AUTH_PROVIDER=none` reports `not_ready`.
+- Any other provider name reports `not_ready` until a real production adapter exists.
 
 OCR readiness is separate from the OCR lifecycle API. The API can still accept OCR requests and record queued/test lifecycle status, but `/ready` does not treat fake/test OCR as production-ready. In production mode, fake/test OCR reports `not_ready`; disabled OCR reports `disabled`.
 
@@ -169,10 +175,16 @@ For local production-like verification using the test database:
 
 ```sh
 TEST_DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run saas:db:reset:test
-DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=local-readiness FILE_STORAGE_REGION=us-east-1 FILE_STORAGE_ACCESS_KEY_ID=local-readiness FILE_STORAGE_SECRET_ACCESS_KEY=local-readiness AUTH_PROVIDER=oidc BILLING_PROVIDER=stripe npm run saas:deploy:check
+DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=local-readiness FILE_STORAGE_REGION=us-east-1 FILE_STORAGE_ACCESS_KEY_ID=local-readiness FILE_STORAGE_SECRET_ACCESS_KEY=local-readiness AUTH_PROVIDER=dev DEV_AUTH_ENABLED=true BILLING_PROVIDER=stripe npm run saas:deploy:check
 ```
 
-The local production-like command only confirms configuration shape and database connectivity. It does not contact an auth provider, Stripe, object storage, or an OCR provider.
+The local production-like command only confirms configuration shape and database connectivity. It uses local/dev auth and does not contact an auth provider, Stripe, object storage, or an OCR provider.
+
+To confirm production auth enforcement, run a negative local check and expect it to fail without printing raw provider values:
+
+```sh
+APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=... FILE_STORAGE_REGION=... FILE_STORAGE_ACCESS_KEY_ID=... FILE_STORAGE_SECRET_ACCESS_KEY=... AUTH_PROVIDER=provider-placeholder npm run saas:deploy:check
+```
 
 To confirm production storage enforcement without real credentials, run a negative local check and expect it to fail without printing raw configuration values:
 
@@ -183,13 +195,14 @@ APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=local npm run
 To confirm production OCR enforcement without real provider integration, run a negative local check and expect it to fail without printing provider internals, raw OCR text, signed URLs, storage keys, or local paths:
 
 ```sh
-APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=... FILE_STORAGE_REGION=... FILE_STORAGE_ACCESS_KEY_ID=... FILE_STORAGE_SECRET_ACCESS_KEY=... AUTH_PROVIDER=oidc BILLING_PROVIDER=stripe OCR_MODE=fake npm run saas:deploy:check
+APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=... FILE_STORAGE_REGION=... FILE_STORAGE_ACCESS_KEY_ID=... FILE_STORAGE_SECRET_ACCESS_KEY=... AUTH_PROVIDER=provider-placeholder BILLING_PROVIDER=stripe OCR_MODE=fake npm run saas:deploy:check
 ```
 
 ## Minimum Pre-Deployment Checklist
 
 - Confirm `APP_ENV=production` and `NODE_ENV=production`.
 - Confirm `DEV_AUTH_ENABLED=false`.
+- Confirm production auth is still treated as not ready unless a real provider adapter has been implemented.
 - Confirm migrations have been applied to the target database.
 - Confirm `DATABASE_URL` is stored in a secret manager and is not printed in logs.
 - Confirm `FILE_STORAGE_DRIVER=s3` and the bucket is private.

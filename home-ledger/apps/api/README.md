@@ -39,7 +39,7 @@ GET /ready
 
 `GET /health` is a liveness check. It only confirms the API process can respond.
 
-`GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail or production object storage is missing in production mode.
+`GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail, production object storage is missing in production mode, or production auth is not connected.
 
 Authenticated endpoint:
 
@@ -121,6 +121,18 @@ Use `DATABASE_URL=... npm run seed:api:dev` from the repo root when the dev sess
 Tests may use `x-home-ledger-test-auth-email` to select a test email only when `APP_ENV=test`. User ids, roles, workspace ids, memberships, entitlements, and object keys are never accepted from request headers.
 
 The API refuses to start when `APP_ENV=production` and `DEV_AUTH_ENABLED=true`.
+
+## Production Auth Boundary
+
+Production auth is planned but not implemented. The current API has a provider-neutral boundary for future request verification, user mapping, and membership loading. A later provider adapter must verify the request server-side, map the external identity to an internal `users` row, and then load workspace roles from `workspace_memberships`.
+
+Readiness stays conservative until that adapter exists:
+
+- Local/test dev auth reports `local_only`.
+- `AUTH_PROVIDER=none` reports `not_ready`.
+- Placeholder provider names report `not_ready` instead of `ok`.
+
+The integration plan is documented in `docs/auth-provider-plan.md`.
 
 ## Workspace Authorization
 
@@ -692,7 +704,7 @@ npm run saas:db:reset:test
 
 `saas:db:check` and `saas:db:reset:test` require `TEST_DATABASE_URL`. These commands refuse to use `DATABASE_URL` and require the database name to contain `test`.
 
-`saas:deploy:check` requires `DATABASE_URL` and runs the same readiness logic used by `GET /ready`. It checks database connectivity and safe provider readiness. It does not run migrations, seed data, call external OCR services, create billing customers, or validate a real production auth provider beyond configured/not-connected status. Set `APP_ENV=production` to enforce production object-storage readiness.
+`saas:deploy:check` requires `DATABASE_URL` and runs the same readiness logic used by `GET /ready`. It checks database connectivity and safe provider readiness. It does not run migrations, seed data, call external OCR services, create billing customers, or validate a real production auth provider. Set `APP_ENV=production` to enforce production object-storage and production auth readiness.
 
 ## Local PostgreSQL Setup
 

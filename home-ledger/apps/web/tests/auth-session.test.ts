@@ -26,8 +26,8 @@ describe("auth and session model", () => {
       isDevAuth: false
     });
 
-    expect(sessionModeLabel(session)).toBe("Configured sign-in");
-    expect(productionAuthStatus(session)).toBe("Sign-in is configured by deployment.");
+    expect(sessionModeLabel(session)).toBe("External sign-in session");
+    expect(productionAuthStatus(session)).toBe("Sign-in details are controlled by deployment.");
     expect(sessionModeLabel(session)).not.toContain("provider_internal_secret");
     expect(productionAuthStatus(session)).not.toContain("provider_internal_secret");
   });

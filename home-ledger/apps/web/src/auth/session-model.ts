@@ -11,13 +11,13 @@ export function formatWorkspaceRole(role: string) {
 
 export function sessionModeLabel(session: SessionResponse) {
   if (isDevelopmentSession(session)) return "Development session";
-  if (session.authProvider) return "Configured sign-in";
+  if (session.authProvider) return "External sign-in session";
   return "Sign-in provider not connected";
 }
 
 export function productionAuthStatus(session: SessionResponse) {
   if (isDevelopmentSession(session)) return "Production sign-in is not connected in this build.";
-  if (session.authProvider) return "Sign-in is configured by deployment.";
+  if (session.authProvider) return "Sign-in details are controlled by deployment.";
   return "Sign-in provider is not connected in this build.";
 }
 
