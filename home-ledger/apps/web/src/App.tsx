@@ -15,6 +15,7 @@ import { ExportsPage } from "./exports/ExportsPage";
 import { FollowUpsPage } from "./follow-ups/FollowUpsPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
+import { SettingsPage } from "./settings/SettingsPage";
 import { VendorsPage } from "./vendors/VendorsPage";
 
 type AppState =
@@ -104,6 +105,13 @@ export function App() {
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
+      {state.status === "ready" && activeView === "settings" ? (
+        <SettingsPage
+          onNavigate={setActiveView}
+          session={state.session}
+          workspace={state.workspace}
         />
       ) : null}
     </AppShell>

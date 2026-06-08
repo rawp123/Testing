@@ -1,0 +1,109 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+import type { SessionResponse, WorkspaceMembership } from "../src/api/types";
+import { SettingsView } from "../src/settings/SettingsPage";
+
+describe("Settings screen", () => {
+  it("renders workspace account data controls documents and review sections", () => {
+    const html = renderToStaticMarkup(
+      <SettingsView
+        onNavigate={() => undefined}
+        session={createSession()}
+        workspace={createWorkspace()}
+      />
+    );
+
+    expect(html).toContain("Settings");
+    expect(html).toContain("Workspace");
+    expect(html).toContain("Home records");
+    expect(html).toContain("Owner");
+    expect(html).toContain("workspace-1");
+    expect(html).toContain("Account");
+    expect(html).toContain("Robert Parrish");
+    expect(html).toContain("owner@example.test");
+    expect(html).toContain("Development sign-in");
+    expect(html).toContain("Data controls");
+    expect(html).toContain("Open export");
+    expect(html).toContain("Import and migration");
+    expect(html).toContain("not connected");
+    expect(html).toContain("Documents and files");
+    expect(html).toContain("Open documents");
+    expect(html).toContain("Review language");
+    expect(html).toContain("organizes home records for professional review");
+  });
+
+  it("uses existing navigation actions for export and documents", () => {
+    const html = renderToStaticMarkup(
+      <SettingsView
+        onNavigate={() => undefined}
+        session={createSession()}
+        workspace={createWorkspace()}
+      />
+    );
+
+    expect(html).toContain("Open export");
+    expect(html).toContain("Open documents");
+    expect(html).not.toContain("href=");
+    expect(html).not.toContain("Download package");
+  });
+
+  it("keeps product-boundary language neutral", () => {
+    const html = renderToStaticMarkup(
+      <SettingsView
+        onNavigate={() => undefined}
+        session={createSession()}
+        workspace={createWorkspace()}
+      />
+    ).toLowerCase();
+
+    for (const blocked of ["deductible", "irs-ready", "tax-safe", "audit-proof", "tax-optimized", "legal-ready"]) {
+      expect(html).not.toContain(blocked);
+    }
+    expect(html).toContain("does not determine tax, legal, accounting, or compliance treatment");
+  });
+
+  it("does not render storage internals local paths or raw OCR text", () => {
+    const html = renderToStaticMarkup(
+      <SettingsView
+        onNavigate={() => undefined}
+        session={createSession({
+          authProvider: "provider_internal_secret",
+          user: {
+            id: "user-1",
+            email: "owner@example.test",
+            displayName: "Owner"
+          }
+        })}
+        workspace={createWorkspace()}
+      />
+    );
+
+    expect(html).not.toContain("storage_key");
+    expect(html).not.toContain("object key");
+    expect(html).not.toContain("signed URL");
+    expect(html).not.toContain("download_url");
+    expect(html).not.toContain("/Users/");
+    expect(html).not.toContain("raw OCR text");
+    expect(html).not.toContain("Sensitive recognized text");
+  });
+});
+
+function createSession(overrides: Partial<SessionResponse> = {}): SessionResponse {
+  return {
+    user: { id: "user-1", email: "owner@example.test", displayName: "Robert Parrish" },
+    authProvider: "dev",
+    isDevAuth: true,
+    memberships: [createWorkspace()],
+    ...overrides
+  };
+}
+
+function createWorkspace(overrides: Partial<WorkspaceMembership> = {}): WorkspaceMembership {
+  return {
+    id: "membership-1",
+    workspaceId: "workspace-1",
+    workspaceName: "Home records",
+    role: "owner",
+    ...overrides
+  };
+}

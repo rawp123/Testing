@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ActionBar } from "../src/components/ActionBar";
+import { AppShell } from "../src/components/AppShell";
 import { CompactRecordTable, type CompactRecordColumn } from "../src/components/CompactRecordTable";
 import { FilterChipGroup, FilterPanel } from "../src/components/FilterPanel";
 import { FormField } from "../src/components/FormField";
@@ -88,5 +89,18 @@ describe("shared web UI components", () => {
     expect(html).toContain("Office · Deck repair");
     expect(html).toContain("Optional. Uses file name if blank.");
     expect(html).toContain("Save document");
+  });
+
+  it("renders Settings as an enabled lower-sidebar destination", () => {
+    const html = renderToStaticMarkup(
+      <AppShell activeView="settings" onNavigate={() => undefined}>
+        <main>Settings content</main>
+      </AppShell>
+    );
+
+    expect(html).toContain("Settings");
+    expect(html).toContain("settings-nav-button is-active");
+    expect(html).toContain("aria-current=\"page\"");
+    expect(html).not.toContain("Settings will be added in a later ticket");
   });
 });

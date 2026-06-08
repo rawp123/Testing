@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type AppView = "dashboard" | "follow-ups" | "properties" | "projects" | "vendors" | "expenses" | "documents" | "exports";
+export type AppView = "dashboard" | "follow-ups" | "properties" | "projects" | "vendors" | "expenses" | "documents" | "exports" | "settings";
 
 const PRIMARY_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },
@@ -54,7 +54,13 @@ export function AppShell({
           ))}
         </nav>
         <div className="sidebar-footer">
-          <button aria-disabled="true" className="settings-nav-button" title="Settings will be added in a later ticket" type="button">
+          <button
+            aria-current={activeView === "settings" ? "page" : undefined}
+            className={activeView === "settings" ? "settings-nav-button is-active" : "settings-nav-button"}
+            onClick={() => onNavigate?.("settings")}
+            title="Settings"
+            type="button"
+          >
             <span aria-hidden="true">⚙</span>
             Settings
           </button>
