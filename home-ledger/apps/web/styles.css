@@ -7,7 +7,9 @@
   --surface-muted: #eef4ef;
   --border: #dbe2dc;
   --border-soft: #e4ebe5;
+  --line-strong: #cfd9d1;
   --ink: #141716;
+  --text: #141716;
   --muted: #62706a;
   --green: #24564b;
   --green-strong: #1e4b41;
@@ -32,7 +34,9 @@
     --surface-muted: #2b3833;
     --border: #35413b;
     --border-soft: #2d3833;
+    --line-strong: #50635a;
     --ink: #f4f7f5;
+    --text: #f4f7f5;
     --muted: #a8b6af;
     --green: #9edfc4;
     --green-strong: #b8f1da;
@@ -190,6 +194,8 @@ button {
   padding: 0 11px;
   font-size: 14px;
   font-weight: 780;
+  line-height: 1.15;
+  min-width: 0;
   text-align: left;
 }
 
@@ -275,6 +281,10 @@ button {
   gap: 8px;
 }
 
+.page-actions {
+  min-width: 0;
+}
+
 .page-intro h1,
 .status-panel h1,
 .panel h2,
@@ -358,7 +368,9 @@ button {
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 780;
+  line-height: 1.2;
   padding: 7px 12px;
+  text-align: center;
 }
 
 .button {
@@ -366,6 +378,8 @@ button {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   text-decoration: none;
 }
 
@@ -513,12 +527,15 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .panel-header h2 {
   color: var(--ink);
   font-size: 1.35rem;
   font-weight: 820;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .filter-panel {
@@ -590,6 +607,7 @@ button {
 
 .table-wrap {
   overflow-x: auto;
+  max-width: 100%;
 }
 
 .compact-record-table {
@@ -615,6 +633,7 @@ button {
   padding: 12px 10px;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 .compact-record-table th {
@@ -725,7 +744,7 @@ button {
 
 .settings-meta-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
   margin: 0;
 }
@@ -760,7 +779,7 @@ button {
 
 .settings-action-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
   gap: 12px;
 }
@@ -792,7 +811,7 @@ button {
 }
 
 .billing-usage-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .billing-control-grid {
@@ -876,6 +895,8 @@ button {
   display: grid;
   gap: 18px;
   width: min(100%, 720px);
+  max-height: calc(100dvh - 64px);
+  overflow: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -945,6 +966,11 @@ button {
   padding: 8px 10px;
 }
 
+.field input[type="file"] {
+  min-width: 0;
+  padding: 7px 10px;
+}
+
 .field textarea {
   min-height: 96px;
   resize: vertical;
@@ -989,6 +1015,7 @@ button {
   .app-tabs button {
     flex: 0 0 auto;
     width: auto;
+    white-space: nowrap;
   }
 
   .sidebar-footer {
@@ -999,6 +1026,7 @@ button {
 
   .settings-nav-button {
     width: auto;
+    white-space: nowrap;
   }
 
   .page-stack {
@@ -1057,7 +1085,7 @@ button {
 
   .compact-record-table td {
     display: grid;
-    grid-template-columns: 110px minmax(0, 1fr);
+    grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
     gap: 12px;
     border-bottom: 0;
     padding: 0;
@@ -1071,7 +1099,7 @@ button {
   }
 
   .compact-record-table button {
-  justify-self: start;
+    justify-self: start;
   }
 
   .export-summary-grid {
@@ -1080,6 +1108,25 @@ button {
 
   .settings-action-list {
     grid-template-columns: 1fr;
+  }
+
+  .modal-backdrop {
+    align-items: stretch;
+    padding: 14px 10px;
+  }
+
+  .form-modal {
+    max-height: calc(100dvh - 28px);
+    padding: 16px;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .button,
+  .form-actions button {
+    flex: 1 1 150px;
   }
 }
 
