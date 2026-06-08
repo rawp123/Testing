@@ -74,8 +74,13 @@ export interface FollowUpSummaryResponse {
   resolved_count?: number;
   total_count?: number;
   by_type?: FollowUpBucket[];
+  by_severity?: FollowUpBucket[];
   [key: string]: unknown;
 }
+
+export type FollowUpStatus = "open" | "resolved" | string;
+export type FollowUpListStatus = "open" | "resolved" | "all";
+export type FollowUpSeverity = "missing_file" | "needs_review" | "missing_info" | "info" | string;
 
 export interface FollowUpItem {
   id: string;
@@ -85,18 +90,22 @@ export interface FollowUpItem {
   project_id?: string | null;
   expense_id?: string | null;
   document_id?: string | null;
-  severity?: "missing_file" | "needs_review" | "missing_info" | "info" | string;
+  severity?: FollowUpSeverity;
   reason_code?: string | null;
   title?: string | null;
   description?: string | null;
   action_label?: string | null;
-  status?: "open" | "resolved" | string;
+  status?: FollowUpStatus;
   source?: string | null;
   created_from?: string | null;
   resolved_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
   [key: string]: unknown;
+}
+
+export interface FollowUpResolveInput {
+  note?: string | null;
 }
 
 export interface DashboardResponse {

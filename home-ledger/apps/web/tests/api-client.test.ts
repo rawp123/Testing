@@ -261,6 +261,54 @@ describe("Home Ledger API client", () => {
     expect(calls[1].options.body).not.toContain("source_confidence");
   });
 
+  it("uses follow-up list summary resolve and reopen API requests", async () => {
+    const calls: Array<{ url: string; options: RequestInit }> = [];
+    const client = createHomeLedgerApiClient({
+      baseUrl: "http://localhost:4000/api/v1",
+      fetchImpl: (async (url: string | URL | Request, options?: RequestInit) => {
+        calls.push({ url: String(url), options: options || {} });
+        const textUrl = String(url);
+        if (textUrl.endsWith("/follow-ups/summary")) {
+          return jsonResponse({
+            data: {
+              open_count: 1,
+              resolved_count: 1,
+              by_type: [{ type: "document_items", label: "Document items", count: 1 }],
+              by_severity: [{ type: "missing_file", label: "Missing file", count: 1 }]
+            }
+          });
+        }
+        if (textUrl.endsWith("/resolve")) {
+          return jsonResponse({ data: createFollowUpPayload({ status: "resolved", resolved_at: "2026-06-07T12:00:00.000Z" }) });
+        }
+        if (textUrl.endsWith("/reopen")) {
+          return jsonResponse({ data: createFollowUpPayload({ status: "open" }) });
+        }
+        return jsonResponse({ data: [createFollowUpPayload()] });
+      }) as typeof fetch
+    });
+
+    await client.getFollowUps("workspace/one");
+    await client.getFollowUps("workspace/one", "resolved");
+    const summary = await client.getFollowUpSummary("workspace/one");
+    await client.resolveFollowUp("workspace/one", "fu_11111111111111111111111111111111", {
+      note: "Handled outside the app."
+    });
+    await client.reopenFollowUp("workspace/one", "fu_11111111111111111111111111111111");
+
+    expect(summary.open_count).toBe(1);
+    expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups?status=resolved"],
+      ["GET", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups/summary"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups/fu_11111111111111111111111111111111/resolve"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/follow-ups/fu_11111111111111111111111111111111/reopen"]
+    ]);
+    expect(calls[3].options.body).toContain("note");
+    expect(calls[3].options.body).not.toContain("workspaceId");
+    expect(calls[4].options.body).toBe("{}");
+  });
+
   it("uses snake_case project API requests", async () => {
     const calls: Array<{ url: string; options: RequestInit }> = [];
     const client = createHomeLedgerApiClient({
@@ -569,6 +617,30 @@ function createDashboardPayload(overrides: Partial<DashboardResponse> = {}): Das
     vendors: { count: 1 },
     recent_activity: [],
     follow_ups: [],
+    ...overrides
+  };
+}
+
+function createFollowUpPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "fu_11111111111111111111111111111111",
+    target_type: "document",
+    target_id: "document-1",
+    property_id: "property-1",
+    project_id: "project-1",
+    expense_id: "expense-1",
+    document_id: "document-1",
+    severity: "missing_file",
+    reason_code: "document_missing_file",
+    title: "Upload receipt file",
+    description: "The receipt record exists, but the file has not been uploaded.",
+    action_label: "Upload receipt file",
+    status: "open",
+    source: "generated",
+    created_from: "current_records",
+    resolved_at: null,
+    created_at: null,
+    updated_at: null,
     ...overrides
   };
 }

@@ -12,6 +12,8 @@ import type {
   ExpenseInput,
   ExpenseRecord,
   FollowUpItem,
+  FollowUpListStatus,
+  FollowUpResolveInput,
   FollowUpSummaryResponse,
   ProjectInput,
   ProjectRecord,
@@ -55,8 +57,10 @@ export interface HomeLedgerApiClientOptions {
 export interface HomeLedgerApiClient {
   getSession(): Promise<SessionResponse>;
   getDashboard(workspaceId: string): Promise<DashboardResponse>;
-  getFollowUps(workspaceId: string): Promise<FollowUpItem[]>;
+  getFollowUps(workspaceId: string, status?: FollowUpListStatus): Promise<FollowUpItem[]>;
   getFollowUpSummary(workspaceId: string): Promise<FollowUpSummaryResponse>;
+  resolveFollowUp(workspaceId: string, followUpId: string, input?: FollowUpResolveInput): Promise<FollowUpItem>;
+  reopenFollowUp(workspaceId: string, followUpId: string): Promise<FollowUpItem>;
   listProperties(workspaceId: string): Promise<PropertyRecord[]>;
   createProperty(workspaceId: string, input: PropertyInput): Promise<PropertyRecord>;
   updateProperty(workspaceId: string, propertyId: string, input: Partial<PropertyInput>): Promise<PropertyRecord>;
@@ -163,11 +167,32 @@ export function createHomeLedgerApiClient({
     getDashboard(workspaceId: string) {
       return request<DashboardResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/dashboard`);
     },
-    getFollowUps(workspaceId: string) {
-      return request<FollowUpItem[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups`);
+    getFollowUps(workspaceId: string, status: FollowUpListStatus = "open") {
+      const query = status === "open" ? "" : `?status=${encodeURIComponent(status)}`;
+      return request<FollowUpItem[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups${query}`);
     },
     getFollowUpSummary(workspaceId: string) {
       return request<FollowUpSummaryResponse>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups/summary`);
+    },
+    resolveFollowUp(workspaceId: string, followUpId: string, input: FollowUpResolveInput = {}) {
+      return request<FollowUpItem>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups/${encodeURIComponent(requireId(followUpId, "followUpId"))}/resolve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        }
+      );
+    },
+    reopenFollowUp(workspaceId: string, followUpId: string) {
+      return request<FollowUpItem>(
+        `/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/follow-ups/${encodeURIComponent(requireId(followUpId, "followUpId"))}/reopen`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        }
+      );
     },
     listProperties(workspaceId: string) {
       return request<PropertyRecord[]>(`/workspaces/${encodeURIComponent(requireId(workspaceId, "workspaceId"))}/properties`);

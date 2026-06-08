@@ -12,6 +12,7 @@ import { DashboardPage } from "./dashboard/DashboardPage";
 import { DocumentsPage } from "./documents/DocumentsPage";
 import { ExpensesPage } from "./expenses/ExpensesPage";
 import { ExportsPage } from "./exports/ExportsPage";
+import { FollowUpsPage } from "./follow-ups/FollowUpsPage";
 import { PropertiesPage } from "./properties/PropertiesPage";
 import { ProjectsPage } from "./projects/ProjectsPage";
 import { VendorsPage } from "./vendors/VendorsPage";
@@ -56,6 +57,13 @@ export function App() {
       {state.status === "error" ? <ErrorState message={state.message} /> : null}
       {state.status === "empty_workspace" ? <DashboardPage state={state} /> : null}
       {state.status === "ready" && activeView === "dashboard" ? <DashboardPage state={state} /> : null}
+      {state.status === "ready" && activeView === "follow-ups" ? (
+        <FollowUpsPage
+          client={client}
+          workspaceId={state.workspace.workspaceId}
+          workspaceName={state.workspace.workspaceName}
+        />
+      ) : null}
       {state.status === "ready" && activeView === "properties" ? (
         <PropertiesPage
           client={client}

@@ -404,6 +404,22 @@ button {
   padding: 2px 0 4px;
 }
 
+.follow-up-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 760;
+}
+
+.follow-up-summary-row strong {
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 850;
+}
+
 .dashboard-summary-link {
   display: inline-flex;
   align-items: baseline;
