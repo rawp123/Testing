@@ -63,9 +63,11 @@ OCR:
 
 ```sh
 OCR_MODE=disabled
+OCR_MODE=fake
+OCR_MODE=test
 ```
 
-`OCR_MODE=fake` is deterministic and intended for local/test checks only. There is no production OCR provider integration yet.
+`OCR_MODE=disabled` is the explicit safe production state while no OCR provider is connected. `OCR_MODE=fake` and `OCR_MODE=test` are deterministic and intended for local/test checks only. There is no production OCR provider integration yet, and fake/test OCR modes are not production-ready.
 
 Billing and analytics:
 
@@ -120,13 +122,15 @@ Checks:
 - required runtime configuration is present
 - database connection can run a minimal query
 - file storage mode is production-ready, local/test only, or not ready
-- OCR mode is configured or disabled
+- OCR mode is disabled, local/test only, or not ready
 - auth provider is configured or degraded
 - billing provider is configured or disabled
 
 Readiness responses are intentionally safe. They must not expose database URLs, passwords, tokens, raw auth headers, secret keys, storage keys, signed URLs, bucket names, provider internal errors, local absolute paths, raw OCR text, or billing provider internals.
 
 `GET /ready` returns `503` if required checks fail or production object storage is missing in production mode. Local/test file storage is reported as `local_only` so local development remains usable without real object-storage credentials.
+
+OCR readiness is separate from the OCR lifecycle API. The API can still accept OCR requests and record queued/test lifecycle status, but `/ready` does not treat fake/test OCR as production-ready. In production mode, fake/test OCR reports `not_ready`; disabled OCR reports `disabled`.
 
 ## Deployment-Oriented Commands
 
@@ -176,6 +180,12 @@ To confirm production storage enforcement without real credentials, run a negati
 APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=local npm run saas:deploy:check
 ```
 
+To confirm production OCR enforcement without real provider integration, run a negative local check and expect it to fail without printing provider internals, raw OCR text, signed URLs, storage keys, or local paths:
+
+```sh
+APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=s3 FILE_STORAGE_BUCKET=... FILE_STORAGE_REGION=... FILE_STORAGE_ACCESS_KEY_ID=... FILE_STORAGE_SECRET_ACCESS_KEY=... AUTH_PROVIDER=oidc BILLING_PROVIDER=stripe OCR_MODE=fake npm run saas:deploy:check
+```
+
 ## Minimum Pre-Deployment Checklist
 
 - Confirm `APP_ENV=production` and `NODE_ENV=production`.
@@ -185,7 +195,7 @@ APP_ENV=production DATABASE_URL=postgres://... FILE_STORAGE_DRIVER=local npm run
 - Confirm `FILE_STORAGE_DRIVER=s3` and the bucket is private.
 - Confirm `FILE_STORAGE_BUCKET`, `FILE_STORAGE_REGION`, `FILE_STORAGE_ACCESS_KEY_ID`, and `FILE_STORAGE_SECRET_ACCESS_KEY` are set through deployment secrets.
 - Confirm signed URL TTLs are no longer than needed.
-- Confirm `OCR_MODE=disabled` unless a production OCR provider has been explicitly implemented.
+- Confirm `OCR_MODE=disabled` unless a production OCR provider mode has been explicitly implemented.
 - Confirm `BILLING_PROVIDER=none` unless backend billing/provider work has been explicitly implemented.
 - Confirm web hosting routes `/api/v1` to the API or set `VITE_API_BASE_URL` appropriately at build time.
 - Run the verification commands listed above.

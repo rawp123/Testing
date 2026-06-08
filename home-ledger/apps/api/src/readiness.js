@@ -1,3 +1,4 @@
+import { getOcrReadiness } from "./ocr-readiness.js";
 import { getFileStorageReadiness } from "./storage-readiness.js";
 
 export async function getReadinessSnapshot({ config, db } = {}) {
@@ -77,19 +78,7 @@ function fileStorageReadinessCheck(config) {
 }
 
 function ocrReadinessCheck(config) {
-  if (config?.ocrMode === "disabled") {
-    return {
-      name: "ocr",
-      status: "disabled",
-      message: "OCR provider is disabled."
-    };
-  }
-
-  return {
-    name: "ocr",
-    status: "ok",
-    message: "OCR lifecycle provider is configured."
-  };
+  return getOcrReadiness(config);
 }
 
 function authReadinessCheck(config) {

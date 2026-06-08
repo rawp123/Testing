@@ -608,9 +608,17 @@ OCR configuration:
 ```sh
 OCR_MODE=disabled
 OCR_MODE=fake
+OCR_MODE=test
 ```
 
-`disabled` records queued lifecycle status without extracting text. `fake` returns deterministic extracted text for tests and local API checks. No external OCR service is called by the current implementation.
+`disabled` records queued lifecycle status without extracting text. `fake` and `test` return deterministic extracted text for tests and local API checks. No external OCR service is called by the current implementation.
+
+Production OCR readiness:
+
+- `OCR_MODE=disabled` is an explicit safe state when production OCR is not connected.
+- `OCR_MODE=fake` and `OCR_MODE=test` are local/test-only modes. `/ready` and `npm run saas:deploy:check` report them as `local_only` outside production and `not_ready` when `APP_ENV=production`.
+- There is no production OCR provider mode yet. Do not configure fake/test OCR for production deployments.
+- Readiness responses never expose raw OCR text, provider request ids, API keys, provider stack traces, storage keys, signed URLs, or local paths.
 
 Deferred for OCR:
 

@@ -20,7 +20,7 @@ test("GET /ready returns safe readiness details without auth", async () => {
       },
       authProvider: "oidc",
       billingProvider: "stripe",
-      ocrMode: "fake"
+      ocrMode: "disabled"
     }),
     db: createReadyDb()
   });
@@ -52,8 +52,8 @@ test("GET /ready returns safe readiness details without auth", async () => {
         },
         {
           name: "ocr",
-          status: "ok",
-          message: "OCR lifecycle provider is configured."
+          status: "disabled",
+          message: "OCR provider is disabled."
         },
         {
           name: "auth",
@@ -182,6 +182,56 @@ test("GET /ready rejects production runtime without production object storage", 
   await app.close();
 });
 
+test("GET /ready rejects production runtime using local OCR behavior", async () => {
+  const app = buildApp({
+    config: createConfig({
+      appEnv: "production",
+      authProvider: "oidc",
+      billingProvider: "stripe",
+      ocrMode: "fake",
+      fileStorageDriver: "s3",
+      fileStorage: {
+        driver: "s3",
+        bucket: "private-bucket",
+        region: "us-east-1",
+        endpoint: "https://storage.internal.example.test",
+        accessKeyId: "storage-access-key",
+        secretAccessKey: "storage-secret-key"
+      }
+    }),
+    db: createReadyDb()
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/ready"
+  });
+
+  assert.equal(response.statusCode, 503);
+  const body = response.json();
+  assert.equal(body.data.status, "not_ready");
+  assert.deepEqual(body.data.checks.find((check) => check.name === "ocr"), {
+    name: "ocr",
+    status: "not_ready",
+    message: "Production OCR provider is not configured."
+  });
+
+  for (const blocked of [
+    "private-bucket",
+    "storage.internal.example.test",
+    "storage-access-key",
+    "storage-secret-key",
+    "provider-request",
+    "Extracted text",
+    "signed_url",
+    "/Users/"
+  ]) {
+    assert.doesNotMatch(response.body, new RegExp(escapeRegExp(blocked), "i"));
+  }
+
+  await app.close();
+});
+
 test("readiness serialization omits provider internals and raw config", async () => {
   const snapshot = await getReadinessSnapshot({
     config: createConfig({
@@ -192,7 +242,10 @@ test("readiness serialization omits provider internals and raw config", async ()
         bucket: "secret-bucket",
         accessKeyId: "secret-access-key",
         secretAccessKey: "secret-storage-key"
-      }
+      },
+      ocrMode: "fake",
+      ocrApiKey: "ocr-secret-key",
+      providerRequestId: "provider-request-123"
     }),
     db: createReadyDb()
   });
@@ -205,6 +258,8 @@ test("readiness serialization omits provider internals and raw config", async ()
   assert.doesNotMatch(body, /secret-bucket/i);
   assert.doesNotMatch(body, /secret-access-key/i);
   assert.doesNotMatch(body, /secret-storage-key/i);
+  assert.doesNotMatch(body, /ocr-secret-key/i);
+  assert.doesNotMatch(body, /provider-request-123/i);
 });
 
 function createConfig(overrides = {}) {
