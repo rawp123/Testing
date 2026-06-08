@@ -262,6 +262,29 @@ test("source fixes remove generated follow-ups and counts are computed", async (
     [EXPENSE_IDS.ownerUnlinked, 2]
   ]);
 
+  const followUpsResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/follow-ups`,
+    headers: authHeaders("owner@example.test")
+  });
+  const documentCounts = new Map();
+  for (const item of followUpsResponse.json().data) {
+    if (item.document_id) {
+      documentCounts.set(item.document_id, (documentCounts.get(item.document_id) || 0) + 1);
+    }
+  }
+
+  const documentsResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents`,
+    headers: authHeaders("owner@example.test")
+  });
+  assert.equal(documentsResponse.statusCode, 200);
+  assert.deepEqual(
+    documentsResponse.json().data.map((document) => [document.id, document.open_item_count]),
+    documentsResponse.json().data.map((document) => [document.id, documentCounts.get(document.id) || 0])
+  );
+
   const updateExpenseResponse = await app.inject({
     method: "PATCH",
     url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/expenses/${EXPENSE_IDS.ownerUnlinked}`,
@@ -282,6 +305,43 @@ test("source fixes remove generated follow-ups and counts are computed", async (
     item.expense_id === EXPENSE_IDS.ownerUnlinked &&
     item.reason_code === "expense_review_later"
   ), false);
+
+  await app.close();
+});
+
+test("resolved document follow-ups suppress document open item counts", async () => {
+  const db = createFakeWorkspaceDb(createSeededWorkspaceState());
+  const app = buildApp({ config: createConfig(), db });
+
+  const listResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/follow-ups`,
+    headers: authHeaders("owner@example.test")
+  });
+  assert.equal(listResponse.statusCode, 200);
+  const target = listResponse.json().data.find((item) =>
+    item.document_id === DOCUMENT_IDS.ownerKitchenInvoice &&
+    item.reason_code === "document_missing_file"
+  );
+  assert(target);
+
+  const resolveResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/follow-ups/${target.id}/resolve`,
+    headers: authHeaders("owner@example.test"),
+    payload: {
+      note: "Document handled outside the app."
+    }
+  });
+  assert.equal(resolveResponse.statusCode, 200);
+
+  const documentResponse = await app.inject({
+    method: "GET",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}`,
+    headers: authHeaders("owner@example.test")
+  });
+  assert.equal(documentResponse.statusCode, 200);
+  assert.equal(documentResponse.json().data.open_item_count, 0);
 
   await app.close();
 });

@@ -1017,9 +1017,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         pagination: request.query || {},
         sort: request.query?.sort
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        documents: result.data
+      });
 
       return {
-        data: result.data.map(serializeDocument),
+        data: counted.documents.map(serializeDocument),
         meta: result.meta
       };
     });
@@ -1038,9 +1043,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
         input: request.body,
         actorUserId: request.auth.userId
       });
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        documents: [document]
+      });
 
       return reply.code(201).send({
-        data: serializeDocument(document)
+        data: serializeDocument(counted.documents[0])
       });
     });
 
@@ -1078,9 +1088,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!document) {
         throw apiError(404, "not_found", "Document not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        documents: [document]
+      });
 
       return {
-        data: serializeDocument(document)
+        data: serializeDocument(counted.documents[0])
       };
     });
 
@@ -1270,9 +1285,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!document) {
         throw apiError(404, "not_found", "Document not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        documents: [document]
+      });
 
       return {
-        data: serializeDocument(document)
+        data: serializeDocument(counted.documents[0])
       };
     });
 
@@ -1294,9 +1314,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       if (!document) {
         throw apiError(404, "not_found", "Document not found.");
       }
+      const counted = await addOpenItemCounts({
+        db,
+        workspaceId: request.params.workspaceId,
+        documents: [document]
+      });
 
       return {
-        data: serializeDocument(document)
+        data: serializeDocument(counted.documents[0])
       };
     });
   }, { prefix: "/api/v1" });

@@ -26,6 +26,7 @@ describe("Documents screen", () => {
       fileStatus: "Attached",
       documentDate: "06/05/2026",
       openItems: "1 open",
+      openItemCount: 1,
       hasFile: true
     });
     expect(rows[0].fileMeta).toContain("receipt.pdf");
@@ -67,6 +68,9 @@ describe("Documents screen", () => {
     expect(html).toContain("View file");
     expect(html).toContain("Remove file");
     expect(html).toContain("Archive");
+    expect(html).toContain("1 open");
+    expect(html).not.toContain("undefined");
+    expect(html).not.toContain("null");
   });
 
   it("renders empty and filtered states with direct copy", () => {

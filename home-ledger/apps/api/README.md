@@ -211,7 +211,7 @@ Compatibility notes:
 - Reopening a follow-up invalidates the active override. If the source issue still exists, the generated item appears again with the same deterministic id.
 - If a source issue is fixed naturally, the generated follow-up disappears and no longer contributes to open counts.
 - If the same source issue reappears after being resolved, the same deterministic id remains suppressed until reopened.
-- `open_item_count` on project and expense responses is computed from open generated follow-ups. Counts are workspace-scoped, exclude resolved overrides, and exclude deleted records.
+- `open_item_count` on project, expense, and document metadata responses is computed from open generated follow-ups. Counts are workspace-scoped, exclude resolved overrides, and exclude deleted records.
 - Dashboard `follow_ups` buckets and `projects.open_follow_up_count` come from this generated follow-up service so dashboard and follow-up list behavior stay aligned.
 
 Follow-up safety exclusions:
@@ -473,6 +473,7 @@ Document rules:
 - `notes` and `file_status_note` are trimmed and length-limited.
 - List responses may include same-workspace `property_name`, `project_name`, and `expense_description`.
 - If file or OCR rows already exist, responses include a safe file summary and OCR status summary only. Raw storage keys, local filesystem paths, and OCR text are not exposed.
+- Document metadata responses include `open_item_count` as an integer for unresolved generated follow-ups targeting that document, such as missing file or pending OCR items.
 - `DELETE` soft-deletes the document metadata row via `deleted_at`. It does not hard-delete file rows or expose file access afterward because file endpoints require a non-deleted document.
 
 Document list behavior:

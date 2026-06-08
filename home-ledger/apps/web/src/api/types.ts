@@ -291,7 +291,7 @@ export interface DocumentRecord {
   file_status_note?: string | null;
   file?: DocumentFileSummary | null;
   ocr?: DocumentOcrSummary | null;
-  open_item_count?: number;
+  open_item_count: number;
   deleted_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

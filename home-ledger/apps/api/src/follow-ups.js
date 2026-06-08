@@ -150,14 +150,15 @@ export async function reopenFollowUp({ db, workspaceId, followUpId, input }) {
   };
 }
 
-export async function addOpenItemCounts({ db, workspaceId, projects = [], expenses = [] }) {
-  if (!projects.length && !expenses.length) {
-    return { projects, expenses };
+export async function addOpenItemCounts({ db, workspaceId, projects = [], expenses = [], documents = [] }) {
+  if (!projects.length && !expenses.length && !documents.length) {
+    return { projects, expenses, documents };
   }
 
   const openItems = await listFollowUps({ db, workspaceId, status: "open" });
   const projectCounts = countBy(openItems, "project_id");
   const expenseCounts = countBy(openItems, "expense_id");
+  const documentCounts = countBy(openItems, "document_id");
 
   return {
     projects: projects.map((project) => ({
@@ -167,6 +168,10 @@ export async function addOpenItemCounts({ db, workspaceId, projects = [], expens
     expenses: expenses.map((expense) => ({
       ...expense,
       openItemCount: expenseCounts.get(expense.id) || 0
+    })),
+    documents: documents.map((document) => ({
+      ...document,
+      openItemCount: documentCounts.get(document.id) || 0
     }))
   };
 }

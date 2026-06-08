@@ -475,6 +475,7 @@ test("document API uses snake_case resource fields and hides storage internals",
   });
   assert.equal(createResponse.statusCode, 201);
   assertDocumentResponseShape(createResponse.json().data);
+  assert.equal(createResponse.json().data.open_item_count, 1);
   const documentId = createResponse.json().data.id;
 
   const listResponse = await app.inject({
@@ -484,6 +485,7 @@ test("document API uses snake_case resource fields and hides storage internals",
   });
   assert.equal(listResponse.statusCode, 200);
   assertDocumentResponseShape(listResponse.json().data[0]);
+  assert.equal(listResponse.json().data.every((document) => Number.isInteger(document.open_item_count)), true);
   assert.deepEqual(Object.keys(listResponse.json().meta).sort(), ["limit", "offset", "total_count"]);
 
   const detailResponse = await app.inject({
@@ -493,6 +495,7 @@ test("document API uses snake_case resource fields and hides storage internals",
   });
   assert.equal(detailResponse.statusCode, 200);
   assertDocumentResponseShape(detailResponse.json().data);
+  assert.equal(detailResponse.json().data.open_item_count, 1);
 
   const deleteResponse = await app.inject({
     method: "DELETE",
@@ -501,6 +504,7 @@ test("document API uses snake_case resource fields and hides storage internals",
   });
   assert.equal(deleteResponse.statusCode, 200);
   assertDocumentResponseShape(deleteResponse.json().data);
+  assert.equal(deleteResponse.json().data.open_item_count, 0);
   assert.notEqual(deleteResponse.json().data.deleted_at, null);
 
   const filterResponse = await app.inject({
@@ -593,6 +597,7 @@ function assertDocumentResponseShape(document) {
     "id",
     "notes",
     "ocr",
+    "open_item_count",
     "project_id",
     "project_name",
     "property_id",

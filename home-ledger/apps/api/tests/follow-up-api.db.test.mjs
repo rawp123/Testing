@@ -172,6 +172,14 @@ test("DB-backed Follow-up API resolves reopens and computes open item counts", {
     assert.equal(expenseResponse.statusCode, 200);
     assert.equal(expenseResponse.json().data.open_item_count, openAfterResolve.json().data.filter((item) => item.expense_id === expenseId).length);
 
+    const documentResponse = await app.inject({
+      method: "GET",
+      url: `/api/v1/workspaces/${workspaceId}/documents/${documentId}`,
+      headers: authHeaders(ownerEmail)
+    });
+    assert.equal(documentResponse.statusCode, 200);
+    assert.equal(documentResponse.json().data.open_item_count, openAfterResolve.json().data.filter((item) => item.document_id === documentId).length);
+
     const dashboardResponse = await app.inject({
       method: "GET",
       url: `/api/v1/workspaces/${workspaceId}/dashboard`,

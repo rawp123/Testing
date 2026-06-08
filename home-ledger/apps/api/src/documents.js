@@ -688,6 +688,7 @@ export function serializeDocument(document) {
     file_status_note: document.fileStatusNote,
     file: document.file,
     ocr: document.ocr,
+    open_item_count: Number(document.openItemCount || 0),
     deleted_at: document.deletedAt,
     created_at: document.createdAt,
     updated_at: document.updatedAt

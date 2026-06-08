@@ -57,7 +57,7 @@ export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
         : document.file_status_note || "No file attached",
       documentDate: document.document_date ? formatDate(document.document_date) : "No date",
       openItems: formatOpenItemCount(document.open_item_count),
-      openItemCount: Number(document.open_item_count || 0),
+      openItemCount: document.open_item_count,
       hasFile: document.file_availability === "available" && Boolean(file),
       source: document
     };

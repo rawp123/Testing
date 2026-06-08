@@ -148,6 +148,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
       has_text: false,
       completed_at: null
     });
+    assert.equal(createResponse.json().data.open_item_count, 1);
     documentId = createResponse.json().data.id;
 
     const fileResult = await db.query(
@@ -193,6 +194,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
     assert.equal(detailResponse.json().data.file.size_bytes, 1234);
     assert.equal(detailResponse.json().data.ocr.status, "succeeded");
     assert.equal(detailResponse.json().data.ocr.has_text, true);
+    assert.equal(detailResponse.json().data.open_item_count, 0);
     assert.equal(JSON.stringify(detailResponse.json().data).includes("private/object/key.pdf"), false);
     assert.equal(JSON.stringify(detailResponse.json().data).includes("Recognized text"), false);
 
@@ -231,6 +233,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
     assert.equal(updateResponse.json().data.expense_id, null);
     assert.equal(updateResponse.json().data.file_availability, "missing");
     assert.equal(updateResponse.json().data.file_status_note, "Imported without file content.");
+    assert.equal(updateResponse.json().data.open_item_count, 0);
 
     const deleteResponse = await app.inject({
       method: "DELETE",
@@ -238,6 +241,7 @@ test("DB-backed Document API validates relationships and soft deletes documents"
       headers: authHeaders(email)
     });
     assert.equal(deleteResponse.statusCode, 200);
+    assert.equal(deleteResponse.json().data.open_item_count, 0);
     assert.notEqual(deleteResponse.json().data.deleted_at, null);
 
     const deletedRow = await db.query(
