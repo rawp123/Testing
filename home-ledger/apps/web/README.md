@@ -55,3 +55,5 @@ npm run check:web
 npm run test:web
 npm run build:web
 ```
+
+Deployment configuration and production-readiness expectations are documented in `docs/deployment-readiness.md`. The current web app still relies on the existing API session contract and does not add production auth, billing, import execution, or production OCR UI.

@@ -76,6 +76,7 @@ import {
   serializeVendor,
   updateVendor
 } from "./vendors.js";
+import { getReadinessSnapshot, serializeReadinessSnapshot } from "./readiness.js";
 import {
   WorkspaceValidationError,
   createWorkspaceWithOwner,
@@ -165,6 +166,17 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       status: "ok"
     }
   }));
+
+  app.get("/ready", async (request, reply) => {
+    const snapshot = await getReadinessSnapshot({ config, db });
+    if (snapshot.status !== "ready") {
+      reply.code(503);
+    }
+
+    return {
+      data: serializeReadinessSnapshot(snapshot)
+    };
+  });
 
   app.register(async (api) => {
     api.get("/session", { preHandler: app.authenticate }, async (request) => {

@@ -34,7 +34,12 @@ Public endpoint:
 
 ```text
 GET /health
+GET /ready
 ```
+
+`GET /health` is a liveness check. It only confirms the API process can respond.
+
+`GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail or production-critical providers are still degraded.
 
 Authenticated endpoint:
 
@@ -666,6 +671,7 @@ Run from the repo root:
 ```sh
 npm run test:api
 npm run check:api
+npm run saas:deploy:check
 npm run saas:db:migrate
 npm run saas:db:rollback
 npm run saas:db:check
@@ -675,6 +681,8 @@ npm run saas:db:reset:test
 `saas:db:migrate` and `saas:db:rollback` require `DATABASE_URL`.
 
 `saas:db:check` and `saas:db:reset:test` require `TEST_DATABASE_URL`. These commands refuse to use `DATABASE_URL` and require the database name to contain `test`.
+
+`saas:deploy:check` requires `DATABASE_URL` and runs the same readiness logic used by `GET /ready`. It checks database connectivity and safe provider readiness. It does not run migrations, seed data, call external OCR services, create billing customers, or validate a real production auth provider beyond configured/not-connected status.
 
 ## Local PostgreSQL Setup
 
