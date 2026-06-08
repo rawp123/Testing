@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { HomeLedgerApiClient } from "../api/client";
-import type { ProjectRecord, PropertyRecord } from "../api/types";
+import type { ProjectRecord, PropertyRecord, VendorRecord } from "../api/types";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
 import { EmptyState } from "../components/EmptyState";
@@ -20,11 +20,12 @@ import {
   type ProjectRow,
   type SelectOption
 } from "./project-model";
+import { vendorOptionsFromRecords, type VendorSelectOption } from "../vendors/vendor-model";
 
 type ProjectsState =
-  | { status: "loading"; projects: ProjectRecord[]; properties: PropertyRecord[] }
-  | { status: "ready"; projects: ProjectRecord[]; properties: PropertyRecord[] }
-  | { status: "error"; projects: ProjectRecord[]; properties: PropertyRecord[]; message: string };
+  | { status: "loading"; projects: ProjectRecord[]; properties: PropertyRecord[]; vendors: VendorRecord[] }
+  | { status: "ready"; projects: ProjectRecord[]; properties: PropertyRecord[]; vendors: VendorRecord[] }
+  | { status: "error"; projects: ProjectRecord[]; properties: PropertyRecord[]; vendors: VendorRecord[]; message: string };
 
 export function ProjectsPage({
   client,
@@ -35,7 +36,7 @@ export function ProjectsPage({
   workspaceId: string;
   workspaceName: string;
 }) {
-  const [state, setState] = useState<ProjectsState>({ status: "loading", projects: [], properties: [] });
+  const [state, setState] = useState<ProjectsState>({ status: "loading", projects: [], properties: [], vendors: [] });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [formValues, setFormValues] = useState<ProjectFormValues>(() => projectToFormValues());
@@ -44,19 +45,21 @@ export function ProjectsPage({
 
   useEffect(() => {
     let cancelled = false;
-    setState((current) => ({ status: "loading", projects: current.projects, properties: current.properties }));
+    setState((current) => ({ status: "loading", projects: current.projects, properties: current.properties, vendors: current.vendors }));
     Promise.all([
       client.listProjects(workspaceId),
-      client.listProperties(workspaceId)
+      client.listProperties(workspaceId),
+      client.listVendors(workspaceId)
     ])
-      .then(([projects, properties]) => {
-        if (!cancelled) setState({ status: "ready", projects, properties });
+      .then(([projects, properties, vendors]) => {
+        if (!cancelled) setState({ status: "ready", projects, properties, vendors });
       })
       .catch(() => {
         if (!cancelled) setState((current) => ({
           status: "error",
           projects: current.projects,
           properties: current.properties,
+          vendors: current.vendors,
           message: "Projects could not be loaded."
         }));
       });
@@ -66,6 +69,7 @@ export function ProjectsPage({
   }, [client, workspaceId]);
 
   const propertyOptions = useMemo(() => propertyOptionsFromRecords(state.properties), [state.properties]);
+  const vendorOptions = useMemo(() => vendorOptionsFromRecords(state.vendors), [state.vendors]);
 
   const openCreate = () => {
     setSelectedProject(null);
@@ -88,11 +92,12 @@ export function ProjectsPage({
   };
 
   const refreshProjects = async () => {
-    const [projects, properties] = await Promise.all([
+    const [projects, properties, vendors] = await Promise.all([
       client.listProjects(workspaceId),
-      client.listProperties(workspaceId)
+      client.listProperties(workspaceId),
+      client.listVendors(workspaceId)
     ]);
-    setState({ status: "ready", projects, properties });
+    setState({ status: "ready", projects, properties, vendors });
   };
 
   const saveProject = async () => {
@@ -132,6 +137,7 @@ export function ProjectsPage({
         status: "error",
         projects: current.projects,
         properties: current.properties,
+        vendors: current.vendors,
         message: "Project could not be archived."
       }));
     }
@@ -155,6 +161,7 @@ export function ProjectsPage({
       projects={state.projects}
       propertyOptions={propertyOptions}
       selectedProject={selectedProject}
+      vendorOptions={vendorOptions}
       workspaceName={workspaceName}
     />
   );
@@ -177,6 +184,7 @@ export function ProjectsView({
   projects,
   propertyOptions,
   selectedProject,
+  vendorOptions,
   workspaceName
 }: {
   activeFilter?: string;
@@ -195,6 +203,7 @@ export function ProjectsView({
   projects: ProjectRecord[];
   propertyOptions: SelectOption[];
   selectedProject?: ProjectRecord | null;
+  vendorOptions: VendorSelectOption[];
   workspaceName: string;
 }) {
   const rows = useMemo(() => toProjectRows(projects), [projects]);
@@ -352,9 +361,26 @@ export function ProjectsView({
             </FormField>
           </div>
           <div className="form-grid two-column">
-            <FormField label="Vendor or contractor">
+            <FormField helper="Select a saved vendor, or leave unassigned." label="Vendor">
+              <select
+                name="vendor_id"
+                onChange={(event) => onFormChange({
+                  ...formValues,
+                  vendorId: event.currentTarget.value,
+                  contractorNameRaw: event.currentTarget.value ? "" : formValues.contractorNameRaw
+                })}
+                value={formValues.vendorId}
+              >
+                <option value="">Unassigned / unknown</option>
+                {vendorOptions.map((vendor) => (
+                  <option key={vendor.value} value={vendor.value}>{vendor.label}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField helper="Use only when no saved vendor is selected." label="Vendor name if unassigned">
               <input
                 name="contractor_name_raw"
+                disabled={Boolean(formValues.vendorId)}
                 onChange={(event) => onFormChange({ ...formValues, contractorNameRaw: event.currentTarget.value })}
                 value={formValues.contractorNameRaw}
               />

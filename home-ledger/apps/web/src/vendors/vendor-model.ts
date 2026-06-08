@@ -22,6 +22,11 @@ export interface VendorRow {
   source: VendorRecord;
 }
 
+export interface VendorSelectOption {
+  value: string;
+  label: string;
+}
+
 export function toVendorRows(vendors: VendorRecord[]): VendorRow[] {
   return vendors
     .map((vendor) => ({
@@ -100,6 +105,15 @@ export function filterVendorRows(rows: VendorRow[], filter: string) {
     return rows.filter((row) => row.source.category === category);
   }
   return rows;
+}
+
+export function vendorOptionsFromRecords(vendors: VendorRecord[]): VendorSelectOption[] {
+  return vendors
+    .map((vendor) => ({
+      value: vendor.id,
+      label: vendor.name || "Unnamed vendor"
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label) || left.value.localeCompare(right.value));
 }
 
 function categoryLabel(value: string | null | undefined) {

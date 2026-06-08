@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { ExpenseRecord, ProjectRecord, PropertyRecord } from "../src/api/types";
+import type { ExpenseRecord, ProjectRecord, PropertyRecord, VendorRecord } from "../src/api/types";
 import { ExpensesView } from "../src/expenses/ExpensesPage";
 import {
   centsToDollarInput,
@@ -10,6 +10,7 @@ import {
   propertyOptionsFromRecords,
   toExpenseRows
 } from "../src/expenses/expense-model";
+import { vendorOptionsFromRecords } from "../src/vendors/vendor-model";
 
 describe("Expenses screen", () => {
   it("maps expense records for compact grid display", () => {
@@ -29,6 +30,16 @@ describe("Expenses screen", () => {
     });
   });
 
+  it("prefers saved vendor names over raw payee text in rows", () => {
+    const rows = toExpenseRows([createExpense({
+      vendor_id: "vendor-1",
+      vendor_name: "Saved Cedarline",
+      vendor_name_raw: "Legacy Cedarline"
+    })]);
+
+    expect(rows[0].vendor).toBe("Saved Cedarline");
+  });
+
   it("renders the expenses grid, filters, and compact actions", () => {
     const html = renderToStaticMarkup(
       <ExpensesView
@@ -44,6 +55,7 @@ describe("Expenses screen", () => {
         onSaveExpense={() => undefined}
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -75,6 +87,7 @@ describe("Expenses screen", () => {
         onSaveExpense={() => undefined}
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -106,6 +119,7 @@ describe("Expenses screen", () => {
           createProperty({ id: "property-2", name: "Rental" })
         ])}
         selectedExpense={createExpense()}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -114,7 +128,9 @@ describe("Expenses screen", () => {
     expect(html).toContain("Save expense");
     expect(html).toContain("Property");
     expect(html).toContain("Project");
-    expect(html).toContain("Vendor or payee");
+    expect(html).toContain("Vendor/payee");
+    expect(html).toContain("Payee name if unassigned");
+    expect(html).toContain("Cedarline Carpentry");
     expect(html).toContain("Review type");
     expect(html).toContain("Documentation");
     expect(html).toContain("Deck repair");
@@ -123,12 +139,13 @@ describe("Expenses screen", () => {
     expect(html).not.toContain("IRS");
   });
 
-  it("normalizes form values to safe expense API input", () => {
+  it("normalizes selected vendor values to safe expense API input", () => {
     expect(centsToDollarInput(248000)).toBe("2480.00");
     expect(dollarsToCents("$2,480.55")).toBe(248055);
     expect(formValuesToExpenseInput({
       propertyId: "property-1",
       projectId: "project-1",
+      vendorId: "vendor-1",
       vendorNameRaw: " Cedarline Carpentry ",
       expenseDate: "2026-06-05",
       description: " Deck boards ",
@@ -140,7 +157,8 @@ describe("Expenses screen", () => {
     })).toEqual({
       property_id: "property-1",
       project_id: "project-1",
-      vendor_name_raw: "Cedarline Carpentry",
+      vendor_id: "vendor-1",
+      vendor_name_raw: null,
       expense_date: "2026-06-05",
       description: "Deck boards",
       amount_cents: 248000,
@@ -149,6 +167,25 @@ describe("Expenses screen", () => {
       record_treatment: "repair_upkeep",
       documentation_status: "needs_follow_up",
       notes: null
+    });
+  });
+
+  it("preserves raw payee fallback when no saved vendor is selected", () => {
+    expect(formValuesToExpenseInput({
+      propertyId: "property-1",
+      projectId: "project-1",
+      vendorId: "",
+      vendorNameRaw: " Cedarline Carpentry ",
+      expenseDate: "2026-06-05",
+      description: "Deck boards",
+      amount: "2480.00",
+      category: "repair_upkeep",
+      recordTreatment: "repair_upkeep",
+      documentationStatus: "needs_follow_up",
+      notes: ""
+    })).toMatchObject({
+      vendor_id: null,
+      vendor_name_raw: "Cedarline Carpentry"
     });
   });
 });
@@ -199,6 +236,26 @@ function createProject(overrides: Partial<ProjectRecord> = {}): ProjectRecord {
     completeness_override_note: null,
     completeness_overridden_at: null,
     open_item_count: 1,
+    archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createVendor(overrides: Partial<VendorRecord> = {}): VendorRecord {
+  return {
+    id: "vendor-1",
+    name: "Cedarline Carpentry",
+    normalized_name: "cedarline carpentry",
+    category: "repair_upkeep",
+    contact_name: null,
+    phone: null,
+    email: null,
+    website: null,
+    notes: null,
+    status: "active",
+    source_confidence: "user_confirmed",
     archived_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",

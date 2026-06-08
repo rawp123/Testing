@@ -107,7 +107,11 @@ describe("Documents screen", () => {
       <DocumentsView
         documents={[createDocument()]}
         expenses={[
-          createExpense(),
+          createExpense({
+            vendor_id: "vendor-1",
+            vendor_name: "Saved Cedarline",
+            vendor_name_raw: "Legacy Cedarline"
+          }),
           createExpense({ id: "expense-2", property_id: "property-2", project_id: "project-2", description: "Bathroom tile" })
         ]}
         formValues={documentToFormValues(createDocument())}
@@ -141,6 +145,8 @@ describe("Documents screen", () => {
     expect(html).toContain("type=\"file\"");
     expect(html).toContain("Selected file: new-receipt.pdf");
     expect(html).toContain("Linked expense");
+    expect(html).toContain("Saved Cedarline");
+    expect(html).not.toContain("Legacy Cedarline");
     expect(html).toContain("Deck repair");
     expect(html).toContain("Deck boards");
     expect(html).not.toContain("Bathroom tile");

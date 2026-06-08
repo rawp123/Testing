@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { ProjectRecord } from "../src/api/types";
+import type { ProjectRecord, VendorRecord } from "../src/api/types";
 import { ProjectsView } from "../src/projects/ProjectsPage";
 import {
   formValuesToProjectInput,
@@ -8,6 +8,7 @@ import {
   propertyOptionsFromRecords,
   toProjectRows
 } from "../src/projects/project-model";
+import { vendorOptionsFromRecords } from "../src/vendors/vendor-model";
 
 describe("Projects screen", () => {
   it("maps project records for compact grid display", () => {
@@ -39,6 +40,7 @@ describe("Projects screen", () => {
         onSaveProject={() => undefined}
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -74,6 +76,7 @@ describe("Projects screen", () => {
         onSaveProject={() => undefined}
         projects={[createProject({ open_item_count: 0 })]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -110,6 +113,7 @@ describe("Projects screen", () => {
           createProperty(),
           { ...createProperty(), id: "property-2", name: "Lake house" }
         ])}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -132,6 +136,7 @@ describe("Projects screen", () => {
         onSaveProject={() => undefined}
         projects={[]}
         propertyOptions={[]}
+        vendorOptions={[]}
         workspaceName="Home records"
       />
     );
@@ -156,6 +161,7 @@ describe("Projects screen", () => {
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
         selectedProject={createProject()}
+        vendorOptions={vendorOptionsFromRecords([createVendor()])}
         workspaceName="Home records"
       />
     );
@@ -164,34 +170,57 @@ describe("Projects screen", () => {
     expect(html).toContain("Save project");
     expect(html).toContain("Property");
     expect(html).toContain("Status");
-    expect(html).toContain("Vendor or contractor");
+    expect(html).toContain("Vendor name if unassigned");
+    expect(html).toContain("Summit Heating &amp; Air");
     expect(html).toContain("Permit number");
     expect(html).not.toContain("deductible");
+    expect(html).not.toContain("normalized_name");
   });
 
-  it("normalizes form values to safe project API input", () => {
+  it("normalizes selected vendor values to safe project API input", () => {
     expect(formValuesToProjectInput({
       propertyId: "property-1",
+      vendorId: "vendor-1",
       name: " Kitchen overhaul ",
       category: " kitchen ",
       status: "in_progress",
       startDate: "2026-06-01",
       completionDate: "",
-      contractorNameRaw: " Summit Heating & Air ",
+      contractorNameRaw: "",
       permitNumber: "",
       scopeSummary: " Cabinets and lighting ",
       notes: ""
     })).toEqual({
       property_id: "property-1",
+      vendor_id: "vendor-1",
       name: "Kitchen overhaul",
       category: "kitchen",
       status: "in_progress",
       start_date: "2026-06-01",
       completion_date: null,
-      contractor_name_raw: "Summit Heating & Air",
+      contractor_name_raw: null,
       permit_number: null,
       scope_summary: "Cabinets and lighting",
       notes: null
+    });
+  });
+
+  it("preserves raw contractor fallback when no saved vendor is selected", () => {
+    expect(formValuesToProjectInput({
+      propertyId: "property-1",
+      vendorId: "",
+      name: "Kitchen overhaul",
+      category: "kitchen",
+      status: "in_progress",
+      startDate: "",
+      completionDate: "",
+      contractorNameRaw: " Summit Heating & Air ",
+      permitNumber: "",
+      scopeSummary: "",
+      notes: ""
+    })).toMatchObject({
+      vendor_id: null,
+      contractor_name_raw: "Summit Heating & Air"
     });
   });
 });
@@ -215,6 +244,26 @@ function createProject(overrides: Partial<ProjectRecord> = {}): ProjectRecord {
     completeness_override_note: null,
     completeness_overridden_at: null,
     open_item_count: 2,
+    archived_at: null,
+    created_at: "2026-06-07T12:00:00.000Z",
+    updated_at: "2026-06-07T12:00:00.000Z",
+    ...overrides
+  };
+}
+
+function createVendor(overrides: Partial<VendorRecord> = {}): VendorRecord {
+  return {
+    id: "vendor-1",
+    name: "Summit Heating & Air",
+    normalized_name: "summit heating & air",
+    category: "hvac",
+    contact_name: null,
+    phone: null,
+    email: null,
+    website: null,
+    notes: null,
+    status: "active",
+    source_confidence: "user_confirmed",
     archived_at: null,
     created_at: "2026-06-07T12:00:00.000Z",
     updated_at: "2026-06-07T12:00:00.000Z",

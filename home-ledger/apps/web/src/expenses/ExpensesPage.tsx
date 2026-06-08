@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { HomeLedgerApiClient } from "../api/client";
-import type { ExpenseRecord, ProjectRecord, PropertyRecord } from "../api/types";
+import type { ExpenseRecord, ProjectRecord, PropertyRecord, VendorRecord } from "../api/types";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
 import { EmptyState } from "../components/EmptyState";
@@ -23,11 +23,12 @@ import {
   type ExpenseRow,
   type SelectOption
 } from "./expense-model";
+import { vendorOptionsFromRecords, type VendorSelectOption } from "../vendors/vendor-model";
 
 type ExpensesState =
-  | { status: "loading"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[] }
-  | { status: "ready"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[] }
-  | { status: "error"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; message: string };
+  | { status: "loading"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; vendors: VendorRecord[] }
+  | { status: "ready"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; vendors: VendorRecord[] }
+  | { status: "error"; expenses: ExpenseRecord[]; properties: PropertyRecord[]; projects: ProjectRecord[]; vendors: VendorRecord[]; message: string };
 
 export function ExpensesPage({
   client,
@@ -38,7 +39,7 @@ export function ExpensesPage({
   workspaceId: string;
   workspaceName: string;
 }) {
-  const [state, setState] = useState<ExpensesState>({ status: "loading", expenses: [], properties: [], projects: [] });
+  const [state, setState] = useState<ExpensesState>({ status: "loading", expenses: [], properties: [], projects: [], vendors: [] });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedExpense, setSelectedExpense] = useState<ExpenseRecord | null>(null);
   const [formValues, setFormValues] = useState<ExpenseFormValues>(() => expenseToFormValues());
@@ -51,15 +52,17 @@ export function ExpensesPage({
       status: "loading",
       expenses: current.expenses,
       properties: current.properties,
-      projects: current.projects
+      projects: current.projects,
+      vendors: current.vendors
     }));
     Promise.all([
       client.listExpenses(workspaceId),
       client.listProperties(workspaceId),
-      client.listProjects(workspaceId)
+      client.listProjects(workspaceId),
+      client.listVendors(workspaceId)
     ])
-      .then(([expenses, properties, projects]) => {
-        if (!cancelled) setState({ status: "ready", expenses, properties, projects });
+      .then(([expenses, properties, projects, vendors]) => {
+        if (!cancelled) setState({ status: "ready", expenses, properties, projects, vendors });
       })
       .catch(() => {
         if (!cancelled) setState((current) => ({
@@ -67,6 +70,7 @@ export function ExpensesPage({
           expenses: current.expenses,
           properties: current.properties,
           projects: current.projects,
+          vendors: current.vendors,
           message: "Expenses could not be loaded."
         }));
       });
@@ -77,6 +81,7 @@ export function ExpensesPage({
   }, [client, workspaceId]);
 
   const propertyOptions = useMemo(() => propertyOptionsFromRecords(state.properties), [state.properties]);
+  const vendorOptions = useMemo(() => vendorOptionsFromRecords(state.vendors), [state.vendors]);
 
   const openCreate = () => {
     setSelectedExpense(null);
@@ -99,12 +104,13 @@ export function ExpensesPage({
   };
 
   const refreshExpenses = async () => {
-    const [expenses, properties, projects] = await Promise.all([
+    const [expenses, properties, projects, vendors] = await Promise.all([
       client.listExpenses(workspaceId),
       client.listProperties(workspaceId),
-      client.listProjects(workspaceId)
+      client.listProjects(workspaceId),
+      client.listVendors(workspaceId)
     ]);
-    setState({ status: "ready", expenses, properties, projects });
+    setState({ status: "ready", expenses, properties, projects, vendors });
   };
 
   const saveExpense = async () => {
@@ -149,6 +155,7 @@ export function ExpensesPage({
         expenses: current.expenses,
         properties: current.properties,
         projects: current.projects,
+        vendors: current.vendors,
         message: "Expense could not be archived."
       }));
     }
@@ -173,6 +180,7 @@ export function ExpensesPage({
       projects={state.projects}
       propertyOptions={propertyOptions}
       selectedExpense={selectedExpense}
+      vendorOptions={vendorOptions}
       workspaceName={workspaceName}
     />
   );
@@ -196,6 +204,7 @@ export function ExpensesView({
   projects,
   propertyOptions,
   selectedExpense,
+  vendorOptions,
   workspaceName
 }: {
   activeFilter?: string;
@@ -215,6 +224,7 @@ export function ExpensesView({
   projects: ProjectRecord[];
   propertyOptions: SelectOption[];
   selectedExpense?: ExpenseRecord | null;
+  vendorOptions: VendorSelectOption[];
   workspaceName: string;
 }) {
   const rows = useMemo(() => toExpenseRows(expenses), [expenses]);
@@ -355,9 +365,26 @@ export function ExpensesView({
             />
           </FormField>
           <div className="form-grid two-column">
-            <FormField label="Vendor or payee">
+            <FormField helper="Select a saved vendor, or leave unassigned." label="Vendor/payee">
+              <select
+                name="vendor_id"
+                onChange={(event) => onFormChange({
+                  ...formValues,
+                  vendorId: event.currentTarget.value,
+                  vendorNameRaw: event.currentTarget.value ? "" : formValues.vendorNameRaw
+                })}
+                value={formValues.vendorId}
+              >
+                <option value="">Unassigned / unknown</option>
+                {vendorOptions.map((vendor) => (
+                  <option key={vendor.value} value={vendor.value}>{vendor.label}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField helper="Use only when no saved vendor is selected." label="Payee name if unassigned">
               <input
                 name="vendor_name_raw"
+                disabled={Boolean(formValues.vendorId)}
                 onChange={(event) => onFormChange({ ...formValues, vendorNameRaw: event.currentTarget.value })}
                 value={formValues.vendorNameRaw}
               />

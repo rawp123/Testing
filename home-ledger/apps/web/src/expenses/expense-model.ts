@@ -17,6 +17,7 @@ export const DOCUMENTATION_STATUS_OPTIONS = [
 export interface ExpenseFormValues {
   propertyId: string;
   projectId: string;
+  vendorId: string;
   vendorNameRaw: string;
   expenseDate: string;
   description: string;
@@ -69,7 +70,8 @@ export function expenseToFormValues(expense?: ExpenseRecord | null, fallbackProp
   return {
     propertyId: expense?.property_id || fallbackPropertyId,
     projectId: expense?.project_id || "",
-    vendorNameRaw: expense?.vendor_name_raw || expense?.vendor_name || "",
+    vendorId: expense?.vendor_id || "",
+    vendorNameRaw: expense?.vendor_id ? "" : expense?.vendor_name_raw || expense?.vendor_name || "",
     expenseDate: expense?.expense_date || "",
     description: expense?.description || "",
     amount: expense?.amount_cents === null || expense?.amount_cents === undefined
@@ -86,7 +88,8 @@ export function formValuesToExpenseInput(values: ExpenseFormValues): ExpenseInpu
   return {
     property_id: values.propertyId,
     project_id: nullableText(values.projectId),
-    vendor_name_raw: nullableText(values.vendorNameRaw),
+    vendor_id: nullableText(values.vendorId),
+    vendor_name_raw: values.vendorId ? null : nullableText(values.vendorNameRaw),
     expense_date: nullableText(values.expenseDate),
     description: values.description.trim(),
     amount_cents: dollarsToCents(values.amount),

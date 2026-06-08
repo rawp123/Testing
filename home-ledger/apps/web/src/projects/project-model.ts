@@ -10,6 +10,7 @@ export const PROJECT_STATUS_OPTIONS = [
 
 export interface ProjectFormValues {
   propertyId: string;
+  vendorId: string;
   name: string;
   category: string;
   status: string;
@@ -57,12 +58,13 @@ export function toProjectRows(projects: ProjectRecord[]): ProjectRow[] {
 export function projectToFormValues(project?: ProjectRecord | null, fallbackPropertyId = ""): ProjectFormValues {
   return {
     propertyId: project?.property_id || fallbackPropertyId,
+    vendorId: project?.vendor_id || "",
     name: project?.name || "",
     category: project?.category || "",
     status: project?.status && project.status !== "archived" ? project.status : "planned",
     startDate: project?.start_date || "",
     completionDate: project?.completion_date || "",
-    contractorNameRaw: project?.contractor_name_raw || project?.vendor_name || "",
+    contractorNameRaw: project?.vendor_id ? project?.contractor_name_raw || "" : project?.contractor_name_raw || project?.vendor_name || "",
     permitNumber: project?.permit_number || "",
     scopeSummary: project?.scope_summary || "",
     notes: project?.notes || ""
@@ -72,6 +74,7 @@ export function projectToFormValues(project?: ProjectRecord | null, fallbackProp
 export function formValuesToProjectInput(values: ProjectFormValues): ProjectInput {
   return {
     property_id: values.propertyId,
+    vendor_id: nullableText(values.vendorId),
     name: values.name.trim(),
     category: values.category.trim(),
     status: values.status,
