@@ -14,16 +14,19 @@ Native iOS source was not found in this repository during the frontend architect
 
 ## Local Development Assumptions
 
-The web app expects the API to be available at `/api/v1`, typically through a later dev proxy or deployment edge configuration. During this foundation ticket, no production auth UI is implemented. The API's configured dev auth/session behavior remains the local development path.
+The web app expects the API to be available at `/api/v1`, typically through a later dev proxy or deployment edge configuration. During local review, set `VITE_API_BASE_URL` to the running API. No production auth UI is implemented yet; the API's configured dev auth/session behavior remains the local development path.
 
-Run the web package with:
+For direct local review against the SaaS API:
 
 ```sh
-npm run dev:web
-npm run check:web
-npm run test:web
-npm run build:web
+TEST_DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run saas:db:reset:test
+DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run seed:api:dev
+DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run dev:api
+VITE_API_BASE_URL=http://127.0.0.1:4000 npm run dev:web
+curl -s http://127.0.0.1:4000/api/v1/session | python3 -m json.tool
 ```
+
+The session response should include at least one membership for the dev user before opening the web app. Without that membership, the API can authenticate the dev user but the web app has no workspace to load.
 
 ## Current Scope
 
@@ -34,14 +37,21 @@ Implemented:
 - `GET /api/v1/workspaces/:workspaceId/follow-ups/summary`
 - Dashboard loading, empty workspace, ready, and error states
 - React component shell with compact dashboard tables and summary panels
+- Properties, Projects, Expenses, Documents, and Export screens
 
 Not implemented yet:
 
-- Full CRUD screens
-- File upload UI
 - Follow-up resolution UI
-- Export UI
 - Billing
 - Import
 - Production auth UI
+- Production OCR provider wiring
 - Native iOS wiring
+
+Run checks with:
+
+```sh
+npm run check:web
+npm run test:web
+npm run build:web
+```

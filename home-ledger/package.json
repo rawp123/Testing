@@ -26,6 +26,7 @@
     "saas:db:rollback": "npm --workspace apps/api run db:rollback",
     "saas:db:reset:test": "npm --workspace apps/api run db:reset:test",
     "saas:db:check": "npm --workspace apps/api run db:check",
+    "seed:api:dev": "npm --workspace apps/api run seed:dev",
     "qa:render": "env -u ELECTRON_RUN_AS_NODE ./desktop/node_modules/.bin/electron scripts/render-qa.cjs",
     "qa:beta": "env -u ELECTRON_RUN_AS_NODE ./desktop/node_modules/.bin/electron scripts/beta-qa.cjs",
     "qa:private-documents": "env -u ELECTRON_RUN_AS_NODE ./desktop/node_modules/.bin/electron scripts/private-document-qa.cjs",

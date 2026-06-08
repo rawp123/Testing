@@ -12,7 +12,23 @@ Run from the repo root:
 npm run dev:api
 ```
 
-The runtime reads `DATABASE_URL` and does not run migrations automatically.
+The runtime reads `DATABASE_URL` and does not run migrations or local data seeding automatically.
+
+Local SaaS review flow:
+
+```sh
+TEST_DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run saas:db:reset:test
+DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run seed:api:dev
+DATABASE_URL=postgres://home_ledger:home_ledger@localhost:5432/home_ledger_test npm run dev:api
+```
+
+In another terminal:
+
+```sh
+curl -s http://127.0.0.1:4000/api/v1/session | python3 -m json.tool
+```
+
+The session should show `dev@example.test` with at least one workspace membership. The dev seed is idempotent, local-only, and creates the configured dev user, a marked dev workspace, and an owner membership. It does not run in production or staging and does not create sample properties, projects, expenses, or documents.
 
 Public endpoint:
 
@@ -94,6 +110,8 @@ Unauthenticated responses use the shared error envelope:
 ## Dev/Test Auth
 
 `AUTH_PROVIDER=dev` and `DEV_AUTH_ENABLED=true` enable local dev auth. The API uses server-side configuration to load or create the dev user, then reads memberships from `workspace_memberships`.
+
+Use `DATABASE_URL=... npm run seed:api:dev` from the repo root when the dev session has no workspace membership. The seed uses `DEV_AUTH_EMAIL`, `DEV_AUTH_DISPLAY_NAME`, and `DEV_WORKSPACE_NAME` when provided; otherwise it uses `dev@example.test`, `Local Developer`, and `Home Ledger Dev Workspace`.
 
 Tests may use `x-home-ledger-test-auth-email` to select a test email only when `APP_ENV=test`. User ids, roles, workspace ids, memberships, entitlements, and object keys are never accepted from request headers.
 
