@@ -21,7 +21,10 @@ describe("Settings screen", () => {
     expect(html).toContain("Account");
     expect(html).toContain("Robert Parrish");
     expect(html).toContain("owner@example.test");
-    expect(html).toContain("Development sign-in");
+    expect(html).toContain("Development session");
+    expect(html).toContain("Auth status");
+    expect(html).toContain("Production sign-in is not connected in this build.");
+    expect(html).toContain("Owner workspace access");
     expect(html).toContain("Billing and plan");
     expect(html).toContain("Open billing");
     expect(html).toContain("Data controls");
@@ -65,6 +68,9 @@ describe("Settings screen", () => {
     for (const blocked of ["deductible", "irs-ready", "tax-safe", "audit-proof", "tax-optimized", "legal-ready"]) {
       expect(html).not.toContain(blocked);
     }
+    for (const authOverclaim of ["production sign-in active", "password saved", "oauth connected", "sso enabled", "mfa enabled", "session encrypted"]) {
+      expect(html).not.toContain(authOverclaim);
+    }
     expect(html).toContain("does not determine tax, legal, accounting, or compliance treatment");
   });
 
@@ -74,6 +80,7 @@ describe("Settings screen", () => {
         onNavigate={() => undefined}
         session={createSession({
           authProvider: "provider_internal_secret",
+          isDevAuth: false,
           user: {
             id: "user-1",
             email: "owner@example.test",
@@ -88,6 +95,7 @@ describe("Settings screen", () => {
     expect(html).not.toContain("object key");
     expect(html).not.toContain("signed URL");
     expect(html).not.toContain("download_url");
+    expect(html).not.toContain("provider_internal_secret");
     expect(html).not.toContain("/Users/");
     expect(html).not.toContain("raw OCR text");
     expect(html).not.toContain("Sensitive recognized text");

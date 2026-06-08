@@ -4,6 +4,7 @@ import {
   createHomeLedgerApiClient,
   loadInitialDashboard
 } from "./api/client";
+import { authBoundaryMessage } from "./auth/session-model";
 import { AppShell } from "./components/AppShell";
 import type { AppView } from "./components/AppShell";
 import { BillingPlanPage } from "./billing/BillingPlanPage";
@@ -38,13 +39,10 @@ export function App() {
         if (!cancelled) setState(nextState);
       })
       .catch((error: unknown) => {
-        const status = typeof error === "object" && error && "status" in error ? error.status : null;
         if (!cancelled) {
           setState({
             status: "error",
-            message: status === 401
-              ? "Sign in to view your home records."
-              : "The dashboard could not be loaded."
+            message: authBoundaryMessage(error, "The dashboard could not be loaded.")
           });
         }
       });

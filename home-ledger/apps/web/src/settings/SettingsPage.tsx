@@ -1,4 +1,10 @@
 import type { SessionResponse, WorkspaceMembership } from "../api/types";
+import {
+  formatWorkspaceRole,
+  productionAuthStatus,
+  sessionModeLabel,
+  workspaceAccessLabel
+} from "../auth/session-model";
 import type { AppView } from "../components/AppShell";
 import { PageTitle } from "../components/PageTitle";
 import { PanelHeader, WorkspacePanel } from "../components/WorkspacePanel";
@@ -36,7 +42,7 @@ export function SettingsView({
   return (
     <div className="page-stack">
       <PageTitle
-        meta={`${workspace.workspaceName} · ${formatRole(membership.role)}`}
+        meta={`${workspace.workspaceName} · ${formatWorkspaceRole(membership.role)}`}
         title="Settings"
       />
 
@@ -51,7 +57,7 @@ export function SettingsView({
             </div>
             <div>
               <dt>Role</dt>
-              <dd>{formatRole(membership.role)}</dd>
+              <dd>{formatWorkspaceRole(membership.role)}</dd>
             </div>
             <div>
               <dt>Workspace ID</dt>
@@ -74,9 +80,14 @@ export function SettingsView({
             </div>
             <div>
               <dt>Sign-in</dt>
-              <dd>{signInLabel(session)}</dd>
+              <dd>{sessionModeLabel(session)}</dd>
             </div>
           </dl>
+          <div className="settings-note">
+            <strong>Auth status</strong>
+            <p>{productionAuthStatus(session)}</p>
+            <p>{workspaceAccessLabel(membership)}</p>
+          </div>
           <div className="settings-action-list">
             <div>
               <strong>Billing and plan</strong>
@@ -139,18 +150,4 @@ export function SettingsView({
       </div>
     </div>
   );
-}
-
-function formatRole(role: string) {
-  const normalized = String(role || "").trim().toLowerCase();
-  if (normalized === "owner") return "Owner";
-  if (normalized === "editor") return "Editor";
-  if (normalized === "viewer") return "Viewer";
-  return role || "Member";
-}
-
-function signInLabel(session: SessionResponse) {
-  if (session.isDevAuth) return "Development sign-in";
-  const provider = String(session.authProvider || "").trim();
-  return provider ? provider : "Configured by deployment";
 }

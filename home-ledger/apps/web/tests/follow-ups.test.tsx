@@ -121,7 +121,7 @@ describe("Follow-ups screen", () => {
           status: "resolved",
           resolved_at: "2026-06-07T12:00:00.000Z"
         })]}
-        notice="You can view follow-ups, but you do not have permission to change them."
+        notice="This action requires a different workspace role."
         onChangeSeverityFilter={() => undefined}
         onChangeStatusFilter={() => undefined}
         onChangeTargetFilter={() => undefined}
@@ -137,7 +137,7 @@ describe("Follow-ups screen", () => {
     expect(html).toContain("Reopen");
     expect(html).toContain("Resolved");
     expect(html).toContain("06/07/2026");
-    expect(html).toContain("You can view follow-ups");
+    expect(html).toContain("This action requires a different workspace role.");
   });
 
   it("filters follow-ups by severity and target type", () => {

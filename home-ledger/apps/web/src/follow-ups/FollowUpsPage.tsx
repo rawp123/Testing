@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { HomeLedgerApiError, type HomeLedgerApiClient } from "../api/client";
+import type { HomeLedgerApiClient } from "../api/client";
 import type { FollowUpItem, FollowUpListStatus, FollowUpSummaryResponse } from "../api/types";
+import { authBoundaryMessage } from "../auth/session-model";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
 import { EmptyState } from "../components/EmptyState";
@@ -290,8 +291,5 @@ export function FollowUpsView({
 }
 
 function actionErrorMessage(error: unknown, fallback: string) {
-  if (error instanceof HomeLedgerApiError && error.status === 403) {
-    return "You can view follow-ups, but you do not have permission to change them.";
-  }
-  return fallback;
+  return authBoundaryMessage(error, fallback);
 }
