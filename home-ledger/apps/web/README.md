@@ -56,4 +56,4 @@ npm run test:web
 npm run build:web
 ```
 
-Deployment configuration and production-readiness expectations are documented in `docs/deployment-readiness.md`, `docs/auth-provider-plan.md`, and `docs/saas-provider-deployment-decision.md`. The current web app still relies on the existing API session contract and does not add production auth, billing, import execution, or production OCR UI.
+Deployment configuration and production-readiness expectations are documented in `docs/deployment-readiness.md`, `docs/auth-provider-plan.md`, `docs/saas-provider-deployment-decision.md`, and `docs/render-deployment.md`. The current web app still relies on the existing API session contract and does not add production auth, billing, import execution, or production OCR UI.

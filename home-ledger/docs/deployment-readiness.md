@@ -6,6 +6,8 @@ Home Ledger organizes home records for professional review. Deployment copy and 
 
 Provider and deployment target recommendations are documented in `docs/saas-provider-deployment-decision.md`.
 
+The Render-specific service skeleton and preflight checklist are documented in `docs/render-deployment.md`.
+
 ## Runtime Services
 
 Required for a production-like SaaS deployment:

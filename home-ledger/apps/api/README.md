@@ -42,6 +42,7 @@ GET /ready
 `GET /ready` is a safe deployment readiness check. It verifies required runtime configuration and database connectivity, then reports provider connection states for file storage, OCR, auth, and billing without exposing `DATABASE_URL`, secrets, bucket names, signed URLs, storage keys, provider errors, OCR text, or local paths. The endpoint returns `503` when required checks fail, production object storage is missing in production mode, or production auth is not connected.
 
 Deployment target and provider recommendations are documented in `docs/saas-provider-deployment-decision.md`.
+Render-specific service setup is documented in `docs/render-deployment.md`.
 
 Authenticated endpoint:
 

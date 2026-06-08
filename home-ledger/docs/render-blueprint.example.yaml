@@ -1,0 +1,86 @@
+# Example only. Do not use as-is.
+#
+# This file is intentionally kept under docs/ instead of the repository root so
+# Render will not treat it as active infrastructure. If this is promoted to a
+# real Blueprint, copy it to the Git root, review every placeholder, choose
+# real service names, and enter secrets in Render rather than committing them.
+#
+# Official reference:
+# https://render.com/docs/blueprint-spec
+
+databases:
+  - name: home-ledger-beta-db
+    databaseName: home_ledger
+    user: home_ledger
+    plan: starter
+
+services:
+  - type: web
+    runtime: node
+    name: home-ledger-api
+    rootDir: home-ledger
+    plan: starter
+    buildCommand: npm install
+    preDeployCommand: npm run saas:db:migrate
+    startCommand: npm run start:api
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: home-ledger-beta-db
+          property: connectionString
+      - key: AUTH_PROVIDER
+        value: none
+      - key: DEV_AUTH_ENABLED
+        value: "false"
+      - key: SESSION_COOKIE_NAME
+        value: home_ledger_session
+      - key: FILE_STORAGE_DRIVER
+        value: s3
+      - key: FILE_STORAGE_BUCKET
+        sync: false
+      - key: FILE_STORAGE_REGION
+        sync: false
+      - key: FILE_STORAGE_ENDPOINT
+        sync: false
+      - key: FILE_STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: FILE_STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: FILE_STORAGE_FORCE_PATH_STYLE
+        value: "false"
+      - key: FILE_STORAGE_UPLOAD_URL_TTL_SECONDS
+        value: "600"
+      - key: FILE_STORAGE_DOWNLOAD_URL_TTL_SECONDS
+        value: "300"
+      - key: OCR_MODE
+        value: disabled
+      - key: BILLING_PROVIDER
+        value: none
+      - key: ANALYTICS_ENABLED
+        value: "false"
+
+  - type: web
+    runtime: static
+    name: home-ledger-web
+    rootDir: home-ledger
+    buildCommand: npm install && npm run build:web
+    staticPublishPath: apps/web/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: /api/v1
+    routes:
+      # Replace this placeholder with the public API service URL from Render.
+      # Keeping the browser on /api/v1 avoids adding CORS behavior in this
+      # skeleton. If you use an absolute VITE_API_BASE_URL instead, add and
+      # test a production CORS allowlist in a later ticket.
+      - type: rewrite
+        source: /api/v1/*
+        destination: https://REPLACE_WITH_API_SERVICE.onrender.com/api/v1/*
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -32,6 +32,8 @@ Recommended near-term stack for the first hosted beta:
 - Email/notifications: defer unless auth or billing provider flows require sender configuration.
 - Monitoring/logging: start with host logs plus a lightweight error reporting option after the deployed beta is stable.
 
+The Render service skeleton for this recommendation is documented in `docs/render-deployment.md`.
+
 Recommended later-production stack if needs grow:
 
 - Keep Render if uptime, backup, and worker needs remain simple.
@@ -176,7 +178,7 @@ OCR implementation requirements:
 
 ## Recommended Phased Implementation Sequence
 
-1. Ticket 50: deployment target config skeleton for Render, including service boundaries, build/start commands, environment groups, and deployment checklist. No external deploy required.
+1. Ticket 50: deployment target config skeleton for Render, including service boundaries, build/start commands, environment variables, and deployment checklist. No external deploy required.
 2. Ticket 51: production Postgres/deployment environment template, migration runbook, backup/restore checklist, and staging database path.
 3. Ticket 52: production auth provider proof of concept and adapter integration, including internal user mapping and workspace membership tests.
 4. Ticket 53: production object storage provider configuration and real signed upload/download QA, using S3 first unless a verified alternative is selected.
