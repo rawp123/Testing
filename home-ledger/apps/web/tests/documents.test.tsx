@@ -57,7 +57,7 @@ describe("Documents screen", () => {
         })]}
         expenses={[createExpense()]}
         formValues={documentToFormValues()}
-        onArchiveDocument={() => undefined}
+        onDeleteDocument={() => undefined}
         onChangeFilter={() => undefined}
         onCloseModal={() => undefined}
         onDownloadFile={() => undefined}
@@ -88,7 +88,8 @@ describe("Documents screen", () => {
     expect(html).toContain("View file");
     expect(html).toContain("Request text");
     expect(html).toContain("Remove file");
-    expect(html).toContain("Archive");
+    expect(html).toContain("Delete record");
+    expect(html).not.toContain("Archive");
     expect(html).toContain("1 open");
     expect(html).toContain("This environment does not provide a browser download URL.");
     expect(html).not.toContain("undefined");
@@ -105,7 +106,7 @@ describe("Documents screen", () => {
         errorMessage="Documents could not be loaded."
         expenses={[createExpense()]}
         formValues={documentToFormValues()}
-        onArchiveDocument={() => undefined}
+        onDeleteDocument={() => undefined}
         onChangeFilter={() => undefined}
         onCloseModal={() => undefined}
         onDownloadFile={() => undefined}
@@ -129,7 +130,7 @@ describe("Documents screen", () => {
     expect(html).toContain("Clear the document filter to see all documents.");
   });
 
-  it("renders add and edit modal fields with dependent expense options and upload control", () => {
+  it("renders edit modal fields without upload controls and with delete action", () => {
     const html = renderToStaticMarkup(
       <DocumentsView
         documents={[createDocument({
@@ -146,7 +147,8 @@ describe("Documents screen", () => {
         ]}
         formValues={documentToFormValues(createDocument())}
         modalMode="edit"
-        onArchiveDocument={() => undefined}
+        allowFileInput={false}
+        onDeleteDocument={() => undefined}
         onChangeFilter={() => undefined}
         onCloseModal={() => undefined}
         onDownloadFile={() => undefined}
@@ -171,18 +173,20 @@ describe("Documents screen", () => {
           file_availability: "available",
           file: createDocumentFile()
         })}
-        selectedFileName="/tmp/new-receipt.pdf"
         workspaceName="Home records"
       />
     );
 
     expect(html).toContain("Edit document");
     expect(html).toContain("Save document");
+    expect(html).toContain("Delete document");
     expect(html).toContain("Attached file");
-    expect(html).toContain("Current file: receipt.pdf");
-    expect(html).toContain("Replace file");
-    expect(html).toContain("type=\"file\"");
-    expect(html).toContain("Replacement file: new-receipt.pdf");
+    expect(html).toContain("receipt.pdf");
+    expect(html).not.toContain("Upload new file");
+    expect(html).not.toContain("Replace file");
+    expect(html).not.toContain("type=\"file\"");
+    expect(html).not.toContain("Selected file");
+    expect(html).not.toContain("Replacement file");
     expect(html).toContain("Linked expense");
     expect(html).toContain("Saved Cedarline");
     expect(html).not.toContain("Legacy Cedarline");
@@ -192,6 +196,48 @@ describe("Documents screen", () => {
     expect(html).not.toContain("/tmp/");
     expect(html).not.toContain("deductible");
     expect(html).not.toContain("IRS");
+  });
+
+  it("renders attach-file modal with upload controls for documents without a viewable file", () => {
+    const pendingDocument = createDocument({
+      file_availability: "not_uploaded",
+      file: null
+    });
+    const html = renderToStaticMarkup(
+      <DocumentsView
+        allowFileInput
+        documents={[pendingDocument]}
+        expenses={[createExpense()]}
+        formValues={documentToFormValues(pendingDocument)}
+        modalMode="edit"
+        onDeleteDocument={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onDownloadFile={() => undefined}
+        onEditDocument={() => undefined}
+        onFileChange={() => undefined}
+        onFormChange={() => undefined}
+        onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
+        onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
+        onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        selectedDocument={pendingDocument}
+        selectedFileName="/tmp/new-receipt.pdf"
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Attach file");
+    expect(html).toContain("type=\"file\"");
+    expect(html).toContain("Selected file: new-receipt.pdf");
+    expect(html).toContain("Delete document");
+    expect(html).not.toContain("Upload new file");
+    expect(html).not.toContain("Replace file");
+    expect(html).not.toContain("/tmp/");
   });
 
   it("normalizes document form values to safe document API input", () => {
@@ -241,7 +287,7 @@ describe("Documents screen", () => {
         })]}
         expenses={[createExpense()]}
         formValues={documentToFormValues()}
-        onArchiveDocument={() => undefined}
+        onDeleteDocument={() => undefined}
         onChangeFilter={() => undefined}
         onCloseModal={() => undefined}
         onDownloadFile={() => undefined}

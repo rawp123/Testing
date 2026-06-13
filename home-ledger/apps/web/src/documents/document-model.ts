@@ -121,19 +121,26 @@ export function documentToFormValues(document?: DocumentRecord | null, fallbackP
   };
 }
 
-export function formValuesToDocumentInput(values: DocumentFormValues, selectedFileName = ""): DocumentInput {
+export function formValuesToDocumentInput(
+  values: DocumentFormValues,
+  selectedFileName = "",
+  { includeFileState = true }: { includeFileState?: boolean } = {}
+): DocumentInput {
   const displayName = values.displayName.trim() || safeFileName(selectedFileName);
-  return {
+  const input: DocumentInput = {
     property_id: nullableText(values.propertyId),
     project_id: nullableText(values.projectId),
     expense_id: nullableText(values.expenseId),
     display_name: displayName,
     document_type: values.documentType || "other",
     document_date: nullableText(values.documentDate),
-    notes: nullableText(values.notes),
-    file_availability: "not_uploaded",
-    file_status_note: null
+    notes: nullableText(values.notes)
   };
+  if (includeFileState) {
+    input.file_availability = "not_uploaded";
+    input.file_status_note = null;
+  }
+  return input;
 }
 
 export function propertyOptionsFromRecords(properties: PropertyRecord[]): SelectOption[] {
@@ -234,7 +241,7 @@ export function formatDocumentFileSummary(file: {
 
 export function documentFileHelperFor(document?: DocumentRecord | null) {
   if (document?.file) {
-    return `Current file: ${formatDocumentFileSummary(document.file)}. Choose a new file to replace it. Maximum file size: 25 MB.`;
+    return `Current file: ${formatDocumentFileSummary(document.file)}. Maximum file size: 25 MB.`;
   }
   return DOCUMENT_FILE_HELPER_COPY;
 }

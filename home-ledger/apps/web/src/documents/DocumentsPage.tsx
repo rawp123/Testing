@@ -39,6 +39,10 @@ type OcrTextModalState =
   | { status: "ready"; document: DocumentRecord; text: DocumentOcrTextResponse }
   | { status: "error"; document: DocumentRecord; message: string };
 
+function hasViewableDocumentFile(document: DocumentRecord) {
+  return document.file_availability === "available" && Boolean(document.file);
+}
+
 export function DocumentsPage({
   client,
   workspaceId,
@@ -53,6 +57,7 @@ export function DocumentsPage({
   const [selectedDocument, setSelectedDocument] = useState<DocumentRecord | null>(null);
   const [formValues, setFormValues] = useState<DocumentFormValues>(() => documentToFormValues());
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentFileInputAllowed, setDocumentFileInputAllowed] = useState(false);
   const [formError, setFormError] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
@@ -98,6 +103,7 @@ export function DocumentsPage({
     setSelectedDocument(null);
     setFormValues(documentToFormValues(null, propertyOptions[0]?.value || ""));
     setSelectedFile(null);
+    setDocumentFileInputAllowed(true);
     setFormError("");
     setNoticeMessage("");
     setModalMode("create");
@@ -107,6 +113,17 @@ export function DocumentsPage({
     setSelectedDocument(document);
     setFormValues(documentToFormValues(document, propertyOptions[0]?.value || ""));
     setSelectedFile(null);
+    setDocumentFileInputAllowed(false);
+    setFormError("");
+    setNoticeMessage("");
+    setModalMode("edit");
+  };
+
+  const openAttachFile = (document: DocumentRecord) => {
+    setSelectedDocument(document);
+    setFormValues(documentToFormValues(document, propertyOptions[0]?.value || ""));
+    setSelectedFile(null);
+    setDocumentFileInputAllowed(!hasViewableDocumentFile(document));
     setFormError("");
     setNoticeMessage("");
     setModalMode("edit");
@@ -116,6 +133,7 @@ export function DocumentsPage({
     setModalMode(null);
     setSelectedDocument(null);
     setSelectedFile(null);
+    setDocumentFileInputAllowed(false);
     setFormError("");
   };
 
@@ -132,12 +150,15 @@ export function DocumentsPage({
   const saveDocument = async () => {
     setNoticeMessage("");
     setFormError("");
-    const fileValidationMessage = getDocumentFileValidationMessage(selectedFile);
+    const fileForSave = modalMode === "create" || documentFileInputAllowed ? selectedFile : null;
+    const fileValidationMessage = getDocumentFileValidationMessage(fileForSave);
     if (fileValidationMessage) {
       setFormError(fileValidationMessage);
       return;
     }
-    const input = formValuesToDocumentInput(formValues, selectedFile?.name || "");
+    const input = formValuesToDocumentInput(formValues, fileForSave?.name || "", {
+      includeFileState: modalMode !== "edit"
+    });
     if (!input.display_name) {
       setFormError("Name is required unless a file is selected.");
       return;
@@ -151,8 +172,8 @@ export function DocumentsPage({
       const document = modalMode === "edit" && selectedDocument
         ? await client.updateDocument(workspaceId, selectedDocument.id, input)
         : await client.createDocument(workspaceId, input);
-      if (selectedFile) {
-        const attachResult = await client.attachDocumentFile(workspaceId, document.id, selectedFile);
+      if (fileForSave) {
+        const attachResult = await client.attachDocumentFile(workspaceId, document.id, fileForSave);
         setNoticeMessage(attachResult.completed_without_browser_upload
           ? "File details attached. This environment does not provide a browser upload URL, so file bytes were not uploaded."
           : "Document and attached file saved.");
@@ -166,9 +187,17 @@ export function DocumentsPage({
     }
   };
 
-  const archiveDocument = async (document: DocumentRecord) => {
+  const deleteDocument = async (document: DocumentRecord) => {
+    const recordName = safeFileName(document.display_name || document.file?.original_file_name || "this document");
+    if (typeof globalThis.confirm === "function" && !globalThis.confirm(`Delete ${recordName}? This removes the document record from active records.`)) {
+      return;
+    }
     try {
       await client.archiveDocument(workspaceId, document.id);
+      if (modalMode === "edit" && selectedDocument?.id === document.id) {
+        closeModal();
+      }
+      setNoticeMessage("Document deleted.");
       await refreshDocuments();
     } catch {
       setState((current) => ({
@@ -177,7 +206,7 @@ export function DocumentsPage({
         properties: current.properties,
         projects: current.projects,
         expenses: current.expenses,
-        message: "Document could not be archived."
+        message: "Document could not be deleted."
       }));
     }
   };
@@ -262,13 +291,15 @@ export function DocumentsPage({
       loading={state.status === "loading"}
       modalMode={modalMode}
       noticeMessage={noticeMessage}
-      onArchiveDocument={archiveDocument}
+      allowFileInput={modalMode === "create" || documentFileInputAllowed}
       onChangeFilter={setActiveFilter}
       onCloseModal={closeModal}
       onDownloadFile={downloadFile}
+      onAttachDocumentFile={openAttachFile}
       onEditDocument={openEdit}
       onFileChange={setSelectedFile}
       onFormChange={setFormValues}
+      onDeleteDocument={deleteDocument}
       onNewDocument={openCreate}
       onReadOcrText={readOcrText}
       onRemoveFile={removeFile}
@@ -286,6 +317,7 @@ export function DocumentsPage({
 }
 
 export function DocumentsView({
+  allowFileInput = true,
   activeFilter = "all",
   documents,
   errorMessage = "",
@@ -295,13 +327,14 @@ export function DocumentsView({
   loading = false,
   modalMode = null,
   noticeMessage = "",
-  onArchiveDocument,
   onChangeFilter,
   onCloseModal,
   onDownloadFile,
+  onAttachDocumentFile,
   onEditDocument,
   onFileChange,
   onFormChange,
+  onDeleteDocument,
   onNewDocument,
   onReadOcrText,
   onRemoveFile,
@@ -315,6 +348,7 @@ export function DocumentsView({
   selectedFileName = "",
   workspaceName
 }: {
+  allowFileInput?: boolean;
   activeFilter?: string;
   documents: DocumentRecord[];
   errorMessage?: string;
@@ -324,13 +358,14 @@ export function DocumentsView({
   loading?: boolean;
   modalMode?: "create" | "edit" | null;
   noticeMessage?: string;
-  onArchiveDocument: (document: DocumentRecord) => void;
   onChangeFilter: (filter: string) => void;
   onCloseModal: () => void;
   onDownloadFile: (document: DocumentRecord) => void;
+  onAttachDocumentFile?: (document: DocumentRecord) => void;
   onEditDocument: (document: DocumentRecord) => void;
   onFileChange: (file: File | null) => void;
   onFormChange: (values: DocumentFormValues) => void;
+  onDeleteDocument: (document: DocumentRecord) => void;
   onNewDocument: () => void;
   onReadOcrText: (document: DocumentRecord) => void;
   onRemoveFile: (document: DocumentRecord) => void;
@@ -393,15 +428,15 @@ export function DocumentsView({
       render: (row) => (
         <div className="row-actions">
           {row.hasFile ? <button onClick={() => onDownloadFile(row.source)} type="button">View file</button> : null}
-          <button onClick={() => onEditDocument(row.source)} type="button">{row.hasFile ? "Edit" : "Attach file"}</button>
+          <button onClick={() => row.hasFile ? onEditDocument(row.source) : (onAttachDocumentFile || onEditDocument)(row.source)} type="button">{row.hasFile ? "Edit" : "Attach file"}</button>
           {row.canReadOcrText ? <button onClick={() => onReadOcrText(row.source)} type="button">Read text</button> : null}
           {row.canRequestOcr && !row.canReadOcrText ? <button onClick={() => onRequestOcr(row.source)} type="button">Request text</button> : null}
           {row.hasFile ? <button onClick={() => onRemoveFile(row.source)} type="button">Remove file</button> : null}
-          <button onClick={() => onArchiveDocument(row.source)} type="button">Archive</button>
+          <button onClick={() => onDeleteDocument(row.source)} type="button">Delete record</button>
         </div>
       )
     }
-  ], [onArchiveDocument, onDownloadFile, onEditDocument, onReadOcrText, onRemoveFile, onRequestOcr]);
+  ], [onAttachDocumentFile, onDeleteDocument, onDownloadFile, onEditDocument, onReadOcrText, onRemoveFile, onRequestOcr]);
 
   const changeProperty = (propertyId: string) => {
     const currentProject = projects.find((project) => project.id === formValues.projectId);
@@ -437,8 +472,7 @@ export function DocumentsView({
     }
   };
   const selectedDocumentFile = selectedDocument?.file || null;
-  const fileInputLabel = selectedDocumentFile ? "Replace file" : "File";
-  const selectedFileLabel = selectedDocumentFile ? "Replacement file" : "Selected file";
+  const modalTitle = modalMode === "edit" ? allowFileInput ? "Attach file" : "Edit document" : "Add document";
 
   return (
     <div className="page-stack">
@@ -490,13 +524,16 @@ export function DocumentsView({
         <Modal
           footer={(
             <>
+              {modalMode === "edit" && selectedDocument ? (
+                <button className="button button-secondary button-danger" onClick={() => onDeleteDocument(selectedDocument)} type="button">Delete document</button>
+              ) : null}
               <button className="button button-secondary" onClick={onCloseModal} type="button">Cancel</button>
               <button className="button button-primary" onClick={onSaveDocument} type="button">Save document</button>
             </>
           )}
           onClose={onCloseModal}
           subtitle={selectedDocument?.property_name || workspaceName}
-          title={modalMode === "edit" ? "Edit document" : "Add document"}
+          title={modalTitle}
         >
           {formError ? <div className="inline-error" role="alert">{formError}</div> : null}
           {selectedDocumentFile ? (
@@ -505,14 +542,18 @@ export function DocumentsView({
               <span>{formatDocumentFileSummary(selectedDocumentFile)}</span>
             </div>
           ) : null}
-          <FormField helper={documentFileHelperFor(selectedDocument)} label={fileInputLabel}>
-            <input
-              name="file"
-              onChange={(event) => changeFile(event.currentTarget.files?.[0] || null)}
-              type="file"
-            />
-          </FormField>
-          {selectedFileName ? <p className="helper-note">{selectedFileLabel}: {safeFileName(selectedFileName)}</p> : null}
+          {allowFileInput ? (
+            <>
+              <FormField helper={documentFileHelperFor(selectedDocument)} label="File">
+                <input
+                  name="file"
+                  onChange={(event) => changeFile(event.currentTarget.files?.[0] || null)}
+                  type="file"
+                />
+              </FormField>
+              {selectedFileName ? <p className="helper-note">Selected file: {safeFileName(selectedFileName)}</p> : null}
+            </>
+          ) : null}
           <div className="form-grid two-column">
             <FormField label="Property">
               <select
