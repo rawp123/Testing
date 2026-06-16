@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HomeLedgerApiError, type HomeLedgerApiClient } from "../api/client";
-import type { DocumentOcrTextResponse, DocumentRecord, ExpenseRecord, ProjectRecord, PropertyRecord } from "../api/types";
+import type {
+  DocumentOcrStatusResponse,
+  DocumentOcrTextResponse,
+  DocumentRecord,
+  ExpenseRecord,
+  ProjectRecord,
+  PropertyRecord,
+  WorkspaceRole
+} from "../api/types";
 import { ActionBar } from "../components/ActionBar";
 import { CompactRecordTable, type CompactRecordColumn } from "../components/CompactRecordTable";
 import { EmptyState } from "../components/EmptyState";
@@ -39,18 +47,33 @@ type OcrTextModalState =
   | { status: "ready"; document: DocumentRecord; text: DocumentOcrTextResponse }
   | { status: "error"; document: DocumentRecord; message: string };
 
+const DOCUMENT_OCR_POLL_INTERVAL_MS = 5000;
+
 function hasViewableDocumentFile(document: DocumentRecord) {
   return document.file_availability === "available" && Boolean(document.file);
+}
+
+function canManageDocumentOcr(workspaceRole: WorkspaceRole | undefined) {
+  return workspaceRole === "owner" || workspaceRole === "editor";
+}
+
+function documentOcrNotice(result: DocumentOcrStatusResponse) {
+  if (result.text_available) return "Document text is available.";
+  if (result.ocr_status === "skipped") return "Document text reading skipped for this file.";
+  if (result.ocr_status === "failed") return "Document text could not be read.";
+  return "Document text reading requested.";
 }
 
 export function DocumentsPage({
   client,
   workspaceId,
-  workspaceName
+  workspaceName,
+  workspaceRole
 }: {
   client: HomeLedgerApiClient;
   workspaceId: string;
   workspaceName: string;
+  workspaceRole?: WorkspaceRole;
 }) {
   const [state, setState] = useState<DocumentsState>({ status: "loading", documents: [], properties: [], projects: [], expenses: [] });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
@@ -62,6 +85,7 @@ export function DocumentsPage({
   const [noticeMessage, setNoticeMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [ocrTextModal, setOcrTextModal] = useState<OcrTextModalState>({ status: "closed" });
+  const ocrPollInFlight = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +120,41 @@ export function DocumentsPage({
       cancelled = true;
     };
   }, [client, workspaceId]);
+
+  const shouldPollOcr = shouldPollDocumentOcr(state.documents, activeFilter);
+  useEffect(() => {
+    if (!shouldPollOcr) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    const refreshDocumentList = async () => {
+      if (ocrPollInFlight.current) return;
+      ocrPollInFlight.current = true;
+      try {
+        const documents = await client.listDocuments(workspaceId);
+        if (!cancelled) {
+          setState((current) => ({
+            status: "ready",
+            documents,
+            properties: current.properties,
+            projects: current.projects,
+            expenses: current.expenses
+          }));
+        }
+      } catch {
+        // Polling is opportunistic; keep the current list visible if a refresh misses.
+      } finally {
+        ocrPollInFlight.current = false;
+      }
+    };
+
+    const intervalId = globalThis.setInterval(refreshDocumentList, DOCUMENT_OCR_POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      globalThis.clearInterval(intervalId);
+    };
+  }, [activeFilter, client, shouldPollOcr, workspaceId]);
 
   const propertyOptions = useMemo(() => propertyOptionsFromRecords(state.properties), [state.properties]);
 
@@ -253,9 +312,7 @@ export function DocumentsPage({
     try {
       const result = await client.requestDocumentOcr(workspaceId, document.id);
       await refreshDocuments();
-      setNoticeMessage(result.text_available
-        ? "Document text is available."
-        : "Document text reading requested.");
+      setNoticeMessage(documentOcrNotice(result));
     } catch (error) {
       setState((current) => ({
         ...current,
@@ -291,6 +348,7 @@ export function DocumentsPage({
       loading={state.status === "loading"}
       modalMode={modalMode}
       noticeMessage={noticeMessage}
+      canManageDocumentText={canManageDocumentOcr(workspaceRole)}
       allowFileInput={modalMode === "create" || documentFileInputAllowed}
       onChangeFilter={setActiveFilter}
       onCloseModal={closeModal}
@@ -327,6 +385,7 @@ export function DocumentsView({
   loading = false,
   modalMode = null,
   noticeMessage = "",
+  canManageDocumentText = true,
   onChangeFilter,
   onCloseModal,
   onDownloadFile,
@@ -358,6 +417,7 @@ export function DocumentsView({
   loading?: boolean;
   modalMode?: "create" | "edit" | null;
   noticeMessage?: string;
+  canManageDocumentText?: boolean;
   onChangeFilter: (filter: string) => void;
   onCloseModal: () => void;
   onDownloadFile: (document: DocumentRecord) => void;
@@ -429,14 +489,21 @@ export function DocumentsView({
         <div className="row-actions">
           {row.hasFile ? <button onClick={() => onDownloadFile(row.source)} type="button">View file</button> : null}
           <button onClick={() => row.hasFile ? onEditDocument(row.source) : (onAttachDocumentFile || onEditDocument)(row.source)} type="button">{row.hasFile ? "Edit" : "Attach file"}</button>
-          {row.canReadOcrText ? <button onClick={() => onReadOcrText(row.source)} type="button">Read text</button> : null}
-          {row.canRequestOcr && !row.canReadOcrText ? <button onClick={() => onRequestOcr(row.source)} type="button">Request text</button> : null}
+          {row.hasFile ? (
+            <>
+              {row.canReadOcrText ? <button onClick={() => onReadOcrText(row.source)} type="button">View text</button> : null}
+              {!row.canReadOcrText && row.ocrIsPending ? <button disabled type="button">Extracting text</button> : null}
+              {!row.canReadOcrText && row.ocrStatusValue === "succeeded" ? <button disabled type="button">No text found</button> : null}
+              {!row.canReadOcrText && canManageDocumentText && row.canRetryOcr ? <button onClick={() => onRequestOcr(row.source)} type="button">Retry text</button> : null}
+              {!row.canReadOcrText && canManageDocumentText && row.canRequestOcr ? <button onClick={() => onRequestOcr(row.source)} type="button">Extract text</button> : null}
+            </>
+          ) : null}
           {row.hasFile ? <button onClick={() => onRemoveFile(row.source)} type="button">Remove file</button> : null}
           <button onClick={() => onDeleteDocument(row.source)} type="button">Delete record</button>
         </div>
       )
     }
-  ], [onAttachDocumentFile, onDeleteDocument, onDownloadFile, onEditDocument, onReadOcrText, onRemoveFile, onRequestOcr]);
+  ], [canManageDocumentText, onAttachDocumentFile, onDeleteDocument, onDownloadFile, onEditDocument, onReadOcrText, onRemoveFile, onRequestOcr]);
 
   const changeProperty = (propertyId: string) => {
     const currentProject = projects.find((project) => project.id === formValues.projectId);
@@ -676,6 +743,10 @@ function buildDocumentFilterOptions(rows: DocumentRow[]): FilterChip[] {
     options.push({ value: `type:${type}`, label: documentTypeLabel(type), count });
   }
   return options;
+}
+
+export function shouldPollDocumentOcr(documents: DocumentRecord[], activeFilter = "all") {
+  return filterDocumentRows(toDocumentRows(documents), activeFilter).some((row) => row.ocrIsPending);
 }
 
 function filterDocumentRows(rows: DocumentRow[], filter: string) {

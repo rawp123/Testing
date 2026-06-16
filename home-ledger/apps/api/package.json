@@ -17,6 +17,7 @@
   "dependencies": {
     "fastify": "^5.8.5",
     "node-pg-migrate": "^8.0.3",
+    "pdfjs-dist": "^6.0.227",
     "pg": "^8.13.1"
   }
 }

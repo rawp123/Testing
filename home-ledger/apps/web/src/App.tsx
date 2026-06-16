@@ -101,6 +101,7 @@ export function App() {
           client={client}
           workspaceId={state.workspace.workspaceId}
           workspaceName={state.workspace.workspaceName}
+          workspaceRole={state.workspace.role}
         />
       ) : null}
       {state.status === "ready" && activeView === "exports" ? (

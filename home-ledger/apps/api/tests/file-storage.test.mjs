@@ -39,6 +39,40 @@ test("local file storage adapter keeps null URLs and avoids network-oriented con
   assert.equal(downloadIntent.expires_at, null);
 });
 
+test("local file storage adapter can privately store and read object bytes", async () => {
+  const adapter = createFileStorageAdapter({
+    driver: "test",
+    now: () => FIXED_NOW
+  });
+  const storageKey = adapter.createStorageKey({
+    workspaceId: WORKSPACE_ID,
+    documentId: DOCUMENT_ID,
+    documentFileId: DOCUMENT_FILE_ID
+  });
+  const original = Buffer.from("private pdf bytes");
+
+  const writeResult = await adapter.writeObject({
+    storageKey,
+    bytes: original
+  });
+  original.fill(0);
+
+  assert.deepEqual(writeResult, {
+    stored: true,
+    size_bytes: "private pdf bytes".length
+  });
+
+  const firstRead = await adapter.readObject({ storageKey });
+  assert.equal(Buffer.from(firstRead).toString("utf8"), "private pdf bytes");
+
+  firstRead.fill(0);
+  const secondRead = await adapter.readObject({ storageKey });
+  assert.equal(Buffer.from(secondRead).toString("utf8"), "private pdf bytes");
+
+  await adapter.deleteObject({ storageKey });
+  assert.equal(await adapter.readObject({ storageKey }), null);
+});
+
 test("S3 storage key is server-generated and does not include raw ids or filenames", () => {
   const storageKey = createOpaqueStorageKey({
     workspaceId: WORKSPACE_ID,
@@ -130,4 +164,22 @@ test("S3 adapter returns no download URL for unavailable file statuses", () => {
     download_url: null,
     expires_at: null
   });
+});
+
+test("S3 adapter does not expose object bytes through the API storage contract", async () => {
+  const adapter = createS3FileStorageAdapter({
+    now: () => FIXED_NOW,
+    config: {
+      driver: "s3",
+      bucket: "home-ledger-documents",
+      region: "us-east-1",
+      accessKeyId: "test-access-key",
+      secretAccessKey: "test-secret-key"
+    }
+  });
+
+  assert.equal(await adapter.readObject({
+    storageKey: "tenant-hash/documents/hash/files/hash"
+  }), null);
+  assert.equal(typeof adapter.writeObject, "undefined");
 });

@@ -1,4 +1,4 @@
-const LOCAL_OCR_MODES = new Set(["fake", "test"]);
+const LOCAL_OCR_MODES = new Set(["fake", "test", "local_pdf"]);
 
 export function getOcrReadiness(config = {}) {
   const appEnv = normalizeText(config.appEnv) || "local";

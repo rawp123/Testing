@@ -520,18 +520,24 @@ describe("Home Ledger API client", () => {
 
     expect(calls.map((call) => [call.options.method || "GET", call.url])).toEqual([
       ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-intent"],
+      ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/files/file-1/upload?upload_id=file-1"],
       ["POST", "http://localhost:4000/api/v1/workspaces/workspace%2Fone/documents/document-1/file-complete"]
     ]);
     expect(result).toMatchObject({
       upload_method: "api_adapter",
       upload_url_available: false,
-      browser_upload_performed: false,
-      completed_without_browser_upload: true
+      browser_upload_performed: true,
+      completed_without_browser_upload: false
     });
     expect(result.file).toMatchObject({ original_file_name: "receipt.txt", status: "available" });
     expect(calls[0].options.body).toContain("receipt.txt");
     expect(calls[0].options.body).not.toContain("/Users/robert");
     expect(calls[0].options.body).toContain("sha256");
+    expect(calls[1].options.body).toBeInstanceOf(File);
+    expect(calls[1].options.headers).toMatchObject({
+      Accept: "application/json",
+      "content-type": "text/plain"
+    });
   });
 
   it("uploads document bytes when a signed upload URL is available", async () => {

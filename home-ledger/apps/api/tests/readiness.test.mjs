@@ -191,59 +191,61 @@ test("GET /ready rejects production runtime without production object storage", 
 });
 
 test("GET /ready rejects production runtime using local OCR behavior", async () => {
-  const app = buildApp({
-    config: createConfig({
-      appEnv: "production",
-      authProvider: "oidc",
-      billingProvider: "stripe",
-      ocrMode: "fake",
-      fileStorageDriver: "s3",
-      fileStorage: {
-        driver: "s3",
-        bucket: "private-bucket",
-        region: "us-east-1",
-        endpoint: "https://storage.internal.example.test",
-        accessKeyId: "storage-access-key",
-        secretAccessKey: "storage-secret-key"
-      }
-    }),
-    db: createReadyDb()
-  });
+  for (const ocrMode of ["fake", "local_pdf"]) {
+    const app = buildApp({
+      config: createConfig({
+        appEnv: "production",
+        authProvider: "oidc",
+        billingProvider: "stripe",
+        ocrMode,
+        fileStorageDriver: "s3",
+        fileStorage: {
+          driver: "s3",
+          bucket: "private-bucket",
+          region: "us-east-1",
+          endpoint: "https://storage.internal.example.test",
+          accessKeyId: "storage-access-key",
+          secretAccessKey: "storage-secret-key"
+        }
+      }),
+      db: createReadyDb()
+    });
 
-  const response = await app.inject({
-    method: "GET",
-    url: "/ready"
-  });
+    const response = await app.inject({
+      method: "GET",
+      url: "/ready"
+    });
 
-  assert.equal(response.statusCode, 503);
-  const body = response.json();
-  assert.equal(body.data.status, "not_ready");
-  assert.deepEqual(body.data.checks.find((check) => check.name === "ocr"), {
-    name: "ocr",
-    status: "not_ready",
-    message: "Production OCR provider is not configured."
-  });
-  assert.deepEqual(body.data.checks.find((check) => check.name === "auth"), {
-    name: "auth",
-    status: "not_ready",
-    message: "Production auth adapter is not implemented."
-  });
+    assert.equal(response.statusCode, 503);
+    const body = response.json();
+    assert.equal(body.data.status, "not_ready");
+    assert.deepEqual(body.data.checks.find((check) => check.name === "ocr"), {
+      name: "ocr",
+      status: "not_ready",
+      message: "Production OCR provider is not configured."
+    });
+    assert.deepEqual(body.data.checks.find((check) => check.name === "auth"), {
+      name: "auth",
+      status: "not_ready",
+      message: "Production auth adapter is not implemented."
+    });
 
-  for (const blocked of [
-    "private-bucket",
-    "storage.internal.example.test",
-    "storage-access-key",
-    "storage-secret-key",
-    "provider-request",
-    "oidc",
-    "Extracted text",
-    "signed_url",
-    "/Users/"
-  ]) {
-    assert.doesNotMatch(response.body, new RegExp(escapeRegExp(blocked), "i"));
+    for (const blocked of [
+      "private-bucket",
+      "storage.internal.example.test",
+      "storage-access-key",
+      "storage-secret-key",
+      "provider-request",
+      "oidc",
+      "Extracted text",
+      "signed_url",
+      "/Users/"
+    ]) {
+      assert.doesNotMatch(response.body, new RegExp(escapeRegExp(blocked), "i"));
+    }
+
+    await app.close();
   }
-
-  await app.close();
 });
 
 test("GET /ready reports production auth placeholders as not ready without internals", async () => {

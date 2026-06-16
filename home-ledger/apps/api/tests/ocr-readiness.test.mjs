@@ -17,8 +17,8 @@ test("OCR readiness reports disabled mode as explicit and safe", () => {
   );
 });
 
-test("OCR readiness reports fake and test modes as local only outside production", () => {
-  for (const mode of ["fake", "test"]) {
+test("OCR readiness reports local OCR modes as local only outside production", () => {
+  for (const mode of ["fake", "test", "local_pdf"]) {
     assert.deepEqual(
       getOcrReadiness({
         appEnv: "local",
@@ -33,8 +33,8 @@ test("OCR readiness reports fake and test modes as local only outside production
   }
 });
 
-test("OCR readiness rejects fake and test modes in production", () => {
-  for (const mode of ["fake", "test"]) {
+test("OCR readiness rejects local OCR modes in production", () => {
+  for (const mode of ["fake", "test", "local_pdf"]) {
     const readiness = getOcrReadiness({
       appEnv: "production",
       ocrMode: mode,

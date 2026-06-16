@@ -3,6 +3,7 @@ import test from "node:test";
 import { buildApp } from "../src/app.js";
 import { MAX_DOCUMENT_FILE_SIZE_BYTES } from "../src/documents.js";
 import { TEST_AUTH_EMAIL_HEADER } from "../src/auth.js";
+import { createFileStorageAdapter } from "../src/file-storage.js";
 import {
   DOCUMENT_FILE_IDS,
   DOCUMENT_IDS,
@@ -254,6 +255,155 @@ test("file-complete updates metadata and file delete detaches without deleting t
   await app.close();
 });
 
+test("owner and editor can upload local API adapter bytes for pending files", async () => {
+  for (const [email, workspaceId, documentId, propertyId] of [
+    ["owner@example.test", WORKSPACE_IDS.owner, DOCUMENT_IDS.ownerKitchenInvoice, PROPERTY_IDS.ownerPrimary],
+    ["editor@example.test", WORKSPACE_IDS.editor, DOCUMENT_IDS.editorDocument, PROPERTY_IDS.editorPrimary]
+  ]) {
+    const db = createFakeWorkspaceDb(createSeededWorkspaceState());
+    const fileStorage = createFileStorageAdapter({ driver: "test" });
+    const app = buildApp({ config: createConfig(), db, fileStorage });
+
+    const targetDocumentId = email.startsWith("editor") ? await createUploadTargetDocument({
+      app,
+      workspaceId,
+      propertyId,
+      email
+    }) : documentId;
+
+    const body = Buffer.from("private upload bytes");
+    const intentResponse = await app.inject({
+      method: "POST",
+      url: `/api/v1/workspaces/${workspaceId}/documents/${targetDocumentId}/file-intent`,
+      headers: authHeaders(email),
+      payload: createFilePayload({
+        original_file_name: "receipt.pdf",
+        size_bytes: body.byteLength
+      })
+    });
+    assert.equal(intentResponse.statusCode, 201);
+    const documentFileId = intentResponse.json().data.document_file_id;
+
+    const uploadResponse = await app.inject({
+      method: "POST",
+      url: `/api/v1/workspaces/${workspaceId}/documents/${targetDocumentId}/files/${documentFileId}/upload?upload_id=${documentFileId}`,
+      headers: {
+        ...authHeaders(email),
+        "content-type": "application/pdf"
+      },
+      payload: body
+    });
+
+    assert.equal(uploadResponse.statusCode, 200);
+    assert.equal(uploadResponse.json().data.id, documentFileId);
+    assert.equal(uploadResponse.json().data.status, "pending_upload");
+    assert.equal(uploadResponse.json().data.upload_stored, true);
+    assertSafeFileResponse(uploadResponse.json().data);
+    assert.equal(
+      Buffer.from(await fileStorage.readObject({
+        storageKey: db.documentFiles.get(documentFileId).storage_key
+      })).toString("utf8"),
+      "private upload bytes"
+    );
+
+    await app.close();
+  }
+});
+
+test("local API adapter upload enforces roles ids content type and size", async () => {
+  const db = createFakeWorkspaceDb(createSeededWorkspaceState());
+  const app = buildApp({
+    config: createConfig(),
+    db,
+    fileStorage: createFileStorageAdapter({ driver: "test" })
+  });
+  const body = Buffer.from("pdf");
+  const intentResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/file-intent`,
+    headers: authHeaders("owner@example.test"),
+    payload: createFilePayload({ size_bytes: body.byteLength })
+  });
+  assert.equal(intentResponse.statusCode, 201);
+  const documentFileId = intentResponse.json().data.document_file_id;
+
+  for (const request of [
+    {
+      status: 403,
+      email: "viewer@example.test",
+      url: `/api/v1/workspaces/${WORKSPACE_IDS.viewer}/documents/${DOCUMENT_IDS.viewerDocument}/files/${DOCUMENT_FILE_IDS.viewerDocument}/upload?upload_id=${DOCUMENT_FILE_IDS.viewerDocument}`
+    },
+    {
+      status: 404,
+      email: "viewer@example.test",
+      url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=${documentFileId}`
+    },
+    {
+      status: 404,
+      email: "owner@example.test",
+      url: `/api/v1/workspaces/${WORKSPACE_IDS.viewer}/documents/${DOCUMENT_IDS.viewerDocument}/files/${DOCUMENT_FILE_IDS.viewerDocument}/upload?upload_id=${DOCUMENT_FILE_IDS.viewerDocument}`
+    },
+    {
+      status: 404,
+      email: "owner@example.test",
+      url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/00000000-0000-4000-8000-000000009999/upload?upload_id=00000000-0000-4000-8000-000000009999`
+    },
+    {
+      status: 422,
+      email: "owner@example.test",
+      url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=00000000-0000-4000-8000-000000009999`
+    }
+  ]) {
+    const response = await app.inject({
+      method: "POST",
+      url: request.url,
+      headers: {
+        ...authHeaders(request.email),
+        "content-type": "application/pdf"
+      },
+      payload: body
+    });
+    assert.equal(response.statusCode, request.status);
+  }
+
+  const wrongTypeResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=${documentFileId}`,
+    headers: {
+      ...authHeaders("owner@example.test"),
+      "content-type": "image/png"
+    },
+    payload: body
+  });
+  assert.equal(wrongTypeResponse.statusCode, 422);
+  assert.equal(wrongTypeResponse.json().error.details[0].field, "content_type");
+
+  const wrongSizeResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=${documentFileId}`,
+    headers: {
+      ...authHeaders("owner@example.test"),
+      "content-type": "application/pdf"
+    },
+    payload: Buffer.from("different size")
+  });
+  assert.equal(wrongSizeResponse.statusCode, 422);
+  assert.equal(wrongSizeResponse.json().error.details[0].field, "size_bytes");
+
+  const oversizedResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=${documentFileId}`,
+    headers: {
+      ...authHeaders("owner@example.test"),
+      "content-type": "application/pdf"
+    },
+    payload: Buffer.alloc(MAX_DOCUMENT_FILE_SIZE_BYTES + 1)
+  });
+  assert.equal(oversizedResponse.statusCode, 413);
+
+  await app.close();
+});
+
 test("available files can be replaced and deleted documents cannot issue file intents", async () => {
   const db = createFakeWorkspaceDb(createSeededWorkspaceState());
   const app = buildApp({
@@ -368,6 +518,53 @@ test("S3 storage returns signed URLs only from file lifecycle endpoints", async 
   await app.close();
 });
 
+test("S3 storage rejects API adapter upload route without exposing provider internals", async () => {
+  const db = createFakeWorkspaceDb(createSeededWorkspaceState());
+  const app = buildApp({
+    config: createConfig({
+      fileStorageDriver: "s3",
+      fileStorage: {
+        driver: "s3",
+        bucket: "home-ledger-documents",
+        region: "us-east-1",
+        endpoint: "https://storage.example.test",
+        accessKeyId: "test-access-key",
+        secretAccessKey: "test-secret-key",
+        forcePathStyle: true
+      }
+    }),
+    db
+  });
+
+  const body = Buffer.from("pdf");
+  const intentResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/file-intent`,
+    headers: authHeaders("owner@example.test"),
+    payload: createFilePayload({ size_bytes: body.byteLength })
+  });
+  assert.equal(intentResponse.statusCode, 201);
+  assert.equal(intentResponse.json().data.upload_method, "signed_url_put");
+  const documentFileId = intentResponse.json().data.document_file_id;
+
+  const uploadResponse = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${WORKSPACE_IDS.owner}/documents/${DOCUMENT_IDS.ownerKitchenInvoice}/files/${documentFileId}/upload?upload_id=${documentFileId}`,
+    headers: {
+      ...authHeaders("owner@example.test"),
+      "content-type": "application/pdf"
+    },
+    payload: body
+  });
+
+  assert.equal(uploadResponse.statusCode, 409);
+  for (const blocked of ["home-ledger-documents", "storage.example.test", "test-access-key", "test-secret-key", "signed_url"]) {
+    assert.doesNotMatch(uploadResponse.body, new RegExp(escapeRegExp(blocked), "i"));
+  }
+
+  await app.close();
+});
+
 function createFilePayload(overrides = {}) {
   return {
     original_file_name: "receipt.pdf",
@@ -377,6 +574,21 @@ function createFilePayload(overrides = {}) {
     source: "web_upload",
     ...overrides
   };
+}
+
+async function createUploadTargetDocument({ app, workspaceId, propertyId, email }) {
+  const response = await app.inject({
+    method: "POST",
+    url: `/api/v1/workspaces/${workspaceId}/documents`,
+    headers: authHeaders(email),
+    payload: {
+      property_id: propertyId,
+      display_name: "Upload target",
+      document_type: "receipt"
+    }
+  });
+  assert.equal(response.statusCode, 201);
+  return response.json().data.id;
 }
 
 function authHeaders(email) {
@@ -413,6 +625,10 @@ function assertSafeFileResponse(value) {
   ]) {
     assert.equal(text.includes(unsafe), false, `${unsafe} should not be exposed`);
   }
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function assertSafeSignedUrlResponse(value) {

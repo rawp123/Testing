@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { DocumentRecord, ExpenseRecord, ProjectRecord, PropertyRecord } from "../src/api/types";
-import { DocumentsView } from "../src/documents/DocumentsPage";
+import { DocumentsView, shouldPollDocumentOcr } from "../src/documents/DocumentsPage";
 import {
   documentToFormValues,
   fileAvailabilityLabel,
@@ -42,6 +42,7 @@ describe("Documents screen", () => {
     })]);
     expect(pendingRows[0]).toMatchObject({
       ocrStatus: "Queued",
+      ocrIsPending: true,
       canRequestOcr: false,
       canReadOcrText: false
     });
@@ -83,10 +84,10 @@ describe("Documents screen", () => {
     expect(html).toContain("Cedarline receipt");
     expect(html).toContain("Attached");
     expect(html).toContain("Not requested");
-    expect(html).toContain("Text not requested.");
+    expect(html).toContain("Text has not been extracted.");
     expect(html).toContain("receipt.pdf");
     expect(html).toContain("View file");
-    expect(html).toContain("Request text");
+    expect(html).toContain("Extract text");
     expect(html).toContain("Remove file");
     expect(html).toContain("Delete record");
     expect(html).not.toContain("Archive");
@@ -243,6 +244,7 @@ describe("Documents screen", () => {
   it("normalizes document form values to safe document API input", () => {
     expect(fileAvailabilityLabel("not_uploaded")).toBe("Not uploaded");
     expect(ocrStatusLabel("succeeded", true)).toBe("Text available");
+    expect(ocrStatusLabel("succeeded", false)).toBe("No text found");
     expect(ocrStatusLabel("queued", false)).toBe("Queued");
     expect(formatFileSize(1536)).toBe("1.5 KB");
     expect(safeFileName("/Users/robert/receipt.pdf")).toBe("receipt.pdf");
@@ -275,6 +277,191 @@ describe("Documents screen", () => {
       size: 26 * 1024 * 1024,
       type: "application/pdf"
     } as File)).toBe("Maximum file size: 25 MB.");
+  });
+
+  it("polls document OCR while queued or processing records are visible", () => {
+    expect(shouldPollDocumentOcr([
+      createDocument({
+        file_availability: "available",
+        file: createDocumentFile(),
+        ocr: { status: "queued", has_text: false, completed_at: null }
+      })
+    ])).toBe(true);
+
+    expect(shouldPollDocumentOcr([
+      createDocument({
+        file_availability: "available",
+        file: createDocumentFile(),
+        ocr: { status: "processing", has_text: false, completed_at: null }
+      })
+    ])).toBe(true);
+  });
+
+  it("stops document OCR polling for terminal and not-requested states", () => {
+    const terminalDocuments = ["not_requested", "succeeded", "failed", "skipped"].map((status) => createDocument({
+      id: `document-${status}`,
+      file_availability: "available",
+      file: createDocumentFile({ id: `file-${status}`, document_id: `document-${status}` }),
+      ocr: { status, has_text: status === "succeeded", completed_at: status === "not_requested" ? null : "2026-06-08T12:00:00.000Z" }
+    }));
+
+    expect(shouldPollDocumentOcr(terminalDocuments)).toBe(false);
+  });
+
+  it("polls only when pending OCR is in the active document filter", () => {
+    const pendingClosedDocument = createDocument({
+      id: "closed-pending",
+      open_item_count: 0,
+      file_availability: "available",
+      file: createDocumentFile({ id: "file-closed-pending", document_id: "closed-pending" }),
+      ocr: { status: "queued", has_text: false, completed_at: null }
+    });
+    const visibleReadyDocument = createDocument({
+      id: "open-ready",
+      open_item_count: 1,
+      file_availability: "available",
+      file: createDocumentFile({ id: "file-open-ready", document_id: "open-ready" }),
+      ocr: { status: "succeeded", has_text: true, completed_at: "2026-06-08T12:00:00.000Z" }
+    });
+
+    expect(shouldPollDocumentOcr([pendingClosedDocument, visibleReadyDocument], "all")).toBe(true);
+    expect(shouldPollDocumentOcr([pendingClosedDocument, visibleReadyDocument], "open")).toBe(false);
+    expect(shouldPollDocumentOcr([pendingClosedDocument, visibleReadyDocument], "type:receipt")).toBe(true);
+    expect(shouldPollDocumentOcr([pendingClosedDocument, visibleReadyDocument], "file:missing")).toBe(false);
+  });
+
+  it("renders practical OCR actions for each document text state", () => {
+    const html = renderToStaticMarkup(
+      <DocumentsView
+        documents={[
+          createDocument({ id: "no-file", display_name: "No file", file_availability: "not_uploaded", file: null }),
+          createDocument({
+            id: "not-requested",
+            display_name: "Ready for text",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-not-requested", document_id: "not-requested" })
+          }),
+          createDocument({
+            id: "queued",
+            display_name: "Queued file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-queued", document_id: "queued" }),
+            ocr: { status: "queued", has_text: false, completed_at: null }
+          }),
+          createDocument({
+            id: "with-text",
+            display_name: "Text file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-with-text", document_id: "with-text" }),
+            ocr: { status: "succeeded", has_text: true, completed_at: "2026-06-08T12:00:00.000Z" }
+          }),
+          createDocument({
+            id: "no-text",
+            display_name: "No text file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-no-text", document_id: "no-text" }),
+            ocr: { status: "succeeded", has_text: false, completed_at: "2026-06-08T12:00:00.000Z" }
+          }),
+          createDocument({
+            id: "skipped",
+            display_name: "Skipped file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-skipped", document_id: "skipped" }),
+            ocr: { status: "skipped", has_text: false, completed_at: "2026-06-08T12:00:00.000Z" }
+          }),
+          createDocument({
+            id: "failed",
+            display_name: "Failed file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-failed", document_id: "failed" }),
+            ocr: { status: "failed", has_text: false, completed_at: "2026-06-08T12:00:00.000Z" }
+          })
+        ]}
+        expenses={[createExpense()]}
+        formValues={documentToFormValues()}
+        onDeleteDocument={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onDownloadFile={() => undefined}
+        onEditDocument={() => undefined}
+        onFileChange={() => undefined}
+        onFormChange={() => undefined}
+        onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
+        onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
+        onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("Ready for text");
+    expect(html).toContain("Extract text");
+    expect(html).toContain("Extracting text");
+    expect(html).toContain("View text");
+    expect(html).toContain("No text found");
+    expect(html).toContain("Retry text");
+    expect(html.match(/Extract text/g)?.length).toBe(1);
+    expect(html.match(/Extracting text/g)?.length).toBe(1);
+    expect(html.match(/View text/g)?.length).toBe(1);
+    expect(html.match(/Retry text/g)?.length).toBe(2);
+    expect(html).toContain("Text reading skipped. Review the file type or try again.");
+    expect(html).toContain("Text could not be read. Try again later.");
+  });
+
+  it("allows viewers to view available OCR text without request or retry actions", () => {
+    const html = renderToStaticMarkup(
+      <DocumentsView
+        canManageDocumentText={false}
+        documents={[
+          createDocument({
+            id: "not-requested",
+            display_name: "Ready for text",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-not-requested", document_id: "not-requested" })
+          }),
+          createDocument({
+            id: "failed",
+            display_name: "Failed file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-failed", document_id: "failed" }),
+            ocr: { status: "failed", has_text: false, completed_at: "2026-06-08T12:00:00.000Z" }
+          }),
+          createDocument({
+            id: "with-text",
+            display_name: "Text file",
+            file_availability: "available",
+            file: createDocumentFile({ id: "file-with-text", document_id: "with-text" }),
+            ocr: { status: "succeeded", has_text: true, completed_at: "2026-06-08T12:00:00.000Z" }
+          })
+        ]}
+        expenses={[createExpense()]}
+        formValues={documentToFormValues()}
+        onDeleteDocument={() => undefined}
+        onChangeFilter={() => undefined}
+        onCloseModal={() => undefined}
+        onDownloadFile={() => undefined}
+        onEditDocument={() => undefined}
+        onFileChange={() => undefined}
+        onFormChange={() => undefined}
+        onNewDocument={() => undefined}
+        onReadOcrText={() => undefined}
+        onRemoveFile={() => undefined}
+        onRequestOcr={() => undefined}
+        onSaveDocument={() => undefined}
+        onCloseOcrText={() => undefined}
+        projects={[createProject()]}
+        propertyOptions={propertyOptionsFromRecords([createProperty()])}
+        workspaceName="Home records"
+      />
+    );
+
+    expect(html).toContain("View text");
+    expect(html).not.toContain("Extract text");
+    expect(html).not.toContain("Retry text");
   });
 
   it("shows read-text actions only through the focused OCR text view", () => {
@@ -324,8 +511,8 @@ describe("Documents screen", () => {
     );
 
     expect(html).toContain("Text available");
-    expect(html).toContain("Read text");
-    expect(html).not.toContain("Request text");
+    expect(html).toContain("View text");
+    expect(html).not.toContain("Extract text");
     expect(html).toContain("Document text");
     expect(html).toContain("Extracted line one");
     expect(html).not.toContain("storage_key");

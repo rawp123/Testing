@@ -522,23 +522,25 @@ Document list behavior:
 
 ## Document File API
 
-Document file routes manage the safe file metadata lifecycle for existing documents. They use the `document_files` table and a storage adapter boundary. The local/test adapter does not require network access and returns `null` upload/download URLs. The S3-compatible adapter generates short-lived signed URLs for private buckets.
+Document file routes manage the safe file metadata lifecycle for existing documents. They use the `document_files` table and a storage adapter boundary. The local/test adapter does not require network access, accepts API-proxied upload bytes for local development, and returns `null` upload/download URLs. The S3-compatible adapter generates short-lived signed URLs for private buckets.
 
 Role behavior:
 
 - `owner` and `editor` can create upload intents, complete upload metadata, and detach files.
+- `owner` and `editor` can upload bytes to the local/test API adapter for pending file intents.
 - `viewer` can request safe download metadata for available files only.
 - Non-members receive `404 not_found`.
 
 File lifecycle rules:
 
 - `POST /file-intent` validates the existing document, file name, MIME type, size, hash, and source, then creates a `pending_upload` `document_files` row.
+- `POST /files/:documentFileId/upload?upload_id=:uploadId` stores raw bytes for a pending local/test `api_adapter` upload. The request body must use the pending file MIME type and exact pending size. The response is safe file metadata only.
 - `POST /file-complete` marks a pending file row `available`, sets `uploaded_at`, and updates the parent document `file_availability` to `available`.
 - `uploaded_at` is file lifecycle metadata. It does not change or replace the parent document `document_date`.
 - `GET /file` returns safe file metadata and adapter download availability for the active available file. It never returns raw storage keys, filesystem paths, OCR text, or file bytes as standalone metadata fields.
 - `DELETE /file` soft-deletes the active file row, leaves document metadata intact, and updates the parent document `file_availability` to `removed`.
 - A document can have at most one active available file in the current schema. Completing a replacement marks any prior available file row deleted before activating the new file. Production object cleanup for replaced files is deferred until provider-specific cleanup/background jobs are implemented.
-- Upload intent and download responses include adapter metadata. In local/test mode `upload_url` and `download_url` are `null`. In S3 mode, `upload_url` and `download_url` are short-lived signed URLs created only for authorized requests.
+- Upload intent and download responses include adapter metadata. In local/test mode `upload_url` and `download_url` are `null`, and browser clients upload bytes through the API adapter upload route. In S3 mode, `upload_url` and `download_url` are short-lived signed URLs created only for authorized requests.
 - Storage keys are generated server-side and do not use the client filename. Normal document metadata responses continue to expose safe file summaries only.
 
 Storage configuration:
@@ -565,7 +567,7 @@ S3-compatible storage notes:
 - `FILE_STORAGE_FORCE_PATH_STYLE=true` is commonly needed for MinIO and some S3-compatible endpoints.
 - Signed URL TTLs must be between `1` and `3600` seconds.
 - Buckets should remain private. The API should be the only component that creates signed upload/download URLs.
-- `FILE_STORAGE_DRIVER=local` and `FILE_STORAGE_DRIVER=test` are local/test metadata-only modes. They preserve document file lifecycle metadata and return `null` upload/download URLs, but they are not production-ready object storage.
+- `FILE_STORAGE_DRIVER=local` and `FILE_STORAGE_DRIVER=test` are local/test modes. They preserve document file lifecycle metadata, accept local API upload bytes, and return `null` upload/download URLs, but they are not production-ready object storage.
 - `/ready` and `npm run saas:deploy:check` report local/test storage as `local_only` outside production and `not_ready` when `APP_ENV=production`.
 
 Validation:
@@ -579,7 +581,7 @@ Validation:
 
 Deferred for document files:
 
-- Binary upload streaming through the API.
+- Production API-proxied binary uploads, if S3 signed upload is not sufficient.
 - Malware scanning and quarantine enforcement.
 - Activity/audit event creation for download and delete actions.
 - Provider-specific immediate object deletion for removed/replaced files.
@@ -605,6 +607,7 @@ OCR lifecycle rules:
 - OCR cannot start for deleted documents or documents without an available file.
 - Normal document list/detail responses never include raw OCR text. They only include status and `has_text`.
 - Replacing or removing a document file resets or skips OCR and makes prior extracted text unavailable.
+- Provider exceptions are recorded as sanitized `failed` OCR status for the current file rather than exposing provider errors or leaving the record stuck in `processing`.
 - Provider raw errors, stack traces, storage keys, signed URLs, and object-storage internals are not returned from OCR endpoints.
 
 OCR response fields:
@@ -624,21 +627,23 @@ OCR configuration:
 OCR_MODE=disabled
 OCR_MODE=fake
 OCR_MODE=test
+OCR_MODE=local_pdf
 ```
 
-`disabled` records queued lifecycle status without extracting text. `fake` and `test` return deterministic extracted text for tests and local API checks. No external OCR service is called by the current implementation.
+`disabled` records queued lifecycle status without extracting text. `fake` and `test` return deterministic extracted text for tests and local API checks. `local_pdf` extracts embedded PDF text locally for files stored through the local/test storage adapter. It does not perform image OCR and does not call any external service. S3-backed files may be marked `skipped` until a production server-side storage byte-read path is implemented.
 
 Production OCR readiness:
 
 - `OCR_MODE=disabled` is an explicit safe state when production OCR is not connected.
-- `OCR_MODE=fake` and `OCR_MODE=test` are local/test-only modes. `/ready` and `npm run saas:deploy:check` report them as `local_only` outside production and `not_ready` when `APP_ENV=production`.
-- There is no production OCR provider mode yet. Do not configure fake/test OCR for production deployments.
+- `OCR_MODE=fake`, `OCR_MODE=test`, and `OCR_MODE=local_pdf` are local/test-only modes. `/ready` and `npm run saas:deploy:check` report them as `local_only` outside production and `not_ready` when `APP_ENV=production`.
+- There is no production OCR provider mode yet. Do not configure local/test OCR modes for production deployments.
 - Readiness responses never expose raw OCR text, provider request ids, API keys, provider stack traces, storage keys, signed URLs, or local paths.
 
 Deferred for OCR:
 
 - Real production OCR provider integration.
 - Async worker queue and retry backoff.
+- Image OCR for scanned PDFs, JPEG, PNG, HEIC, or HEIF files.
 - OCR search.
 - OCR read audit events.
 - OCR inclusion/exclusion decisions for exports.

@@ -16,7 +16,8 @@ export function createFileStorageAdapter({ driver = "local", config = {}, now = 
   return createLocalFileStorageAdapter({ driver: normalizedDriver, now });
 }
 
-export function createLocalFileStorageAdapter({ driver = "local", now = () => new Date() } = {}) {
+export function createLocalFileStorageAdapter({ driver = "local", now = () => new Date(), objects } = {}) {
+  const objectBytes = objects || new Map();
   return {
     driver,
     createStorageKey({ workspaceId, documentId, documentFileId }) {
@@ -40,10 +41,32 @@ export function createLocalFileStorageAdapter({ driver = "local", now = () => ne
         expires_at: null
       };
     },
-    async deleteObject() {
+    async deleteObject({ storageKey } = {}) {
+      if (storageKey) {
+        objectBytes.delete(normalizeStorageKey(storageKey));
+      }
       return {
         cleanup_deferred: true
       };
+    },
+    async writeObject({ storageKey, bytes }) {
+      const key = normalizeStorageKey(storageKey);
+      if (!key) {
+        return {
+          stored: false,
+          size_bytes: 0
+        };
+      }
+      const storedBytes = toStoredBytes(bytes);
+      objectBytes.set(key, storedBytes);
+      return {
+        stored: true,
+        size_bytes: storedBytes.byteLength
+      };
+    },
+    async readObject({ storageKey }) {
+      const bytes = objectBytes.get(normalizeStorageKey(storageKey));
+      return bytes ? new Uint8Array(bytes) : null;
     }
   };
 }
@@ -99,6 +122,9 @@ export function createS3FileStorageAdapter({ config, now = () => new Date() }) {
       return {
         cleanup_deferred: true
       };
+    },
+    async readObject() {
+      return null;
     }
   };
 }
@@ -255,6 +281,26 @@ function hmacHex(key, value) {
 
 function normalizeText(value) {
   return String(value || "").trim();
+}
+
+function normalizeStorageKey(value) {
+  return normalizeText(value);
+}
+
+function toStoredBytes(value) {
+  if (Buffer.isBuffer(value)) {
+    return new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+  }
+  if (value instanceof Uint8Array) {
+    return new Uint8Array(value);
+  }
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value.slice(0));
+  }
+  if (ArrayBuffer.isView(value)) {
+    return new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+  }
+  return new Uint8Array(Buffer.from(value || ""));
 }
 
 function normalizeTtl(value, fallback) {

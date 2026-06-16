@@ -71,6 +71,10 @@ export interface DocumentRow {
   openItems: string;
   openItemCount: number;
   hasFile: boolean;
+  ocrStatusValue: string;
+  ocrHasText: boolean;
+  ocrIsPending: boolean;
+  canRetryOcr: boolean;
   canRequestOcr: boolean;
   canReadOcrText: boolean;
   source: DocumentRecord;
@@ -89,6 +93,7 @@ export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
     const ocrStatus = String(document.ocr?.status || "not_requested");
     const hasFile = document.file_availability === "available" && Boolean(file);
     const hasText = Boolean(document.ocr?.has_text);
+    const ocrIsPending = ocrStatus === "queued" || ocrStatus === "processing";
     return {
       id: document.id,
       name: document.display_name || "Untitled document",
@@ -102,7 +107,11 @@ export function toDocumentRows(documents: DocumentRecord[]): DocumentRow[] {
       openItems: formatOpenItemCount(document.open_item_count),
       openItemCount: document.open_item_count,
       hasFile,
-      canRequestOcr: hasFile && !hasText && !["queued", "processing"].includes(ocrStatus),
+      ocrStatusValue: ocrStatus,
+      ocrHasText: hasText,
+      ocrIsPending,
+      canRetryOcr: hasFile && !hasText && (ocrStatus === "failed" || ocrStatus === "skipped"),
+      canRequestOcr: hasFile && !hasText && ocrStatus === "not_requested",
       canReadOcrText: hasText,
       source: document
     };
@@ -201,7 +210,7 @@ export function ocrStatusLabel(status: string | null | undefined, hasText = fals
     not_requested: "Not requested",
     queued: "Queued",
     processing: "Processing",
-    succeeded: "No text",
+    succeeded: "No text found",
     failed: "Failed",
     skipped: "Skipped"
   };
@@ -216,10 +225,10 @@ export function ocrStatusDetail(document: DocumentRecord) {
   if (document.file_availability !== "available" || !document.file) return "Attach a file before reading text.";
   if (status === "queued") return "Text reading has been requested.";
   if (status === "processing") return "Text reading is in progress.";
-  if (status === "failed") return "Text could not be read.";
-  if (status === "skipped") return "Text reading skipped.";
-  if (status === "succeeded") return "No document text is available.";
-  return "Text not requested.";
+  if (status === "failed") return "Text could not be read. Try again later.";
+  if (status === "skipped") return "Text reading skipped. Review the file type or try again.";
+  if (status === "succeeded") return "No readable text was found.";
+  return "Text has not been extracted.";
 }
 
 export function formatFileSize(value: number | string | null | undefined) {

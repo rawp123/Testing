@@ -9,6 +9,7 @@ import {
   deleteDocument,
   deleteDocumentFile,
   completeDocumentFileUpload,
+  MAX_DOCUMENT_FILE_SIZE_BYTES,
   getDocumentById,
   getDocumentFileDownload,
   getDocumentFilterOptions,
@@ -19,6 +20,7 @@ import {
   serializeDocument,
   serializeDocumentOcr,
   serializeDocumentOcrText,
+  uploadDocumentFileBytes,
   updateDocument
 } from "./documents.js";
 import { getDashboardSummary, serializeDashboardSummary } from "./dashboard.js";
@@ -104,6 +106,11 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
   });
 
   app.decorateRequest("auth", null);
+  app.addContentTypeParser(
+    /^(application\/pdf|application\/octet-stream|image\/jpeg|image\/png|image\/heic|image\/heif)(?:;.*)?$/i,
+    { parseAs: "buffer", bodyLimit: MAX_DOCUMENT_FILE_SIZE_BYTES },
+    (_request, body, done) => done(null, body)
+  );
 
   app.decorate("authenticate", async (request, reply) => {
     request.auth = await resolveAuthenticatedRequest({ request, config, db });
@@ -150,6 +157,14 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
             issue: error.issue
           }
         ]
+      });
+    }
+
+    if (error.statusCode === 413 || error.code === "FST_ERR_CTP_BODY_TOO_LARGE") {
+      return sendError(reply, 413, {
+        code: "payload_too_large",
+        message: "Document file is too large.",
+        requestId: request.id
       });
     }
 
@@ -1162,6 +1177,37 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
       };
     });
 
+    api.post("/workspaces/:workspaceId/documents/:documentId/files/:documentFileId/upload", {
+      preHandler: app.authenticate,
+      bodyLimit: MAX_DOCUMENT_FILE_SIZE_BYTES
+    }, async (request) => {
+      await requireWorkspaceRole({
+        request,
+        db,
+        workspaceId: request.params.workspaceId,
+        allowedRoles: ["owner", "editor"]
+      });
+
+      const file = await uploadDocumentFileBytes({
+        db,
+        storage,
+        workspaceId: request.params.workspaceId,
+        documentId: request.params.documentId,
+        documentFileId: request.params.documentFileId,
+        uploadId: request.query?.upload_id,
+        contentType: request.headers["content-type"],
+        bytes: request.body
+      });
+
+      if (!file) {
+        throw apiError(404, "not_found", "Document file not found.");
+      }
+
+      return {
+        data: file
+      };
+    });
+
     api.get("/workspaces/:workspaceId/documents/:documentId/file", { preHandler: app.authenticate }, async (request) => {
       await requireWorkspaceMembership({
         request,
@@ -1220,6 +1266,7 @@ export function buildApp({ config, db, logger = false, fileStorage, ocrProvider 
 
       const ocrStatus = await requestDocumentOcr({
         db,
+        storage,
         ocrProvider: ocr,
         workspaceId: request.params.workspaceId,
         documentId: request.params.documentId

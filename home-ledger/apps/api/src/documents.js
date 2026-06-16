@@ -493,6 +493,74 @@ export async function completeDocumentFileUpload({ db, workspaceId, documentId, 
   return serializeDocumentFile(result.rows[0]);
 }
 
+export async function uploadDocumentFileBytes({
+  db,
+  storage,
+  workspaceId,
+  documentId,
+  documentFileId,
+  uploadId,
+  contentType,
+  bytes
+}) {
+  validateDocumentId(documentId);
+  const uploadInput = validateFileUploadInput({ documentFileId, uploadId, bytes });
+  const document = await getActiveDocumentFileState({ db, workspaceId, documentId });
+  if (!document) {
+    return null;
+  }
+
+  const file = await getDocumentFileById({
+    db,
+    workspaceId,
+    documentId,
+    documentFileId: uploadInput.documentFileId
+  });
+  if (!file) {
+    return null;
+  }
+  if (file.status !== "pending_upload") {
+    throw apiError(409, "conflict", "Document file is not pending upload.");
+  }
+  if (typeof storage?.writeObject !== "function") {
+    throw apiError(409, "conflict", "API file upload is not available for this storage adapter.");
+  }
+
+  const normalizedContentType = normalizeContentType(contentType);
+  if (normalizedContentType && normalizedContentType !== file.mime_type) {
+    throw validationError([
+      {
+        field: "content_type",
+        issue: "metadata_mismatch"
+      }
+    ]);
+  }
+  if (Number(file.size_bytes || 0) !== uploadInput.bytes.byteLength) {
+    throw validationError([
+      {
+        field: "size_bytes",
+        issue: "metadata_mismatch"
+      }
+    ]);
+  }
+
+  await storage.writeObject({
+    workspaceId,
+    documentId,
+    documentFileId: file.id,
+    storageProvider: file.storage_provider,
+    storageKey: file.storage_key,
+    mimeType: file.mime_type,
+    sizeBytes: uploadInput.bytes.byteLength,
+    bytes: uploadInput.bytes
+  });
+
+  return {
+    ...serializeDocumentFile(file),
+    upload_stored: true
+  };
+}
+
 export async function getDocumentFileDownload({ db, storage, workspaceId, documentId }) {
   validateDocumentId(documentId);
   const document = await getActiveDocumentFileState({ db, workspaceId, documentId });
@@ -591,7 +659,7 @@ export async function deleteDocumentFile({ db, storage, workspaceId, documentId,
   };
 }
 
-export async function requestDocumentOcr({ db, ocrProvider, workspaceId, documentId }) {
+export async function requestDocumentOcr({ db, storage, ocrProvider, workspaceId, documentId }) {
   validateDocumentId(documentId);
   const document = await getActiveDocumentFileState({ db, workspaceId, documentId });
   if (!document) {
@@ -617,33 +685,76 @@ export async function requestDocumentOcr({ db, ocrProvider, workspaceId, documen
     completed: false
   });
 
-  const result = await ocrProvider.requestText({
+  const fileBytes = await readOcrFileBytes({ storage, ocrProvider, workspaceId, documentId, file });
+  const result = await requestOcrProviderText({
+    ocrProvider,
     workspaceId,
     documentId,
-    file: {
-      id: file.id,
-      original_file_name: file.original_file_name,
-      mime_type: file.mime_type,
-      size_bytes: Number(file.size_bytes || 0)
-    }
+    file,
+    fileBytes
   });
-
-  const text = normalizeOcrText(result.text);
+  const status = normalizeOcrStatus(result.status);
+  const text = status === "succeeded" ? normalizeOcrText(result.text) : null;
   await upsertDocumentOcr({
     db,
     workspaceId,
     documentId,
     documentFileId: file.id,
-    status: normalizeOcrStatus(result.status),
+    status,
     text,
     textSha256: text ? sha256Hex(text) : null,
     engine: normalizeNullableText(result.engine),
     errorCode: sanitizeOcrError(result.errorCode),
     errorMessage: sanitizeOcrError(result.errorMessage),
-    completed: ["succeeded", "failed", "skipped"].includes(normalizeOcrStatus(result.status))
+    completed: ["succeeded", "failed", "skipped"].includes(status)
   });
 
   return getDocumentOcrStatus({ db, workspaceId, documentId });
+}
+
+async function requestOcrProviderText({ ocrProvider, workspaceId, documentId, file, fileBytes }) {
+  try {
+    return await ocrProvider.requestText({
+      workspaceId,
+      documentId,
+      file: {
+        id: file.id,
+        original_file_name: file.original_file_name,
+        mime_type: file.mime_type,
+        size_bytes: Number(file.size_bytes || 0),
+        bytes: fileBytes
+      }
+    });
+  } catch {
+    return {
+      status: "failed",
+      text: null,
+      engine: ocrProvider?.mode || null,
+      errorCode: "provider_error",
+      errorMessage: "Document text could not be read."
+    };
+  }
+}
+
+async function readOcrFileBytes({ storage, ocrProvider, workspaceId, documentId, file }) {
+  if (ocrProvider?.mode !== "local_pdf" || typeof storage?.readObject !== "function") {
+    return null;
+  }
+
+  try {
+    return await storage.readObject({
+      workspaceId,
+      documentId,
+      documentFileId: file.id,
+      storageProvider: file.storage_provider,
+      storageKey: file.storage_key,
+      status: file.status,
+      mimeType: file.mime_type,
+      sizeBytes: Number(file.size_bytes || 0)
+    });
+  } catch {
+    return null;
+  }
 }
 
 export async function getDocumentOcrStatus({ db, workspaceId, documentId }) {
@@ -1043,6 +1154,8 @@ async function getDocumentFileById({ db, workspaceId, documentId, documentFileId
       -- getDocumentFileById
       SELECT id,
              document_id,
+             storage_provider,
+             storage_key,
              original_file_name,
              mime_type,
              size_bytes,
@@ -1622,6 +1735,58 @@ function validateFileCompleteInput(input) {
     sizeBytes,
     sha256
   };
+}
+
+function validateFileUploadInput({ documentFileId, uploadId, bytes }) {
+  const details = [];
+  const normalizedDocumentFileId = normalizeRelationshipId(documentFileId, "document_file_id", { required: true }, details);
+  const normalizedUploadId = normalizeRelationshipId(uploadId, "upload_id", { required: false }, details);
+  if (normalizedUploadId && normalizedDocumentFileId && normalizedUploadId !== normalizedDocumentFileId) {
+    details.push({ field: "upload_id", issue: "metadata_mismatch" });
+  }
+
+  const uploadBytes = normalizeUploadBytes(bytes);
+  if (uploadBytes.byteLength === 0) {
+    details.push({ field: "file", issue: "required" });
+  } else if (uploadBytes.byteLength > MAX_DOCUMENT_FILE_SIZE_BYTES) {
+    throw apiError(413, "payload_too_large", "Document file is too large.", [
+      {
+        field: "file",
+        issue: "too_large",
+        max_size_bytes: MAX_DOCUMENT_FILE_SIZE_BYTES
+      }
+    ]);
+  }
+
+  if (details.length > 0) {
+    throw validationError(details);
+  }
+
+  return {
+    documentFileId: normalizedDocumentFileId,
+    uploadId: normalizedUploadId || normalizedDocumentFileId,
+    bytes: uploadBytes
+  };
+}
+
+function normalizeUploadBytes(value) {
+  if (Buffer.isBuffer(value)) {
+    return new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+  }
+  if (value instanceof Uint8Array) {
+    return new Uint8Array(value);
+  }
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value.slice(0));
+  }
+  if (ArrayBuffer.isView(value)) {
+    return new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+  }
+  return new Uint8Array(Buffer.from(value || ""));
+}
+
+function normalizeContentType(value) {
+  return String(value || "").split(";")[0].trim().toLowerCase();
 }
 
 function sanitizeFileName(value) {

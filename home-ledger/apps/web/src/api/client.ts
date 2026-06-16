@@ -383,6 +383,7 @@ export function createHomeLedgerApiClient({
       );
 
       const uploadUrlAvailable = Boolean(intent.upload_url);
+      let browserUploadPerformed = false;
       if (intent.upload_url) {
         const uploadResponse = await fetchImpl(intent.upload_url, {
           method: intent.upload_method === "signed_url_put" ? "PUT" : "POST",
@@ -399,6 +400,25 @@ export function createHomeLedgerApiClient({
             message: "File upload failed."
           });
         }
+        browserUploadPerformed = true;
+      } else if (intent.upload_method === "api_adapter") {
+        const uploadResponse = await fetchImpl(
+          `${normalizedBaseUrl}/workspaces/${workspace}/documents/${document}/files/${encodeURIComponent(requireId(intent.document_file_id, "documentFileId"))}/upload?upload_id=${encodeURIComponent(intent.upload_id || intent.document_file_id)}`,
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              ...headers,
+              "content-type": mimeType
+            },
+            body: file
+          }
+        );
+        if (!uploadResponse.ok) {
+          const payload = await readJsonPayload<unknown>(uploadResponse);
+          throw normalizeApiError(uploadResponse, payload);
+        }
+        browserUploadPerformed = true;
       }
 
       const completedFile = await request<DocumentFileSummary>(
@@ -418,8 +438,8 @@ export function createHomeLedgerApiClient({
         file: completedFile,
         upload_method: intent.upload_method || null,
         upload_url_available: uploadUrlAvailable,
-        browser_upload_performed: uploadUrlAvailable,
-        completed_without_browser_upload: !uploadUrlAvailable,
+        browser_upload_performed: browserUploadPerformed,
+        completed_without_browser_upload: !browserUploadPerformed,
         max_size_bytes: intent.max_size_bytes ?? null
       };
     },

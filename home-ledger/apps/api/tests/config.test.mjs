@@ -56,6 +56,12 @@ test("loadConfig validates OCR mode", () => {
   });
   assert.equal(fakeConfig.ocrMode, "fake");
 
+  const localPdfConfig = loadConfig({
+    DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",
+    OCR_MODE: "local_pdf"
+  });
+  assert.equal(localPdfConfig.ocrMode, "local_pdf");
+
   assert.throws(
     () => loadConfig({
       DATABASE_URL: "postgres://user:secret@localhost:5432/home_ledger_dev",

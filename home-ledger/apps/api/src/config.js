@@ -47,8 +47,8 @@ export function loadConfig(env = process.env) {
 
   const fileStorage = loadFileStorageConfig(env, issues);
   const ocrMode = (normalizeText(env.OCR_MODE) || "disabled").toLowerCase();
-  if (!["disabled", "fake", "test"].includes(ocrMode)) {
-    issues.push({ key: "OCR_MODE", message: "OCR_MODE must be disabled, fake, or test." });
+  if (!["disabled", "fake", "test", "local_pdf"].includes(ocrMode)) {
+    issues.push({ key: "OCR_MODE", message: "OCR_MODE must be disabled, fake, test, or local_pdf." });
   }
 
   if (issues.length > 0) {
