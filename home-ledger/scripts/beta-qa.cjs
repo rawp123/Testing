@@ -4,6 +4,8 @@ const os = require("node:os");
 const path = require("node:path");
 
 const appUrl = process.env.QA_APP_URL || "http://127.0.0.1:3102";
+const appTheme = ["light", "dark", "system"].includes(process.env.QA_APP_THEME) ? process.env.QA_APP_THEME : "";
+const outputDir = path.resolve(process.env.QA_OUTPUT_DIR || path.join(__dirname, "..", "release", "qa"));
 const userDataDir = path.join(os.tmpdir(), `home-basis-tracker-beta-qa-${process.pid}`);
 const downloadDir = path.join(userDataDir, "downloads");
 
@@ -66,6 +68,7 @@ async function clearBrowserStorage(window) {
     (async () => {
       localStorage.clear();
       localStorage.setItem("home-ledger:disable-temp-sample-records", "true");
+      ${appTheme ? `localStorage.setItem("home-ledger:theme-preference", ${JSON.stringify(appTheme)});` : ""}
       if (indexedDB.databases) {
         const databases = await indexedDB.databases();
         await Promise.all(databases.map((database) => new Promise((resolve, reject) => {
@@ -249,7 +252,7 @@ async function seedRecordsWithAttachment(window) {
       await setValue("description", "Quartz countertop installation");
       await setValue("classification", "potential basis addition");
       await setValue("category", "kitchen");
-      await setValue("documentationStatus", "no document yet");
+      await setValue("documentationStatus", "invoice attached");
       const projectOption = document.querySelector('[name="projectId"] option:not([value=""])');
       if (projectOption) await setValue("projectId", projectOption.value);
       await setValue("vendorId", vendorOption.value);
@@ -284,7 +287,7 @@ async function seedRecordsWithAttachment(window) {
       let records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       const savedDocumentId = records.documents[0].id;
       const previewButton = document.querySelector('[data-action="preview-document-file"][data-id="' + savedDocumentId + '"]');
-      assert(previewButton?.textContent.trim() === "View document", "Stored document should expose a clear View document action.");
+      assert(previewButton?.textContent.trim() === "View file", "Stored document should expose a clear View file action.");
 
       await click('[data-action="preview-document-file"][data-id="' + savedDocumentId + '"]');
       await waitFor(() => {
@@ -311,14 +314,24 @@ async function seedRecordsWithAttachment(window) {
         return /BETA|PDF|OCR|INVOICE|3487/i.test(ocrText);
       }, "PDF local text extraction");
       await click('[data-action="close-document-preview"]');
+      await click('[data-tab="calculators"]');
       await click('[data-tab="dashboard"]');
+      await click('[data-action="set-dashboard-subtab"][data-dashboard-subtab="attention"]');
+      await waitFor(() =>
+        bodyIncludes("Needs attention") &&
+        bodyIncludes("Type\tRecord\tDetail\tResolve") &&
+        bodyIncludes("Project item") &&
+        bodyIncludes("4"),
+        "dashboard canonical follow-ups",
+      );
+      await click('[data-tab="calculators"]');
       await setValue("salePrice", "900000");
       await setValue("mortgagePayoff", "300000");
       await setValue("sellingCostsRate", "6");
       await setValue("sellingCostsAmount", "");
       await setValue("exclusionAmount", "250000");
       await submit('[data-form="sale-scenario"]');
-      await waitFor(() => bodyIncludes("Potential taxable gain") && bodyIncludes("$82,512.58") && bodyIncludes("$546,000.00"), "sale scenario estimate");
+      await waitFor(() => bodyIncludes("Estimated gain before tax review") && bodyIncludes("$82,512.58") && bodyIncludes("$546,000.00"), "sale scenario estimate");
 
       records = JSON.parse(localStorage.getItem("home-ledger:v1"));
       assert(records.properties.length === 1, "Expected one property.");
@@ -466,16 +479,56 @@ async function restoreBackup(window, backupText) {
   `);
 }
 
+async function captureBetaScreens(window) {
+  if (!appTheme) return [];
+  await fs.mkdir(outputDir, { recursive: true });
+  const screens = [
+    { name: "beta-dashboard", script: "document.querySelector('[data-tab=\"dashboard\"]')?.click(); document.querySelector('[data-action=\"set-dashboard-subtab\"][data-dashboard-subtab=\"activity\"]')?.click(); document.querySelector('[data-action=\"toggle-dashboard-property\"]')?.click();" },
+    { name: "beta-property", script: "document.querySelector('[data-tab=\"property\"]')?.click();" },
+    { name: "beta-projects", script: "document.querySelector('[data-tab=\"projects\"]')?.click();" },
+    { name: "beta-project-file", script: "document.querySelector('[data-tab=\"projects\"]')?.click(); await new Promise((resolve) => setTimeout(resolve, 80)); document.querySelector('[data-action=\"select-project\"]')?.click();" },
+    { name: "beta-expenses", script: "document.querySelector('[data-tab=\"expenses\"]')?.click();" },
+    { name: "beta-documents", script: "document.querySelector('[data-tab=\"documents\"]')?.click();" },
+    { name: "beta-document-form", script: "document.querySelector('[data-tab=\"documents\"]')?.click(); await new Promise((resolve) => setTimeout(resolve, 80)); document.querySelector('[data-action=\"edit-document\"]')?.click();" },
+    { name: "beta-calculators", script: "document.querySelector('[data-tab=\"calculators\"]')?.click();" },
+    { name: "beta-settings", script: "document.querySelector('[data-action=\"open-settings\"]')?.click();" },
+  ];
+  const screenshotPaths = [];
+
+  for (const screen of screens) {
+    await runPageScript(window, `
+      (async () => {
+        document.querySelector('[data-action="close-project-file"]')?.click();
+        document.querySelector('[data-action="close-expense-form"]')?.click();
+        document.querySelector('[data-action="close-document-form"]')?.click();
+        document.querySelector('[data-action="close-records-to-finish"]')?.click();
+        document.querySelector('[data-action="close-follow-up-resolution"]')?.click();
+        ${screen.script}
+        await new Promise((resolve) => setTimeout(resolve, 180));
+        window.scrollTo(0, 0);
+      })()
+    `);
+    const image = await window.webContents.capturePage();
+    const screenshotPath = path.join(outputDir, `${screen.name}-${appTheme}.png`);
+    await fs.writeFile(screenshotPath, image.toPNG());
+    screenshotPaths.push(screenshotPath);
+  }
+
+  return screenshotPaths;
+}
+
 async function main() {
   const window = await createWindow();
   try {
     await clearBrowserStorage(window);
     const seeded = await seedRecordsWithAttachment(window);
+    const screenshotPaths = await captureBetaScreens(window);
     const backupResult = await downloadBackup(window);
     await clearBrowserStorage(window);
     const restored = await restoreBackup(window, backupResult.backupText);
     console.log(`Home Basis Tracker browser beta QA passed: ${restored.properties} property, ${restored.projects} project, ${restored.expenses} expense, ${restored.documents} document, restored ${restored.restoredFileName}.`);
     console.log(`Backup verified: ${backupResult.backupPath}`);
+    if (screenshotPaths.length) console.log(`Dark UI screenshots: ${screenshotPaths.join(", ")}`);
     assert(seeded.documentFileName === restored.restoredFileName, "Restored file name changed unexpectedly.");
     assert(seeded.ocrText === restored.ocrText, "Restored local document text changed unexpectedly.");
   } finally {

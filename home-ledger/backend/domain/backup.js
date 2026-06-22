@@ -294,7 +294,7 @@ function assertUniqueBackupIds(records, label) {
     const id = cleanBackupText(record?.id);
     if (!id) continue;
     if (seenIds.has(id)) {
-      throw new Error(`Backup contains duplicate ${label} records.`);
+      throw new Error(`Backup contains duplicate ${label} items.`);
     }
     seenIds.add(id);
   }

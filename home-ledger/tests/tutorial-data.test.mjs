@@ -28,7 +28,8 @@ test("tutorial workspace data covers the main Home Basis workflows", () => {
   assert.ok(tutorialData.documents.some((document) => document.documentType === "contract"));
   assert.ok(tutorialData.documents.some((document) => document.documentType === "plan or drawing"));
   assert.ok(TUTORIAL_STEPS.some((step) => /backup/i.test(`${step.title} ${step.summary}`)));
-  assert.ok(TUTORIAL_STEPS.some((step) => /CPA|export/i.test(`${step.title} ${step.summary}`)));
+  assert.ok(TUTORIAL_STEPS.some((step) => /export/i.test(`${step.title} ${step.summary}`)));
+  assert.equal(TUTORIAL_STEPS.some((step) => /CPA/i.test(`${step.title} ${step.summary}`)), false);
 });
 
 test("tutorial data is safe sample data and can be exported without file payloads", () => {

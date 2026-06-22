@@ -6,6 +6,7 @@ const path = require("node:path");
 const outputDir = path.resolve(process.env.QA_OUTPUT_DIR || path.join(__dirname, "..", "release", "qa"));
 const appUrl = process.env.QA_APP_URL || "http://127.0.0.1:3102";
 const websiteUrl = process.env.QA_WEBSITE_URL || "http://127.0.0.1:3104";
+const appTheme = ["light", "dark", "system"].includes(process.env.QA_APP_THEME) ? process.env.QA_APP_THEME : "";
 const userDataDir = path.join(os.tmpdir(), `home-basis-tracker-render-qa-${process.pid}`);
 
 app.setPath("userData", userDataDir);
@@ -19,7 +20,7 @@ const targets = [
   { name: "app-mobile", url: appUrl, width: 390, height: 844, expectedText: "Home Basis Tracker" },
   { name: "website-desktop", url: websiteUrl, width: 1440, height: 1000, expectedText: "Home Basis Tracker" },
   { name: "website-mobile", url: websiteUrl, width: 390, height: 844, expectedText: "Home Basis Tracker" },
-];
+].filter((target) => !appTheme || target.url === appUrl);
 
 async function renderTarget(target) {
   const window = new BrowserWindow({
@@ -49,6 +50,10 @@ async function renderTarget(target) {
 
   try {
     await loadUrlWithRetry(window, target.url);
+    if (appTheme && target.url === appUrl) {
+      await window.webContents.executeJavaScript(`localStorage.setItem("home-ledger:theme-preference", ${JSON.stringify(appTheme)})`, true);
+      await loadUrlWithRetry(window, target.url);
+    }
     await window.webContents.executeJavaScript("document.fonts?.ready || Promise.resolve()", true);
     await new Promise((resolve) => {
       setTimeout(resolve, 600);
@@ -70,7 +75,7 @@ async function renderTarget(target) {
     `, true);
 
     const image = await window.webContents.capturePage();
-    const screenshotPath = path.join(outputDir, `${target.name}.png`);
+    const screenshotPath = path.join(outputDir, `${target.name}${appTheme && target.url === appUrl ? `-${appTheme}` : ""}.png`);
     await fs.writeFile(screenshotPath, image.toPNG());
 
     return {

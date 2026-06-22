@@ -251,13 +251,18 @@ async function runDesktopSmoke(window) {
         assert(!filesAfterDelete.some((fileRecord) => fileRecord.id === "file_smoke_private_beta"), "Stored file was not deleted.");
 
         await click('[data-tab="export"]');
-        await waitFor(() => bodyIncludes("Professional review summary") && bodyIncludes("Smoke Roofing LLC"), "export summary");
+        await waitFor(() => bodyIncludes("Review packet preview"), "review packet preview");
+        const previewSummary = document.querySelector(".export-preview-panel > summary");
+        assert(previewSummary, "Missing review packet preview summary.");
+        previewSummary.click();
+        await sleep();
+        await waitFor(() => bodyIncludes("Smoke Roofing LLC"), "expanded review packet preview");
         const csvButton = document.querySelector('[data-action="download-csv"]');
         assert(csvButton && !csvButton.disabled, "CSV export button should be enabled after adding an expense.");
         const pdfButton = document.querySelector('[data-action="download-cpa-pdf"]');
-        assert(pdfButton && !pdfButton.disabled, "Professional review PDF export button should be enabled after adding records.");
+        assert(pdfButton && !pdfButton.disabled, "Review packet PDF export button should be enabled after adding records.");
         pdfButton.click();
-        await waitFor(() => bodyIncludes("Professional review PDF saved."), "professional review PDF save");
+        await waitFor(() => bodyIncludes("Review packet PDF saved."), "review packet PDF save");
         assert(!document.body.innerText.includes("/Users/private"), "Raw local path leaked into the UI.");
 
         const savedData = await window.homeLedgerDesktop.loadData();
@@ -573,7 +578,7 @@ async function getPdfSaveTarget(filename) {
   }
 
   return dialog.showSaveDialog({
-    title: "Save Home Basis Tracker professional review PDF",
+    title: "Save Home Basis Tracker review packet PDF",
     defaultPath: filename,
     buttonLabel: "Save PDF",
     filters: [{ name: "PDF document", extensions: ["pdf"] }],
@@ -648,10 +653,10 @@ function registerIpcHandlers() {
     const filename = ensurePdfFileName(record?.filename);
     const html = String(record?.html || "");
     if (!html.trim()) {
-      throw new Error("Professional review PDF content was empty.");
+      throw new Error("Review packet PDF content was empty.");
     }
     if (Buffer.byteLength(html, "utf8") > MAX_REVIEW_HTML_BYTES) {
-      throw new Error("Professional review PDF content is too large.");
+      throw new Error("Review packet PDF content is too large.");
     }
 
     const result = await getPdfSaveTarget(filename);
@@ -663,7 +668,7 @@ function registerIpcHandlers() {
     const pdfBuffer = await renderHtmlToPdfBuffer(html);
     await writeBinaryFileAtomic(ensurePdfFilePath(result.filePath), pdfBuffer, {
       maxBytes: MAX_REVIEW_PDF_BYTES,
-      tooLargeMessage: "Professional review PDF is too large to save.",
+      tooLargeMessage: "Review packet PDF is too large to save.",
     });
     return { canceled: false };
   });

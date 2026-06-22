@@ -1,36 +1,36 @@
 # Home Basis Tracker
 
-Home Basis Tracker helps homeowners keep improvement receipts, contractor invoices, permits, photos, project notes, and cost records in one local app for CPA review.
+Home Basis Tracker helps homeowners keep improvement receipts, contractor invoices, permits, photos, project notes, and costs in one local app.
 
-It is not budgeting software, tax software, legal advice, or tax advice. Expense classifications are for organization only and should be reviewed with a CPA.
+It is not budgeting software, tax software, legal advice, or tax advice. Cost types are for organization only.
 
 ## What It Tracks
 
 - Properties, including optional address, purchase date, purchase price, and notes.
 - Projects, including category, status, dates, contractor/vendor, and notes.
-- Expenses, including property, optional project, date, vendor, description, amount, classification, category, documentation status, and notes.
-- Documents, including type, related property/project/expense, added date, notes, and optional local file attachment metadata.
+- Expenses, including property, optional project, date, vendor, description, amount, cost type, category, receipt/file status, and notes.
+- Documents, including type, related property/project/expense, added date, notes, and optional attached file details.
 
 ## Local Storage Model
 
-The app does not create an account, upload files, call third-party APIs, or use server-side storage.
+The app does not create an account, upload files, use outside services for files, or use server-side storage.
 
-- Fresh real app storage starts empty. Sample home records live only in the separate Tutorial Workspace.
-- In the Mac desktop app, structured records are stored in an app-managed records file on the Mac, and attached files are copied into an app-managed documents folder.
-- In the web version, structured records are stored in the current browser profile with `localStorage`, and attached document files are stored in that browser profile with IndexedDB.
-- CSV and print exports include document metadata, not attached file contents.
-- Full backup JSON files include structured records and attached files encoded inside the backup.
+- Fresh real app storage starts empty. Sample home paperwork lives only in the separate Tutorial Workspace.
+- In the Mac desktop app, saved details are stored in an app data file on the Mac, and attached files are copied into a folder managed by the app.
+- In the web version, saved details are stored in the current browser profile with `localStorage`, and attached document files are stored in that browser profile with IndexedDB.
+- CSV and print exports include document details, not attached file contents.
+- Full backup JSON files include saved details and attached files inside the backup.
 
-Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove records and attached files.
+Local app storage is convenient, but it is not a backup. Deleting the app's local data, clearing browser data, changing browser profiles, or using private browsing can remove saved details and attached files.
 
-The Tutorial Workspace is a temporary sample-data sandbox. Users can practice properties, projects, expenses, documents, professional review exports, backups, restores, reset, and exit without writing sample records into their real binder.
+The Tutorial Workspace is a temporary sample-data sandbox. Users can practice properties, projects, expenses, documents, review exports, backups, restores, reset, and exit without writing sample items into their real home file.
 
 ## Product Layout
 
 - `website/`: standalone product website and support pages.
 - `frontend/`: browser UI, HTML entry point, and visual styles.
 - `backend/domain/`: local data model, validation, sanitization, CSV export, backup shaping, and shared constants.
-- `backend/storage/`: browser storage and desktop bridge adapters for records and document files.
+- `backend/storage/`: browser storage and desktop bridge adapters for saved details and document files.
 - `desktop/`: Electron shell, private desktop storage, packaging, and desktop smoke tests.
 - `scripts/`: product-local validation and development helpers.
 - `tests/`: focused Node tests for domain, backup, and desktop storage helper behavior.
@@ -53,7 +53,7 @@ npm run dev:website
 
 ## Mac Desktop App
 
-The desktop app is an Electron wrapper around the same local-first records binder. It does not add accounts, cloud sync, tax filing, or third-party storage. Document text extraction runs locally for supported files.
+The desktop app is an Electron wrapper around the same private home paperwork app. It does not add accounts, cloud sync, tax filing, or outside file storage. Document text extraction runs locally for supported files.
 
 Install desktop dependencies:
 
@@ -88,21 +88,21 @@ The app intentionally shows friendly storage labels instead of raw local file pa
 
 Use **Export & backup > Download full backup** to create a private JSON backup. Keep that file somewhere you already use for important personal records.
 
-Use **Export & backup > Restore from backup** to replace the current local app records with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this beta.
+Use **Export & backup > Restore from backup** to replace the current local app contents with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this beta.
 
-Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private records.
+Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private files.
 
 Only restore backups you created or trust. The app skips several active or executable attachment types during restore, but a full backup can still contain private files and notes.
 
-Tutorial backups and restores are scoped to the tutorial workspace. Exiting the tutorial returns to the real app records without copying sample records over.
+Tutorial backups and restores are scoped to the tutorial workspace. Exiting the tutorial returns to the real home file without copying sample items over.
 
 See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardrails.
 
 ## Exports
 
-- **Download CSV** creates a cost record export with property, project, category, date, vendor, description, amount, classification, documentation status, and notes.
-- **Print review summary** creates a printable professional review summary.
-- Export wording should say "review with your CPA" or "share with your CPA", not tax-filing language.
+- **Download CSV** creates a cost export with property, project, category, date, vendor, description, amount, cost type, receipt/file status, and notes.
+- **Print review summary** creates a printable review packet summary.
+- Export wording should say "review packet" or "items for review", not tax-filing language.
 
 ## What Is Intentionally Not Included
 
@@ -117,7 +117,7 @@ See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardra
 
 Before a private beta build, verify the app flows in both the Mac app and web version when practical. The detailed human checklist lives in `docs/HUMAN_REVIEW_CHECKLIST.md`, and real-document guidance lives in `docs/REAL_WORLD_DOCUMENT_QA.md`.
 
-Also verify the first-run boundary: the real app should not show sample records by default. The Tutorial Workspace should be opt-in, resettable, and visibly separate from the real records workspace.
+Also verify the first-run boundary: the real app should not show sample items by default. The Tutorial Workspace should be opt-in, resettable, and visibly separate from the real workspace.
 
 Useful validation commands from `home-ledger/`:
 
@@ -138,4 +138,4 @@ git diff --check
 
 ## Release Notes
 
-The Mac app stores records and document copies locally through the desktop shell, and a signed/notarized DMG packaging path is available. Remaining release-readiness work is clean-install distribution QA, import/export migration testing, optional user-chosen backup locations, and continued CPA-review wording checks.
+The Mac app stores saved details and document copies locally through the desktop shell, and a signed/notarized DMG packaging path is available. Remaining release-readiness work is clean-install distribution QA, import/export migration testing, optional user-chosen backup locations, and continued review-packet wording checks.

@@ -63,6 +63,6 @@ for (const forbidden of ["/Users/", "~/", "C:/", "\\\\Server", "/Applications/",
 
 const csv = buildExpensesCsv(cleanData);
 assert.match(csv, /'=Formula Vendor/);
-assert.match(csv, /Potential basis addition|potential basis addition/);
+assert.match(csv, /Possible improvement/);
 
 console.log("Home Basis Tracker model checks passed.");

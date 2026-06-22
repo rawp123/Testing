@@ -14,6 +14,7 @@ export const EMPTY_DATA = {
   projects: [],
   expenses: [],
   documents: [],
+  followUpOverrides: [],
 };
 
 export const TABS = [
@@ -22,6 +23,7 @@ export const TABS = [
   { id: "projects", label: "Projects" },
   { id: "expenses", label: "Expenses" },
   { id: "documents", label: "Documents" },
+  { id: "calculators", label: "Calculators" },
   { id: "export", label: "Export & backup" },
   { id: "tutorial", label: "Tutorial" },
 ];
@@ -35,9 +37,9 @@ export const PROJECT_STATUSES = [
 ];
 
 export const CLASSIFICATIONS = [
-  { value: "potential basis addition", label: "Potential basis addition" },
-  { value: "repair or maintenance", label: "Repair or maintenance" },
-  { value: "unclear / ask CPA", label: "Needs professional review" },
+  { value: "potential basis addition", label: "Possible improvement" },
+  { value: "repair or maintenance", label: "Repair / upkeep" },
+  { value: "unclear / ask CPA", label: "Not sure, review later" },
 ];
 
 export const EXPENSE_CATEGORIES = [
@@ -109,7 +111,7 @@ export const DOCUMENT_TYPES = [
   { value: "warranty", label: "Warranty" },
   { value: "photo", label: "Photo" },
   { value: "contract", label: "Contract" },
-  { value: "payment record", label: "Payment record" },
+  { value: "payment record", label: "Payment proof" },
   { value: "appraisal", label: "Appraisal" },
   { value: "inspection", label: "Inspection" },
   { value: "plan or drawing", label: "Plan or drawing" },
@@ -157,6 +159,7 @@ export function sanitizeData(value) {
     projects: Array.isArray(value?.projects) ? value.projects.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeProject) : [],
     expenses: Array.isArray(value?.expenses) ? value.expenses.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeExpense) : [],
     documents: Array.isArray(value?.documents) ? value.documents.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeDocument) : [],
+    followUpOverrides: Array.isArray(value?.followUpOverrides) ? value.followUpOverrides.slice(0, MAX_RECORDS_PER_TYPE).map(sanitizeFollowUpOverride) : [],
   };
   return normalizeRelationships(sanitized);
 }
@@ -183,6 +186,7 @@ function sanitizeProperty(property) {
     purchaseDate: cleanDate(property?.purchaseDate),
     purchasePrice: Math.max(0, parseAmount(property?.purchasePrice)),
     notes: cleanDisplayText(property?.notes),
+    isPrimary: Boolean(property?.isPrimary),
   };
 }
 
@@ -200,6 +204,7 @@ function sanitizeProject(project) {
     status: allowedOptionValue(PROJECT_STATUSES, project?.status, "planned"),
     scopeSummary: cleanDisplayText(project?.scopeSummary),
     notes: cleanDisplayText(project?.notes),
+    completenessOverrideNote: cleanDisplayText(project?.completenessOverrideNote),
   };
 }
 
@@ -242,8 +247,30 @@ function sanitizeDocument(document) {
   };
 }
 
+function sanitizeFollowUpOverride(override) {
+  return {
+    id: cleanText(override?.id),
+    label: cleanDisplayText(override?.label),
+    typeLabel: cleanDisplayText(override?.typeLabel),
+    detail: cleanDisplayText(override?.detail),
+    propertyId: cleanText(override?.propertyId),
+    projectId: cleanText(override?.projectId),
+    expenseId: cleanText(override?.expenseId),
+    documentId: cleanText(override?.documentId),
+    note: cleanDisplayText(override?.note),
+    completedAt: cleanText(override?.completedAt),
+  };
+}
+
 function normalizeRelationships(cleanData) {
-  const properties = cleanData.properties.filter((property) => property.id && property.name);
+  const usableProperties = cleanData.properties.filter((property) => property.id && property.name);
+  const primaryPropertyId = usableProperties.find((property) => property.isPrimary)?.id || "";
+  const properties = usableProperties
+    .map((property) => ({
+      ...property,
+      isPrimary: Boolean(primaryPropertyId && property.id === primaryPropertyId),
+    }))
+    .sort((firstProperty, secondProperty) => Number(secondProperty.isPrimary) - Number(firstProperty.isPrimary));
   const propertyIds = new Set(properties.map((property) => property.id));
   const fallbackPropertyId = properties[0]?.id || "";
 
@@ -319,6 +346,7 @@ function normalizeRelationships(cleanData) {
     projects: projects.filter((project) => projectIds.has(project.id) && baseProjectIds.has(project.id)),
     expenses,
     documents,
+    followUpOverrides: cleanData.followUpOverrides.filter((override) => override.id),
   };
 }
 
@@ -630,6 +658,87 @@ export function getProjectCompleteness(data, project) {
   return buildProjectCompleteness(project, getProjectContext(data, project));
 }
 
+export function getRecordFollowUps(data, options = {}) {
+  const records = getRecordCollections(data);
+  const items = [];
+  const overrideIds = new Set(records.followUpOverrides.map((override) => override.id));
+  const pushItem = (item) => {
+    if (!item?.id || overrideIds.has(item.id) || items.some((currentItem) => currentItem.id === item.id)) return;
+    items.push({
+      severity: "medium",
+      priority: 50,
+      propertyId: "",
+      projectId: "",
+      expenseId: "",
+      documentId: "",
+      surfaces: ["dashboard", "export"],
+      ...item,
+    });
+  };
+
+  records.properties.forEach((property) => {
+    if (!property.purchaseDate) {
+      pushItem(createFollowUpItem({
+        id: `property:${property.id}:purchase-date`,
+        type: "property-missing-purchase-date",
+        typeLabel: "Property details",
+        label: "Add purchase date",
+        detail: `${property.name} is missing a purchase date.`,
+        severity: "medium",
+        priority: 20,
+        propertyId: property.id,
+        action: {
+          label: "Add purchase date",
+          action: "edit-property-field",
+          id: property.id,
+          field: "purchaseDate",
+          destinationTab: "property",
+          opens: "property field editor",
+        },
+      }));
+    }
+    if (!property.purchasePrice) {
+      pushItem(createFollowUpItem({
+        id: `property:${property.id}:purchase-price`,
+        type: "property-missing-purchase-price",
+        typeLabel: "Property details",
+        label: "Add purchase price",
+        detail: `${property.name} is missing a purchase price.`,
+        severity: "medium",
+        priority: 21,
+        propertyId: property.id,
+        action: {
+          label: "Add purchase price",
+          action: "edit-property-field",
+          id: property.id,
+          field: "purchasePrice",
+          destinationTab: "property",
+          opens: "property field editor",
+        },
+      }));
+    }
+  });
+
+  records.projects.forEach((project) => {
+    getProjectFollowUpItems(records, project).forEach(pushItem);
+  });
+
+  records.expenses.forEach((expense) => {
+    getExpenseFollowUpItems(records, expense).forEach(pushItem);
+  });
+
+  records.documents.forEach((documentRecord) => {
+    const item = getDocumentFollowUpItem(records, documentRecord, options);
+    if (item) pushItem(item);
+  });
+
+  return items.sort(compareFollowUpItems);
+}
+
+export function getRecordFollowUpsForSurface(data, surface, options = {}) {
+  return getRecordFollowUps(data, options).filter((item) => item.surfaces.includes(surface));
+}
+
 function getProjectContext(data, project) {
   const properties = Array.isArray(data?.properties) ? data.properties : [];
   const expenses = Array.isArray(data?.expenses) ? data.expenses.filter((expense) => expense.projectId === project?.id) : [];
@@ -672,24 +781,24 @@ function buildProjectCompleteness(project, context) {
       "Add the contractor/vendor on the project or linked expenses.",
     ),
     projectCheck(
-      "Cost records linked",
+      "Costs linked",
       expenses.length > 0,
       "Link at least one expense to this project.",
     ),
     projectCheck(
       "Supporting documents linked",
       documents.length > 0,
-      "Link receipts, invoices, permits, photos, or notes to this project.",
+      "Attach receipts, invoices, permits, photos, or notes to this project.",
     ),
     projectCheck(
-      "Receipt and invoice records linked",
+      "Receipt and invoice files linked",
       expenses.length > 0 && missingDocuments === 0,
-      "Link receipts or invoices for expenses that need them.",
+      "Attach receipts or invoices for expenses that need them.",
     ),
     projectCheck(
-      "Review classifications chosen",
+      "Review treatment choices",
       expenses.length > 0 && unclearExpenses === 0,
-      "Review unclear expense classifications with a qualified professional.",
+      "Review expenses marked Not sure, review later.",
     ),
     projectCheck(
       "Expected document types covered",
@@ -699,6 +808,24 @@ function buildProjectCompleteness(project, context) {
   ];
   const completedChecks = checks.filter((check) => check.done).length;
   const totalChecks = checks.length;
+  const completenessOverrideNote = cleanDisplayText(project?.completenessOverrideNote);
+
+  if (completenessOverrideNote) {
+    return {
+      score: 100,
+      completedChecks: totalChecks,
+      totalChecks,
+      checks,
+      readyItems: ["Marked complete with note"],
+      followUps: [],
+      expectedDocumentTypes,
+      missingExpectedDocumentTypes: [],
+      missingDocuments,
+      unclearExpenses,
+      isOverridden: true,
+      overrideNote: completenessOverrideNote,
+    };
+  }
 
   return {
     score: Math.round((completedChecks / totalChecks) * 100),
@@ -708,37 +835,45 @@ function buildProjectCompleteness(project, context) {
     readyItems: checks.filter((check) => check.done).map((check) => check.label),
     followUps: [
       ...checks.filter((check) => !check.done).map((check) => check.followUp),
-      ...expectedDocumentFollowUps.map((item) => `Add a ${item.label.toLowerCase()} record if available or applicable.`),
+      ...expectedDocumentFollowUps.map((item) => `Add a ${item.label.toLowerCase()} if available or applicable.`),
     ].filter(Boolean),
     expectedDocumentTypes,
     missingExpectedDocumentTypes: expectedDocumentFollowUps,
     missingDocuments,
     unclearExpenses,
+    isOverridden: false,
+    overrideNote: "",
   };
 }
 
 export function getReviewReadiness(data) {
-  const propertiesMissingPurchaseDetails = data.properties.filter((property) =>
+  const records = getRecordCollections(data);
+  const followUpItems = getRecordFollowUps(records);
+  const propertiesMissingPurchaseDetails = records.properties.filter((property) =>
     !property.purchaseDate || !property.purchasePrice
   );
-  const expensesMissingLinkedEvidence = data.expenses.filter((expense) => isExpenseMissingLinkedEvidence(data, expense));
-  const unclearExpenses = data.expenses.filter((expense) => expense.classification === "unclear / ask CPA");
-  const projectsMissingDates = data.projects.filter((project) =>
+  const expenseSupportFollowUpIds = new Set(followUpItems
+    .filter((item) => item.type.startsWith("expense-") && item.type.includes("document"))
+    .map((item) => item.expenseId));
+  const expensesMissingLinkedEvidence = records.expenses.filter((expense) => expenseSupportFollowUpIds.has(expense.id));
+  const unclearExpenses = records.expenses.filter((expense) => expense.classification === "unclear / ask CPA");
+  const projectsToFinish = records.projects.filter((project) => !project.completenessOverrideNote);
+  const projectsMissingDates = projectsToFinish.filter((project) =>
     !project.startDate || (project.status === "completed" && !project.completionDate)
   );
-  const projectsMissingScope = data.projects.filter((project) => !project.scopeSummary && !project.notes);
-  const expensesMissingVendors = data.expenses.filter((expense) => !expense.vendorId);
-  const documentsWithoutFiles = data.documents.filter((document) => !document.hasFile);
-  const storedDocuments = data.documents.filter((document) => document.hasFile);
+  const projectsMissingScope = projectsToFinish.filter((project) => !project.scopeSummary && !project.notes);
+  const expensesMissingVendors = records.expenses.filter((expense) => !expense.vendorId && !expense.vendor);
+  const documentsWithoutFiles = records.documents.filter((document) => !document.hasFile);
+  const storedDocuments = records.documents.filter((document) => document.hasFile);
   const totalChecks = 7;
   const completedChecks = [
-    data.properties.length > 0,
-    data.expenses.length > 0,
-    data.documents.length > 0,
-    data.expenses.length > 0 && expensesMissingVendors.length === 0,
-    data.properties.length > 0 && propertiesMissingPurchaseDetails.length === 0,
-    data.expenses.length > 0 && expensesMissingLinkedEvidence.length === 0,
-    data.expenses.length > 0 && unclearExpenses.length === 0,
+    records.properties.length > 0,
+    records.expenses.length > 0,
+    records.documents.length > 0,
+    records.expenses.length > 0 && expensesMissingVendors.length === 0,
+    records.properties.length > 0 && propertiesMissingPurchaseDetails.length === 0,
+    records.expenses.length > 0 && expensesMissingLinkedEvidence.length === 0,
+    records.expenses.length > 0 && unclearExpenses.length === 0,
   ].filter(Boolean).length;
 
   return {
@@ -753,37 +888,415 @@ export function getReviewReadiness(data) {
     projectsMissingScope,
     documentsWithoutFiles,
     storedDocuments,
+    followUpItems,
     readyItems: [
-      data.properties.length ? "Property record created" : "",
-      data.projects.length ? "Projects grouped" : "",
-      data.expenses.length && !expensesMissingVendors.length ? "Expense vendors linked" : "",
+      records.properties.length ? "Home details added" : "",
+      records.projects.length ? "Projects grouped" : "",
+      records.expenses.length && !expensesMissingVendors.length ? "Expense vendors linked" : "",
       storedDocuments.length ? "Stored document files attached" : "",
-      data.expenses.some((expense) => expense.classification === "potential basis addition") ? "Potential basis additions flagged" : "",
+      records.expenses.some((expense) => expense.classification === "potential basis addition") ? "Possible improvements noted" : "",
     ].filter(Boolean),
-    followUps: [
-      data.properties.length ? "" : "Add at least one property.",
-      data.expenses.length ? "" : "Add expense records before preparing a professional review packet.",
-      data.documents.length ? "" : "Add supporting document records.",
-      expensesMissingVendors.length ? "Assign vendors/payees to unassigned expenses." : "",
-      propertiesMissingPurchaseDetails.length ? "Add purchase date and purchase price where available." : "",
-      expensesMissingLinkedEvidence.length ? "Link stored receipts or invoices to documented expenses." : "",
-      unclearExpenses.length ? "Review items marked for professional classification." : "",
-      projectsMissingDates.length ? "Add missing project start/completion dates." : "",
-      projectsMissingScope.length ? "Add project descriptions or notes for context." : "",
-    ].filter(Boolean),
+    followUps: followUpItems.map((item) => item.label),
   };
 }
 
 function isExpenseMissingLinkedEvidence(data, expense) {
-  if (isDocumentationGap(expense)) return true;
+  if (isDocumentationGap(expense) && !getStoredExpenseEvidenceDocument(data, expense)) return true;
   if (!["receipt attached", "invoice attached"].includes(expense.documentationStatus)) return false;
+  return !getStoredExpenseEvidenceDocument(data, expense);
+}
 
-  const expectedType = expense.documentationStatus === "invoice attached" ? "invoice" : "receipt";
-  return !data.documents.some((document) =>
-    document.expenseId === expense.id &&
-    document.hasFile &&
-    document.documentType === expectedType
+function getRecordCollections(data) {
+  return {
+    vendors: Array.isArray(data?.vendors) ? data.vendors : [],
+    properties: Array.isArray(data?.properties) ? data.properties : [],
+    projects: Array.isArray(data?.projects) ? data.projects : [],
+    expenses: Array.isArray(data?.expenses) ? data.expenses : [],
+    documents: Array.isArray(data?.documents) ? data.documents : [],
+    followUpOverrides: Array.isArray(data?.followUpOverrides) ? data.followUpOverrides : [],
+  };
+}
+
+function createFollowUpItem({ action, ...item }) {
+  const primaryAction = {
+    label: action.label,
+    action: action.action,
+    id: action.id || "",
+    field: action.field || "",
+    projectId: action.projectId || "",
+    expenseId: action.expenseId || "",
+    documentId: action.documentId || "",
+    destinationTab: action.destinationTab,
+    destination: action.destination || action.destinationTab,
+    opens: action.opens || "",
+    changesData: Boolean(action.changesData),
+    copy: action.copy || getActionCopy(action),
+  };
+  return {
+    ...item,
+    primaryAction,
+  };
+}
+
+function getActionCopy(action) {
+  if (action.changesData) {
+    return "Applies right away.";
+  }
+  return `Opens the ${action.opens || "related form"}. You can review it before saving.`;
+}
+
+function getProjectFollowUpItems(records, project) {
+  if (project?.completenessOverrideNote) return [];
+
+  const items = [];
+  const expenses = records.expenses.filter((expense) => expense.projectId === project.id);
+  const documents = records.documents.filter((documentRecord) => documentRecord.projectId === project.id);
+  const totals = getExpenseTotals(expenses);
+  const expectedDocumentTypes = getExpectedProjectDocumentTypes(project, expenses, totals.total);
+  const missingProjectDocumentTypes = getMissingProjectDocumentTypes(project, documents, expectedDocumentTypes)
+    .filter((type) => !["receipt/invoice", "payment record"].includes(type.value));
+  const propertyId = project.propertyId || "";
+
+  const projectAction = (label) => ({
+    label,
+    action: "edit-project",
+    id: project.id,
+    destinationTab: "projects",
+    opens: "project form",
+  });
+
+  if (!project.vendorId && !project.contractor && !expenses.some((expense) => expense.vendorId || expense.vendor)) {
+    items.push(createFollowUpItem({
+      id: `project:${project.id}:vendor`,
+      type: "project-missing-vendor",
+      typeLabel: "Project item",
+      label: "Add project vendor",
+      detail: `${project.name} does not have a vendor linked yet.`,
+      severity: "medium",
+      priority: 30,
+      propertyId,
+      projectId: project.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: projectAction("Add vendor"),
+    }));
+  }
+
+  const missingDates = [
+    !project.startDate ? "start date" : "",
+    ["completed", "archived"].includes(project.status) && !project.completionDate ? "completion date" : "",
+  ].filter(Boolean);
+  if (missingDates.length) {
+    items.push(createFollowUpItem({
+      id: `project:${project.id}:dates`,
+      type: "project-missing-dates",
+      typeLabel: "Project item",
+      label: missingDates.length === 2 ? "Add project dates" : `Add ${missingDates[0]}`,
+      detail: `${project.name} is missing ${humanList(missingDates)}.`,
+      severity: "medium",
+      priority: 31,
+      propertyId,
+      projectId: project.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: projectAction("Add project dates"),
+    }));
+  }
+
+  if (!project.scopeSummary && !project.notes) {
+    items.push(createFollowUpItem({
+      id: `project:${project.id}:scope`,
+      type: "project-missing-scope",
+      typeLabel: "Project item",
+      label: "Add project description",
+      detail: `${project.name} needs a short description or note.`,
+      severity: "medium",
+      priority: 32,
+      propertyId,
+      projectId: project.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: projectAction("Add description"),
+    }));
+  }
+
+  missingProjectDocumentTypes.forEach((documentType, index) => {
+    const documentLabel = documentType.label.toLowerCase();
+    items.push(createFollowUpItem({
+      id: `project:${project.id}:supporting-document:${slugifyId(documentType.value) || index + 1}`,
+      type: "project-missing-supporting-documents",
+      typeLabel: "Project documents",
+      label: `Add ${documentLabel}`,
+      detail: `${project.name} is missing a ${documentLabel} document record.`,
+      severity: "medium",
+      priority: 33 + index,
+      propertyId,
+      projectId: project.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: `Add ${documentLabel}`,
+        action: "add-document",
+        id: project.id,
+        projectId: project.id,
+        destinationTab: "documents",
+        opens: "document form",
+        copy: `Opens the document form for this project. Add a ${documentLabel} record and upload the file if you have it.`,
+      },
+    }));
+  });
+
+  if (!missingProjectDocumentTypes.length && !documents.length && !expenses.length) {
+    items.push(createFollowUpItem({
+      id: `project:${project.id}:supporting-document`,
+      type: "project-missing-supporting-documents",
+      typeLabel: "Project documents",
+      label: "Add supporting document",
+      detail: `${project.name} does not have any project documents yet. Add a receipt, invoice, permit, photo, contract, or note if one applies.`,
+      severity: "medium",
+      priority: 33,
+      propertyId,
+      projectId: project.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: "Add supporting document",
+        action: "add-document",
+        id: project.id,
+        projectId: project.id,
+        destinationTab: "documents",
+        opens: "document form",
+        copy: "Opens the document form for this project. Add the specific record you have available.",
+      },
+    }));
+  }
+
+  return items;
+}
+
+function getExpenseFollowUpItems(records, expense) {
+  const items = [];
+  const propertyId = expense.propertyId || "";
+  const projectId = expense.projectId || "";
+  const expenseName = getExpenseFollowUpName(records, expense);
+
+  if (!expense.vendorId && !expense.vendor) {
+    items.push(createFollowUpItem({
+      id: `expense:${expense.id}:vendor`,
+      type: "expense-missing-vendor",
+      typeLabel: "Expense item",
+      label: "Add vendor",
+      detail: `${expenseName} does not have a vendor or payee yet.`,
+      severity: "medium",
+      priority: 40,
+      propertyId,
+      projectId,
+      expenseId: expense.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: "Add vendor",
+        action: "edit-expense",
+        id: expense.id,
+        destinationTab: "expenses",
+        opens: "expense form",
+      },
+    }));
+  }
+
+  if (expense.classification === "unclear / ask CPA") {
+    items.push(createFollowUpItem({
+      id: `expense:${expense.id}:record-treatment`,
+      type: "expense-review-treatment",
+      typeLabel: "Cost type",
+      label: "Review cost type",
+      detail: `${expenseName} is marked Not sure, review later.`,
+      severity: "medium",
+      priority: 41,
+      propertyId,
+      projectId,
+      expenseId: expense.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: "Review cost type",
+        action: "edit-expense",
+        id: expense.id,
+        destinationTab: "expenses",
+        opens: "expense form",
+      },
+    }));
+  }
+
+  const expectedType = getExpectedExpenseDocumentType(expense);
+  const supportLabel = getExpenseSupportLabel(records, expense);
+  const linkedExpectedDocument = getLinkedExpenseEvidenceDocuments(records, expense)
+    .find((documentRecord) => documentRecord.documentType === expectedType);
+  const storedExpectedDocument = getStoredExpenseEvidenceDocument(records, expense);
+
+  if (isDocumentationGap(expense) && !storedExpectedDocument && !linkedExpectedDocument) {
+    items.push(createFollowUpItem({
+      id: `expense:${expense.id}:document-support`,
+      type: "expense-missing-document-support",
+      typeLabel: "Expense support",
+      label: `Add ${expectedType} for ${supportLabel}`,
+      detail: `${expenseName} needs ${expectedType} support. Add a ${expectedType} document record and upload the file if you have it.`,
+      severity: "high",
+      priority: 10,
+      propertyId,
+      projectId,
+      expenseId: expense.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: `Add ${expectedType}`,
+        action: "add-document-for-expense",
+        id: expense.id,
+        expenseId: expense.id,
+        destinationTab: "documents",
+        opens: "document form",
+        copy: `Opens the document form with this expense selected. Add a ${expectedType} record and upload the file if you have it.`,
+      },
+    }));
+  }
+
+  if (["receipt attached", "invoice attached"].includes(expense.documentationStatus) && !storedExpectedDocument && !linkedExpectedDocument) {
+    items.push(createFollowUpItem({
+      id: `expense:${expense.id}:documented-without-support`,
+      type: "expense-documented-without-support",
+      typeLabel: "Expense support",
+      label: `Upload ${expectedType} for ${supportLabel}`,
+      detail: `${expenseName} is marked ${optionLabel(DOCUMENT_STATUSES, expense.documentationStatus).toLowerCase()}, but no uploaded ${expectedType} file is linked yet.`,
+      severity: "high",
+      priority: 11,
+      propertyId,
+      projectId,
+      expenseId: expense.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        label: `Upload ${expectedType}`,
+        action: "add-document-for-expense",
+        id: expense.id,
+        expenseId: expense.id,
+        destinationTab: "documents",
+        opens: "document form",
+        copy: `Opens the document form with this expense selected. Add or upload the ${expectedType} file that supports it.`,
+      },
+    }));
+  }
+
+  return items;
+}
+
+function getDocumentFollowUpItem(records, documentRecord, options = {}) {
+  const propertyId = documentRecord.propertyId || "";
+  const projectId = documentRecord.projectId || "";
+  const relatedExpense = records.expenses.find((expense) => expense.id === documentRecord.expenseId);
+  const documentType = optionLabel(DOCUMENT_TYPES, documentRecord.documentType).toLowerCase();
+  const fileLabel = `${documentType} file`;
+  const action = {
+    label: `Upload ${fileLabel}`,
+    action: "edit-document",
+    id: documentRecord.id,
+    documentId: documentRecord.id,
+    destinationTab: "documents",
+    opens: "document form",
+  };
+
+  if (isTutorialMetadataDocument(documentRecord, options)) {
+    return createFollowUpItem({
+      id: `document:${documentRecord.id}:tutorial-metadata`,
+      type: "document-tutorial-metadata-only",
+      typeLabel: "Sample file details",
+      label: `Upload ${fileLabel}`,
+      detail: `${documentRecord.displayName} only has sample ${fileLabel} details. Use your normal workspace to upload the real file.`,
+      severity: "low",
+      priority: 90,
+      propertyId,
+      projectId,
+      expenseId: documentRecord.expenseId || "",
+      documentId: documentRecord.id,
+      surfaces: ["dashboard", "projects", "export"],
+      action: {
+        ...action,
+        label: `Upload ${fileLabel}`,
+        copy: `Opens this document record. Upload the missing ${fileLabel}.`,
+      },
+    });
+  }
+
+  if (documentRecord.hasFile) return null;
+
+  const restoredOrMissing = isRestoredDocumentWithoutFile(documentRecord);
+  const label = restoredOrMissing ? `Restore or upload ${fileLabel}` : `Upload ${fileLabel}`;
+  const detail = relatedExpense
+    ? `${documentRecord.displayName} is linked to ${getExpenseFollowUpName(records, relatedExpense)}, but the ${fileLabel} has not been uploaded.`
+    : `${documentRecord.displayName} has a document entry, but the ${fileLabel} has not been uploaded.`;
+
+  return createFollowUpItem({
+    id: `document:${documentRecord.id}:attached-file`,
+    type: restoredOrMissing ? "document-restored-without-file-content" : "document-missing-attached-file",
+    typeLabel: restoredOrMissing ? "Restored file" : "Document file",
+    label,
+    detail: documentRecord.fileStatusNote ? `${detail} ${documentRecord.fileStatusNote}` : detail,
+    severity: restoredOrMissing ? "high" : "medium",
+    priority: restoredOrMissing ? 12 : 42,
+    propertyId,
+    projectId,
+    expenseId: documentRecord.expenseId || "",
+    documentId: documentRecord.id,
+    surfaces: ["dashboard", "projects", "export"],
+    action: {
+      ...action,
+      label,
+      copy: restoredOrMissing
+        ? `Opens this document record. Restore or upload the missing ${fileLabel}.`
+        : `Opens this document record. Upload the missing ${fileLabel}.`,
+    },
+  });
+}
+
+function getLinkedExpenseEvidenceDocuments(data, expense) {
+  const records = getRecordCollections(data);
+  return records.documents.filter((documentRecord) =>
+    documentRecord.expenseId === expense.id &&
+    ["receipt", "invoice"].includes(documentRecord.documentType)
   );
+}
+
+function getStoredExpenseEvidenceDocument(data, expense) {
+  const expectedType = getExpectedExpenseDocumentType(expense);
+  return getLinkedExpenseEvidenceDocuments(data, expense).find((documentRecord) =>
+    documentRecord.hasFile &&
+    documentRecord.documentType === expectedType
+  );
+}
+
+function getExpectedExpenseDocumentType(expense) {
+  return expense?.documentationStatus === "invoice attached" ? "invoice" : "receipt";
+}
+
+function getExpenseFollowUpName(records, expense) {
+  return `${getExpenseVendorName(records, expense, "Expense")} / ${expense.description || "Expense"}`;
+}
+
+function getExpenseSupportLabel(records, expense) {
+  return getExpenseVendorName(records, expense, expense.description || "expense");
+}
+
+function isRestoredDocumentWithoutFile(documentRecord) {
+  return /restored|skipped|not included|not restored/i.test(documentRecord?.fileStatusNote || "");
+}
+
+function isTutorialMetadataDocument(documentRecord, options = {}) {
+  return Boolean(options.tutorialMode && (
+    /^tutorial-file-/i.test(String(documentRecord?.fileId || documentRecord?.id || "")) ||
+    /tutorial sample|tutorial file metadata|sample metadata/i.test(documentRecord?.fileStatusNote || "")
+  ));
+}
+
+function humanList(items) {
+  const values = items.filter(Boolean);
+  if (values.length <= 1) return values[0] || "";
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(", ")}, and ${values.at(-1)}`;
+}
+
+function compareFollowUpItems(firstItem, secondItem) {
+  if (firstItem.priority !== secondItem.priority) return firstItem.priority - secondItem.priority;
+  return String(firstItem.id).localeCompare(String(secondItem.id));
 }
 
 function projectCheck(label, done, followUp) {
@@ -809,7 +1322,7 @@ function getExpectedProjectDocumentTypes(project, expenses, totalSpend) {
     expectedTypes.push({ value: "photo", label: "Before/after photo" });
   }
   if (expenses.length) {
-    expectedTypes.push({ value: "payment record", label: "Payment record" });
+    expectedTypes.push({ value: "payment record", label: "Payment proof" });
   }
 
   const seenValues = new Set();
@@ -920,8 +1433,8 @@ export function buildExpensesCsv(data) {
     "Vendor/Payee",
     "Description",
     "Amount",
-    "Classification",
-    "Documentation status",
+    "Cost type",
+    "Receipt/file status",
     "Notes",
   ];
 
@@ -936,7 +1449,7 @@ export function buildExpensesCsv(data) {
     getExpenseVendorName(cleanData, expense),
     expense.description,
     parseAmount(expense.amount).toFixed(2),
-    expense.classification,
+    optionLabel(CLASSIFICATIONS, expense.classification),
     expense.documentationStatus,
     expense.notes,
   ]);

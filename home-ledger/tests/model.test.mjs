@@ -8,6 +8,8 @@ import {
   getProjectCompleteness,
   getProjectReviewSummaries,
   getPropertyReviewSummaries,
+  getRecordFollowUps,
+  getRecordFollowUpsForSurface,
   getReviewReadiness,
   parseAmount,
   removeLocalPaths,
@@ -23,6 +25,7 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
       purchaseDate: "2024-02-31",
       purchasePrice: "$450,000.99",
       notes: "See file:///Users/private/closing.pdf",
+      isPrimary: true,
     }],
     projects: [{
       id: "project_1",
@@ -32,6 +35,7 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
       permitNumber: "/Users/private/permit.pdf",
       status: "mystery",
       scopeSummary: "See ~/private/scope.txt",
+      completenessOverrideNote: "Reviewed /Users/private/project-notes.txt",
     }],
     expenses: [{
       id: "expense_1",
@@ -62,6 +66,7 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
   });
 
   assert.equal(cleanData.properties.length, 1);
+  assert.equal(cleanData.properties[0].isPrimary, true);
   assert.equal(cleanData.properties[0].purchaseDate, "");
   assert.equal(cleanData.properties[0].purchasePrice, 450000.99);
   assert.equal(cleanData.projects[0].propertyId, "property_1");
@@ -69,6 +74,7 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
   assert.equal(cleanData.projects[0].status, "planned");
   assert.equal(cleanData.projects[0].permitNumber, "[local file path removed]");
   assert.equal(cleanData.projects[0].scopeSummary, "See [local file path removed]");
+  assert.equal(cleanData.projects[0].completenessOverrideNote, "Reviewed [local file path removed]");
   assert.equal(cleanData.expenses[0].classification, "unclear / ask CPA");
   assert.equal(cleanData.expenses[0].category, "other");
   assert.equal(cleanData.expenses[0].documentationStatus, "no document yet");
@@ -81,6 +87,24 @@ test("sanitizeData normalizes relationships, options, dates, amounts, and local 
   for (const forbidden of ["/Users/", "file://", "../private", "C:/", "~/"]) {
     assert.equal(serialized.includes(forbidden), false, `raw path survived sanitizer: ${forbidden}`);
   }
+});
+
+test("sanitizeData keeps one primary property first", () => {
+  const cleanData = sanitizeData({
+    properties: [
+      { id: "property_1", name: "Lake house", isPrimary: false },
+      { id: "property_2", name: "Main home", isPrimary: true },
+      { id: "property_3", name: "Office", isPrimary: true },
+    ],
+    projects: [],
+    expenses: [],
+    documents: [],
+  });
+
+  assert.equal(cleanData.properties[0].id, "property_2");
+  assert.equal(cleanData.properties[0].isPrimary, true);
+  assert.equal(cleanData.properties.filter((property) => property.isPrimary).length, 1);
+  assert.deepEqual(cleanData.properties.map((property) => property.id), ["property_2", "property_1", "property_3"]);
 });
 
 test("sanitizeData drops orphaned records when no usable property remains", () => {
@@ -97,6 +121,7 @@ test("sanitizeData drops orphaned records when no usable property remains", () =
     projects: [],
     expenses: [],
     documents: [],
+    followUpOverrides: [],
   });
 });
 
@@ -207,6 +232,288 @@ test("review readiness and project summaries cover export essentials", () => {
   assert.equal(projects[0].project.name, "Kitchen remodel");
   assert.equal(projects[0].hasPermit, true);
   assert.equal(projects[0].expenses[0].description, "Cabinet installation");
+});
+
+test("record follow-up generator normalizes unfinished record items", () => {
+  const cleanData = sanitizeData({
+    properties: [{
+      id: "property_1",
+      name: "Main home",
+    }],
+    projects: [
+      {
+        id: "project_1",
+        propertyId: "property_1",
+        name: "Roof work",
+        category: "roof",
+        status: "completed",
+      },
+      {
+        id: "project_no_vendor",
+        propertyId: "property_1",
+        name: "Attic insulation",
+        category: "attic",
+        status: "planned",
+      },
+      {
+        id: "project_marked_complete",
+        propertyId: "property_1",
+        name: "Basement shelves",
+        status: "completed",
+        completenessOverrideNote: "No more records to add.",
+      },
+    ],
+    expenses: [
+      {
+        id: "expense_missing_support",
+        propertyId: "property_1",
+        projectId: "project_1",
+        date: "2024-01-05",
+        description: "Roof deposit",
+        amount: 500,
+        classification: "unclear / ask CPA",
+        documentationStatus: "needs follow-up",
+      },
+      {
+        id: "expense_documented_without_link",
+        propertyId: "property_1",
+        projectId: "project_1",
+        date: "2024-01-08",
+        vendor: "Roof Co.",
+        description: "Roof invoice",
+        amount: 2000,
+        classification: "potential basis addition",
+        documentationStatus: "invoice attached",
+      },
+      {
+        id: "expense_linked_missing_file",
+        propertyId: "property_1",
+        projectId: "project_1",
+        date: "2024-01-09",
+        vendor: "Supply Co.",
+        description: "Roof materials",
+        amount: 300,
+        classification: "repair or maintenance",
+        documentationStatus: "receipt attached",
+      },
+    ],
+    documents: [
+      {
+        id: "document_linked_missing_file",
+        propertyId: "property_1",
+        projectId: "project_1",
+        expenseId: "expense_linked_missing_file",
+        displayName: "Roof materials receipt",
+        documentType: "receipt",
+        hasFile: false,
+      },
+      {
+        id: "document_restored_missing",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "Restored permit",
+        documentType: "permit",
+        hasFile: false,
+        fileStatusNote: "File content was not restored inside this workspace.",
+      },
+      {
+        id: "document_tutorial_sample",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "Tutorial photo",
+        documentType: "photo",
+        hasFile: false,
+        fileStatusNote: "Tutorial sample: no photo file is stored.",
+      },
+    ],
+  });
+
+  const followUps = getRecordFollowUps(cleanData, { tutorialMode: true });
+  const types = new Set(followUps.map((item) => item.type));
+
+  assert.ok(types.has("property-missing-purchase-date"));
+  assert.ok(types.has("property-missing-purchase-price"));
+  assert.ok(types.has("project-missing-vendor"));
+  assert.ok(types.has("project-missing-dates"));
+  assert.ok(types.has("project-missing-scope"));
+  assert.ok(types.has("project-missing-supporting-documents"));
+  assert.ok(types.has("expense-missing-vendor"));
+  assert.ok(types.has("expense-review-treatment"));
+  assert.ok(types.has("expense-missing-document-support"));
+  assert.ok(types.has("expense-documented-without-support"));
+  assert.ok(types.has("document-missing-attached-file"));
+  assert.ok(types.has("document-restored-without-file-content"));
+  assert.ok(types.has("document-tutorial-metadata-only"));
+
+  assert.equal(followUps.some((item) => item.projectId === "project_marked_complete"), false);
+  assert.equal(
+    followUps.some((item) => item.expenseId === "expense_linked_missing_file" && item.type === "expense-documented-without-support"),
+    false,
+  );
+  assert.ok(
+    followUps.some((item) => item.expenseId === "expense_linked_missing_file" && item.type === "document-missing-attached-file"),
+  );
+  assert.ok(followUps.every((item) => item.id && item.primaryAction?.label && item.primaryAction?.destinationTab && item.primaryAction?.copy));
+});
+
+test("document-related follow-ups are surfaced through projects instead of documents", () => {
+  const cleanData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{ id: "project_1", propertyId: "property_1", name: "Kitchen" }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      description: "Cabinets",
+      amount: 1200,
+      documentationStatus: "invoice attached",
+      classification: "potential basis addition",
+    }],
+    documents: [{
+      id: "document_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      expenseId: "expense_1",
+      displayName: "Cabinet invoice",
+      documentType: "invoice",
+      hasFile: false,
+    }],
+  });
+
+  const documentFollowUps = getRecordFollowUpsForSurface(cleanData, "documents");
+  const projectFollowUps = getRecordFollowUpsForSurface(cleanData, "projects");
+
+  assert.deepEqual(documentFollowUps, []);
+  assert.ok(projectFollowUps.some((item) => item.type === "document-missing-attached-file"));
+  assert.ok(projectFollowUps.some((item) => item.label === "Upload invoice file"));
+  assert.ok(projectFollowUps.some((item) => /Cabinet invoice/.test(item.detail)));
+});
+
+test("project follow-ups name the exact missing document or file requirement", () => {
+  const cleanData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Bathroom remodel",
+      category: "bathroom",
+      status: "completed",
+      startDate: "2024-01-01",
+      completionDate: "2024-01-20",
+      contractor: "Harbor Bath & Tile",
+      scopeSummary: "Tile, waterproofing, vanity, and fixture installation.",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-01-10",
+      vendor: "Harbor Bath & Tile",
+      description: "Bathroom tile and vanity installation",
+      amount: 9000,
+      classification: "potential basis addition",
+      documentationStatus: "invoice attached",
+    }],
+    documents: [{
+      id: "document_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      expenseId: "expense_1",
+      displayName: "Bathroom remodel invoice",
+      documentType: "invoice",
+      hasFile: true,
+      fileName: "bathroom-invoice.pdf",
+    }],
+  });
+
+  const projectFollowUps = getRecordFollowUpsForSurface(cleanData, "projects");
+
+  assert.ok(projectFollowUps.some((item) =>
+    item.id === "project:project_1:supporting-document:contract" &&
+    item.label === "Add contract or estimate" &&
+    /missing a contract or estimate document record/i.test(item.detail)
+  ));
+  assert.ok(projectFollowUps.some((item) =>
+    item.id === "project:project_1:supporting-document:photo" &&
+    item.label === "Add before/after photo" &&
+    /missing a before\/after photo document record/i.test(item.detail)
+  ));
+  assert.equal(projectFollowUps.some((item) => /contract or estimate and before\/after photo/i.test(item.detail)), false);
+});
+
+test("expense support follow-ups name receipt or invoice requirements", () => {
+  const receiptData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{ id: "project_1", propertyId: "property_1", name: "Deck repair" }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      vendor: "Cedarline Carpentry",
+      description: "Deck repair estimate",
+      amount: 1200,
+      documentationStatus: "needs follow-up",
+      classification: "repair or maintenance",
+    }],
+  });
+  const receiptFollowUps = getRecordFollowUpsForSurface(receiptData, "projects");
+  assert.ok(receiptFollowUps.some((item) =>
+    item.type === "expense-missing-document-support" &&
+    item.label === "Add receipt for Cedarline Carpentry" &&
+    /needs receipt support/i.test(item.detail)
+  ));
+
+  const invoiceData = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{ id: "project_1", propertyId: "property_1", name: "Bathroom remodel" }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      vendor: "Harbor Bath & Tile",
+      description: "Bathroom tile installation",
+      amount: 9000,
+      documentationStatus: "invoice attached",
+      classification: "potential basis addition",
+    }],
+  });
+  const invoiceFollowUps = getRecordFollowUpsForSurface(invoiceData, "projects");
+  assert.ok(invoiceFollowUps.some((item) =>
+    item.type === "expense-documented-without-support" &&
+    item.label === "Upload invoice for Harbor Bath & Tile" &&
+    /no uploaded invoice file is linked/i.test(item.detail)
+  ));
+});
+
+test("follow-up overrides persist and remove only the overridden open item", () => {
+  const dataWithOpenItems = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Kitchen",
+      status: "completed",
+    }],
+  });
+  const openItems = getRecordFollowUpsForSurface(dataWithOpenItems, "projects");
+  assert.ok(openItems.some((item) => item.id === "project:project_1:dates"));
+  assert.ok(openItems.some((item) => item.id === "project:project_1:scope"));
+
+  const dataWithOverride = sanitizeData({
+    ...dataWithOpenItems,
+    followUpOverrides: [{
+      id: "project:project_1:dates",
+      label: "Add project dates",
+      projectId: "project_1",
+      note: "Dates reviewed outside the app.",
+      completedAt: "2026-06-06T12:00:00.000Z",
+    }],
+  });
+  const remainingItems = getRecordFollowUpsForSurface(dataWithOverride, "projects");
+
+  assert.equal(remainingItems.some((item) => item.id === "project:project_1:dates"), false);
+  assert.ok(remainingItems.some((item) => item.id === "project:project_1:scope"));
+  assert.equal(dataWithOverride.followUpOverrides[0].note, "Dates reviewed outside the app.");
 });
 
 test("sale scenario estimates proceeds and potential taxable gain from saved basis records", () => {
@@ -366,12 +673,47 @@ test("project completeness tracks missing and finished review requirements", () 
   assert.deepEqual(complete.missingExpectedDocumentTypes, []);
 });
 
+test("project completeness can be marked complete with a note", () => {
+  const data = sanitizeData({
+    properties: [{ id: "property_1", name: "Main home" }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Electrical panel",
+      category: "electrical",
+      status: "completed",
+      completenessOverrideNote: "Reviewed available records and no additional documents are needed.",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-04-10",
+      vendor: "Electrician Co.",
+      description: "Panel upgrade",
+      amount: 3200,
+      classification: "unclear / ask CPA",
+      documentationStatus: "invoice attached",
+    }],
+  });
+
+  const completeness = getProjectCompleteness(data, data.projects[0]);
+
+  assert.equal(completeness.score, 100);
+  assert.equal(completeness.completedChecks, completeness.totalChecks);
+  assert.equal(completeness.followUps.length, 0);
+  assert.deepEqual(completeness.missingExpectedDocumentTypes, []);
+  assert.equal(completeness.isOverridden, true);
+  assert.match(completeness.overrideNote, /Reviewed available records/);
+});
+
 test("review readiness starts at zero for an empty binder", () => {
   const readiness = getReviewReadiness(sanitizeData());
 
   assert.equal(readiness.score, 0);
   assert.equal(readiness.completedChecks, 0);
-  assert.ok(readiness.followUps.some((item) => /property/i.test(item)));
+  assert.deepEqual(readiness.followUps, []);
+  assert.deepEqual(readiness.followUpItems, []);
 });
 
 test("amount, file-size, and path helpers handle edge cases", () => {
