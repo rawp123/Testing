@@ -13,8 +13,8 @@ describe("Export screen", () => {
     const metrics = toExportSummaryMetrics(createSummary({ total_expense_amount_cents: 123456 }));
 
     expect(metrics).toEqual([
-      { label: "Properties", value: "1", detail: "Included in full JSON" },
-      { label: "Projects", value: "2", detail: "Included in full JSON" },
+      { label: "Properties", value: "1", detail: "Included in records JSON" },
+      { label: "Projects", value: "2", detail: "Included in records JSON" },
       { label: "Expenses", value: "3", detail: "$1,234.56 total" },
       { label: "Documents", value: "4", detail: "1 with text extracted" }
     ]);
@@ -36,9 +36,12 @@ describe("Export screen", () => {
     expect(html).toContain("Available exports");
     expect(html).toContain("Expense records");
     expect(html).toContain("Document records");
-    expect(html).toContain("Full record data");
+    expect(html).toContain("Workspace Records JSON");
+    expect(html).toContain("Attached document files, storage keys, download URLs, and extracted document text are not included.");
     expect(html).toContain("Download CSV");
     expect(html).toContain("Download JSON");
+    expect(html).not.toContain("Full record data");
+    expect(html).not.toContain("Full workspace data");
     expect(html).toContain("Review packet");
     expect(html).toContain("Planned");
     expect(html).toContain("Full record exports are available");

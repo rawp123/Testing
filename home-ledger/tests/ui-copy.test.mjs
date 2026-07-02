@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const appSourcePromise = readFile(new URL("../frontend/app.js", import.meta.url), "utf8");
+const modelSourcePromise = readFile(new URL("../backend/domain/model.js", import.meta.url), "utf8");
 const styleSourcePromise = readFile(new URL("../frontend/styles.css", import.meta.url), "utf8");
 const readmePromise = readFile(new URL("../README.md", import.meta.url), "utf8");
 const desktopPackagePromise = readFile(new URL("../desktop/package.json", import.meta.url), "utf8");
@@ -23,7 +24,7 @@ test("calculator surfaces use homeowner labels and sale estimate caveat", async 
     "Estimated gain before tax review",
     "Basis estimate used",
     "Optional home-sale exclusion assumption",
-    "Review-later amounts tracked separately",
+    "Needs-classification amounts tracked separately",
     "Home Ledger organizes records. It does not give tax, legal, or accounting advice.",
   ]) {
     assert.ok(source.includes(copy), `missing calculator copy: ${copy}`);
@@ -62,6 +63,56 @@ test("export and backup page labels frame output as review packet and full backu
 
   assert.equal(source.includes("Professional review PDF"), false);
   assert.equal(source.includes("Download/save professional review PDF"), false);
+});
+
+test("review packet PDF source uses professional readiness copy and print-safe tables", async () => {
+  const source = await appSourcePromise;
+  const modelSource = await modelSourcePromise;
+  const pdfStart = source.indexOf("function buildCpaReviewPdfHtml");
+  const pdfEnd = source.indexOf("async function downloadFullBackup", pdfStart);
+  const pdfSource = source.slice(pdfStart, pdfEnd);
+  const packetSource = `${pdfSource}\n${modelSource}`;
+  const tableHeaderCss = pdfSource.slice(pdfSource.indexOf("    th {"), pdfSource.indexOf("    td {", pdfSource.indexOf("    th {")));
+
+  assert.notEqual(pdfStart, -1, "review packet PDF builder should exist");
+  assert.notEqual(pdfEnd, -1, "review packet helper boundary should exist");
+
+  for (const copy of [
+    "Draft Professional Review Packet",
+    "Professional Review Packet",
+    "Packet status",
+    "Proof/support needed",
+    "Expense proof files linked",
+    "Records Still Needed",
+    "Readiness Summary",
+    "Proof Files and Document Index",
+    "Document Title",
+    "Original Filename",
+    "Needs classification",
+    "packetSummary.dismissedItemCopy",
+    "white-space: nowrap",
+    "word-break: keep-all",
+    "pdfColumnClass",
+  ]) {
+    assert.ok(packetSource.includes(copy), `missing packet source marker: ${copy}`);
+  }
+
+  assert.ok(packetSource.includes("Draft text flags"), "packet should use product-facing placeholder wording");
+  assert.ok(packetSource.includes("draft or test content"), "follow-ups should describe placeholder data in user terms");
+
+  for (const oldCopy of [
+    "Review later",
+    "Stored File",
+    'pdfSection("Document Index"',
+    'pdfTable(["Document", "Type", "Property", "Project", "Related Expense", "Stored File"]',
+    "Placeholder flags",
+    "possible placeholder content",
+    "looks like placeholder content",
+  ]) {
+    assert.equal(packetSource.includes(oldCopy), false, `old packet source remains: ${oldCopy}`);
+  }
+
+  assert.equal(tableHeaderCss.includes("letter-spacing: 0.04em"), false, "PDF table headers should not force spaced all-caps");
 });
 
 test("restore confirmation names workspace, counts, attached files, and replacement scope", async () => {
@@ -291,7 +342,7 @@ test("website copy avoids technical product language", async () => {
 test("user-facing copy avoids AI-giveaway and implementation scaffold terms", async () => {
   const source = await appSourcePromise;
   const websiteSources = await Promise.all(websiteSourcePromises);
-  const implementationTokenPattern = /\bplaceholder\b/g;
+  const implementationTokenPattern = /\b(?:[$A-Z_a-z][$\w]*?)?placeholder[$\w]*\b/gi;
   const publicCopy = [source.replace(implementationTokenPattern, ""), ...websiteSources].join("\n");
 
   for (const prohibitedCopy of [

@@ -40,8 +40,8 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   },
   {
     id: "full-json",
-    name: "Full record data",
-    includes: "Properties, projects, vendors, expenses, documents, file details, and text status.",
+    name: "Workspace Records JSON",
+    includes: "Exports workspace records and document metadata. Attached document files, storage keys, download URLs, and extracted document text are not included.",
     format: "JSON",
     status: "available",
     actionLabel: "Download JSON",
@@ -79,12 +79,12 @@ export function toExportSummaryMetrics(summary: ExportSummaryResponse | null): E
     {
       label: "Properties",
       value: String(summary.property_count || 0),
-      detail: "Included in full JSON"
+      detail: "Included in records JSON"
     },
     {
       label: "Projects",
       value: String(summary.project_count || 0),
-      detail: "Included in full JSON"
+      detail: "Included in records JSON"
     },
     {
       label: "Expenses",

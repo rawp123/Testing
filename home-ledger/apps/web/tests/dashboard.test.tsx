@@ -44,7 +44,7 @@ describe("Dashboard React shell", () => {
     expect(viewModel.expenseBreakdown.map((item) => item.label)).toEqual([
       "Possible improvements",
       "Repair or upkeep",
-      "Review later"
+      "Needs classification"
     ]);
     expect(viewModel.activityFilterOptions.map((item) => item.label)).toEqual(["Document", "Expense", "Project"]);
     expect(viewModel.followUpItems[0]).toMatchObject({

@@ -39,8 +39,18 @@ export const PROJECT_STATUSES = [
 export const CLASSIFICATIONS = [
   { value: "potential basis addition", label: "Possible improvement" },
   { value: "repair or maintenance", label: "Repair or upkeep" },
-  { value: "unclear / ask CPA", label: "Review later" },
+  { value: "unclear / ask CPA", label: "Needs classification" },
 ];
+
+const PROFESSIONAL_CLASSIFICATION_LABELS = {
+  "potential basis addition": "Possible improvement",
+  "repair or maintenance": "Repair or upkeep",
+  "unclear / ask CPA": "Needs classification",
+};
+
+const PROFESSIONAL_PROJECT_STATUS_LABELS = {
+  archived: "Archived / included for record review",
+};
 
 export const EXPENSE_CATEGORIES = [
   { value: "addition/structural", label: "Addition/structural" },
@@ -732,6 +742,8 @@ export function getRecordFollowUps(data, options = {}) {
     if (item) pushItem(item);
   });
 
+  getPlaceholderFollowUpItems(records).forEach(pushItem);
+
   return items.sort(compareFollowUpItems);
 }
 
@@ -798,7 +810,7 @@ function buildProjectCompleteness(project, context) {
     projectCheck(
       "Review treatment choices",
       expenses.length > 0 && unclearExpenses === 0,
-      "Review expenses marked Review later.",
+      "Review expenses marked Needs classification.",
     ),
     projectCheck(
       "Expected document types covered",
@@ -898,6 +910,69 @@ export function getReviewReadiness(data) {
     ].filter(Boolean),
     followUps: followUpItems.map((item) => item.label),
   };
+}
+
+export function getProfessionalClassificationLabel(value) {
+  return PROFESSIONAL_CLASSIFICATION_LABELS[value] || optionLabel(CLASSIFICATIONS, value);
+}
+
+export function getProfessionalProjectStatusLabel(value) {
+  return PROFESSIONAL_PROJECT_STATUS_LABELS[value] || optionLabel(PROJECT_STATUSES, value);
+}
+
+export function getPacketReadinessSummary(data, options = {}) {
+  const records = getRecordCollections(data);
+  const openItems = getRecordFollowUps(records, options).filter((item) => item.surfaces.includes("export"));
+  const supportItems = openItems.filter(isSupportFollowUpItem);
+  const placeholderItems = openItems.filter((item) => item.type === "record-placeholder-content");
+  const needsClassificationItems = openItems.filter((item) => item.type === "expense-review-treatment");
+  const dismissedItems = records.followUpOverrides.filter((override) => override.id);
+  const hasRecords = Boolean(records.properties.length || records.projects.length || records.expenses.length || records.documents.length);
+  const readyToShare = hasRecords && openItems.length === 0;
+  const statusLabel = !hasRecords
+    ? "Needs records"
+    : supportItems.length
+      ? "Needs records"
+      : openItems.length
+        ? "Needs review"
+        : "Ready to share with a professional";
+
+  return {
+    title: readyToShare ? "Professional Review Packet" : "Draft Professional Review Packet",
+    statusLabel,
+    readyToShare,
+    openItems,
+    openItemCount: openItems.length,
+    supportItems,
+    supportItemCount: supportItems.length,
+    recordsStillNeededItems: supportItems,
+    placeholderItems,
+    placeholderItemCount: placeholderItems.length,
+    needsClassificationItems,
+    needsClassificationCount: needsClassificationItems.length,
+    dismissedItems,
+    dismissedItemCount: dismissedItems.length,
+    dismissedItemCopy: getDismissedItemCopy(dismissedItems.length),
+    expenseProofFilesLinked: countLinkedExpenseProofFiles(records),
+    proofFilesStillNeeded: supportItems.length,
+    attachedFileCount: records.documents.filter((documentRecord) => documentRecord.hasFile).length,
+  };
+}
+
+export function isPlaceholderReviewValue(value) {
+  const raw = cleanDisplayText(value).trim();
+  if (!raw) return false;
+
+  const lower = raw.toLowerCase().replace(/[“”]/g, "\"").replace(/[’]/g, "'");
+  const compact = lower.replace(/[^a-z0-9]/g, "");
+  const exactPlaceholders = new Set(["test", "asdf", "lorem", "todo", "tbd", "na", "n/a"]);
+  if (exactPlaceholders.has(lower) || exactPlaceholders.has(compact)) return true;
+  if (/^(this is )?(a )?test( item| record| note| project| file)?[.!?]?$/.test(lower)) return true;
+  if (/^lorem( ipsum)?[.!?]?$/.test(lower)) return true;
+  if (/^(todo|tbd|asdf|qwerty)[\s:._-]*\d{0,4}$/i.test(raw)) return true;
+  if (compact.length >= 8 && /^(.)\1+$/.test(compact)) return true;
+  if (/^(asdf|qwerty){2,}$/.test(compact)) return true;
+  return false;
 }
 
 function isExpenseMissingLinkedEvidence(data, expense) {
@@ -1104,7 +1179,7 @@ function getExpenseFollowUpItems(records, expense) {
       type: "expense-review-treatment",
       typeLabel: "Cost type",
       label: "Review cost type",
-      detail: `${expenseName} is marked Review later.`,
+      detail: `${expenseName} needs classification before sharing.`,
       severity: "medium",
       priority: 41,
       propertyId,
@@ -1274,6 +1349,151 @@ function getExpenseFollowUpName(records, expense) {
 
 function getExpenseSupportLabel(records, expense) {
   return getExpenseVendorName(records, expense, expense.description || "expense");
+}
+
+function getPlaceholderFollowUpItems(records) {
+  const items = [];
+  const addItem = ({ id, typeLabel, label, detail, propertyId = "", projectId = "", expenseId = "", documentId = "", action }) => {
+    items.push(createFollowUpItem({
+      id,
+      type: "record-placeholder-content",
+      typeLabel,
+      label,
+      detail,
+      severity: "medium",
+      priority: 14,
+      propertyId,
+      projectId,
+      expenseId,
+      documentId,
+      surfaces: ["export"],
+      action,
+    }));
+  };
+
+  records.properties.forEach((property) => {
+    if (isPlaceholderReviewValue(property.notes)) {
+      addItem({
+        id: `property:${property.id}:placeholder:notes`,
+        typeLabel: "Needs review",
+        label: "Review property notes",
+        detail: `${property.name} has possible draft or test content in property notes.`,
+        propertyId: property.id,
+        action: {
+          label: "Review notes",
+          action: "edit-property-field",
+          id: property.id,
+          field: "notes",
+          destinationTab: "property",
+          opens: "property notes",
+        },
+      });
+    }
+  });
+
+  records.projects.forEach((project) => {
+    [
+      ["scopeSummary", "project description", project.scopeSummary],
+      ["notes", "project notes", project.notes],
+      ["contractor", "contractor or payee", project.contractor],
+      ["permitNumber", "permit number", project.permitNumber],
+    ].forEach(([field, label, value]) => {
+      if (!isPlaceholderReviewValue(value)) return;
+      addItem({
+        id: `project:${project.id}:placeholder:${field}`,
+        typeLabel: "Needs review",
+        label: `Review ${label}`,
+        detail: `${project.name} has possible draft or test content in ${label}.`,
+        propertyId: project.propertyId,
+        projectId: project.id,
+        action: {
+          label: `Review ${label}`,
+          action: "edit-project",
+          id: project.id,
+          field,
+          destinationTab: "projects",
+          opens: "project form",
+        },
+      });
+    });
+  });
+
+  records.expenses.forEach((expense) => {
+    [
+      ["vendor", "vendor or payee", expense.vendor],
+      ["notes", "expense notes", expense.notes],
+    ].forEach(([field, label, value]) => {
+      if (!isPlaceholderReviewValue(value)) return;
+      addItem({
+        id: `expense:${expense.id}:placeholder:${field}`,
+        typeLabel: "Needs review",
+        label: `Review ${label}`,
+        detail: `${expense.description} has possible draft or test content in ${label}.`,
+        propertyId: expense.propertyId,
+        projectId: expense.projectId,
+        expenseId: expense.id,
+        action: {
+          label: `Review ${label}`,
+          action: "edit-expense",
+          id: expense.id,
+          field,
+          destinationTab: "expenses",
+          opens: "expense form",
+        },
+      });
+    });
+  });
+
+  records.documents.forEach((documentRecord) => {
+    if (isPlaceholderReviewValue(documentRecord.displayName)) {
+      addItem({
+        id: `document:${documentRecord.id}:placeholder:title`,
+        typeLabel: "Needs review",
+        label: "Review document title",
+        detail: `${documentRecord.displayName} looks like draft or test content. Rename the document before sharing the packet.`,
+        propertyId: documentRecord.propertyId,
+        projectId: documentRecord.projectId,
+        expenseId: documentRecord.expenseId,
+        documentId: documentRecord.id,
+        action: {
+          label: "Review title",
+          action: "edit-document",
+          id: documentRecord.id,
+          field: "displayName",
+          destinationTab: "documents",
+          opens: "document form",
+        },
+      });
+    }
+  });
+
+  return items;
+}
+
+function isSupportFollowUpItem(item) {
+  return [
+    "project-missing-supporting-documents",
+    "expense-missing-document-support",
+    "expense-documented-without-support",
+    "document-missing-attached-file",
+    "document-restored-without-file-content",
+    "document-tutorial-metadata-only",
+  ].includes(item?.type);
+}
+
+function countLinkedExpenseProofFiles(records) {
+  return records.expenses.reduce((total, expense) => {
+    const expectedType = getExpectedExpenseDocumentType(expense);
+    return total + getLinkedExpenseEvidenceDocuments(records, expense).filter((documentRecord) =>
+      documentRecord.hasFile &&
+      documentRecord.documentType === expectedType
+    ).length;
+  }, 0);
+}
+
+function getDismissedItemCopy(count) {
+  if (!count) return "No dismissed items.";
+  return `${count} dismissed item${count === 1 ? " is" : "s are"} excluded from open counts.`;
 }
 
 function isRestoredDocumentWithoutFile(documentRecord) {
@@ -1449,7 +1669,7 @@ export function buildExpensesCsv(data) {
     getExpenseVendorName(cleanData, expense),
     expense.description,
     parseAmount(expense.amount).toFixed(2),
-    optionLabel(CLASSIFICATIONS, expense.classification),
+    getProfessionalClassificationLabel(expense.classification),
     expense.documentationStatus,
     expense.notes,
   ]);

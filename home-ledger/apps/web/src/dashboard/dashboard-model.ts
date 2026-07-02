@@ -12,7 +12,7 @@ import { formatCents, formatDate, titleCase, toInteger } from "../utils/format";
 const CLASSIFICATION_LABELS = Object.freeze({
   possible_improvement: "Possible improvements",
   repair_upkeep: "Repair or upkeep",
-  review_later: "Review later"
+  review_later: "Needs classification"
 });
 
 const ACTIVITY_LABELS = Object.freeze({

@@ -555,7 +555,7 @@ function getExpenseFollowUps(state, records, expense) {
       reasonCode: "expense_review_later",
       severity: "needs_review",
       title: "Review cost type",
-      description: `${expenseName} is marked Review later.`,
+      description: `${expenseName} needs classification before sharing.`,
       actionLabel: "Review cost type",
       priority: 41
     }));

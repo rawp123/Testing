@@ -31,6 +31,7 @@ const EXPECTED_DOCUMENT_HEADERS = [
   "document_id",
   "title",
   "document_type",
+  "document_date",
   "property_id",
   "property_name",
   "project_id",
@@ -154,9 +155,13 @@ test("empty workspace exports valid empty outputs", async () => {
     headers: authHeaders("empty-export@example.test")
   });
   assert.equal(fullResponse.statusCode, 200);
-  assert.deepEqual(fullResponse.json().data.properties, []);
-  assert.deepEqual(fullResponse.json().data.expenses, []);
-  assert.deepEqual(fullResponse.json().data.documents, []);
+  assert.equal(fullResponse.json().data.app, "home-ledger");
+  assert.equal(fullResponse.json().data.exportType, "workspace-records");
+  assert.equal(fullResponse.json().data.exportSchemaVersion, 1);
+  assert.equal(fullResponse.json().data.workspace.id, workspaceId);
+  assert.deepEqual(fullResponse.json().data.data.properties, []);
+  assert.deepEqual(fullResponse.json().data.data.expenses, []);
+  assert.deepEqual(fullResponse.json().data.data.documents, []);
 
   await app.close();
 });
@@ -235,11 +240,11 @@ test("documents CSV and full JSON export safe file and OCR metadata only", async
   assert.equal(documentsResponse.statusCode, 200);
   assert.match(documentsResponse.headers["content-type"], /^text\/csv/);
   assert.equal(documentsResponse.body.split("\n")[0], EXPECTED_DOCUMENT_HEADERS.join(","));
-  assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("document_date"), false);
+  assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("document_date"), true);
   assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("created_at"), true);
   assert.equal(EXPECTED_DOCUMENT_HEADERS.includes("updated_at"), true);
   assert.match(documentsResponse.body, /Cedarline Carpentry - Receipt/);
-  assert.match(documentsResponse.body, /application\/pdf,2048,succeeded,true/);
+  assert.match(documentsResponse.body, /2026-06-05,[^\n]*application\/pdf,2048,succeeded,true/);
   assert.doesNotMatch(documentsResponse.body, /Sensitive OCR text/);
   assert.doesNotMatch(documentsResponse.body, /private\/owner-deck-receipt\.pdf/);
 
@@ -252,7 +257,12 @@ test("documents CSV and full JSON export safe file and OCR metadata only", async
   assert.equal(fullResponse.statusCode, 200);
   assert.match(fullResponse.headers["content-disposition"], /^attachment; filename="home-ledger-full-\d{4}-\d{2}-\d{2}\.json"$/);
   const fullExport = fullResponse.json().data;
-  const receiptDocument = fullExport.documents.find((document) => document.id === DOCUMENT_IDS.ownerDeckReceipt);
+  assert.equal(fullExport.app, "home-ledger");
+  assert.equal(fullExport.productName, "Home Ledger");
+  assert.equal(fullExport.exportType, "workspace-records");
+  assert.equal(fullExport.exportSchemaVersion, 1);
+  assert.equal(fullExport.workspace.id, WORKSPACE_IDS.owner);
+  const receiptDocument = fullExport.data.documents.find((document) => document.id === DOCUMENT_IDS.ownerDeckReceipt);
   assert.equal(receiptDocument.document_date, "2026-06-05");
   assert.equal(receiptDocument.ocr.text_available, true);
   const serialized = JSON.stringify(fullExport);

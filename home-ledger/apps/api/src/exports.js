@@ -27,6 +27,7 @@ export const DOCUMENT_CSV_HEADERS = [
   "document_id",
   "title",
   "document_type",
+  "document_date",
   "property_id",
   "property_name",
   "project_id",
@@ -46,7 +47,7 @@ export const DOCUMENT_CSV_HEADERS = [
 const CLASSIFICATION_LABELS = {
   possible_improvement: "Possible improvement",
   repair_upkeep: "Repair or upkeep",
-  review_later: "Review later"
+  review_later: "Needs classification"
 };
 
 export async function getExportData({ db, workspaceId }) {
@@ -297,6 +298,7 @@ export function buildDocumentsCsv(exportData) {
     document.id,
     document.title,
     document.document_type,
+    document.document_date,
     document.property_id,
     document.property_name,
     document.project_id,
@@ -317,42 +319,50 @@ export function buildDocumentsCsv(exportData) {
 
 export function buildFullJsonExport(exportData) {
   return {
-    workspace_id: exportData.workspaceId,
+    app: "home-ledger",
+    productName: EXPORT_PRODUCT_NAME,
+    exportType: "workspace-records",
+    exportSchemaVersion: 1,
     generated_at: exportData.generatedAt,
-    properties: exportData.properties,
-    projects: exportData.projects,
-    vendors: exportData.vendors,
-    expenses: exportData.expenses,
-    documents: exportData.documents.map((document) => ({
-      id: document.id,
-      title: document.title,
-      document_type: document.document_type,
-      document_date: document.document_date,
-      property_id: document.property_id,
-      property_name: document.property_name,
-      project_id: document.project_id,
-      project_name: document.project_name,
-      expense_id: document.expense_id,
-      expense_description: document.expense_description,
-      notes: document.notes,
-      file_availability: document.file_availability,
-      file_status_note: document.file_status_note,
-      file: document.file_available
-        ? {
-            id: document.file_id,
-            original_file_name: document.file_original_file_name,
-            mime_type: document.file_mime_type,
-            size_bytes: document.file_size_bytes,
-            status: document.file_status
-          }
-        : null,
-      ocr: {
-        status: document.ocr_status,
-        text_available: document.text_available
-      },
-      created_at: document.created_at,
-      updated_at: document.updated_at
-    }))
+    workspace: {
+      id: exportData.workspaceId
+    },
+    data: {
+      properties: exportData.properties,
+      projects: exportData.projects,
+      vendors: exportData.vendors,
+      expenses: exportData.expenses,
+      documents: exportData.documents.map((document) => ({
+        id: document.id,
+        title: document.title,
+        document_type: document.document_type,
+        document_date: document.document_date,
+        property_id: document.property_id,
+        property_name: document.property_name,
+        project_id: document.project_id,
+        project_name: document.project_name,
+        expense_id: document.expense_id,
+        expense_description: document.expense_description,
+        notes: document.notes,
+        file_availability: document.file_availability,
+        file_status_note: document.file_status_note,
+        file: document.file_available
+          ? {
+              id: document.file_id,
+              original_file_name: document.file_original_file_name,
+              mime_type: document.file_mime_type,
+              size_bytes: document.file_size_bytes,
+              status: document.file_status
+            }
+          : null,
+        ocr: {
+          status: document.ocr_status,
+          text_available: document.text_available
+        },
+        created_at: document.created_at,
+        updated_at: document.updated_at
+      }))
+    }
   };
 }
 

@@ -70,6 +70,7 @@ const EXPECTED_DOCUMENT_CSV_HEADERS = [
   "document_id",
   "title",
   "document_type",
+  "document_date",
   "property_id",
   "property_name",
   "project_id",
@@ -279,6 +280,12 @@ test("export compatibility locks SaaS headers and avoids local-only fields", () 
   });
 
   const serialized = JSON.stringify(fullExport);
+  assert.equal(fullExport.app, "home-ledger");
+  assert.equal(fullExport.productName, "Home Ledger");
+  assert.equal(fullExport.exportType, "workspace-records");
+  assert.equal(fullExport.exportSchemaVersion, 1);
+  assert.equal(fullExport.workspace.id, "workspace");
+  assert.equal(fullExport.data.documents[0].document_date, "2026-06-07");
   assert.equal(serialized.includes("Sensitive OCR text"), false);
   assert.equal(serialized.includes("private/storage/key"), false);
   assert.equal(serialized.includes("download_url"), false);

@@ -87,7 +87,7 @@ describe("Follow-ups screen", () => {
             severity: "needs_review",
             title: "Review cost type",
             action_label: "Review cost type",
-            description: "Cedarline Carpentry is marked Review later."
+            description: "Cedarline Carpentry needs classification before sharing."
           })
         ]}
         onChangeSeverityFilter={() => undefined}

@@ -134,6 +134,10 @@ test("generated follow-ups use stable safe fields and deterministic ordering", a
   assert(first.every((item) => /^fu_[a-f0-9]{32}$/.test(item.id)));
   assert(first.some((item) => item.document_id === DOCUMENT_IDS.ownerKitchenInvoice && item.title === "Upload invoice file"));
   assert(first.some((item) => item.expense_id === EXPENSE_IDS.ownerUnlinked && item.title === "Review cost type"));
+  assert.equal(
+    first.find((item) => item.reason_code === "expense_review_later")?.description,
+    "Cash vendor / Miscellaneous repair supplies needs classification before sharing."
+  );
 
   const serialized = JSON.stringify(first);
   assert.equal(serialized.includes("private/owner-deck-receipt.pdf"), false);

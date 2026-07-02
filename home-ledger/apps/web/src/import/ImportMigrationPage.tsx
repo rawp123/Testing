@@ -78,7 +78,7 @@ export function ImportMigrationView({
             <li>Keep a fresh backup/export from the local app.</li>
             <li>Review properties, projects, expenses, vendors, and documents before importing.</li>
             <li>Keep attached documents available separately if they may need to be uploaded again.</li>
-            <li>Use follow-ups and Review later status to flag records that need another look.</li>
+            <li>Use follow-ups and Needs classification status to flag records that need another look.</li>
           </ul>
         </WorkspacePanel>
 

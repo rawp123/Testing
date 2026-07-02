@@ -4,6 +4,8 @@ import {
   buildSaleScenarioEstimate,
   buildExpensesCsv,
   formatFileSize,
+  getPacketReadinessSummary,
+  getProfessionalClassificationLabel,
   getSafeDownloadFileName,
   getProjectCompleteness,
   getProjectReviewSummaries,
@@ -11,6 +13,7 @@ import {
   getRecordFollowUps,
   getRecordFollowUpsForSurface,
   getReviewReadiness,
+  isPlaceholderReviewValue,
   parseAmount,
   removeLocalPaths,
   sanitizeData,
@@ -354,6 +357,154 @@ test("record follow-up generator normalizes unfinished record items", () => {
     followUps.some((item) => item.expenseId === "expense_linked_missing_file" && item.type === "document-missing-attached-file"),
   );
   assert.ok(followUps.every((item) => item.id && item.primaryAction?.label && item.primaryAction?.destinationTab && item.primaryAction?.copy));
+});
+
+test("packet readiness flags placeholder content and professional labels", () => {
+  assert.equal(isPlaceholderReviewValue("test"), true);
+  assert.equal(isPlaceholderReviewValue("asdf"), true);
+  assert.equal(isPlaceholderReviewValue("This note mentions a test fit with real context."), false);
+  assert.equal(getProfessionalClassificationLabel("unclear / ask CPA"), "Needs classification");
+
+  const cleanData = sanitizeData({
+    properties: [{
+      id: "property_1",
+      name: "Main home",
+      purchaseDate: "2020-01-01",
+      purchasePrice: 400000,
+      notes: "asdf",
+    }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Roof project",
+      contractor: "test",
+      permitNumber: "test",
+      scopeSummary: "test",
+      notes: "todo",
+      startDate: "2024-01-01",
+    }],
+    expenses: [{
+      id: "expense_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      date: "2024-01-05",
+      vendor: "test",
+      description: "Roof deposit",
+      amount: 500,
+      classification: "unclear / ask CPA",
+      documentationStatus: "needs follow-up",
+      notes: "tbd",
+    }],
+    documents: [{
+      id: "document_1",
+      propertyId: "property_1",
+      projectId: "project_1",
+      displayName: "asdf",
+      documentType: "other",
+      hasFile: true,
+      fileName: "note.pdf",
+    }],
+  });
+
+  const packet = getPacketReadinessSummary(cleanData);
+  const placeholderIds = new Set(packet.placeholderItems.map((item) => item.id));
+
+  assert.equal(packet.title, "Draft Professional Review Packet");
+  assert.equal(packet.statusLabel, "Needs records");
+  assert.equal(packet.readyToShare, false);
+  assert.ok(placeholderIds.has("property:property_1:placeholder:notes"));
+  assert.ok(placeholderIds.has("project:project_1:placeholder:scopeSummary"));
+  assert.ok(placeholderIds.has("project:project_1:placeholder:contractor"));
+  assert.ok(placeholderIds.has("project:project_1:placeholder:permitNumber"));
+  assert.ok(placeholderIds.has("expense:expense_1:placeholder:vendor"));
+  assert.ok(placeholderIds.has("expense:expense_1:placeholder:notes"));
+  assert.ok(placeholderIds.has("document:document_1:placeholder:title"));
+  assert.ok(packet.needsClassificationItems.some((item) => item.label === "Review cost type"));
+});
+
+test("packet readiness counts only linked expense proof files and separates dismissed items", () => {
+  const records = {
+    properties: [{
+      id: "property_1",
+      name: "Main home",
+      purchaseDate: "2020-01-01",
+      purchasePrice: 400000,
+    }],
+    projects: [{
+      id: "project_1",
+      propertyId: "property_1",
+      name: "Kitchen project",
+      contractor: "Builder Co.",
+      scopeSummary: "Cabinet and fixture work.",
+      startDate: "2024-01-01",
+    }],
+    expenses: [
+      {
+        id: "expense_supported",
+        propertyId: "property_1",
+        projectId: "project_1",
+        date: "2024-01-05",
+        vendor: "Builder Co.",
+        description: "Cabinet invoice",
+        amount: 1200,
+        classification: "potential basis addition",
+        documentationStatus: "invoice attached",
+      },
+      {
+        id: "expense_unlinked",
+        propertyId: "property_1",
+        projectId: "project_1",
+        date: "2024-01-06",
+        vendor: "Builder Co.",
+        description: "Fixture invoice",
+        amount: 800,
+        classification: "potential basis addition",
+        documentationStatus: "invoice attached",
+      },
+    ],
+    documents: [
+      {
+        id: "document_linked",
+        propertyId: "property_1",
+        projectId: "project_1",
+        expenseId: "expense_supported",
+        displayName: "Cabinet invoice",
+        documentType: "invoice",
+        hasFile: true,
+        fileName: "cabinet-invoice.pdf",
+      },
+      {
+        id: "document_unrelated",
+        propertyId: "property_1",
+        projectId: "project_1",
+        displayName: "Unrelated invoice",
+        documentType: "invoice",
+        hasFile: true,
+        fileName: "unrelated-invoice.pdf",
+      },
+    ],
+  };
+
+  const packet = getPacketReadinessSummary(sanitizeData(records));
+  assert.equal(packet.expenseProofFilesLinked, 1);
+  assert.ok(packet.supportItems.some((item) => item.expenseId === "expense_unlinked"));
+  assert.equal(packet.readyToShare, false);
+
+  const dismissedPacket = getPacketReadinessSummary(sanitizeData({
+    ...records,
+    followUpOverrides: [{
+      id: "expense:expense_unlinked:documented-without-support",
+      label: "Upload invoice for Builder Co.",
+      typeLabel: "Expense support",
+      expenseId: "expense_unlinked",
+      note: "Handled outside the app.",
+    }],
+  }));
+
+  assert.equal(dismissedPacket.expenseProofFilesLinked, 1);
+  assert.equal(dismissedPacket.supportItems.some((item) => item.expenseId === "expense_unlinked"), false);
+  assert.equal(dismissedPacket.dismissedItemCount, 1);
+  assert.equal(dismissedPacket.dismissedItemCopy, "1 dismissed item is excluded from open counts.");
 });
 
 test("document-related follow-ups are surfaced through projects instead of documents", () => {

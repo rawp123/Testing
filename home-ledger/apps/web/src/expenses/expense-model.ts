@@ -4,7 +4,7 @@ import { formatCents, formatDate, toInteger } from "../utils/format";
 export const RECORD_TREATMENT_OPTIONS = [
   { value: "possible_improvement", label: "Possible improvement" },
   { value: "repair_upkeep", label: "Repair or upkeep" },
-  { value: "review_later", label: "Review later" }
+  { value: "review_later", label: "Needs classification" }
 ] as const;
 
 export const DOCUMENTATION_STATUS_OPTIONS = [

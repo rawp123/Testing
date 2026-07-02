@@ -123,6 +123,7 @@ test("DB-backed Follow-up API resolves reopens and computes open item counts", {
     assert.equal(JSON.stringify(followUps).includes("storage_key"), false);
 
     const target = followUps.find((item) => item.reason_code === "expense_review_later");
+    assert.equal(target.description, "Expense / Follow-up expense needs classification before sharing.");
     const viewerResolve = await app.inject({
       method: "POST",
       url: `/api/v1/workspaces/${workspaceId}/follow-ups/${target.id}/resolve`,

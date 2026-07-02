@@ -14,6 +14,9 @@ import {
   buildSaleScenarioEstimate,
   getExpenseTotals,
   getExpenseVendorName,
+  getPacketReadinessSummary,
+  getProfessionalClassificationLabel,
+  getProfessionalProjectStatusLabel,
   getProjectCompleteness,
   getProjectReviewSummaries,
   getProjectVendorName,
@@ -822,7 +825,7 @@ function renderSaleScenarioPanel(propertySummaries) {
         ? renderEmpty("Purchase price not added", "Add the purchase price to make this worksheet more useful.", renderInlineAction("Add purchase price", "edit-property-field", "button-secondary", { id: selectedSummary.property.id, field: "purchasePrice" }))
         : ""}
       ${selectedSummary && !selectedSummary.expenses.length
-        ? renderEmpty("No tracked expenses for this property", "Add expenses to include possible improvements and review-later amounts in the worksheet.", renderInlineAction("Add expense", "add-expense", "button-secondary"))
+        ? renderEmpty("No tracked expenses for this property", "Add expenses to include possible improvements and costs that need classification in the worksheet.", renderInlineAction("Add expense", "add-expense", "button-secondary"))
         : ""}
       <div class="sale-scenario-grid">
         <form class="sale-scenario-form" data-form="sale-scenario" novalidate>
@@ -865,7 +868,7 @@ function renderSaleScenarioPanel(propertySummaries) {
             ${detailItem("Estimated selling costs", hasSalePrice ? formatCurrency(estimate.sellingCosts) : "Not estimated")}
             ${detailItem("Basis estimate used", formatCurrency(estimate.adjustedBasis))}
             ${detailItem("Gain before exclusion", hasSalePrice ? formatCurrency(estimate.gainBeforeExclusion) : "Not estimated")}
-            ${detailItem("Review-later amounts tracked separately", formatCurrency(estimate.needsReviewCosts))}
+            ${detailItem("Needs-classification amounts tracked separately", formatCurrency(estimate.needsReviewCosts))}
           </dl>
           <p class="helper-note">Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
         </div>
@@ -909,17 +912,17 @@ function renderBasisSummaryCalculator(propertySummaries) {
       </label>
       <div class="scenario-result-grid">
         ${scenarioResultCard("Basis estimate", formatCurrency(estimate.adjustedBasis), "Purchase price plus included possible improvements.")}
-        ${scenarioResultCard("Review later", formatCurrency(estimate.needsReviewCosts), "Tracked separately for later review.")}
+        ${scenarioResultCard("Needs classification", formatCurrency(estimate.needsReviewCosts), "Tracked separately for later review.")}
       </div>
       ${!selectedSummary.property.purchasePrice
         ? renderEmpty("Purchase price not added", "Add the purchase price to make the basis estimate more useful.", renderInlineAction("Add purchase price", "edit-property-field", "button-secondary", { id: selectedSummary.property.id, field: "purchasePrice" }))
         : ""}
-      ${selectedSummary.expenses.length ? "" : renderEmpty("No tracked expenses for this property", "Add expenses to separate possible improvements, repair / upkeep, and review-later amounts.", renderInlineAction("Add expense", "add-expense", "button-secondary"))}
+      ${selectedSummary.expenses.length ? "" : renderEmpty("No tracked expenses for this property", "Add expenses to separate possible improvements, repair / upkeep, and costs that need classification.", renderInlineAction("Add expense", "add-expense", "button-secondary"))}
       <dl class="scenario-breakdown calculator-breakdown">
         ${detailItem("Purchase price", formatCurrency(estimate.purchasePrice))}
         ${detailItem("Included possible improvements", formatCurrency(estimate.basisAdditions))}
         ${detailItem("Repair or upkeep", formatCurrency(estimate.repairCosts))}
-        ${detailItem("Review later", formatCurrency(estimate.needsReviewCosts))}
+        ${detailItem("Needs classification", formatCurrency(estimate.needsReviewCosts))}
         ${detailItem("Missing support", formatCurrency(missingSupportTotal))}
         ${detailItem("Projects", selectedSummary.projects.length)}
         ${detailItem("Expenses", selectedSummary.expenses.length)}
@@ -928,7 +931,7 @@ function renderBasisSummaryCalculator(propertySummaries) {
       <p class="helper-note">Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
       ${projectRows.length ? `
         <div class="calculator-table-wrap">
-          ${table(["Project", "Total spend", "Possible improvements", "Review later"], projectRows.map((row) => [
+          ${table(["Project", "Total spend", "Possible improvements", "Needs classification"], projectRows.map((row) => [
             escapeHtml(row.project.name),
             `<span class="money">${formatCurrency(row.totals.total)}</span>`,
             `<span class="money">${formatCurrency(row.totals.potential)}</span>`,
@@ -1106,7 +1109,7 @@ function renderRecordsToFinishBody(content, id = "") {
       ${content.missingEvidenceTotal || content.reviewLaterTotal ? `
         <div class="attention-summary-row">
           ${content.missingEvidenceTotal ? `<span>${escapeHtml(`${content.expenseSupportItems.length} ${content.expenseSupportItems.length === 1 ? "expense needs" : "expenses need"} receipt or invoice support`)} · ${escapeHtml(formatCurrency(content.missingEvidenceTotal))}</span>` : ""}
-          ${content.reviewLaterTotal ? `<span>Review-later amount · ${escapeHtml(formatCurrency(content.reviewLaterTotal))}</span>` : ""}
+          ${content.reviewLaterTotal ? `<span>Needs-classification amount · ${escapeHtml(formatCurrency(content.reviewLaterTotal))}</span>` : ""}
         </div>
       ` : ""}
       ${renderFollowUpActionTable(content.followUps, "Nothing needs review.")}
@@ -1312,7 +1315,7 @@ function renderFollowUpResolutionBody(item, action) {
   if (action.action === "edit-document" || item.documentId) {
     const documentRecord = data.documents.find((document) => document.id === (action.id || item.documentId));
     if (!documentRecord) return renderMissingFollowUpRecord("This document is no longer available.");
-    return renderDocumentForm(documentRecord, { highlightField: "file" });
+    return renderDocumentForm(documentRecord, { highlightField: item.type === "record-placeholder-content" ? action.field || "displayName" : "file" });
   }
 
   if (action.action === "edit-project" || item.projectId) {
@@ -1330,6 +1333,7 @@ function renderFollowUpResolutionBody(item, action) {
 }
 
 function getExpenseFollowUpHighlightField(item) {
+  if (item.type === "record-placeholder-content") return item.primaryAction?.field || "";
   if (item.type === "expense-review-treatment") return "classification";
   if (item.type === "expense-missing-vendor") return "vendorId";
   if (item.type?.includes("document")) return "documentationStatus";
@@ -1337,6 +1341,7 @@ function getExpenseFollowUpHighlightField(item) {
 }
 
 function getProjectFollowUpHighlightFields(item) {
+  if (item.type === "record-placeholder-content" && item.primaryAction?.field) return [item.primaryAction.field];
   if (item.type === "project-missing-vendor") return ["vendorId"];
   if (item.type === "project-missing-dates") return ["startDate", "completionDate"];
   if (item.type === "project-missing-scope") return ["scopeSummary"];
@@ -1412,7 +1417,7 @@ function renderNextActionsPanel(readiness) {
 
   return `
     <section class="panel next-actions-panel">
-      ${renderPanelHeader("Next suggested actions", "Small steps that make the binder easier to review later.", "clipboard")}
+          ${renderPanelHeader("Next suggested actions", "Small steps that make the binder easier to check when needed.", "clipboard")}
       ${actions.length ? `
         <div class="safety-list action-list">
           ${actions.map((item) => `
@@ -2154,7 +2159,7 @@ function renderExpensesView() {
         ["Filtered total", formatCurrency(totals.total), ""],
         ["Possible improvements", formatCurrency(totals.potential), "green"],
         ["Repair or upkeep", formatCurrency(totals.repair), "rust"],
-        ["Review later", formatCurrency(totals.unclear), "amber"],
+        ["Needs classification", formatCurrency(totals.unclear), "amber"],
       ], "compact")}
       <section class="panel">
         ${renderPanelHeader("Costs", "", "receipt")}
@@ -2236,8 +2241,7 @@ function renderDocumentsView() {
 
 function renderExportCenter() {
   const totals = getExpenseTotals(data.expenses);
-  const readiness = getReviewReadiness(data);
-  const followUps = getSurfaceFollowUps("export");
+  const packetSummary = getPacketReadinessSummary(data, { tutorialMode: isTutorialMode() });
   if (!isDesktopMode() && !isTutorialMode()) requestStorageEstimate();
 
   return `
@@ -2251,7 +2255,7 @@ function renderExportCenter() {
           ${isTutorialMode() ? `<span>Tutorial sample data</span>` : ""}
         </div>
         ${renderCpaExportPanel()}
-        ${renderReviewSummaryPreview(totals, readiness, followUps)}
+        ${renderReviewSummaryPreview(totals, packetSummary)}
       </section>
       <section class="export-workflow-section" aria-labelledby="backup-restore-heading">
         <div class="section-title-row">
@@ -2266,7 +2270,8 @@ function renderExportCenter() {
   `;
 }
 
-function renderReviewSummaryPreview(totals, readiness, followUps) {
+function renderReviewSummaryPreview(totals, packetSummary) {
+  const reviewItems = packetSummary.openItems.filter((item) => !packetSummary.supportItems.some((supportItem) => supportItem.id === item.id));
   return `
     <details class="panel print-summary export-preview-panel">
       <summary>
@@ -2280,12 +2285,26 @@ function renderReviewSummaryPreview(totals, readiness, followUps) {
         ["Total tracked spend", formatCurrency(totals.total), ""],
         ["Possible improvements", formatCurrency(totals.potential), "green"],
         ["Repair or upkeep", formatCurrency(totals.repair), "rust"],
-        ["Review later", formatCurrency(totals.unclear), "amber"],
+        ["Needs classification", formatCurrency(totals.unclear), "amber"],
+        ["Packet status", packetSummary.statusLabel, packetSummary.readyToShare ? "green" : "amber"],
+        ["Proof/support needed", String(packetSummary.proofFilesStillNeeded), packetSummary.proofFilesStillNeeded ? "amber" : "green"],
       ], "compact")}
       <div class="export-section">
         <h3>Check before sharing</h3>
-        ${renderExportFollowUpChecklist(followUps)}
+        ${renderExportFollowUpChecklist(packetSummary.openItems)}
       </div>
+      <div class="export-section">
+        <h3>Records still needed</h3>
+        ${packetSummary.supportItems.length
+          ? renderExportFollowUpsTable(packetSummary.supportItems)
+          : `<p class="helper-note">No required support records or files are flagged.</p>`}
+      </div>
+      ${reviewItems.length ? `
+        <div class="export-section">
+          <h3>Review items</h3>
+          ${renderExportFollowUpsTable(reviewItems)}
+        </div>
+      ` : ""}
       <div class="export-section">
         <h3>Properties</h3>
         ${data.properties.length ? renderExportPropertiesTable() : renderEmpty("No properties to export", "Add a property before preparing a full summary.")}
@@ -2753,7 +2772,7 @@ function renderExpenseForm(expense, context = {}) {
         ${selectField("Cost type", "classification", draftValues?.classification || expense?.classification || "unclear / ask CPA", CLASSIFICATIONS, false, { highlight: context.highlightField === "classification" })}
         ${selectField("Category", "category", draftValues?.category || expense?.category || "other", EXPENSE_CATEGORIES, false)}
       </div>
-      <p class="helper-note">Examples: roof replacement or an addition might be a possible improvement; a service visit or small repair might be repair or upkeep. Use Review later when you want to revisit the cost.</p>
+      <p class="helper-note">Examples: roof replacement or an addition might be a possible improvement; a service visit or small repair might be repair or upkeep. Use Needs classification when you want to revisit the cost.</p>
       ${selectField("Documentation", "documentationStatus", draftValues?.documentationStatus || expense?.documentationStatus || "no document yet", DOCUMENT_STATUSES, false, { highlight: context.highlightField === "documentationStatus" })}
       <p class="helper-note">Use your best guess for sorting costs. You can change this later.</p>
       ${textarea("Notes", "notes", draftValues?.notes || expense?.notes || "")}
@@ -3819,7 +3838,7 @@ function renderExportExpensesTable() {
     escapeHtml(getProjectName(data, expense.projectId)),
     escapeHtml(getExpenseVendorName(data, expense)),
     escapeHtml(expense.description),
-    escapeHtml(optionLabel(CLASSIFICATIONS, expense.classification)),
+    escapeHtml(getProfessionalClassificationLabel(expense.classification)),
     escapeHtml(optionLabel(DOCUMENT_STATUSES, expense.documentationStatus)),
     `<span class="money">${formatCurrency(expense.amount)}</span>`,
   ]));
@@ -5880,10 +5899,25 @@ async function saveCpaReviewPdfFile() {
 function buildCpaReviewPdfHtml(records) {
   const cleanData = sanitizeData(records);
   const totals = getExpenseTotals(cleanData.expenses);
-  const followUps = getRecordFollowUps(cleanData, { tutorialMode: isTutorialMode() });
+  const packetSummary = getPacketReadinessSummary(cleanData, { tutorialMode: isTutorialMode() });
+  const followUps = packetSummary.openItems;
+  const supportRows = packetSummary.recordsStillNeededItems.map((item) => [
+    item.label,
+    item.typeLabel,
+    getPdfFollowUpRecordLabel(cleanData, item),
+    item.primaryAction?.label || item.label,
+  ]);
+  const reviewRows = followUps
+    .filter((item) => !packetSummary.recordsStillNeededItems.some((neededItem) => neededItem.id === item.id))
+    .map((item) => [
+      item.label,
+      item.typeLabel,
+      getPdfFollowUpRecordLabel(cleanData, item),
+      item.primaryAction?.label || item.label,
+    ]);
   const propertySummaries = getPropertyReviewSummaries(cleanData);
   const projectSummaries = getProjectReviewSummaries(cleanData);
-  const title = isTutorialMode() ? "Tutorial Review Packet" : "Review Packet";
+  const title = isTutorialMode() ? "Tutorial Review Packet" : packetSummary.title;
   const subtitle = isTutorialMode()
     ? "Prepared from sample tutorial items"
     : "Prepared from Home Ledger";
@@ -5898,7 +5932,7 @@ function buildCpaReviewPdfHtml(records) {
   ]);
   const projectRows = projectSummaries.map((summary) => [
     `${summary.project.name}\n${getPropertyName(cleanData, summary.project.propertyId)}`,
-    optionLabel(PROJECT_STATUSES, summary.project.status),
+    getProfessionalProjectStatusLabel(summary.project.status),
     summary.dateRange,
     getProjectVendorName(cleanData, summary.project, "Not added"),
     summary.project.permitNumber || (summary.hasPermit ? "Permit attached" : "Not added"),
@@ -5912,30 +5946,11 @@ function buildCpaReviewPdfHtml(records) {
     `${getExpenseVendorName(cleanData, expense)}\n${expense.description}`,
     getPropertyName(cleanData, expense.propertyId),
     getProjectName(cleanData, expense.projectId),
-    optionLabel(CLASSIFICATIONS, expense.classification),
+    getProfessionalClassificationLabel(expense.classification),
     optionLabel(DOCUMENT_STATUSES, expense.documentationStatus),
     formatCurrency(expense.amount),
   ]);
-  const followUpRows = followUps.map((item) => [
-    item.label,
-    item.typeLabel,
-    getPdfFollowUpRecordLabel(cleanData, item),
-    item.primaryAction?.label || item.label,
-    item.primaryAction?.copy || "",
-  ]);
-  const documentRows = cleanData.documents.map((documentRecord) => {
-    const relatedExpense = cleanData.expenses.find((expense) => expense.id === documentRecord.expenseId);
-    return [
-      documentRecord.displayName,
-      optionLabel(DOCUMENT_TYPES, documentRecord.documentType),
-      getPropertyName(cleanData, documentRecord.propertyId),
-      getProjectName(cleanData, documentRecord.projectId),
-      relatedExpense ? `${getExpenseVendorName(cleanData, relatedExpense)} / ${relatedExpense.description}` : "None",
-      documentRecord.hasFile
-        ? `${documentRecord.fileName || "Attached file"} (${formatFileSize(documentRecord.fileSize)})`
-        : documentRecord.fileStatusNote || "No file attached",
-    ];
-  });
+  const proofFileRows = getPdfProofFileRows(cleanData);
 
   return `<!doctype html>
 <html lang="en">
@@ -6023,23 +6038,41 @@ function buildCpaReviewPdfHtml(records) {
       margin: 14px 0 16px;
       color: #3c4742;
     }
+    .packet-status {
+      border-top: 1px solid #cfd7d2;
+      border-bottom: 1px solid #cfd7d2;
+      margin: 14px 0 12px;
+      padding: 9px 0;
+    }
+    .packet-status span {
+      display: block;
+      color: #66716c;
+      font-size: 8.5px;
+      text-transform: uppercase;
+    }
+    .packet-status strong {
+      display: block;
+      color: #1f2b26;
+      font-size: 14px;
+      margin-top: 2px;
+    }
     .metrics {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 0 12px;
       margin: 16px 0 12px;
     }
     .metric {
-      border: 1px solid #d8ded9;
-      padding: 9px;
-      min-height: 58px;
+      border-bottom: 1px solid #d8ded9;
+      padding: 7px 0;
+      min-height: 42px;
     }
     .metric span {
       display: block;
       color: #66716c;
       font-size: 8.5px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0;
       margin-bottom: 4px;
     }
     .metric strong {
@@ -6060,17 +6093,36 @@ function buildCpaReviewPdfHtml(records) {
       border: 1px solid #cfd7d2;
       color: #26312d;
       font-size: 8.5px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-align: left;
       text-transform: uppercase;
       padding: 6px;
       vertical-align: top;
+      white-space: nowrap;
+      word-break: keep-all;
     }
     td {
       border: 1px solid #dce2de;
       padding: 6px;
       vertical-align: top;
       white-space: pre-line;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+    .nowrap {
+      white-space: nowrap;
+      word-break: keep-all;
+      overflow-wrap: normal;
+    }
+    .id-cell {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 7.6px;
+      white-space: nowrap;
+      word-break: keep-all;
+    }
+    .amount-cell {
+      text-align: right;
+      white-space: nowrap;
     }
     .section {
       page-break-inside: avoid;
@@ -6103,19 +6155,37 @@ function buildCpaReviewPdfHtml(records) {
   </div>
   <h1>${escapeHtml(title)}</h1>
   <p class="lede">${escapeHtml(subtitle)}. This packet organizes property, project, expense, and document details for review.</p>
-  <div class="note">Home Ledger keeps this as a clear handoff. Check cost types before sharing.</div>
+  <div class="packet-status">
+    <span>Packet status</span>
+    <strong>${escapeHtml(packetSummary.statusLabel)}</strong>
+  </div>
+  <div class="note">Home Ledger keeps this as a clear handoff. Check records, support files, and cost types before sharing.</div>
   <div class="metrics">
     ${pdfMetric("Total tracked spend", formatCurrency(totals.total))}
     ${pdfMetric("Possible improvements", formatCurrency(totals.potential))}
     ${pdfMetric("Repair or upkeep", formatCurrency(totals.repair))}
-    ${pdfMetric("Review later", formatCurrency(totals.unclear))}
-    ${pdfMetric("Items to review", String(followUps.length))}
+    ${pdfMetric("Needs classification", formatCurrency(totals.unclear))}
+    ${pdfMetric("Open items", String(packetSummary.openItemCount))}
+    ${pdfMetric("Proof/support needed", String(packetSummary.proofFilesStillNeeded))}
+    ${pdfMetric("Expense proof files linked", String(packetSummary.expenseProofFilesLinked))}
+    ${pdfMetric("Dismissed items", String(packetSummary.dismissedItemCount))}
     ${pdfMetric("Properties", String(cleanData.properties.length))}
     ${pdfMetric("Projects", String(cleanData.projects.length))}
     ${pdfMetric("Documents", String(cleanData.documents.length))}
   </div>
-  ${pdfSection("Items to Review Before Sharing", followUpRows.length
-    ? pdfTable(["Item", "Type", "Related item", "Action", "Opens"], followUpRows)
+  <p class="lede">${escapeHtml(packetSummary.dismissedItemCopy)}</p>
+  ${pdfSection("Readiness Summary", pdfTable(["Status", "Open items", "Records/files still needed", "Needs classification", "Draft text flags"], [[
+    packetSummary.statusLabel,
+    String(packetSummary.openItemCount),
+    String(packetSummary.supportItemCount),
+    String(packetSummary.needsClassificationCount),
+    String(packetSummary.placeholderItemCount),
+  ]]))}
+  ${pdfSection("Records Still Needed", supportRows.length
+    ? pdfTable(["Item", "Type", "Related item", "Action"], supportRows)
+    : `<div class="empty">No required support records or files are flagged.</div>`)}
+  ${pdfSection("Items to Review Before Sharing", reviewRows.length
+    ? pdfTable(["Item", "Type", "Related item", "Action"], reviewRows)
     : `<div class="empty">Nothing needs review before sharing.</div>`)}
   ${pdfSection("Property Summary", propertyRows.length
     ? pdfTable(["Property", "Purchase Date", "Purchase Price", "Tracked Spend", "Projects", "Documents", "Follow-Ups"], propertyRows)
@@ -6126,12 +6196,34 @@ function buildCpaReviewPdfHtml(records) {
   ${pdfSection("Expense Detail", expenseRows.length
     ? pdfTable(["Date", "Expense", "Property", "Project", "Cost Type", "Receipt/File", "Amount"], expenseRows)
     : `<div class="empty">No expenses.</div>`)}
-  ${pdfSection("Document Index", documentRows.length
-    ? pdfTable(["Document", "Type", "Property", "Project", "Related Expense", "Stored File"], documentRows)
+  ${pdfSection("Proof Files and Document Index", proofFileRows.length
+    ? pdfTable(["Document Title", "Original Filename", "Type", "Document Date", "Linked Project", "Linked Expense", "File Status"], proofFileRows)
     : `<div class="empty">No documents.</div>`)}
   <div class="footer">Generated by Home Ledger. Attached file contents are not embedded in this PDF.</div>
 </body>
 </html>`;
+}
+
+function getPdfProofFileRows(records) {
+  return records.documents.map((documentRecord) => {
+    const relatedExpense = records.expenses.find((expense) => expense.id === documentRecord.expenseId);
+    return [
+      documentRecord.displayName,
+      documentRecord.fileName || "None recorded",
+      optionLabel(DOCUMENT_TYPES, documentRecord.documentType),
+      formatDate(documentRecord.addedDate),
+      getProjectName(records, documentRecord.projectId),
+      relatedExpense ? `${getExpenseVendorName(records, relatedExpense)} / ${relatedExpense.description}` : "None recorded",
+      getPdfDocumentFileStatus(documentRecord),
+    ];
+  });
+}
+
+function getPdfDocumentFileStatus(documentRecord) {
+  if (documentRecord.hasFile) {
+    return `File attached (${formatFileSize(documentRecord.fileSize)})`;
+  }
+  return documentRecord.fileStatusNote || "No file attached";
 }
 
 function getPdfFollowUpRecordLabel(records, item) {
@@ -6163,13 +6255,22 @@ function pdfTable(headers, rows) {
   return `
     <table>
       <thead>
-        <tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr>
+        <tr>${headers.map((header) => `<th class="${pdfColumnClass(header)}">${escapeHtml(header)}</th>`).join("")}</tr>
       </thead>
       <tbody>
-        ${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}
+        ${rows.map((row) => `<tr>${row.map((cell, index) => `<td class="${pdfColumnClass(headers[index])}">${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}
       </tbody>
     </table>
   `;
+}
+
+function pdfColumnClass(header = "") {
+  const label = String(header).toLowerCase();
+  const classes = [];
+  if (/\bid\b/.test(label)) classes.push("id-cell");
+  if (/date|status|type|file status|receipt\/file|cost type/.test(label)) classes.push("nowrap");
+  if (/amount|spend|price|total/.test(label)) classes.push("amount-cell");
+  return classes.join(" ");
 }
 
 async function downloadFullBackup() {

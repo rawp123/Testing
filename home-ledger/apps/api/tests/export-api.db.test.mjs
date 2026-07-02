@@ -195,7 +195,7 @@ test("DB-backed Export API produces safe isolated exports", {
       headers: authHeaders(viewerEmail)
     });
     assert.equal(documentsCsv.statusCode, 200);
-    assert.match(documentsCsv.body, /^document_id,title,document_type,/);
+    assert.match(documentsCsv.body, /^document_id,title,document_type,document_date,/);
     assert.match(documentsCsv.body, /Export receipt/);
     assert.match(documentsCsv.body, /application\/pdf,4321,succeeded,true/);
 
@@ -206,7 +206,12 @@ test("DB-backed Export API produces safe isolated exports", {
     });
     assert.equal(fullJson.statusCode, 200);
     assert.match(fullJson.headers["content-disposition"], /^attachment; filename="home-ledger-full-\d{4}-\d{2}-\d{2}\.json"$/);
-    const serialized = JSON.stringify(fullJson.json().data);
+    const fullExport = fullJson.json().data;
+    assert.equal(fullExport.app, "home-ledger");
+    assert.equal(fullExport.exportType, "workspace-records");
+    assert.equal(fullExport.exportSchemaVersion, 1);
+    assert.equal(fullExport.workspace.id, workspaceId);
+    const serialized = JSON.stringify(fullExport);
     assert.equal(serialized.includes("Export receipt"), true);
     assert.equal(serialized.includes("Sensitive export OCR text"), false);
     assert.equal(serialized.includes("private/export-receipt.pdf"), false);

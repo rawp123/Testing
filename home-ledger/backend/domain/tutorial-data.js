@@ -81,7 +81,7 @@ export function createTutorialData() {
         permitNumber: "",
         status: "completed",
         scopeSummary: "Full tear-off and replacement of the existing roof system.",
-        notes: "Full tear-off and replacement. Good example of a large project to review later.",
+        notes: "Full tear-off and replacement. Good example of a large project to check again when needed.",
       },
       {
         id: "tutorial_project_bath",
@@ -304,7 +304,7 @@ export function createTutorialData() {
         classification: "unclear / ask CPA",
         category: "bathroom",
         documentationStatus: "needs follow-up",
-        notes: "Use Review later when you want to revisit the cost type.",
+        notes: "Use Needs classification when you want to revisit the cost type.",
       },
       {
         id: "tutorial_expense_countertops",
@@ -330,7 +330,7 @@ export function createTutorialData() {
         classification: "unclear / ask CPA",
         category: "appliances",
         documentationStatus: "receipt attached",
-        notes: "Sample appliance purchase marked Review later.",
+        notes: "Sample appliance purchase marked Needs classification.",
       },
       {
         id: "tutorial_expense_bath_framing",
@@ -680,7 +680,7 @@ export function createTutorialData() {
         displayName: "Appliance package receipt",
         documentType: "receipt",
         addedDate: "2023-05-12",
-        notes: "Receipt sample for an item marked Review later.",
+        notes: "Receipt sample for an item marked Needs classification.",
         ocrText: "Sample receipt text: range, dishwasher, delivery, installation kit, and haul-away fee.",
         hasFile: false,
         fileStatusNote: "Tutorial sample: no appliance receipt file is stored.",
