@@ -418,7 +418,7 @@ async function main() {
 app.whenReady()
   .then(main)
   .catch((error) => {
-    console.error(`Home Basis Tracker private document QA failed: ${error?.message || error}`);
+    console.error(`Home Ledger private document QA failed: ${error?.message || error}`);
     process.exitCode = 1;
   })
   .finally(async () => {

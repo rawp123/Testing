@@ -23,7 +23,7 @@ describe("Settings screen", () => {
     expect(html).toContain("owner@example.test");
     expect(html).toContain("Development session");
     expect(html).toContain("Auth status");
-    expect(html).toContain("Production sign-in is not connected in this build.");
+    expect(html).toContain("This beta is using a development sign-in.");
     expect(html).toContain("Owner workspace access");
     expect(html).toContain("Billing and plan");
     expect(html).toContain("Open billing");
@@ -32,11 +32,11 @@ describe("Settings screen", () => {
     expect(html).toContain("Import and migration");
     expect(html).toContain("Prepare migration");
     expect(html).toContain("Open import");
-    expect(html).toContain("not connected");
+    expect(html).toContain("unavailable in this beta");
     expect(html).toContain("Documents and files");
     expect(html).toContain("Open documents");
     expect(html).toContain("Review language");
-    expect(html).toContain("organizes home records for professional review");
+    expect(html).toContain("Home Ledger organizes records");
   });
 
   it("uses existing navigation actions for billing export import and documents", () => {
@@ -71,7 +71,7 @@ describe("Settings screen", () => {
     for (const authOverclaim of ["production sign-in active", "password saved", "oauth connected", "sso enabled", "mfa enabled", "session encrypted"]) {
       expect(html).not.toContain(authOverclaim);
     }
-    expect(html).toContain("does not determine tax, legal, accounting, or compliance treatment");
+    expect(html).toContain("does not give tax, legal, or accounting advice");
   });
 
   it("does not render storage internals local paths or raw OCR text", () => {

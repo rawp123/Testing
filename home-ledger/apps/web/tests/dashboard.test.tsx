@@ -43,8 +43,8 @@ describe("Dashboard React shell", () => {
     expect(viewModel.metrics.find((item) => item.label === "Total spend")?.value).toBe("$3,172.50");
     expect(viewModel.expenseBreakdown.map((item) => item.label)).toEqual([
       "Possible improvements",
-      "Repair / upkeep",
-      "Not sure, review later"
+      "Repair or upkeep",
+      "Review later"
     ]);
     expect(viewModel.activityFilterOptions.map((item) => item.label)).toEqual(["Document", "Expense", "Project"]);
     expect(viewModel.followUpItems[0]).toMatchObject({
@@ -60,7 +60,7 @@ describe("Dashboard React shell", () => {
 
     expect(html).toContain("Your home records");
     expect(html).toContain("Recent activity");
-    expect(html).toContain("Needs attention");
+    expect(html).toContain("Follow-ups");
     expect(html).toContain("All activity");
     expect(html).toContain("Project <span>1</span>");
     expect(html).toContain("Expense <span>1</span>");
@@ -87,7 +87,7 @@ describe("Dashboard React shell", () => {
       }
     ]} />);
 
-    expect(html).toContain("What needs attention");
+    expect(html).toContain("Issue");
     expect(html).toContain("Upload receipt file");
     expect(html).toContain("The receipt record exists");
     expect(html).not.toContain("Document items");

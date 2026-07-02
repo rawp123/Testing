@@ -13,7 +13,7 @@ const skipMissing = process.argv.includes("--skip-missing");
 const quitExisting = process.argv.includes("--quit-existing");
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const smokeScript = path.join(projectRoot, "scripts", "smoke-packaged-app.mjs");
-const dmgPath = path.resolve(argValue("--dmg") || "release/mac/Home Basis Tracker-0.1.0-arm64.dmg");
+const dmgPath = path.resolve(argValue("--dmg") || "release/mac/Home Ledger-0.1.0-arm64.dmg");
 
 if (process.platform !== "darwin") {
   if (skipMissing) {
@@ -32,7 +32,7 @@ if (!fs.existsSync(dmgPath)) {
   throw new Error(message);
 }
 
-const mountDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "home-basis-dmg-smoke-")));
+const mountDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "home-ledger-dmg-smoke-")));
 
 function detach() {
   const isMounted = () => {
@@ -59,7 +59,7 @@ try {
     throw new Error(`Could not mount DMG.\nstdout:\n${attach.stdout}\nstderr:\n${attach.stderr}`);
   }
 
-  const appPath = path.join(mountDir, "Home Basis Tracker.app");
+  const appPath = path.join(mountDir, "Home Ledger.app");
   const smokeArgs = [smokeScript, "--app", appPath];
   if (quitExisting) smokeArgs.push("--quit-existing");
   const smoke = spawnSync(process.execPath, smokeArgs, {
@@ -71,7 +71,7 @@ try {
 
   process.stdout.write(smoke.stdout);
   process.stderr.write(smoke.stderr);
-  console.log(`Home Basis Tracker mounted DMG smoke passed: ${dmgPath}`);
+  console.log(`Home Ledger mounted DMG smoke passed: ${dmgPath}`);
 } finally {
   detach();
 }

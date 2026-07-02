@@ -304,7 +304,7 @@ export function createTutorialData() {
         classification: "unclear / ask CPA",
         category: "bathroom",
         documentationStatus: "needs follow-up",
-        notes: "Use Not sure, review later when you want to revisit the cost type.",
+        notes: "Use Review later when you want to revisit the cost type.",
       },
       {
         id: "tutorial_expense_countertops",
@@ -330,7 +330,7 @@ export function createTutorialData() {
         classification: "unclear / ask CPA",
         category: "appliances",
         documentationStatus: "receipt attached",
-        notes: "Sample appliance purchase marked Not sure, review later.",
+        notes: "Sample appliance purchase marked Review later.",
       },
       {
         id: "tutorial_expense_bath_framing",
@@ -680,7 +680,7 @@ export function createTutorialData() {
         displayName: "Appliance package receipt",
         documentType: "receipt",
         addedDate: "2023-05-12",
-        notes: "Receipt sample for an item marked Not sure, review later.",
+        notes: "Receipt sample for an item marked Review later.",
         ocrText: "Sample receipt text: range, dishwasher, delivery, installation kit, and haul-away fee.",
         hasFile: false,
         fileStatusNote: "Tutorial sample: no appliance receipt file is stored.",

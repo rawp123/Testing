@@ -7,7 +7,7 @@ const outputDir = path.resolve(process.env.QA_OUTPUT_DIR || path.join(__dirname,
 const appUrl = process.env.QA_APP_URL || "http://127.0.0.1:3102";
 const websiteUrl = process.env.QA_WEBSITE_URL || "http://127.0.0.1:3104";
 const appTheme = ["light", "dark", "system"].includes(process.env.QA_APP_THEME) ? process.env.QA_APP_THEME : "";
-const userDataDir = path.join(os.tmpdir(), `home-basis-tracker-render-qa-${process.pid}`);
+const userDataDir = path.join(os.tmpdir(), `home-ledger-render-qa-${process.pid}`);
 
 app.setPath("userData", userDataDir);
 app.commandLine.appendSwitch("disable-features", "LocalNetworkAccessChecks");
@@ -16,10 +16,10 @@ app.on("window-all-closed", (event) => {
 });
 
 const targets = [
-  { name: "app-desktop", url: appUrl, width: 1440, height: 1000, expectedText: "Home Basis Tracker" },
-  { name: "app-mobile", url: appUrl, width: 390, height: 844, expectedText: "Home Basis Tracker" },
-  { name: "website-desktop", url: websiteUrl, width: 1440, height: 1000, expectedText: "Home Basis Tracker" },
-  { name: "website-mobile", url: websiteUrl, width: 390, height: 844, expectedText: "Home Basis Tracker" },
+  { name: "app-desktop", url: appUrl, width: 1440, height: 1000, expectedText: "Home Ledger" },
+  { name: "app-mobile", url: appUrl, width: 390, height: 844, expectedText: "Home Ledger" },
+  { name: "website-desktop", url: websiteUrl, width: 1440, height: 1000, expectedText: "Home Ledger" },
+  { name: "website-mobile", url: websiteUrl, width: 390, height: 844, expectedText: "Home Ledger" },
 ].filter((target) => !appTheme || target.url === appUrl);
 
 async function renderTarget(target) {

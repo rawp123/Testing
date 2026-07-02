@@ -4,7 +4,7 @@ import type { DashboardResponse } from "../src/api/types";
 import { BillingPlanView } from "../src/billing/BillingPlanPage";
 
 describe("Billing and Plan screen", () => {
-  it("renders the billing skeleton sections with direct non-connected status", () => {
+  it("renders the billing beta sections with direct unavailable status", () => {
     const html = renderToStaticMarkup(
       <BillingPlanView
         dashboard={createDashboard()}
@@ -16,10 +16,10 @@ describe("Billing and Plan screen", () => {
     expect(html).toContain("Billing and plan");
     expect(html).toContain("Current plan");
     expect(html).toContain("Usage snapshot");
-    expect(html).toContain("Future plan controls");
-    expect(html).toContain("Entitlement explanation");
-    expect(html).toContain("Account/data safety note");
-    expect(html).toContain("Plan details are not connected yet");
+    expect(html).toContain("Plan actions");
+    expect(html).toContain("Plan limits");
+    expect(html).toContain("Account and data note");
+    expect(html).toContain("Plan details are unavailable in this beta");
     expect(html).toContain("does not collect payment or change workspace access");
   });
 
@@ -38,9 +38,9 @@ describe("Billing and Plan screen", () => {
     expect(html).toContain("7");
     expect(html).toContain("Files attached");
     expect(html).toContain("4");
-    expect(html).toContain("OCR/text available");
+    expect(html).toContain("Text extracted");
     expect(html).toContain("3");
-    expect(html).toContain("Supported downloads available");
+    expect(html).toContain("Downloads ready");
   });
 
   it("renders disabled future billing controls instead of fake payment behavior", () => {
@@ -57,12 +57,12 @@ describe("Billing and Plan screen", () => {
     expect(html).toContain("View invoices");
     expect(html).toContain("Change plan");
     expect(html).toContain("disabled=\"\"");
-    expect(html).toContain("These controls are not connected yet.");
+    expect(html).toContain("These controls are unavailable in this beta.");
     expect(html).not.toContain("Checkout");
     expect(html).not.toContain("Customer portal");
   });
 
-  it("keeps functionality language separate from placeholder entitlement state", () => {
+  it("keeps functionality language separate from beta plan state", () => {
     const html = renderToStaticMarkup(
       <BillingPlanView
         dashboard={createDashboard()}
@@ -71,7 +71,7 @@ describe("Billing and Plan screen", () => {
       />
     );
 
-    expect(html).toContain("Existing screens are not blocked by this placeholder.");
+    expect(html).toContain("Current record screens stay available in this beta.");
     expect(html).toContain("Billing controls are separate from record organization, document files, and exports.");
     expect(html).toContain("Open export");
     expect(html).toContain("Open import");

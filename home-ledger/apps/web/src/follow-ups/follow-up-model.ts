@@ -25,7 +25,7 @@ export function toFollowUpRows(items: FollowUpItem[]): FollowUpRow[] {
       const targetType = String(item.target_type || "record");
       return {
         id: String(item.id || ""),
-        title: String(item.title || "Needs attention"),
+        title: String(item.title || "Needs review"),
         description: String(item.description || ""),
         actionLabel: String(item.action_label || (status === "resolved" ? "Reopen" : "Resolve")),
         severity,
@@ -129,7 +129,7 @@ export function statusLabel(value: string) {
 
 export function severityLabel(value: string) {
   if (value === "missing_file") return "Missing file";
-  if (value === "needs_review") return "Needs review";
+  if (value === "needs_review") return "Review needed";
   if (value === "missing_info") return "Missing info";
   if (value === "info") return "Info";
   return titleCase(value);
@@ -196,7 +196,7 @@ function sanitizeBuckets(items: FollowUpBucket[] | undefined) {
   return Array.isArray(items)
     ? items.map((item) => ({
       type: String(item.type || ""),
-      label: String(item.label || "Needs attention"),
+      label: String(item.label || "Needs review"),
       count: toInteger(item.count)
     })).filter((item) => item.count > 0)
     : [];

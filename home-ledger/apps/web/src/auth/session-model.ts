@@ -12,13 +12,13 @@ export function formatWorkspaceRole(role: string) {
 export function sessionModeLabel(session: SessionResponse) {
   if (isDevelopmentSession(session)) return "Development session";
   if (session.authProvider) return "External sign-in session";
-  return "Sign-in provider not connected";
+  return "Sign-in unavailable in this beta";
 }
 
 export function productionAuthStatus(session: SessionResponse) {
-  if (isDevelopmentSession(session)) return "Production sign-in is not connected in this build.";
+  if (isDevelopmentSession(session)) return "This beta is using a development sign-in.";
   if (session.authProvider) return "Sign-in details are controlled by deployment.";
-  return "Sign-in provider is not connected in this build.";
+  return "Sign-in is unavailable in this beta.";
 }
 
 export function workspaceAccessLabel(workspace: WorkspaceMembership) {

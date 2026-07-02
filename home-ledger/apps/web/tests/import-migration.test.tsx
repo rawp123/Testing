@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ImportMigrationView } from "../src/import/ImportMigrationPage";
 
 describe("Import and Migration screen", () => {
-  it("renders the migration skeleton sections with direct non-connected status", () => {
+  it("renders the migration beta sections with direct unavailable status", () => {
     const html = renderToStaticMarkup(
       <ImportMigrationView onNavigate={() => undefined} workspaceName="Home records" />
     );
@@ -13,9 +13,9 @@ describe("Import and Migration screen", () => {
     expect(html).toContain("What can be prepared");
     expect(html).toContain("Current status");
     expect(html).toContain("Recommended preparation");
-    expect(html).toContain("Future import controls");
-    expect(html).toContain("local/downloadable app");
-    expect(html).toContain("Automated import is not connected yet");
+    expect(html).toContain("Import controls");
+    expect(html).toContain("earlier local app");
+    expect(html).toContain("Automated import is unavailable in this beta");
     expect(html).toContain("does not upload, parse, merge, or replace records");
   });
 
@@ -43,7 +43,7 @@ describe("Import and Migration screen", () => {
     expect(html).toContain("accept=\"application/json,.json\"");
     expect(html).toContain("disabled=\"\"");
     expect(html).toContain("Review import");
-    expect(html).toContain("File import is not connected yet.");
+    expect(html).toContain("File import is unavailable in this beta.");
     expect(html).not.toContain("Uploading");
     expect(html).not.toContain("Processing backup");
   });

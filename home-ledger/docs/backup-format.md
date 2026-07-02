@@ -20,7 +20,7 @@ Source: `createBackupEnvelope(data, files, missingFiles, createdAt)` in `backend
 ```js
 {
   app: "home-basis-tracker",
-  productName: "Home Basis Tracker",
+  productName: "Home Ledger",
   productVersion: "0.1.0",
   exportType: "full-backup",
   backupVersion: 1,
@@ -35,7 +35,7 @@ Confirmed constants:
 
 - `BACKUP_APP_ID = "home-basis-tracker"`
 - `BACKUP_VERSION = 1`
-- `EXPORT_PRODUCT_NAME = "Home Basis Tracker"`
+- `EXPORT_PRODUCT_NAME = "Home Ledger"`
 - `EXPORT_PRODUCT_VERSION = "0.1.0"`
 - `MAX_BACKUP_FILE_SIZE = 500 * 1024 * 1024`
 - `MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024`
@@ -53,7 +53,7 @@ The `data` payload is sanitized with `sanitizeData(data)` before export and agai
 - `documents`
 - `followUpOverrides`
 
-The backup payload preserves the local data shape. It does not embed a future SaaS model, cloud workspace model, or API representation.
+The backup payload preserves the local data shape. It does not embed a future account model, cloud workspace model, or API representation.
 
 ## Files Payload
 
@@ -214,4 +214,3 @@ Confirmed behavior:
 - Duplicate legacy ids reject restore today. A future migration importer will need a different duplicate-handling policy if users import multiple backups into one workspace.
 - Empty checksum values are accepted to support backups created without Web Crypto. This preserves compatibility but creates a weaker integrity signal for those files.
 - File ids are local storage ids, not durable cloud object ids.
-

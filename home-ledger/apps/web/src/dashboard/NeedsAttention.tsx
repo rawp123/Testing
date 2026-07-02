@@ -4,7 +4,7 @@ import type { FollowUpRow } from "./dashboard-model";
 
 export function NeedsAttention({ items }: { items: FollowUpRow[] }) {
   if (!items.length) {
-    return <EmptyState title="No open items">No open items.</EmptyState>;
+    return <EmptyState title="Nothing needs review">No open follow-ups.</EmptyState>;
   }
 
   const columns: CompactRecordColumn<FollowUpRow>[] = [
@@ -15,7 +15,7 @@ export function NeedsAttention({ items }: { items: FollowUpRow[] }) {
     },
     {
       key: "title",
-      header: "What needs attention",
+      header: "Issue",
       className: "record-name-cell",
       render: (item) => <strong>{item.title}</strong>
     },

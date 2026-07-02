@@ -53,7 +53,7 @@ export function FollowUpsPage({
         status: "error",
         items: current.items,
         summary: current.summary,
-        message: "Needs attention could not be loaded."
+        message: "We couldn't load follow-ups."
       }));
     }
   };
@@ -73,7 +73,7 @@ export function FollowUpsPage({
           status: "error",
           items: current.items,
           summary: current.summary,
-          message: "Needs attention could not be loaded."
+          message: "We couldn't load follow-ups."
         }));
       });
     return () => {
@@ -200,7 +200,7 @@ export function FollowUpsView({
     },
     {
       key: "title",
-      header: "Needs attention",
+      header: "Issue",
       className: "record-name-cell",
       render: (row) => (
         <div className="record-stack">
@@ -233,7 +233,7 @@ export function FollowUpsView({
 
   return (
     <div className="page-stack">
-      <PageTitle meta={workspaceName} title="Needs attention" />
+      <PageTitle meta={workspaceName} title="Follow-ups" />
 
       <ActionBar label="Follow-up summary">
         <div className="follow-up-summary-row" aria-label="Follow-up counts">
@@ -271,7 +271,7 @@ export function FollowUpsView({
         {loading ? <p className="muted-copy">Loading follow-ups.</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title={statusFilter === "resolved" ? "No resolved follow-ups" : "No open follow-ups"}>
-            {statusFilter === "resolved" ? "Resolved items will appear here." : "No items need review."}
+            {statusFilter === "resolved" ? "Resolved follow-ups will appear here." : "Nothing needs review."}
           </EmptyState>
         ) : null}
         {!loading && rows.length > 0 && !filteredRows.length ? (

@@ -198,7 +198,7 @@ export function PropertiesView({
       <WorkspacePanel className="properties-panel">
         <PanelHeader icon="⌁" title="Properties" />
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
-        {loading ? <p className="muted-copy">Loading properties.</p> : null}
+        {loading ? <p className="muted-copy">Loading properties...</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title="No properties">Add a property to start organizing projects, expenses, and documents.</EmptyState>
         ) : null}

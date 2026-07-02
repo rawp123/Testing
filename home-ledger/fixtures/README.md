@@ -1,6 +1,6 @@
 # Fixtures
 
-Use this folder for Home Basis Tracker QA fixtures.
+Use this folder for Home Ledger QA fixtures.
 
 Private real-world documents belong in:
 

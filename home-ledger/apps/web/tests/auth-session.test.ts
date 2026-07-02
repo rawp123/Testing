@@ -15,7 +15,7 @@ describe("auth and session model", () => {
     const workspace = createWorkspace({ role: "owner" });
 
     expect(sessionModeLabel(session)).toBe("Development session");
-    expect(productionAuthStatus(session)).toBe("Production sign-in is not connected in this build.");
+    expect(productionAuthStatus(session)).toBe("This beta is using a development sign-in.");
     expect(formatWorkspaceRole("owner")).toBe("Owner");
     expect(workspaceAccessLabel(workspace)).toBe("Owner workspace access");
   });

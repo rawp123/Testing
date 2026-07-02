@@ -1,7 +1,7 @@
 export const STORAGE_KEY = "home-ledger:v1";
 export const BACKUP_APP_ID = "home-basis-tracker";
 export const BACKUP_VERSION = 1;
-export const EXPORT_PRODUCT_NAME = "Home Basis Tracker";
+export const EXPORT_PRODUCT_NAME = "Home Ledger";
 export const EXPORT_PRODUCT_VERSION = "0.1.0";
 export const MAX_BACKUP_FILE_SIZE = 500 * 1024 * 1024;
 export const MAX_DOCUMENT_FILE_SIZE = 25 * 1024 * 1024;
@@ -31,15 +31,15 @@ export const TABS = [
 export const PROJECT_STATUSES = [
   { value: "planned", label: "Planned" },
   { value: "in progress", label: "In progress" },
-  { value: "blocked", label: "Blocked / waiting" },
+  { value: "blocked", label: "Blocked or waiting" },
   { value: "completed", label: "Completed" },
   { value: "archived", label: "Archived" },
 ];
 
 export const CLASSIFICATIONS = [
   { value: "potential basis addition", label: "Possible improvement" },
-  { value: "repair or maintenance", label: "Repair / upkeep" },
-  { value: "unclear / ask CPA", label: "Not sure, review later" },
+  { value: "repair or maintenance", label: "Repair or upkeep" },
+  { value: "unclear / ask CPA", label: "Review later" },
 ];
 
 export const EXPENSE_CATEGORIES = [
@@ -798,7 +798,7 @@ function buildProjectCompleteness(project, context) {
     projectCheck(
       "Review treatment choices",
       expenses.length > 0 && unclearExpenses === 0,
-      "Review expenses marked Not sure, review later.",
+      "Review expenses marked Review later.",
     ),
     projectCheck(
       "Expected document types covered",
@@ -1104,7 +1104,7 @@ function getExpenseFollowUpItems(records, expense) {
       type: "expense-review-treatment",
       typeLabel: "Cost type",
       label: "Review cost type",
-      detail: `${expenseName} is marked Not sure, review later.`,
+      detail: `${expenseName} is marked Review later.`,
       severity: "medium",
       priority: 41,
       propertyId,
@@ -1434,7 +1434,7 @@ export function buildExpensesCsv(data) {
     "Description",
     "Amount",
     "Cost type",
-    "Receipt/file status",
+    "Documentation",
     "Notes",
   ];
 

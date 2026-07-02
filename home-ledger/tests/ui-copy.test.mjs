@@ -24,7 +24,7 @@ test("calculator surfaces use homeowner labels and sale estimate caveat", async 
     "Basis estimate used",
     "Optional home-sale exclusion assumption",
     "Review-later amounts tracked separately",
-    "This is an organizing estimate only. It does not determine taxes owed, exclusion eligibility, depreciation, state taxes, or professional treatment.",
+    "Home Ledger organizes records. It does not give tax, legal, or accounting advice.",
   ]) {
     assert.ok(source.includes(copy), `missing calculator copy: ${copy}`);
   }
@@ -51,10 +51,10 @@ test("export and backup page labels frame output as review packet and full backu
   for (const copy of [
     "Export for review",
     "Backup and restore",
-    "Review packet PDF",
-    "Download review packet",
+    "Review packet",
+    "Save review packet",
     "Download expense CSV",
-    "Items to review before sharing",
+    "Check before sharing",
     "Full backup",
   ]) {
     assert.ok(source.includes(copy), `missing export/backup copy: ${copy}`);
@@ -163,7 +163,7 @@ test("document attachment form uses compact business copy", async () => {
   }
 });
 
-test("dashboard uses filtered recent activity and a needs attention subtab", async () => {
+test("dashboard uses filtered recent activity and a follow-ups subtab", async () => {
   const source = await appSourcePromise;
   const dashboardStart = source.indexOf("function renderDashboard()");
   const dashboardEnd = source.indexOf("function renderDashboardSummaryRow", dashboardStart);
@@ -171,7 +171,8 @@ test("dashboard uses filtered recent activity and a needs attention subtab", asy
 
   for (const marker of [
     "Recent activity",
-    "Needs attention",
+    "Follow-ups",
+    "Items to review",
     'data-action="set-dashboard-subtab"',
     'data-dashboard-subtab="${DASHBOARD_TAB_ATTENTION}"',
     'renderFilter("Activity type", "dashboard.activityType"',
@@ -274,9 +275,6 @@ test("website copy avoids technical product language", async () => {
     "document metadata",
     "record structure",
     "review conversation",
-    "Mac",
-    "macOS",
-    "iOS",
     "on your device",
     "on your Mac",
     "local storage",
@@ -287,5 +285,34 @@ test("website copy avoids technical product language", async () => {
     assert.equal(websiteCopy.includes(prohibitedCopy), false, `technical website copy remains: ${prohibitedCopy}`);
   }
   assert.ok(websiteCopy.includes("Backup basics"));
-  assert.ok(websiteCopy.includes("Keep a second copy of important home paperwork."));
+  assert.ok(websiteCopy.includes("Keep a second copy of important home records."));
+});
+
+test("user-facing copy avoids AI-giveaway and implementation scaffold terms", async () => {
+  const source = await appSourcePromise;
+  const websiteSources = await Promise.all(websiteSourcePromises);
+  const implementationTokenPattern = /\bplaceholder\b/g;
+  const publicCopy = [source.replace(implementationTokenPattern, ""), ...websiteSources].join("\n");
+
+  for (const prohibitedCopy of [
+    "Home Basis Tracker",
+    "SaaS",
+    "entitlement",
+    "placeholder",
+    "not connected yet",
+    "Unsupported",
+    "OCR/text",
+    "local/downloadable",
+    "professional review",
+    "audit-proof",
+    "tax-ready",
+    "IRS-ready",
+    "seamless",
+    "effortless",
+    "powerful",
+    "robust",
+    "streamline",
+  ]) {
+    assert.equal(publicCopy.includes(prohibitedCopy), false, `AI-giveaway copy remains: ${prohibitedCopy}`);
+  }
 });

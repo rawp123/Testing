@@ -119,7 +119,7 @@ export function ExportsView({
       <WorkspacePanel className="exports-summary-panel">
         <PanelHeader icon="↓" title="Export summary" />
         {loading && !summary ? (
-          <EmptyState title="Loading export summary">Checking the records available for export.</EmptyState>
+          <EmptyState title="Loading export summary">Checking what can be downloaded.</EmptyState>
         ) : null}
         {summary ? (
           <div className="export-summary-grid" aria-label="Export summary">
@@ -135,7 +135,7 @@ export function ExportsView({
       </WorkspacePanel>
 
       <FilterPanel title="Scope">
-        <span>Workspace-wide exports are available. Property and project-specific exports are not connected yet.</span>
+        <span>Full record exports are available. Property and project-specific downloads are planned.</span>
       </FilterPanel>
 
       <WorkspacePanel>
@@ -167,7 +167,7 @@ function exportColumns({
       render: (row) => (
         <div className="record-stack">
           <strong>{row.name}</strong>
-          <span>{row.status === "available" ? "Available download" : "Not available yet"}</span>
+          <span>{row.status === "available" ? "Ready to download" : "Planned"}</span>
         </div>
       )
     },
@@ -184,7 +184,7 @@ function exportColumns({
     {
       key: "status",
       header: "Status",
-      render: (row) => row.status === "available" ? "Ready" : "Unsupported"
+      render: (row) => row.status === "available" ? "Ready" : "Planned"
     },
     {
       key: "actions",

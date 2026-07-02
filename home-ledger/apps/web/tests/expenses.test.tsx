@@ -22,7 +22,7 @@ describe("Expenses screen", () => {
       vendor: "Cedarline Carpentry",
       linkedTo: "Office · Deck repair",
       category: "Repair Upkeep",
-      recordTreatment: "Repair / upkeep",
+      recordTreatment: "Repair or upkeep",
       documentationStatus: "Needs follow-up",
       expenseDate: "06/05/2026",
       amount: "$2,480.00",
@@ -63,10 +63,10 @@ describe("Expenses screen", () => {
 
     expect(html).toContain("Expense records");
     expect(html).toContain("Add expense");
-    expect(html).toContain("Open items");
+    expect(html).toContain("Open follow-ups");
     expect(html).toContain("Cedarline Carpentry");
     expect(html).toContain("Deck boards");
-    expect(html).toContain("Repair / upkeep");
+    expect(html).toContain("Repair or upkeep");
     expect(html).toContain("Needs follow-up");
     expect(html).toContain("$2,480.00");
     expect(html).toContain("Archive");
@@ -129,11 +129,11 @@ describe("Expenses screen", () => {
     expect(html).toContain("Save expense");
     expect(html).toContain("Property");
     expect(html).toContain("Project");
-    expect(html).toContain("Vendor/payee");
+    expect(html).toContain("Vendor or payee");
     expect(html).toContain("Add vendor");
     expect(html).toContain("Payee name if unassigned");
     expect(html).toContain("Cedarline Carpentry");
-    expect(html).toContain("Review type");
+    expect(html).toContain("Cost type");
     expect(html).toContain("Documentation");
     expect(html).toContain("Deck repair");
     expect(html).not.toContain("Bathroom remodel");

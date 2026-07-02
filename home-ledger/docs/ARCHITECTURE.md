@@ -1,10 +1,10 @@
 # Architecture
 
-Home Basis Tracker is a local-first records binder for property improvement records. It is intentionally separate from Message Archive Utility, Car Care Log, and the root website workspace.
+Home Ledger is a local records binder for property improvement records. It is intentionally separate from Message Archive Utility, Car Care Log, and the root website workspace.
 
 ## Product Layers
 
-- `website/`: standalone product website and support pages for Home Basis Tracker.
+- `website/`: standalone product website and support pages for Home Ledger.
 - `frontend/`: browser UI, app state, document preview, local text extraction, export, backup, and restore flows.
 - `backend/domain/`: shared local model rules, validation, CSV export, backup envelope validation, and restore helpers.
 - `backend/storage/`: browser storage adapters plus the desktop bridge adapter.
@@ -50,7 +50,7 @@ Full backups are private JSON files. They include structured records and attache
 
 Restore currently validates:
 
-- Home Basis Tracker app id.
+- Legacy backup app id.
 - Supported backup version.
 - Duplicate record IDs.
 - Project, expense, and document relationships.
@@ -80,5 +80,5 @@ Core app functionality does not require runtime network access. There is no clou
 
 - Full backups are plaintext JSON and can contain private home, vendor, receipt, invoice, permit, photo, and note data.
 - Browser storage can be cleared by browser profile changes or private browsing behavior.
-- OCR/text extraction is best effort and should be reviewed by the user.
+- Text extraction is best effort and should be reviewed by the user.
 - The app organizes records for CPA review; it does not compute tax basis or determine deductibility.

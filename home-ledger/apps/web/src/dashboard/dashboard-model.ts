@@ -11,8 +11,8 @@ import { formatCents, formatDate, titleCase, toInteger } from "../utils/format";
 
 const CLASSIFICATION_LABELS = Object.freeze({
   possible_improvement: "Possible improvements",
-  repair_upkeep: "Repair / upkeep",
-  review_later: "Not sure, review later"
+  repair_upkeep: "Repair or upkeep",
+  review_later: "Review later"
 });
 
 const ACTIVITY_LABELS = Object.freeze({
@@ -138,10 +138,10 @@ export function createDashboardViewModel({
       }
     ],
     documentSummary: [
-      documentMetric("Files attached", documents.with_file_count ?? 0, "Available files"),
-      documentMetric("Missing files", documents.missing_file_count ?? 0, "Needs attention"),
-      documentMetric("OCR available", documents.ocr_text_available_count ?? 0, "Text ready"),
-      documentMetric("OCR pending", documents.ocr_pending_count ?? 0, "In progress")
+      documentMetric("Files saved", documents.with_file_count ?? 0, "Saved files"),
+      documentMetric("Missing files", documents.missing_file_count ?? 0, "Needs review"),
+      documentMetric("Text extracted", documents.ocr_text_available_count ?? 0, "Text ready"),
+      documentMetric("Text pending", documents.ocr_pending_count ?? 0, "In progress")
     ],
     recentActivity,
     activityFilterOptions: getActivityFilterOptions(recentActivity),
@@ -206,7 +206,7 @@ function getFollowUpRows(items?: FollowUpItem[] | null): FollowUpRow[] {
       .map((item) => ({
         id: String(item.id || ""),
         area: titleCase(item.target_type || "record"),
-        title: String(item.title || "Needs attention"),
+        title: String(item.title || "Needs review"),
         description: String(item.description || ""),
         actionLabel: String(item.action_label || "Review"),
         severity: titleCase(item.severity || "needs_review"),
@@ -244,7 +244,7 @@ function getFollowUps(dashboard: DashboardResponse, followUpSummary?: FollowUpSu
   return source
     .map((item) => ({
       type: String(item.type || ""),
-      label: String(item.label || "Needs attention"),
+      label: String(item.label || "Needs review"),
       count: toInteger(item.count)
     }))
     .filter((item) => item.count > 0);

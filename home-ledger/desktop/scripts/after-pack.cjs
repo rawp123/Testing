@@ -4,7 +4,7 @@ const path = require("node:path");
 module.exports = async function afterPack(context) {
   if (context.electronPlatformName !== "darwin") return;
 
-  const plistPath = path.join(context.appOutDir, "Home Basis Tracker.app", "Contents", "Info.plist");
+  const plistPath = path.join(context.appOutDir, "Home Ledger.app", "Contents", "Info.plist");
   let plist = await fs.readFile(plistPath, "utf8");
   plist = plist.replace(
     /(<key>NSAllowsArbitraryLoads<\/key>\s*)<true\/>/,

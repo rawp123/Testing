@@ -48,7 +48,7 @@ describe("Projects screen", () => {
 
     expect(html).toContain("Project records");
     expect(html).toContain("Add project");
-    expect(html).toContain("Open items");
+    expect(html).toContain("Open follow-ups");
     expect(html).toContain("Office");
     expect(html).toContain("Kitchen");
     expect(html).toContain("Kitchen overhaul");

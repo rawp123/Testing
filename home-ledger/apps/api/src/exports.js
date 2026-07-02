@@ -1,4 +1,4 @@
-const EXPORT_PRODUCT_NAME = "Home Basis Tracker";
+const EXPORT_PRODUCT_NAME = "Home Ledger";
 
 export const EXPENSE_CSV_HEADERS = [
   "Export Source",
@@ -8,12 +8,12 @@ export const EXPENSE_CSV_HEADERS = [
   "Vendor ID",
   "Category",
   "Date",
-  "Vendor/Payee",
+  "Vendor or payee",
   "Description",
   "Amount",
   "Amount cents",
   "Cost type",
-  "Receipt/file status",
+  "Documentation",
   "Notes",
   "Expense ID",
   "Property ID",
@@ -45,8 +45,8 @@ export const DOCUMENT_CSV_HEADERS = [
 
 const CLASSIFICATION_LABELS = {
   possible_improvement: "Possible improvement",
-  repair_upkeep: "Repair / upkeep",
-  review_later: "Not sure, review later"
+  repair_upkeep: "Repair or upkeep",
+  review_later: "Review later"
 };
 
 export async function getExportData({ db, workspaceId }) {

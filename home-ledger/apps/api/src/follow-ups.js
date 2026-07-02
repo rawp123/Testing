@@ -555,7 +555,7 @@ function getExpenseFollowUps(state, records, expense) {
       reasonCode: "expense_review_later",
       severity: "needs_review",
       title: "Review cost type",
-      description: `${expenseName} is marked Not sure, review later.`,
+      description: `${expenseName} is marked Review later.`,
       actionLabel: "Review cost type",
       priority: 41
     }));
@@ -646,7 +646,7 @@ function getOcrFollowUp(state, document) {
     documentId: document.id,
     reasonCode: "document_ocr_pending",
     severity: "info",
-    title: "OCR pending",
+    title: "Text extraction pending",
     description: `${document.displayName} is waiting for text extraction to finish.`,
     actionLabel: "Review OCR status",
     priority: 80

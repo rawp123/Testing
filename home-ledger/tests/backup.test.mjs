@@ -15,7 +15,7 @@ import {
 test("validateBackupEnvelope rejects unknown and newer backups", () => {
   assert.throws(
     () => validateBackupEnvelope({ app: "other", data: {} }),
-    /Home Basis Tracker backup/,
+    /Home Ledger backup/,
   );
   assert.throws(
     () => validateBackupEnvelope({ app: "home-basis-tracker", backupVersion: 999, data: {} }),
@@ -127,7 +127,7 @@ test("createBackupEnvelope sanitizes records and preserves file arrays", () => {
   );
 
   assert.equal(envelope.app, "home-basis-tracker");
-  assert.equal(envelope.productName, "Home Basis Tracker");
+  assert.equal(envelope.productName, "Home Ledger");
   assert.equal(envelope.productVersion, "0.1.0");
   assert.equal(envelope.exportType, "full-backup");
   assert.equal(envelope.backupVersion, 1);

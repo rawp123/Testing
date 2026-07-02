@@ -1659,7 +1659,7 @@ function validateFileIntentInput(input) {
   }
   const unsupportedType = mimeType && (!ALLOWED_FILE_TYPES.has(mimeType) || isBlockedFileType({ fileName: originalFileName, mimeType }));
   if (unsupportedType) {
-    throw apiError(415, "unsupported_media_type", "Unsupported document file type.", [
+    throw apiError(415, "unsupported_media_type", "This document file type cannot be uploaded.", [
       {
         field: "mime_type",
         issue: "unsupported_media_type"

@@ -27,7 +27,7 @@ export function ImportMigrationView({
   return (
     <div className="page-stack">
       <PageTitle
-        meta={`${workspaceName} · Not connected yet`}
+        meta={`${workspaceName} · Unavailable in this beta`}
         title="Import and migration"
       />
 
@@ -35,7 +35,7 @@ export function ImportMigrationView({
         <WorkspacePanel className="settings-section settings-section-wide">
           <PanelHeader icon="⇄" title="Migration overview" />
           <p className="muted-copy">
-            This area will help move records from the earlier local/downloadable app into this SaaS workspace after import review is connected.
+            This area will help move records from the earlier local app into this workspace after import review is available.
           </p>
           <div className="settings-action-list">
             <div>
@@ -63,12 +63,12 @@ export function ImportMigrationView({
         <WorkspacePanel className="settings-section">
           <PanelHeader icon="!" title="Current status" />
           <div className="settings-note">
-            <strong>Automated import is not connected yet</strong>
+            <strong>Automated import is unavailable in this beta</strong>
             <p>The web app does not upload, parse, merge, or replace records from backup files in this release.</p>
           </div>
           <div className="settings-note">
             <strong>No workspace changes happen here</strong>
-            <p>The controls below are disabled until a reviewed import workflow is backed by the API.</p>
+            <p>The controls below stay disabled until import review is ready.</p>
           </div>
         </WorkspacePanel>
 
@@ -78,17 +78,17 @@ export function ImportMigrationView({
             <li>Keep a fresh backup/export from the local app.</li>
             <li>Review properties, projects, expenses, vendors, and documents before importing.</li>
             <li>Keep attached documents available separately if they may need to be uploaded again.</li>
-            <li>Use needs attention and Not sure, review later status to flag records that need follow-up.</li>
+            <li>Use follow-ups and Review later status to flag records that need another look.</li>
           </ul>
         </WorkspacePanel>
 
         <WorkspacePanel className="settings-section">
-          <PanelHeader icon="◇" title="Future import controls" />
+          <PanelHeader icon="◇" title="Import controls" />
           <div className="migration-disabled-control" aria-disabled="true">
             <label className="field">
               <span>Backup file</span>
               <input accept="application/json,.json" disabled type="file" />
-              <small>File import is not connected yet.</small>
+              <small>File import is unavailable in this beta.</small>
             </label>
             <button className="button button-primary" disabled type="button">
               Review import

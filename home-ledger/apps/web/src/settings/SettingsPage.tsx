@@ -112,7 +112,7 @@ export function SettingsView({
           </div>
           <div className="settings-note">
             <strong>Import and migration</strong>
-            <p>Backup import and migration review are planned, but not connected in this web app yet.</p>
+            <p>Backup import and migration review are planned, but unavailable in this beta.</p>
           </div>
           <div className="settings-action-list">
             <div>
@@ -125,13 +125,13 @@ export function SettingsView({
           </div>
           <div className="settings-note">
             <strong>Deletion controls</strong>
-            <p>Workspace deletion and account deletion controls are not connected yet.</p>
+            <p>Workspace deletion and account deletion controls are unavailable in this beta.</p>
           </div>
         </WorkspacePanel>
 
         <WorkspacePanel className="settings-section">
           <PanelHeader icon="◇" title="Documents and files" />
-          <p className="muted-copy">Document records can show whether a file is attached, missing, or needs attention. OCR text is only opened from the document text action when it is available.</p>
+          <p className="muted-copy">Document records can show whether a file is attached, missing, or needs review. Extracted text only opens from the document text action when it is available.</p>
           <div className="settings-action-list">
             <div>
               <strong>Review documents</strong>
@@ -145,7 +145,7 @@ export function SettingsView({
 
         <WorkspacePanel className="settings-section settings-section-wide">
           <PanelHeader icon="✓" title="Review language" />
-          <p className="muted-copy">Home Ledger organizes home records for professional review. It does not determine tax, legal, accounting, or compliance treatment.</p>
+          <p className="muted-copy">Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
         </WorkspacePanel>
       </div>
     </div>

@@ -32,10 +32,10 @@ export const BLOCKED_BACKUP_MIME_PREFIXES = [
 
 export function validateBackupEnvelope(backup) {
   if (!backup || backup.app !== BACKUP_APP_ID || !backup.data) {
-    throw new Error("This does not look like a Home Basis Tracker backup.");
+    throw new Error("This does not look like a Home Ledger backup.");
   }
   if (Number(backup.backupVersion || 1) > BACKUP_VERSION) {
-    throw new Error("This backup was created by a newer version of Home Basis Tracker.");
+    throw new Error("This backup was created by a newer version of Home Ledger.");
   }
   validateBackupDataRelationships(backup.data);
   const data = sanitizeData(backup.data);

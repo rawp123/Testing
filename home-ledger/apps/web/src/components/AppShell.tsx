@@ -4,7 +4,7 @@ export type AppView = "dashboard" | "follow-ups" | "properties" | "projects" | "
 
 const PRIMARY_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "⌂", enabled: true },
-  { id: "follow-ups", label: "Needs attention", icon: "!", enabled: true },
+  { id: "follow-ups", label: "Follow-ups", icon: "!", enabled: true },
   { id: "properties", label: "Property", icon: "⌁", enabled: true },
   { id: "projects", label: "Projects", icon: "▣", enabled: true },
   { id: "vendors", label: "Vendors", icon: "◎", enabled: true },

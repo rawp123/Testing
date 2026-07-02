@@ -311,7 +311,7 @@ export function ProjectsView({
     { key: "category", header: "Category", render: (row) => row.category },
     { key: "dates", header: "Dates", render: (row) => row.dateRange },
     { key: "contractor", header: "Vendor", render: (row) => row.contractor },
-    { key: "openItems", header: "Open items", align: "right", render: (row) => row.openItems },
+    { key: "openItems", header: "Open follow-ups", align: "right", render: (row) => row.openItems },
     {
       key: "actions",
       header: "Actions",
@@ -353,7 +353,7 @@ export function ProjectsView({
       <WorkspacePanel className="projects-panel">
         <PanelHeader icon="▣" title="Projects" />
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
-        {loading ? <p className="muted-copy">Loading projects.</p> : null}
+        {loading ? <p className="muted-copy">Loading projects...</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title={emptyTitle}>{emptyCopy}</EmptyState>
         ) : null}
@@ -504,7 +504,7 @@ function buildProjectFilterOptions(rows: ProjectRow[]): FilterChip[] {
   const options: FilterChip[] = [{ value: "all", label: "All", count: rows.length }];
   const openCount = rows.filter((row) => row.openItemCount > 0).length;
   if (openCount) {
-    options.push({ value: "open", label: "Open items", count: openCount });
+    options.push({ value: "open", label: "Open follow-ups", count: openCount });
   }
 
   const properties = countRows(rows, (row) => row.source.property_id || "unassigned");

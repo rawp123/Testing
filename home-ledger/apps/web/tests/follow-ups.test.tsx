@@ -57,11 +57,11 @@ describe("Follow-ups screen", () => {
       />
     );
     expect(emptyHtml).toContain("No open follow-ups");
-    expect(emptyHtml).toContain("No items need review.");
+    expect(emptyHtml).toContain("Nothing needs review.");
 
     const errorHtml = renderToStaticMarkup(
       <FollowUpsView
-        errorMessage="Needs attention could not be loaded."
+        errorMessage="We couldn't load follow-ups."
         items={[]}
         onChangeSeverityFilter={() => undefined}
         onChangeStatusFilter={() => undefined}
@@ -73,7 +73,7 @@ describe("Follow-ups screen", () => {
         workspaceName="Home records"
       />
     );
-    expect(errorHtml).toContain("Needs attention could not be loaded.");
+    expect(errorHtml).toContain("We couldn&#x27;t load follow-ups.");
   });
 
   it("renders populated list summary filters and resolve actions", () => {
@@ -87,7 +87,7 @@ describe("Follow-ups screen", () => {
             severity: "needs_review",
             title: "Review cost type",
             action_label: "Review cost type",
-            description: "Cedarline Carpentry is marked Not sure, review later."
+            description: "Cedarline Carpentry is marked Review later."
           })
         ]}
         onChangeSeverityFilter={() => undefined}
@@ -101,13 +101,13 @@ describe("Follow-ups screen", () => {
       />
     );
 
-    expect(html).toContain("Needs attention");
+    expect(html).toContain("Follow-ups");
     expect(html).toContain("1</strong> open");
     expect(html).toContain("1</strong> resolved");
     expect(html).toContain("Open");
     expect(html).toContain("Resolved");
     expect(html).toContain("Missing file");
-    expect(html).toContain("Needs review");
+    expect(html).toContain("Review needed");
     expect(html).toContain("Document");
     expect(html).toContain("Expense");
     expect(html).toContain("Upload receipt file");
@@ -153,7 +153,7 @@ describe("Follow-ups screen", () => {
 
     expect(filterFollowUpRows(rows, { severity: "missing_file" }).map((row) => row.title)).toEqual(["Upload receipt file"]);
     expect(filterFollowUpRows(rows, { targetType: "expense" }).map((row) => row.title)).toEqual(["Review cost type"]);
-    expect(buildSeverityFilterOptions(rows).map((option) => option.label)).toContain("Needs review");
+    expect(buildSeverityFilterOptions(rows).map((option) => option.label)).toContain("Review needed");
   });
 
   it("applies resolve and reopen results without re-deriving follow-up rules", () => {

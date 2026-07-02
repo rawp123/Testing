@@ -45,7 +45,7 @@ export function DashboardPage({ state }: { state: InitialDashboardState }) {
           <div className="step-list" aria-label="Suggested setup steps">
             <span>Add your property</span>
             <span>Create projects</span>
-            <span>Attach receipts or permits and export a review packet</span>
+            <span>Attach receipts or permits and export a packet</span>
           </div>
         </section>
       ) : null}
@@ -83,7 +83,7 @@ export function DashboardPage({ state }: { state: InitialDashboardState }) {
             role="tab"
             type="button"
           >
-            Needs attention <span>{viewModel.openFollowUpCount}</span>
+            Follow-ups <span>{viewModel.openFollowUpCount}</span>
           </button>
         </div>
         {dashboardTab === "activity" ? (
@@ -114,7 +114,7 @@ export function DashboardPage({ state }: { state: InitialDashboardState }) {
             id="dashboard-attention-panel"
             role="tabpanel"
           >
-            <PanelHeader icon="!" title="Needs attention" />
+            <PanelHeader icon="!" title="Items to review" />
             <NeedsAttention items={viewModel.followUpItems} />
           </div>
         )}

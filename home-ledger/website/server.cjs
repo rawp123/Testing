@@ -61,5 +61,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Home Basis Tracker website: http://127.0.0.1:${port}`);
+  console.log(`Home Ledger website: http://127.0.0.1:${port}`);
 });

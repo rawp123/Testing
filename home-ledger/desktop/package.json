@@ -3,9 +3,9 @@
   "description": "A Mac app for organizing home improvement records.",
   "version": "0.1.0",
   "private": true,
-  "productName": "Home Basis Tracker",
-  "author": "Home Basis Tracker",
-  "copyright": "Copyright © 2026 Home Basis Tracker",
+  "productName": "Home Ledger",
+  "author": "Home Ledger",
+  "copyright": "Copyright © 2026 Home Ledger",
   "main": "main.cjs",
   "scripts": {
     "dev": "env -u ELECTRON_RUN_AS_NODE electron .",
@@ -18,7 +18,7 @@
   },
   "build": {
     "appId": "com.homebasistracker.app",
-    "productName": "Home Basis Tracker",
+    "productName": "Home Ledger",
     "asar": true,
     "npmRebuild": false,
     "directories": {
@@ -112,16 +112,16 @@
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
         },
-        "NSAudioCaptureUsageDescription": "Home Basis Tracker does not use audio capture.",
-        "NSBluetoothAlwaysUsageDescription": "Home Basis Tracker does not use Bluetooth.",
-        "NSBluetoothPeripheralUsageDescription": "Home Basis Tracker does not use Bluetooth.",
-        "NSCameraUsageDescription": "Home Basis Tracker does not use the camera.",
-        "NSMicrophoneUsageDescription": "Home Basis Tracker does not use the microphone."
+        "NSAudioCaptureUsageDescription": "Home Ledger does not use audio capture.",
+        "NSBluetoothAlwaysUsageDescription": "Home Ledger does not use Bluetooth.",
+        "NSBluetoothPeripheralUsageDescription": "Home Ledger does not use Bluetooth.",
+        "NSCameraUsageDescription": "Home Ledger does not use the camera.",
+        "NSMicrophoneUsageDescription": "Home Ledger does not use the microphone."
       }
     },
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "title": "Home Basis Tracker ${version}",
+      "title": "Home Ledger ${version}",
       "backgroundColor": "#f4f6f2",
       "window": {
         "width": 560,

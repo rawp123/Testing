@@ -4,19 +4,19 @@ const asar = require("@electron/asar");
 
 const plistPath = path.resolve(
   __dirname,
-  "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Info.plist",
+  "../../release/mac/mac-arm64/Home Ledger.app/Contents/Info.plist",
 );
 const appAsarPath = path.resolve(
   __dirname,
-  "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Resources/app.asar",
+  "../../release/mac/mac-arm64/Home Ledger.app/Contents/Resources/app.asar",
 );
 
 if (!fs.existsSync(plistPath)) {
-  console.error("Packaged Home Basis Tracker app was not found. Run npm run pack:mac first.");
+  console.error("Packaged Home Ledger app was not found. Run npm run pack:mac first.");
   process.exit(1);
 }
 if (!fs.existsSync(appAsarPath)) {
-  console.error("Packaged Home Basis Tracker app.asar was not found. Run npm run pack:mac first.");
+  console.error("Packaged Home Ledger app.asar was not found. Run npm run pack:mac first.");
   process.exit(1);
 }
 
@@ -64,13 +64,13 @@ if (missingAsarFiles.length) {
 
 const resourcesDir = path.resolve(
   __dirname,
-  "../../release/mac/mac-arm64/Home Basis Tracker.app/Contents/Resources/home-ledger",
+  "../../release/mac/mac-arm64/Home Ledger.app/Contents/Resources/home-ledger",
 );
 const missingResources = requiredResources.filter((fileName) => !fs.existsSync(path.join(resourcesDir, fileName)));
 
 if (missingResources.length) {
-  console.error(`Packaged app is missing Home Basis Tracker resources: ${missingResources.join(", ")}`);
+  console.error(`Packaged app is missing Home Ledger resources: ${missingResources.join(", ")}`);
   process.exit(1);
 }
 
-console.log("Packaged Home Basis Tracker app passed local-first package checks.");
+console.log("Packaged Home Ledger app passed package checks.");

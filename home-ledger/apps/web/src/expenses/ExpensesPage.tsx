@@ -326,11 +326,11 @@ export function ExpensesView({
     },
     { key: "linkedTo", header: "Linked to", render: (row) => row.linkedTo },
     { key: "category", header: "Category", render: (row) => row.category },
-    { key: "recordTreatment", header: "Review type", render: (row) => row.recordTreatment },
+    { key: "recordTreatment", header: "Cost type", render: (row) => row.recordTreatment },
     { key: "documentationStatus", header: "Documentation", render: (row) => row.documentationStatus },
     { key: "date", header: "Date", render: (row) => row.expenseDate },
     { key: "amount", header: "Amount", align: "right", render: (row) => row.amount },
-    { key: "openItems", header: "Open items", align: "right", render: (row) => row.openItems },
+    { key: "openItems", header: "Open follow-ups", align: "right", render: (row) => row.openItems },
     {
       key: "actions",
       header: "Actions",
@@ -381,7 +381,7 @@ export function ExpensesView({
       <WorkspacePanel className="expenses-panel">
         <PanelHeader icon="▥" title="Expenses" />
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
-        {loading ? <p className="muted-copy">Loading expenses.</p> : null}
+        {loading ? <p className="muted-copy">Loading expenses...</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title="No expenses">Add an expense and link it to a property or project.</EmptyState>
         ) : null}
@@ -445,7 +445,7 @@ export function ExpensesView({
             />
           </FormField>
           <div className="form-grid two-column">
-            <FormField helper="Select a saved vendor, or leave unassigned." label="Vendor/payee">
+            <FormField helper="Select a saved vendor, or leave unassigned." label="Vendor or payee">
               <select
                 name="vendor_id"
                 onChange={(event) => onFormChange(applyExpenseVendorSelection(formValues, event.currentTarget.value))}
@@ -504,7 +504,7 @@ export function ExpensesView({
             </FormField>
           </div>
           <div className="form-grid two-column">
-            <FormField label="Review type">
+            <FormField label="Cost type">
               <select
                 name="record_treatment"
                 onChange={(event) => onFormChange({ ...formValues, recordTreatment: event.currentTarget.value })}
@@ -543,7 +543,7 @@ export function ExpensesView({
 function buildExpenseFilterOptions(rows: ExpenseRow[]): FilterChip[] {
   const options: FilterChip[] = [{ value: "all", label: "All", count: rows.length }];
   const openCount = rows.filter((row) => row.openItemCount > 0).length;
-  if (openCount) options.push({ value: "open", label: "Open items", count: openCount });
+  if (openCount) options.push({ value: "open", label: "Open follow-ups", count: openCount });
 
   const documentationStatuses = new Map<string, number>();
   const recordTreatments = new Map<string, number>();

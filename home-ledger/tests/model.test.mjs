@@ -168,7 +168,7 @@ test("buildExpensesCsv neutralizes spreadsheet formulas and quotes values", () =
 
   const csv = buildExpensesCsv(cleanData);
   assert.match(csv, /^Export Source,Export Date,Property,/);
-  assert.match(csv, /^Home Basis Tracker,\d{4}-\d{2}-\d{2},/m);
+  assert.match(csv, /^Home Ledger,\d{4}-\d{2}-\d{2},/m);
   assert.match(csv, /,'@Vendor,/);
   assert.match(csv, /"Line one\nLine two"/);
   assert.match(csv, /"Main, Home"/);

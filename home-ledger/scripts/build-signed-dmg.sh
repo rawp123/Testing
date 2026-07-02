@@ -16,7 +16,7 @@ case "$MACHINE_ARCH" in
     APP_ARCH="$MACHINE_ARCH"
     ;;
 esac
-DMG_PATH="$PROJECT_DIR/release/mac/Home Basis Tracker-$APP_VERSION-$APP_ARCH.dmg"
+DMG_PATH="$PROJECT_DIR/release/mac/Home Ledger-$APP_VERSION-$APP_ARCH.dmg"
 
 has_api_key_notary_credentials() {
   [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" ]]

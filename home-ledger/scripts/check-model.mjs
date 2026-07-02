@@ -65,4 +65,4 @@ const csv = buildExpensesCsv(cleanData);
 assert.match(csv, /'=Formula Vendor/);
 assert.match(csv, /Possible improvement/);
 
-console.log("Home Basis Tracker model checks passed.");
+console.log("Home Ledger model checks passed.");

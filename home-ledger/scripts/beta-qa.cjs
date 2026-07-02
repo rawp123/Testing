@@ -318,8 +318,8 @@ async function seedRecordsWithAttachment(window) {
       await click('[data-tab="dashboard"]');
       await click('[data-action="set-dashboard-subtab"][data-dashboard-subtab="attention"]');
       await waitFor(() =>
-        bodyIncludes("Needs attention") &&
-        bodyIncludes("Type\tRecord\tDetail\tResolve") &&
+        bodyIncludes("Items to review") &&
+        bodyIncludes("Type\tRecord\tIssue\tResolve") &&
         bodyIncludes("Project item") &&
         bodyIncludes("4"),
         "dashboard canonical follow-ups",
@@ -526,7 +526,7 @@ async function main() {
     const backupResult = await downloadBackup(window);
     await clearBrowserStorage(window);
     const restored = await restoreBackup(window, backupResult.backupText);
-    console.log(`Home Basis Tracker browser beta QA passed: ${restored.properties} property, ${restored.projects} project, ${restored.expenses} expense, ${restored.documents} document, restored ${restored.restoredFileName}.`);
+    console.log(`Home Ledger browser beta QA passed: ${restored.properties} property, ${restored.projects} project, ${restored.expenses} expense, ${restored.documents} document, restored ${restored.restoredFileName}.`);
     console.log(`Backup verified: ${backupResult.backupPath}`);
     if (screenshotPaths.length) console.log(`Dark UI screenshots: ${screenshotPaths.join(", ")}`);
     assert(seeded.documentFileName === restored.restoredFileName, "Restored file name changed unexpectedly.");
@@ -539,7 +539,7 @@ async function main() {
 app.whenReady()
   .then(main)
   .catch((error) => {
-    console.error(`Home Basis Tracker browser beta QA failed: ${error?.message || error}`);
+    console.error(`Home Ledger browser beta QA failed: ${error?.message || error}`);
     process.exitCode = 1;
   })
   .finally(async () => {

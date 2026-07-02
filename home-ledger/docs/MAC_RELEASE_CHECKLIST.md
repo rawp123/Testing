@@ -1,6 +1,6 @@
 # Mac Release Checklist
 
-Use this checklist before publishing a Home Basis Tracker Mac download.
+Use this checklist before publishing a Home Ledger Mac download.
 
 ## Credentials
 
@@ -10,7 +10,7 @@ Keep credentials outside Git. A typical shell env file is:
 source ~/.home-basis-tracker-signing-env
 ```
 
-Use `.env.example` only as a placeholder reference. Never commit real Apple IDs, API keys, app-specific passwords, team IDs, keychain profiles, or certificate material.
+Use `.env.example` only as a sample reference. Never commit real Apple IDs, API keys, app-specific passwords, team IDs, keychain profiles, or certificate material.
 
 ## Local Validation
 

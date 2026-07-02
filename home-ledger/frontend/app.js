@@ -242,7 +242,7 @@ function renderLoading() {
   app.innerHTML = `
     <main class="workspace loading-workspace">
       <section class="panel">
-        ${renderPanelHeader("Opening Home Basis Tracker", "Loading your home project information.", "home")}
+        ${renderPanelHeader("Opening Home Ledger", "Loading your home project information.", "home")}
       </section>
     </main>
   `;
@@ -345,7 +345,7 @@ function render() {
               <span class="brand-mark-fallback" hidden>H</span>
             </span>
             <div>
-              <h1>Home Basis Tracker</h1>
+              <h1>Home Ledger</h1>
               ${isTutorialMode() ? `
                 <span class="workspace-mode-chip">Tutorial workspace</span>
                 <p>Sample items only</p>
@@ -539,7 +539,7 @@ function renderDashboardSubTabs(activityCount, followUpCount) {
         role="tab"
         tabindex="${dashboardSubTab === DASHBOARD_TAB_ATTENTION ? "0" : "-1"}"
         type="button"
-      >Needs attention <span>${followUpCount}</span></button>
+      >Follow-ups <span>${followUpCount}</span></button>
     </div>
   `;
 }
@@ -565,7 +565,7 @@ function renderDashboardAttentionPanel(followUps) {
   const content = getRecordsToFinishContent(followUps);
   return `
     <div id="dashboard-attention-panel" role="tabpanel" aria-labelledby="dashboard-attention-tab" class="dashboard-tab-panel">
-      ${renderPanelHeader("Needs attention", "", "alert")}
+      ${renderPanelHeader("Items to review", "", "alert")}
       ${renderRecordsToFinishBody(content, "dashboard-attention-body")}
     </div>
   `;
@@ -867,7 +867,7 @@ function renderSaleScenarioPanel(propertySummaries) {
             ${detailItem("Gain before exclusion", hasSalePrice ? formatCurrency(estimate.gainBeforeExclusion) : "Not estimated")}
             ${detailItem("Review-later amounts tracked separately", formatCurrency(estimate.needsReviewCosts))}
           </dl>
-          <p class="helper-note">This is an organizing estimate only. It does not determine taxes owed, exclusion eligibility, depreciation, state taxes, or professional treatment.</p>
+          <p class="helper-note">Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
         </div>
       </div>
     </section>
@@ -909,7 +909,7 @@ function renderBasisSummaryCalculator(propertySummaries) {
       </label>
       <div class="scenario-result-grid">
         ${scenarioResultCard("Basis estimate", formatCurrency(estimate.adjustedBasis), "Purchase price plus included possible improvements.")}
-        ${scenarioResultCard("Not sure, review later", formatCurrency(estimate.needsReviewCosts), "Tracked separately for later review.")}
+        ${scenarioResultCard("Review later", formatCurrency(estimate.needsReviewCosts), "Tracked separately for later review.")}
       </div>
       ${!selectedSummary.property.purchasePrice
         ? renderEmpty("Purchase price not added", "Add the purchase price to make the basis estimate more useful.", renderInlineAction("Add purchase price", "edit-property-field", "button-secondary", { id: selectedSummary.property.id, field: "purchasePrice" }))
@@ -918,14 +918,14 @@ function renderBasisSummaryCalculator(propertySummaries) {
       <dl class="scenario-breakdown calculator-breakdown">
         ${detailItem("Purchase price", formatCurrency(estimate.purchasePrice))}
         ${detailItem("Included possible improvements", formatCurrency(estimate.basisAdditions))}
-        ${detailItem("Repair / upkeep", formatCurrency(estimate.repairCosts))}
-        ${detailItem("Not sure, review later", formatCurrency(estimate.needsReviewCosts))}
+        ${detailItem("Repair or upkeep", formatCurrency(estimate.repairCosts))}
+        ${detailItem("Review later", formatCurrency(estimate.needsReviewCosts))}
         ${detailItem("Missing support", formatCurrency(missingSupportTotal))}
         ${detailItem("Projects", selectedSummary.projects.length)}
         ${detailItem("Expenses", selectedSummary.expenses.length)}
         ${detailItem("Documents", selectedSummary.documents.length)}
       </dl>
-      <p class="helper-note">This summary organizes saved project details. It is not a final determination of basis, treatment, or eligibility.</p>
+      <p class="helper-note">Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
       ${projectRows.length ? `
         <div class="calculator-table-wrap">
           ${table(["Project", "Total spend", "Possible improvements", "Review later"], projectRows.map((row) => [
@@ -1012,7 +1012,7 @@ function renderRecordsToFinishPanel(followUps = getSurfaceFollowUps("dashboard")
     <details class="panel record-gap-details">
       <summary aria-controls="records-to-finish-body" aria-describedby="records-to-finish-summary">
         <span class="record-gap-summary-title">
-          <strong><span class="summary-chevron" aria-hidden="true">›</span>Needs attention</strong>
+          <strong><span class="summary-chevron" aria-hidden="true">›</span>Follow-ups</strong>
           <small id="records-to-finish-summary">${escapeHtml(content.followUpLabel)} · Expand for next actions</small>
         </span>
         <span class="record-gap-summary-metrics">
@@ -1028,7 +1028,7 @@ function renderRecordsToFinishSummaryCard(followUps = getSurfaceFollowUps("dashb
   const content = getRecordsToFinishContent(followUps);
   return `
     <section class="panel records-to-finish-card">
-      ${renderPanelHeader("Needs attention", "", "alert")}
+      ${renderPanelHeader("Items to review", "", "alert")}
       <div class="records-to-finish-summary">
         <strong>${escapeHtml(content.followUpLabel)}</strong>
         <span>${escapeHtml(content.breakdownLabel)}</span>
@@ -1047,7 +1047,7 @@ function renderRecordsToFinishModal(followUps = getSurfaceFollowUps("dashboard")
       <section class="form-modal records-to-finish-modal" role="dialog" aria-modal="true" aria-labelledby="records-to-finish-title">
         <div class="modal-header">
           <div>
-            <h2 id="records-to-finish-title">Needs attention</h2>
+            <h2 id="records-to-finish-title">Items to review</h2>
             <p>${escapeHtml(content.followUpLabel)} / ${escapeHtml(content.breakdownLabel)}</p>
           </div>
           <button class="icon-button" data-action="close-records-to-finish" type="button" aria-label="Close">×</button>
@@ -1074,10 +1074,10 @@ function getRecordsToFinishContent(followUps = getSurfaceFollowUps("dashboard"))
     documentItems ? countLabel(documentItems, "document item") : "",
     projectItems ? countLabel(projectItems, "project item") : "",
   ].filter(Boolean);
-  const breakdownLabel = breakdownParts.length ? breakdownParts.join(" · ") : "No items need review.";
+  const breakdownLabel = breakdownParts.length ? breakdownParts.join(" · ") : "Nothing needs review.";
   const followUpLabel = followUps.length
     ? `${followUps.length} item${followUps.length === 1 ? "" : "s"} need review`
-    : "No items need review.";
+    : "Nothing needs review.";
 
   return {
     breakdownLabel,
@@ -1101,7 +1101,7 @@ function renderRecordsToFinishBody(content, id = "") {
         ${detailItem("Expense items", content.expenseItems + content.expenseSupportItems.length)}
         ${detailItem("Project items", content.projectItems)}
         ${detailItem("Marked complete with note", content.markedCompleteProjects)}
-        ${detailItem("Needs attention", content.followUps.length)}
+        ${detailItem("Open follow-ups", content.followUps.length)}
       </dl>
       ${content.missingEvidenceTotal || content.reviewLaterTotal ? `
         <div class="attention-summary-row">
@@ -1109,7 +1109,7 @@ function renderRecordsToFinishBody(content, id = "") {
           ${content.reviewLaterTotal ? `<span>Review-later amount · ${escapeHtml(formatCurrency(content.reviewLaterTotal))}</span>` : ""}
         </div>
       ` : ""}
-      ${renderFollowUpActionTable(content.followUps, "No items need review.")}
+      ${renderFollowUpActionTable(content.followUps, "Nothing needs review.")}
     </div>
   `;
 }
@@ -1158,7 +1158,7 @@ function renderFollowUpActionTable(items, emptyCopy) {
           <tr>
             <th>Type</th>
             <th>Record</th>
-            <th>Detail</th>
+            <th>Issue</th>
             <th class="align-right">Resolve</th>
           </tr>
         </thead>
@@ -1167,7 +1167,7 @@ function renderFollowUpActionTable(items, emptyCopy) {
             <tr>
               <td data-label="Type"><span class="pill ${getFollowUpPillTone(item)}">${escapeHtml(item.typeLabel || "Follow-up")}</span></td>
               <td class="record-name-cell" data-label="Record"><strong>${escapeHtml(getFollowUpRecordLabel(item))}</strong></td>
-              <td data-label="Detail">${escapeHtml(item.detail || item.primaryAction?.copy || "Review this item.")}</td>
+              <td data-label="Issue">${escapeHtml(item.detail || item.primaryAction?.copy || "Review this item.")}</td>
               <td class="align-right" data-label="Resolve">
                 <button class="button button-secondary table-action-button" data-action="open-follow-up" data-follow-up-id="${escapeAttr(item.id)}" type="button">${escapeHtml(item.primaryAction?.label || "Resolve")}</button>
               </td>
@@ -1232,7 +1232,7 @@ function renderFollowUpResolutionModal() {
           ${item.documentId ? `<div><span>Related document</span><strong>${escapeHtml(getFollowUpDocumentLabel(item.documentId))}</strong></div>` : ""}
         </div>
         <div class="resolution-summary">
-          <span>Needs attention</span>
+          <span>Follow-up</span>
           <strong>${escapeHtml(item.label)}</strong>
           <p>${escapeHtml(getFollowUpResolutionCopy(item, action))}</p>
         </div>
@@ -1936,7 +1936,7 @@ function renderProjectsView() {
           ${renderFilter("Property", "project.propertyId", projectFilters.propertyId, projectFilterOptions.properties)}
           ${renderFilter("Status", "project.status", projectFilters.status, projectFilterOptions.statuses)}
           ${renderFilter("Category", "project.category", projectFilters.category, projectFilterOptions.categories)}
-          ${renderFilter("Open items", "project.openItems", projectFilters.openItems, projectFilterOptions.openItems)}
+          ${renderFilter("Open follow-ups", "project.openItems", projectFilters.openItems, projectFilterOptions.openItems)}
           ${renderProjectDateFilterCluster()}
         `, { count: data.projects.length, hasActiveFilters, clearAction: "clear-project-filters", className: "project-filters" })}
         <div class="results-body project-results-body">
@@ -2036,8 +2036,8 @@ const PROJECT_DEPENDENT_FILTERS = [
 ];
 
 const PROJECT_OPEN_ITEM_FILTER_OPTIONS = [
-  { value: "has-open-items", label: "Has open items" },
-  { value: "no-open-items", label: "No open items" },
+  { value: "has-open-items", label: "Has open follow-ups" },
+  { value: "no-open-items", label: "No open follow-ups" },
 ];
 
 const EXPENSE_DEPENDENT_FILTERS = [
@@ -2153,8 +2153,8 @@ function renderExpensesView() {
       ${renderMetrics([
         ["Filtered total", formatCurrency(totals.total), ""],
         ["Possible improvements", formatCurrency(totals.potential), "green"],
-        ["Repair / upkeep", formatCurrency(totals.repair), "rust"],
-        ["Not sure, review later", formatCurrency(totals.unclear), "amber"],
+        ["Repair or upkeep", formatCurrency(totals.repair), "rust"],
+        ["Review later", formatCurrency(totals.unclear), "amber"],
       ], "compact")}
       <section class="panel">
         ${renderPanelHeader("Costs", "", "receipt")}
@@ -2243,7 +2243,7 @@ function renderExportCenter() {
   return `
     <div class="page-stack">
       ${renderPageIntro({
-        title: "Export summaries and keep backups",
+        title: "Exports and backups",
       })}
       <section class="export-workflow-section" aria-labelledby="export-review-heading">
         <div class="section-title-row">
@@ -2271,19 +2271,19 @@ function renderReviewSummaryPreview(totals, readiness, followUps) {
     <details class="panel print-summary export-preview-panel">
       <summary>
         <span>
-          <strong>Review packet preview</strong>
+          <strong>Packet preview</strong>
           <small>Prepared ${formatDate(todayISO())}. Expand to inspect what will be included.</small>
         </span>
       </summary>
-      <p class="helper-note print-caveat">${isTutorialMode() ? "Tutorial sample items only. " : ""}This packet organizes home project details for review. It does not make final conclusions.</p>
+      <p class="helper-note print-caveat">${isTutorialMode() ? "Tutorial sample items only. " : ""}Home Ledger organizes records. It does not give tax, legal, or accounting advice.</p>
       ${renderMetrics([
         ["Total tracked spend", formatCurrency(totals.total), ""],
         ["Possible improvements", formatCurrency(totals.potential), "green"],
-        ["Repair / upkeep", formatCurrency(totals.repair), "rust"],
-        ["Not sure, review later", formatCurrency(totals.unclear), "amber"],
+        ["Repair or upkeep", formatCurrency(totals.repair), "rust"],
+        ["Review later", formatCurrency(totals.unclear), "amber"],
       ], "compact")}
       <div class="export-section">
-        <h3>Items to review before sharing</h3>
+        <h3>Check before sharing</h3>
         ${renderExportFollowUpChecklist(followUps)}
       </div>
       <div class="export-section">
@@ -2334,10 +2334,10 @@ function renderDataSafetyPanel() {
 
 function renderCpaExportPanel() {
   const hasReviewRecords = data.properties.length || data.expenses.length || data.documents.length;
-  const pdfLabel = isTutorialMode() ? "Download tutorial review packet" : "Download review packet";
+  const pdfLabel = isTutorialMode() ? "Save tutorial review packet" : "Save review packet";
   return `
     <section class="panel print-hidden">
-      ${renderPanelHeader("Review packet PDF", "", "clipboard")}
+      ${renderPanelHeader("Review packet", "", "clipboard")}
       ${hasReviewRecords
         ? `<p class="helper-note">${isTutorialMode() ? "Exports use tutorial sample items only." : "Create an organizer from saved properties, projects, expenses, and documents."}</p>`
         : renderEmpty("No items to export yet", "Add a property, project, expense, or document to populate the review packet.")}
@@ -2384,7 +2384,7 @@ function renderBackupRestorePanel() {
         <input class="restore-input" data-restore-input type="file" accept="application/json,.json">
       </div>
       <div class="backup-status-row">
-        <span>Backup status</span>
+        <span>Last backup</span>
         <strong>${lastBackupCreatedAt ? `Created this session ${formatBackupTimestamp(lastBackupCreatedAt)}` : "No backup created in this app session"}</strong>
       </div>
       <p class="helper-note">${isTutorialMode()
@@ -2745,7 +2745,7 @@ function renderExpenseForm(expense, context = {}) {
         ${field("Amount", "amount", draftValues?.amount || expense?.amount || "", { type: "number", step: "0.01", placeholder: "0.00", required: true })}
       </div>
       <div class="form-row">
-        ${selectField("Vendor/payee", "vendorId", vendorId, getVendorSelectOptions({ selectedVendorId: vendorId }), true, { highlight: context.highlightField === "vendorId" })}
+        ${selectField("Vendor or payee", "vendorId", vendorId, getVendorSelectOptions({ selectedVendorId: vendorId }), true, { highlight: context.highlightField === "vendorId" })}
         ${field("Description", "description", draftValues?.description || expense?.description || "", { placeholder: "Roof repair, dishwasher install, permit fee", required: true })}
       </div>
       <p class="helper-note">Expenses use shared vendors. Unassigned / unknown is fine when the payee is not clear yet. <span class="inline-action-group"><button class="inline-text-button" data-action="add-vendor" type="button">Add vendor</button><button class="inline-text-button" data-action="manage-vendors" type="button">Manage vendors</button></span></p>
@@ -2753,8 +2753,8 @@ function renderExpenseForm(expense, context = {}) {
         ${selectField("Cost type", "classification", draftValues?.classification || expense?.classification || "unclear / ask CPA", CLASSIFICATIONS, false, { highlight: context.highlightField === "classification" })}
         ${selectField("Category", "category", draftValues?.category || expense?.category || "other", EXPENSE_CATEGORIES, false)}
       </div>
-      <p class="helper-note">Examples: roof replacement or an addition might be a possible improvement; a service visit or small repair might be repair / upkeep. Use Not sure, review later when you want to revisit the cost.</p>
-      ${selectField("Receipt/file status", "documentationStatus", draftValues?.documentationStatus || expense?.documentationStatus || "no document yet", DOCUMENT_STATUSES, false, { highlight: context.highlightField === "documentationStatus" })}
+      <p class="helper-note">Examples: roof replacement or an addition might be a possible improvement; a service visit or small repair might be repair or upkeep. Use Review later when you want to revisit the cost.</p>
+      ${selectField("Documentation", "documentationStatus", draftValues?.documentationStatus || expense?.documentationStatus || "no document yet", DOCUMENT_STATUSES, false, { highlight: context.highlightField === "documentationStatus" })}
       <p class="helper-note">Use your best guess for sorting costs. You can change this later.</p>
       ${textarea("Notes", "notes", draftValues?.notes || expense?.notes || "")}
       ${formActions("Save expense")}
@@ -2909,7 +2909,7 @@ function renderProjectsTable(projects) {
             <th class="align-right">Expense count</th>
             <th class="align-right">Expense total</th>
             <th class="align-right">Docs</th>
-            <th>Open items</th>
+            <th>Open follow-ups</th>
             <th class="align-right">Actions</th>
           </tr>
         </thead>
@@ -2946,7 +2946,7 @@ function renderProjectTableRow(project, projectFollowUps = getProjectFollowUps(p
       <td class="align-right" data-label="Expense count"><strong>${projectExpenses.length}</strong></td>
       <td class="align-right" data-label="Expense total"><strong>${formatCurrency(totals.total)}</strong></td>
       <td class="align-right" data-label="Docs">${projectDocuments.length}</td>
-      <td data-label="Open items">${renderProjectOpenItemsControl(project, projectFollowUps, completeness)}</td>
+      <td data-label="Open follow-ups">${renderProjectOpenItemsControl(project, projectFollowUps, completeness)}</td>
       <td class="align-right" data-label="Actions">
         <div class="table-actions">
           ${rowActions("edit-project", "delete-project", project.id, project.name)}
@@ -2960,7 +2960,7 @@ function renderProjectOpenItemsControl(project, projectFollowUps, completeness) 
   const label = getProjectRecordStatusLabel(project, projectFollowUps, completeness);
   const expanded = expandedProjectFollowUpIds.has(project.id);
   if (!projectFollowUps.length) {
-    const note = project.completenessOverrideNote || completeness.isOverridden ? "Marked complete" : "No open items";
+    const note = project.completenessOverrideNote || completeness.isOverridden ? "Marked complete" : "No open follow-ups";
     return `<span class="open-items-static"><strong>${escapeHtml(label)}</strong><small>${escapeHtml(note)}</small></span>`;
   }
   return `
@@ -2994,7 +2994,7 @@ function renderProjectFollowUpRow(project, projectFollowUps) {
             <div class="project-followup-link-list">
               ${projectFollowUps.map((item) => renderProjectFollowUpLink(item)).join("")}
             </div>
-          ` : `<p class="helper-note">No open items for this project.</p>`}
+          ` : `<p class="helper-note">No open follow-ups for this project.</p>`}
         </div>
       </td>
     </tr>
@@ -3808,7 +3808,7 @@ function renderExportFollowUpChecklist(followUps) {
       <strong>${followUps.length ? `${followUps.length} item${followUps.length === 1 ? "" : "s"}` : "No items"}</strong>
       <span>These are items to review before sharing the packet.</span>
     </div>
-    ${followUps.length ? renderExportFollowUpsTable(followUps) : `<p class="helper-note">No open items to review before sharing.</p>`}
+    ${followUps.length ? renderExportFollowUpsTable(followUps) : `<p class="helper-note">Nothing needs review before sharing.</p>`}
   `;
 }
 
@@ -4211,8 +4211,8 @@ async function handleClick(event) {
     activeTab = "export";
   } else if (action === "download-csv") {
     const filename = isTutorialMode()
-      ? `home-basis-tracker-tutorial-expense-export-${todayISO()}.csv`
-      : `home-basis-tracker-expense-export-${todayISO()}.csv`;
+      ? `home-ledger-tutorial-expense-export-${todayISO()}.csv`
+      : `home-ledger-expense-export-${todayISO()}.csv`;
     downloadTextFile(buildExpensesCsv(data), filename, "text/csv;charset=utf-8");
   } else if (action === "download-cpa-pdf") {
     await saveCpaReviewPdfFile();
@@ -5851,7 +5851,7 @@ function reconcileExpensesAfterDocumentFileRemoval(nextDocuments, changedDocumen
 
 async function saveCpaReviewPdfFile() {
   if (!data.properties.length && !data.expenses.length && !data.documents.length) {
-    showNotice("Add a property, expense, or document before creating a review packet PDF.");
+    showNotice("Add a property, expense, or document before creating a review packet.");
     return;
   }
 
@@ -5862,18 +5862,18 @@ async function saveCpaReviewPdfFile() {
   }
 
   const filename = isTutorialMode()
-    ? `home-basis-tracker-tutorial-review-packet-${todayISO()}.pdf`
-    : `home-basis-tracker-review-packet-${todayISO()}.pdf`;
+    ? `home-ledger-tutorial-review-packet-${todayISO()}.pdf`
+    : `home-ledger-review-packet-${todayISO()}.pdf`;
 
   try {
     const result = await saveCpaReviewPdf(filename, buildCpaReviewPdfHtml(data));
     if (result?.canceled) {
-      showNotice("Review packet PDF save canceled.");
+      showNotice("Review packet save canceled.");
       return;
     }
-    showNotice(isTutorialMode() ? "Tutorial review PDF saved." : "Review packet PDF saved.");
+    showNotice(isTutorialMode() ? "Tutorial packet saved." : "Review packet saved.");
   } catch (error) {
-    showNotice(error?.message || "Review packet PDF could not be saved.");
+    showNotice(error?.message || "Review packet could not be saved.");
   }
 }
 
@@ -5886,7 +5886,7 @@ function buildCpaReviewPdfHtml(records) {
   const title = isTutorialMode() ? "Tutorial Review Packet" : "Review Packet";
   const subtitle = isTutorialMode()
     ? "Prepared from sample tutorial items"
-    : "Prepared from Home Basis Tracker";
+    : "Prepared from Home Ledger";
   const propertyRows = propertySummaries.map((summary) => [
     `${summary.property.name}${summary.property.address ? `\n${summary.property.address}` : ""}`,
     formatDate(summary.property.purchaseDate),
@@ -6095,7 +6095,7 @@ function buildCpaReviewPdfHtml(records) {
     <div class="brand">
       <span class="brand-mark">HB</span>
       <div>
-        <span class="brand-name">Home Basis Tracker</span>
+        <span class="brand-name">Home Ledger</span>
         <span class="brand-subtitle">Home project paperwork</span>
       </div>
     </div>
@@ -6103,12 +6103,12 @@ function buildCpaReviewPdfHtml(records) {
   </div>
   <h1>${escapeHtml(title)}</h1>
   <p class="lede">${escapeHtml(subtitle)}. This packet organizes property, project, expense, and document details for review.</p>
-  <div class="note">Home Basis Tracker keeps this as an organized handoff. Review cost types before sharing.</div>
+  <div class="note">Home Ledger keeps this as a clear handoff. Check cost types before sharing.</div>
   <div class="metrics">
     ${pdfMetric("Total tracked spend", formatCurrency(totals.total))}
     ${pdfMetric("Possible improvements", formatCurrency(totals.potential))}
-    ${pdfMetric("Repair / upkeep", formatCurrency(totals.repair))}
-    ${pdfMetric("Not sure, review later", formatCurrency(totals.unclear))}
+    ${pdfMetric("Repair or upkeep", formatCurrency(totals.repair))}
+    ${pdfMetric("Review later", formatCurrency(totals.unclear))}
     ${pdfMetric("Items to review", String(followUps.length))}
     ${pdfMetric("Properties", String(cleanData.properties.length))}
     ${pdfMetric("Projects", String(cleanData.projects.length))}
@@ -6116,7 +6116,7 @@ function buildCpaReviewPdfHtml(records) {
   </div>
   ${pdfSection("Items to Review Before Sharing", followUpRows.length
     ? pdfTable(["Item", "Type", "Related item", "Action", "Opens"], followUpRows)
-    : `<div class="empty">No open items to review before sharing.</div>`)}
+    : `<div class="empty">Nothing needs review before sharing.</div>`)}
   ${pdfSection("Property Summary", propertyRows.length
     ? pdfTable(["Property", "Purchase Date", "Purchase Price", "Tracked Spend", "Projects", "Documents", "Follow-Ups"], propertyRows)
     : `<div class="empty">No properties.</div>`)}
@@ -6129,7 +6129,7 @@ function buildCpaReviewPdfHtml(records) {
   ${pdfSection("Document Index", documentRows.length
     ? pdfTable(["Document", "Type", "Property", "Project", "Related Expense", "Stored File"], documentRows)
     : `<div class="empty">No documents.</div>`)}
-  <div class="footer">Generated by Home Basis Tracker. Attached file contents are not embedded in this PDF.</div>
+  <div class="footer">Generated by Home Ledger. Attached file contents are not embedded in this PDF.</div>
 </body>
 </html>`;
 }
@@ -6181,8 +6181,8 @@ async function downloadFullBackup() {
       return;
     }
     const filename = isTutorialMode()
-      ? `home-basis-tracker-tutorial-backup-${todayISO()}.json`
-      : `home-basis-tracker-backup-${todayISO()}.json`;
+      ? `home-ledger-tutorial-backup-${todayISO()}.json`
+      : `home-ledger-backup-${todayISO()}.json`;
     if (isDesktopMode()) {
       const result = await saveBackupFile(filename, backupText);
       if (result?.canceled) {
@@ -6340,7 +6340,7 @@ function buildRestorePreviewMessage(file, backupSummary) {
     : "This will replace the current saved items. Download a backup first if you want to keep what is here.";
 
   return [
-    "Restore this Home Basis Tracker backup?",
+    "Restore this Home Ledger backup?",
     "",
     `Workspace affected: ${workspaceLabel}`,
     `Backup file: ${file?.name || "Selected backup"}`,
@@ -6686,7 +6686,7 @@ function getBackupError(error) {
   if (/quota|storage/i.test(message)) {
     return `The backup could not be restored because ${storageSurfaceName().toLowerCase()} storage may be full.`;
   }
-  if (/Home Basis Tracker backup|newer version/i.test(message)) {
+  if (/Home Ledger backup|newer version/i.test(message)) {
     return message;
   }
   return "The backup could not be completed. Check the file and try again.";

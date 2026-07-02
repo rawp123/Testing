@@ -23,7 +23,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "expenses-csv",
     name: "Expense records",
-    includes: "Expense rows, linked property/project names, record type, document count, and integer-cent totals.",
+    includes: "Expenses with linked properties, projects, cost type, document count, and cent totals.",
     format: "CSV",
     status: "available",
     actionLabel: "Download CSV",
@@ -32,7 +32,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "documents-csv",
     name: "Document records",
-    includes: "Document metadata, linked records, file availability, OCR status, and text availability.",
+    includes: "Documents, linked records, file status, and text extraction status.",
     format: "CSV",
     status: "available",
     actionLabel: "Download CSV",
@@ -40,8 +40,8 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   },
   {
     id: "full-json",
-    name: "Full workspace data",
-    includes: "Properties, projects, vendors, expenses, documents, file metadata, and OCR status metadata.",
+    name: "Full record data",
+    includes: "Properties, projects, vendors, expenses, documents, file details, and text status.",
     format: "JSON",
     status: "available",
     actionLabel: "Download JSON",
@@ -50,7 +50,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "review-packet-pdf",
     name: "Review packet",
-    includes: "Printable packet export is not connected yet.",
+    includes: "Printable packet export is planned.",
     format: "PDF",
     status: "unavailable",
     actionLabel: "Unavailable"
@@ -58,7 +58,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "excel-workbook",
     name: "Workbook",
-    includes: "Excel workbook export is not connected yet.",
+    includes: "Excel workbook export is planned.",
     format: "Excel",
     status: "unavailable",
     actionLabel: "Unavailable"
@@ -66,7 +66,7 @@ export const EXPORT_OPTION_ROWS: ExportOptionRow[] = [
   {
     id: "document-package",
     name: "Document package",
-    includes: "ZIP package export is not connected yet.",
+    includes: "ZIP package export is planned.",
     format: "ZIP",
     status: "unavailable",
     actionLabel: "Unavailable"
@@ -94,7 +94,7 @@ export function toExportSummaryMetrics(summary: ExportSummaryResponse | null): E
     {
       label: "Documents",
       value: String(summary.document_count || 0),
-      detail: `${summary.text_available_document_count || 0} with OCR text available`
+      detail: `${summary.text_available_document_count || 0} with text extracted`
     }
   ];
 }

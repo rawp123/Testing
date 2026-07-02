@@ -234,7 +234,7 @@ export function DocumentsPage({
       if (fileForSave) {
         const attachResult = await client.attachDocumentFile(workspaceId, document.id, fileForSave);
         setNoticeMessage(attachResult.completed_without_browser_upload
-          ? "File details attached. This environment does not provide a browser upload URL, so file bytes were not uploaded."
+          ? "File details saved. File contents were not uploaded in this beta environment."
           : "Document and attached file saved.");
       } else {
         setNoticeMessage("Document saved.");
@@ -297,7 +297,7 @@ export function DocumentsPage({
         setNoticeMessage("File link opened in a new tab.");
         return;
       }
-      setNoticeMessage("File details are attached. This environment does not provide a browser download URL.");
+      setNoticeMessage("File details are saved. A file link is unavailable in this beta environment.");
     } catch (error) {
       setState((current) => ({
         ...current,
@@ -480,7 +480,7 @@ export function DocumentsView({
       )
     },
     { key: "date", header: "Date", render: (row) => row.documentDate },
-    { key: "openItems", header: "Open items", align: "right", render: (row) => row.openItems },
+    { key: "openItems", header: "Open follow-ups", align: "right", render: (row) => row.openItems },
     {
       key: "actions",
       header: "Actions",
@@ -570,7 +570,7 @@ export function DocumentsView({
         <PanelHeader icon="◇" title="Documents" />
         {errorMessage ? <div className="inline-error" role="alert">{errorMessage}</div> : null}
         {noticeMessage ? <div className="inline-notice" role="status">{noticeMessage}</div> : null}
-        {loading ? <p className="muted-copy">Loading documents.</p> : null}
+        {loading ? <p className="muted-copy">Loading documents...</p> : null}
         {!loading && !rows.length ? (
           <EmptyState title="No documents">Add receipts, invoices, permits, photos, contracts, or notes.</EmptyState>
         ) : null}
@@ -725,7 +725,7 @@ export function DocumentsView({
 function buildDocumentFilterOptions(rows: DocumentRow[]): FilterChip[] {
   const options: FilterChip[] = [{ value: "all", label: "All", count: rows.length }];
   const openCount = rows.filter((row) => row.openItemCount > 0).length;
-  if (openCount) options.push({ value: "open", label: "Open items", count: openCount });
+  if (openCount) options.push({ value: "open", label: "Open follow-ups", count: openCount });
 
   const fileStatuses = new Map<string, number>();
   const documentTypes = new Map<string, number>();

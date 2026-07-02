@@ -1,6 +1,6 @@
-# Home Basis Tracker
+# Home Ledger
 
-Home Basis Tracker helps homeowners keep improvement receipts, contractor invoices, permits, photos, project notes, and costs in one local app.
+Home Ledger helps homeowners keep improvement receipts, contractor invoices, permits, photos, project notes, and costs in one local app.
 
 It is not budgeting software, tax software, legal advice, or tax advice. Cost types are for organization only.
 
@@ -8,7 +8,7 @@ It is not budgeting software, tax software, legal advice, or tax advice. Cost ty
 
 - Properties, including optional address, purchase date, purchase price, and notes.
 - Projects, including category, status, dates, contractor/vendor, and notes.
-- Expenses, including property, optional project, date, vendor, description, amount, cost type, category, receipt/file status, and notes.
+- Expenses, including property, optional project, date, vendor, description, amount, cost type, category, documentation, and notes.
 - Documents, including type, related property/project/expense, added date, notes, and optional attached file details.
 
 ## Local Storage Model
@@ -37,7 +37,7 @@ The Tutorial Workspace is a temporary sample-data sandbox. Users can practice pr
 - `docs/`: architecture, data safety, release, real-document QA, and cross-platform notes.
 - `fixtures/`: optional QA fixtures. Private real-world documents belong in ignored subfolders.
 
-Home Basis Tracker is standalone inside `home-ledger/`. It does not import app or website files from Message Archive Utility, Car Care Log, or the root website workspace.
+Home Ledger is standalone inside `home-ledger/`. It does not import app or website files from Message Archive Utility, Car Care Log, or the root website workspace.
 
 Run the browser app locally:
 
@@ -88,7 +88,7 @@ The app intentionally shows friendly storage labels instead of raw local file pa
 
 Use **Export & backup > Download full backup** to create a private JSON backup. Keep that file somewhere you already use for important personal records.
 
-Use **Export & backup > Restore from backup** to replace the current local app contents with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Basis Tracker, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this beta.
+Use **Export & backup > Restore from backup** to replace the current local app contents with a prior backup. Restore does not upload the file. It validates that the backup appears to belong to Home Ledger, strips local file paths from restored display fields, validates known category/status values, normalizes relationships, and skips backup files or attached files that are too large for this beta.
 
 Backup files are plaintext JSON and can contain sensitive home, vendor, amount, note, receipt, invoice, photo, and document contents. Treat them like private files.
 
@@ -100,7 +100,7 @@ See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardra
 
 ## Exports
 
-- **Download CSV** creates a cost export with property, project, category, date, vendor, description, amount, cost type, receipt/file status, and notes.
+- **Download CSV** creates a cost export with property, project, category, date, vendor, description, amount, cost type, documentation, and notes.
 - **Print review summary** creates a printable review packet summary.
 - Export wording should say "review packet" or "items for review", not tax-filing language.
 
@@ -111,7 +111,7 @@ See `docs/DATA_SAFETY.md` for the current storage, deletion, and restore guardra
 - Payment or subscription flows.
 - Cloud OCR or external AI/document processing APIs.
 - Tax filing, tax forms, or tax/legal advice.
-- Unsupported claims about expense eligibility, savings, or acceptance by a tax authority.
+- Claims about expense eligibility, savings, or acceptance by a tax authority.
 
 ## QA And Review
 

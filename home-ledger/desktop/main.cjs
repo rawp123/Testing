@@ -28,7 +28,7 @@ const ATTACHMENTS_FILE = "attachments.json";
 const DOCUMENTS_DIR = "documents";
 const IS_SMOKE_TEST = process.env.HOME_LEDGER_DESKTOP_SMOKE === "1";
 const SMOKE_USER_DATA_DIR = process.env.HOME_LEDGER_TEST_USER_DATA ||
-  path.join(os.tmpdir(), `home-basis-tracker-smoke-${process.pid}`);
+  path.join(os.tmpdir(), `home-ledger-smoke-${process.pid}`);
 
 let modelModulePromise;
 
@@ -83,7 +83,7 @@ function createWindow() {
     height: 900,
     minWidth: 980,
     minHeight: 700,
-    title: "Home Basis Tracker",
+    title: "Home Ledger",
     backgroundColor: "#f4f6f2",
     webPreferences: {
       nodeIntegration: false,
@@ -119,7 +119,7 @@ function createWindow() {
       }, 500);
     });
     window.webContents.once("did-fail-load", (_event, _code, description) => {
-      console.error(`Home Basis Tracker desktop smoke failed: ${description}`);
+      console.error(`Home Ledger desktop smoke failed: ${description}`);
       void finishDesktopSmoke(1);
     });
   }
@@ -172,7 +172,7 @@ async function runDesktopSmoke(window) {
         assert(typeof window.homeLedgerDesktop.saveCpaReviewPdf === "function", "Desktop PDF save bridge was not available.");
         window.confirm = () => true;
         await window.homeLedgerDesktop.saveData({ properties: [], projects: [], expenses: [], documents: [] });
-        assert(bodyIncludes("Home Basis Tracker"), "App shell did not render.");
+        assert(bodyIncludes("Home Ledger"), "App shell did not render.");
 
         await click('[data-action="add-property"]');
         await setValue("name", "Smoke Test Home");
@@ -251,7 +251,7 @@ async function runDesktopSmoke(window) {
         assert(!filesAfterDelete.some((fileRecord) => fileRecord.id === "file_smoke_private_beta"), "Stored file was not deleted.");
 
         await click('[data-tab="export"]');
-        await waitFor(() => bodyIncludes("Review packet preview"), "review packet preview");
+        await waitFor(() => bodyIncludes("Packet preview"), "packet preview");
         const previewSummary = document.querySelector(".export-preview-panel > summary");
         assert(previewSummary, "Missing review packet preview summary.");
         previewSummary.click();
@@ -260,9 +260,9 @@ async function runDesktopSmoke(window) {
         const csvButton = document.querySelector('[data-action="download-csv"]');
         assert(csvButton && !csvButton.disabled, "CSV export button should be enabled after adding an expense.");
         const pdfButton = document.querySelector('[data-action="download-cpa-pdf"]');
-        assert(pdfButton && !pdfButton.disabled, "Review packet PDF export button should be enabled after adding records.");
+        assert(pdfButton && !pdfButton.disabled, "Review packet export button should be enabled after adding records.");
         pdfButton.click();
-        await waitFor(() => bodyIncludes("Review packet PDF saved."), "review packet PDF save");
+        await waitFor(() => bodyIncludes("Review packet saved."), "review packet save");
         assert(!document.body.innerText.includes("/Users/private"), "Raw local path leaked into the UI.");
 
         const savedData = await window.homeLedgerDesktop.loadData();
@@ -291,10 +291,10 @@ async function runDesktopSmoke(window) {
         };
       })()
     `);
-    console.log(`Home Basis Tracker desktop smoke passed: ${result.properties} property, ${result.projects} project, ${result.expenses} expense, ${result.documents} document.`);
+    console.log(`Home Ledger desktop smoke passed: ${result.properties} property, ${result.projects} project, ${result.expenses} expense, ${result.documents} document.`);
     await finishDesktopSmoke(0);
   } catch (error) {
-    console.error(`Home Basis Tracker desktop smoke failed: ${serializeError(error).message}`);
+    console.error(`Home Ledger desktop smoke failed: ${serializeError(error).message}`);
     await finishDesktopSmoke(1);
   }
 }
@@ -509,7 +509,7 @@ function serializeError(error) {
 }
 
 function ensurePdfFileName(filename) {
-  const safeName = getSafeFileName(filename || "home-basis-tracker-professional-review.pdf");
+  const safeName = getSafeFileName(filename || "home-ledger-review-packet.pdf");
   return safeName.toLowerCase().endsWith(".pdf") ? safeName : `${safeName}.pdf`;
 }
 
@@ -578,7 +578,7 @@ async function getPdfSaveTarget(filename) {
   }
 
   return dialog.showSaveDialog({
-    title: "Save Home Basis Tracker review packet PDF",
+    title: "Save Home Ledger review packet",
     defaultPath: filename,
     buttonLabel: "Save PDF",
     filters: [{ name: "PDF document", extensions: ["pdf"] }],
@@ -623,14 +623,14 @@ function registerIpcHandlers() {
 
   ipcMain.handle("home-ledger:save-backup-file", async (event, record) => {
     assertTrustedSender(event);
-    const filename = getSafeFileName(record?.filename || "home-basis-tracker-backup.json");
+    const filename = getSafeFileName(record?.filename || "home-ledger-backup.json");
     const contents = String(record?.contents || "");
     if (Buffer.byteLength(contents, "utf8") > MAX_BACKUP_BYTES) {
       throw new Error("Backup file is too large.");
     }
 
     const result = await dialog.showSaveDialog({
-      title: "Save private Home Basis Tracker backup",
+      title: "Save private Home Ledger backup",
       defaultPath: filename,
       buttonLabel: "Save backup",
       filters: [{ name: "JSON backup", extensions: ["json"] }],
@@ -653,10 +653,10 @@ function registerIpcHandlers() {
     const filename = ensurePdfFileName(record?.filename);
     const html = String(record?.html || "");
     if (!html.trim()) {
-      throw new Error("Review packet PDF content was empty.");
+      throw new Error("Review packet content was empty.");
     }
     if (Buffer.byteLength(html, "utf8") > MAX_REVIEW_HTML_BYTES) {
-      throw new Error("Review packet PDF content is too large.");
+      throw new Error("Review packet content is too large.");
     }
 
     const result = await getPdfSaveTarget(filename);
@@ -668,7 +668,7 @@ function registerIpcHandlers() {
     const pdfBuffer = await renderHtmlToPdfBuffer(html);
     await writeBinaryFileAtomic(ensurePdfFilePath(result.filePath), pdfBuffer, {
       maxBytes: MAX_REVIEW_PDF_BYTES,
-      tooLargeMessage: "Review packet PDF is too large to save.",
+      tooLargeMessage: "Review packet is too large to save.",
     });
     return { canceled: false };
   });
@@ -776,7 +776,7 @@ app.whenReady().then(async () => {
   try {
     await ensureStorageReady();
   } catch (error) {
-    dialog.showErrorBox("Home Basis Tracker could not open", serializeError(error).message);
+    dialog.showErrorBox("Home Ledger could not open", serializeError(error).message);
     app.quit();
     return;
   }

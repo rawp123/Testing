@@ -23,7 +23,7 @@ const screens = [
   { name: "projects", title: "Project records", action: "Projects" },
   { name: "expenses", title: "Expense records", action: "Expenses" },
   { name: "documents", title: "Document records", action: "Documents" },
-  { name: "follow-ups", title: "Needs attention", action: "Needs attention" },
+  { name: "follow-ups", title: "Follow-ups", action: "Follow-ups" },
   { name: "exports", title: "Export records", action: "Export" },
   { name: "settings", title: "Settings", action: "Settings" },
   { name: "import", title: "Import and migration", action: "Import and migration" },
@@ -114,7 +114,7 @@ async function waitForApp(window) {
     if (ready) return;
     await delay(250);
   }
-  throw new Error("SaaS web app did not finish loading.");
+  throw new Error("Web app did not finish loading.");
 }
 
 async function clickButton(window, actionText, selector = "button") {
@@ -284,7 +284,7 @@ async function runModalTarget(theme, viewport, modal) {
 
 function formatReport(results, modalResults, failures) {
   const lines = [
-    "# SaaS Web Visual QA",
+    "# Web App Visual QA",
     "",
     `Date: ${new Date().toISOString()}`,
     `App URL: ${appUrl}`,

@@ -74,13 +74,13 @@ describe("Documents screen", () => {
         projects={[createProject()]}
         propertyOptions={propertyOptionsFromRecords([createProperty()])}
         workspaceName="Home records"
-        noticeMessage="File details are attached. This environment does not provide a browser download URL."
+        noticeMessage="File details are saved. A file link is unavailable in this beta environment."
       />
     );
 
     expect(html).toContain("Document records");
     expect(html).toContain("Add document");
-    expect(html).toContain("Open items");
+    expect(html).toContain("Open follow-ups");
     expect(html).toContain("Cedarline receipt");
     expect(html).toContain("Attached");
     expect(html).toContain("Not requested");
@@ -92,7 +92,7 @@ describe("Documents screen", () => {
     expect(html).toContain("Delete record");
     expect(html).not.toContain("Archive");
     expect(html).toContain("1 open");
-    expect(html).toContain("This environment does not provide a browser download URL.");
+    expect(html).toContain("A file link is unavailable in this beta environment.");
     expect(html).not.toContain("undefined");
     expect(html).not.toContain("null");
     expect(html).not.toContain("storage_key");

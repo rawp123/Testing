@@ -16,7 +16,7 @@ describe("Export screen", () => {
       { label: "Properties", value: "1", detail: "Included in full JSON" },
       { label: "Projects", value: "2", detail: "Included in full JSON" },
       { label: "Expenses", value: "3", detail: "$1,234.56 total" },
-      { label: "Documents", value: "4", detail: "1 with OCR text available" }
+      { label: "Documents", value: "4", detail: "1 with text extracted" }
     ]);
     expect(generatedAtLabel(createSummary())).toBe("Summary generated 06/07/2026");
   });
@@ -36,12 +36,12 @@ describe("Export screen", () => {
     expect(html).toContain("Available exports");
     expect(html).toContain("Expense records");
     expect(html).toContain("Document records");
-    expect(html).toContain("Full workspace data");
+    expect(html).toContain("Full record data");
     expect(html).toContain("Download CSV");
     expect(html).toContain("Download JSON");
     expect(html).toContain("Review packet");
-    expect(html).toContain("Unsupported");
-    expect(html).toContain("Workspace-wide exports are available");
+    expect(html).toContain("Planned");
+    expect(html).toContain("Full record exports are available");
     expect(html).not.toContain("deductible");
     expect(html).not.toContain("IRS");
     expect(html).not.toContain("audit-proof");
@@ -62,10 +62,10 @@ describe("Export screen", () => {
 
     expect(html).toContain("Export summary could not be loaded.");
     expect(html).toContain("Loading export summary");
-    expect(html).toContain("Checking the records available for export.");
+    expect(html).toContain("Checking what can be downloaded.");
   });
 
-  it("keeps unsupported export types disabled instead of creating fake downloads", () => {
+  it("keeps planned export types disabled instead of creating fake downloads", () => {
     const unavailableRows = EXPORT_OPTION_ROWS.filter((row) => row.status === "unavailable");
     const supportedRows = EXPORT_OPTION_ROWS.filter((row) => row.status === "available");
     const html = renderToStaticMarkup(
@@ -83,7 +83,7 @@ describe("Export screen", () => {
     expect(unavailableRows.every((row) => !row.kind)).toBe(true);
     expect(html).toContain("Downloading");
     expect(html).toContain("disabled=\"\"");
-    expect(html).toContain("ZIP package export is not connected yet.");
+    expect(html).toContain("ZIP package export is planned.");
   });
 });
 
