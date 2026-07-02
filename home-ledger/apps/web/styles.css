@@ -562,6 +562,7 @@ button {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 10px;
+  min-width: 0;
 }
 
 .filter-panel strong {
@@ -579,7 +580,7 @@ button {
 .filter-chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
 }
 
 .filter-chip-row button {
@@ -591,6 +592,7 @@ button {
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 780;
+  line-height: 1.15;
   padding: 5px 10px;
 }
 
@@ -685,13 +687,17 @@ button {
 }
 
 .pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: transparent;
-  color: inherit;
-  font-size: 0.8rem;
+  background: var(--surface-soft);
+  color: var(--green);
+  font-size: 0.78rem;
   font-weight: 820;
-  padding: 0;
+  line-height: 1.1;
+  padding: 4px 8px;
   white-space: nowrap;
 }
 
@@ -874,6 +880,9 @@ button {
   border: 1px dashed var(--border);
   border-radius: var(--radius-control);
   background: var(--surface-soft);
+  display: grid;
+  gap: 5px;
+  line-height: 1.45;
   padding: 18px;
 }
 
@@ -1002,7 +1011,8 @@ button {
     min-height: 0;
     border-right: 0;
     border-bottom: 1px solid var(--border);
-    padding: 14px;
+    gap: 12px;
+    padding: 12px 14px;
   }
 
   .brand-block {
@@ -1022,8 +1032,15 @@ button {
 
   .app-tabs button {
     flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 10px;
     width: auto;
     white-space: nowrap;
+  }
+
+  .app-tabs button svg {
+    height: 22px;
+    width: 22px;
   }
 
   .sidebar-footer {
@@ -1063,6 +1080,10 @@ button {
 }
 
 @media (max-width: 700px) {
+  .page-stack {
+    padding: 20px 14px 32px;
+  }
+
   .page-intro {
     align-items: start;
     grid-template-columns: minmax(0, 1fr);
@@ -1076,6 +1097,26 @@ button {
     gap: 8px 14px;
   }
 
+  .filter-panel {
+    display: grid;
+    align-items: start;
+  }
+
+  .filter-panel > div {
+    display: grid;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .filter-chip-row button {
+    min-height: 32px;
+    padding: 6px 10px;
+  }
+
+  .inline-filter-button {
+    justify-self: start;
+  }
+
   .compact-record-table {
     min-width: 0;
   }
@@ -1087,15 +1128,19 @@ button {
   .compact-record-table tr {
     display: grid;
     gap: 8px;
-    border-bottom: 1px solid var(--border);
-    padding: 12px 0;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    margin-bottom: 10px;
+    padding: 12px;
   }
 
   .compact-record-table td {
     display: grid;
-    grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
+    grid-template-columns: minmax(96px, 34%) minmax(0, 1fr);
     gap: 12px;
     border-bottom: 0;
+    line-height: 1.35;
     padding: 0;
     text-align: left !important;
   }
@@ -1126,6 +1171,10 @@ button {
   .form-modal {
     max-height: calc(100dvh - 28px);
     padding: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.35rem;
   }
 
   .form-actions {

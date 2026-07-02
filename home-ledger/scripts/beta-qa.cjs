@@ -6,7 +6,7 @@ const path = require("node:path");
 const appUrl = process.env.QA_APP_URL || "http://127.0.0.1:3102";
 const appTheme = ["light", "dark", "system"].includes(process.env.QA_APP_THEME) ? process.env.QA_APP_THEME : "";
 const outputDir = path.resolve(process.env.QA_OUTPUT_DIR || path.join(__dirname, "..", "release", "qa"));
-const userDataDir = path.join(os.tmpdir(), `home-basis-tracker-beta-qa-${process.pid}`);
+const userDataDir = path.join(os.tmpdir(), `home-ledger-beta-qa-${process.pid}`);
 const downloadDir = path.join(userDataDir, "downloads");
 
 app.setPath("userData", userDataDir);
@@ -428,7 +428,7 @@ async function restoreBackup(window, backupText) {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(new File(
         [${JSON.stringify(backupText)}],
-        "home-basis-tracker-beta-qa-backup.json",
+        "home-ledger-beta-qa-backup.json",
         { type: "application/json" },
       ));
       restoreInput.files = dataTransfer.files;
