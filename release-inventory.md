@@ -1,12 +1,19 @@
-# Release Inventory
+# Historical Release Inventory
 
 Date: June 2, 2026
 
-This inventory records the current signed, notarized, stapled macOS ARM64 release artifacts for the three independent product workspaces.
+This inventory records the signed, notarized, stapled macOS ARM64 artifacts produced while the three products still shared this repository. It is retained as a historical release record.
+
+Home Ledger and Car Care Log have since moved to the private `rawp123/home-ledger` and `rawp123/car-care-log` repositories. Their paths and commit IDs below refer to the pre-extraction Testing history; current development and future releases belong in those standalone repositories.
+
+| Extracted product | Canonical repository | Repository tip at extraction |
+| --- | --- | --- |
+| Home Ledger | `rawp123/home-ledger` | `e60fe5e` |
+| Car Care Log | `rawp123/car-care-log` | `f8976ee` |
 
 ## Artifacts
 
-| Product | Version | DMG | Size | SHA-256 | Apple Notarization ID |
+| Product | Version | Historical DMG path | Size | SHA-256 | Apple Notarization ID |
 | --- | --- | --- | --- | --- | --- |
 | Message Archive Utility | 0.1.0 | `message-archive-utility/release/mac/Message Archive Utility-0.1.0-arm64.dmg` | 128M | `b6379c5f043dbe0e80ae2298eca0932a9b99d2ee6e975a536f2fb39f5ea57bb9` | `eb43f5e7-6f26-439a-8633-526440538eb1` |
 | Home Basis Tracker | 0.1.0 | `home-ledger/release/mac/Home Basis Tracker-0.1.0-arm64.dmg` | 139M | `024c825dd03576ec762309abdfd0636aea2df76b8a1c2206eb4bcfb8ff9904d3` | `414a6b61-384e-45b9-ac51-8b3b1bf78cb3` |
@@ -33,7 +40,7 @@ Additional product QA completed:
 
 Home Basis Tracker packaged-app and mounted-DMG smoke attempts were not counted for the `34cdc2a` rebuild because an already-running installed app instance caused launch contention during direct binary smoke. Clean-install Finder launch remains in the manual QA section below.
 
-## Current Release Commits
+## Historical Release Commits
 
 - `64f3119` Separate Message Archive Utility workspace
 - `c022c88` Organize Home Ledger workspace and website
@@ -63,18 +70,18 @@ Product-specific manual checks:
 - Home Basis Tracker: add a property, project, expense, and attached document; run local text reading on a PDF or image; download a backup; restore it in a clean profile.
 - Car Care Log: add a vehicle, service record, and receipt; confirm OCR/runtime assets work with a real receipt or invoice; export the service history.
 
-## Publishing Steps
+## Historical Publishing Notes
 
-These remain manual unless release-host credentials are provided to Codex:
+At the time of this inventory, the remaining publishing steps were:
 
 - Choose public or private beta status for each product.
 - Upload the three DMGs to the selected release host.
 - Record the final public download URLs.
 - Update each product website download button to the final URL.
 - Re-run website route checks after URL wiring.
-- Push commits and any release tag or branch to the remote repository.
+- Push commits and any release tag or branch to the appropriate product repository.
 
-Suggested tag:
+The suggested historical tag was:
 
 ```bash
 git tag release-three-products-notarized-2026-06-02

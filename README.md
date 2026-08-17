@@ -1,14 +1,17 @@
 # Product Workspace
 
-This repository contains several independent product workspaces plus older static experiments and utilities.
+This repository contains the public portfolio, Message Archive Utility, and older static experiments and utilities.
 
-## Independent Products
+## Current Product Workspace
 
 - `message-archive-utility/`: Message Archive Utility website, React frontend, FastAPI backend, Electron desktop shell, packaging, and release scripts.
-- `home-ledger/`: Home Basis Tracker website, browser frontend, local data services, Electron desktop shell, packaging, and validation scripts.
-- `car-care-log/`: Car Care Log website, Electron/React frontend, local desktop backend, shared product contracts, packaging, and tests.
 
-Each product should be developed from inside its own folder. The root package is only for the remaining root-level static site and utility scripts; it no longer owns product app commands.
+## Extracted Products
+
+- [Home Ledger](https://github.com/rawp123/home-ledger) is maintained in its own private repository and deployed at [home-ledger-web.onrender.com](https://home-ledger-web.onrender.com/).
+- [Car Care Log](https://github.com/rawp123/car-care-log) is maintained in its own private repository with its own cross-platform CI and release workflow.
+
+The small `home-ledger/` and `car-care-log/` paths retained here are compatibility pages for old public URLs; they are not application source trees. The root package owns only the root static site and utility scripts.
 
 ## Root Static Site
 
@@ -23,4 +26,4 @@ Run the root static site:
 npm run start:dev
 ```
 
-For product development commands, open the relevant product README.
+For Message Archive Utility development commands, open its README. Develop extracted products from their standalone repositories.

@@ -2,16 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>Home Ledger</title>
-  <meta name="description" content="A home records binder for tracking property projects, expenses, documents, and review packet exports.">
-  <link rel="canonical" href="/home-ledger/">
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="refresh" content="0; url=https://home-ledger-web.onrender.com/">
+  <link rel="canonical" href="https://home-ledger-web.onrender.com/">
+  <title>Home Ledger has moved</title>
+  <style>
+    :root{color-scheme:light;--bg:#f6f4ef;--surface:#fff;--text:#171714;--muted:#5d5a52;--border:#ded8ce;--accent:#31524d}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+    main{width:min(560px,100%);padding:32px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:0 18px 44px rgba(45,39,29,.08)}
+    p{margin:12px 0 0;color:var(--muted);line-height:1.65}
+    a{color:var(--accent);font-weight:800}
+  </style>
+  <script>
+    const destination = new URL("https://home-ledger-web.onrender.com/");
+    destination.search = window.location.search;
+    destination.hash = window.location.hash;
+    window.location.replace(destination.href);
+  </script>
 </head>
-<body data-page="home-ledger">
-  <div id="app"></div>
-  <script type="module" src="./app.js"></script>
+<body>
+  <main>
+    <h1>Home Ledger has moved</h1>
+    <p>The current web app is opening now. If it does not open automatically, <a href="https://home-ledger-web.onrender.com/">continue to Home Ledger</a>.</p>
+  </main>
 </body>
 </html>
