@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Product Workspace Index</title>
-  <meta name="description" content="Local index for independent product workspaces.">
+  <title>Product Portfolio</title>
+  <meta name="description" content="Current product sites and standalone workspaces.">
   <style>
     :root{
       color-scheme:light;
@@ -61,6 +61,10 @@
       border-color:rgba(49,82,77,.36);
       box-shadow:0 12px 28px rgba(45,39,29,.08);
     }
+    a:focus-visible{
+      outline:3px solid rgba(49,82,77,.28);
+      outline-offset:3px;
+    }
     strong{
       color:var(--accent);
       font-size:1.05rem;
@@ -70,6 +74,14 @@
       font-size:.92rem;
       line-height:1.55;
     }
+    .status{
+      align-self:end;
+      color:var(--accent);
+      font-size:.76rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
     @media (max-width:760px){
       .grid{grid-template-columns:1fr}
     }
@@ -77,20 +89,23 @@
 </head>
 <body>
   <main>
-    <h1>Independent product workspaces</h1>
-    <p>Each product now owns its own app files, website files, scripts, and release path. Use the product folders directly for development.</p>
+    <h1>Product workspaces</h1>
+    <p>Each product now has a focused source repository and deployment path. Use these links for the current public experiences.</p>
     <div class="grid" aria-label="Product websites">
       <a href="/message-archive-utility/website/">
         <strong>Message Archive Utility</strong>
-        <span>Website, React frontend, FastAPI backend, and Electron desktop app live under one product folder.</span>
+        <span>Search, review, and export personal message archives from a local-first desktop workspace.</span>
+        <span class="status">Public site</span>
       </a>
-      <a href="/home-ledger/frontend/">
-        <strong>Home Basis Tracker</strong>
-        <span>Browser frontend, local data services, and desktop shell are separated inside the product folder.</span>
+      <a href="https://home-ledger-web.onrender.com/">
+        <strong>Home Ledger</strong>
+        <span>Organize property projects, expenses, documents, and proof files in a hosted workspace.</span>
+        <span class="status">Live beta</span>
       </a>
       <a href="/car-care-log/website/">
         <strong>Car Care Log</strong>
-        <span>Marketing website and Electron app layers are owned by the Car Care Log workspace.</span>
+        <span>Keep vehicle service history, receipts, and maintenance records in a standalone desktop app.</span>
+        <span class="status">Private beta</span>
       </a>
     </div>
   </main>
